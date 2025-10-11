@@ -17,4 +17,18 @@
     <a href="https://hub.docker.com/r/lissy93/networking-toolbox"><code>lissy93/networking-toolbox</code></a> image from
     DockerHub.
   </p>
+  <blockquote>
+    <b>Not using Docker, or don't have a server?</b>
+    We support other free hosting options, just take a look at our <a href="/about/deploying">Deployment Docs</a>.
+  </blockquote>
 </section>
+
+<style>
+  blockquote {
+    border-left: 2px solid var(--color-info);
+    padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm) var(--spacing-lg);
+    background: color-mix(in srgb, var(--color-info), transparent 90%);
+    border-radius: var(--radius-sm);
+    margin-top: var(--spacing-md);
+  }
+</style>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { ALL_PAGES, type NavItem } from '$lib/constants/nav';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { debounce } from '$lib/utils/debounce';
 
   let {
     filteredTools = $bindable(),
@@ -99,11 +100,17 @@
     return results;
   }
 
+  // Debounced search function (only debounce the filtering, not the input value)
+  const debouncedSearch = debounce((...args: unknown[]) => {
+    const query = (args[0] as string) ?? '';
+    filteredTools = performSearch(query);
+  }, 220);
+
   // Handle search input changes
   function handleSearch(event: Event) {
     const target = event.target as HTMLInputElement;
     searchQuery = target.value;
-    filteredTools = performSearch(searchQuery);
+    debouncedSearch(searchQuery);
   }
 
   // Open search input

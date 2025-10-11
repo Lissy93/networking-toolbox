@@ -7,6 +7,7 @@
   import { browser } from '$app/environment';
   import { theme, themes, type ThemeOption, type Theme } from '$lib/stores/theme';
   import { navbarDisplay, navbarDisplayOptions, type NavbarDisplayMode } from '$lib/stores/navbarDisplay';
+  import { homepageLayout, homepageLayoutOptions, type HomepageLayoutMode } from '$lib/stores/homepageLayout';
   import { site } from '$lib/constants/site';
   import { resolve } from '$app/paths';
 
@@ -24,6 +25,7 @@
   let accessibilitySettings = $state(accessibility);
   let currentTheme = $state(theme);
   let currentNavbarDisplay = $state(navbarDisplay);
+  let currentHomepageLayout = $state(homepageLayout);
 
   // Shortcut key detection
   const isMac = browser && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
@@ -52,6 +54,12 @@
   function handleNavbarDisplayChange(event: Event) {
     const target = event.currentTarget as HTMLSelectElement;
     navbarDisplay.setMode(target.value as NavbarDisplayMode);
+  }
+
+  // Handle homepage layout mode change
+  function handleHomepageLayoutChange(event: Event) {
+    const target = event.currentTarget as HTMLSelectElement;
+    homepageLayout.setMode(target.value as HomepageLayoutMode);
   }
 
   // Primary accessibility options (always visible)
@@ -108,6 +116,7 @@
     accessibility.init();
     theme.init();
     navbarDisplay.init();
+    homepageLayout.init();
 
     return () => {
       document.removeEventListener('click', handleClickOutside);
@@ -212,10 +221,27 @@
             >
               {lang.flag}
               {lang.name}
-              {!lang.available ? ' (Soon)' : ''}
             </button>
           {/each}
         </div>
+      </div>
+
+      <!-- Homepage Layout -->
+      <div class="settings-section">
+        <h3>Homepage Layout</h3>
+        <div class="navbar-select-wrapper">
+          <select class="navbar-select" value={$currentHomepageLayout} onchange={handleHomepageLayoutChange}>
+            {#each homepageLayoutOptions as option (option.id)}
+              <option value={option.id}>{option.name}</option>
+            {/each}
+          </select>
+          <div class="dropdown-icon">
+            <Icon name="chevron-down" size="xs" />
+          </div>
+        </div>
+        <small class="navbar-description">
+          {homepageLayoutOptions.find((opt) => opt.id === $currentHomepageLayout)?.description}
+        </small>
       </div>
 
       <!-- Navbar Display -->
@@ -344,7 +370,7 @@
 
   .settings-section {
     &:not(:last-child) {
-      margin-bottom: var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
       padding-bottom: var(--spacing-md);
       border-bottom: 1px solid var(--border-primary);
     }
@@ -439,9 +465,9 @@
   }
 
   .language-dropdown {
-    display: flex;
-    flex-direction: column;
     gap: var(--spacing-xs);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
   }
 
   .language-option {
@@ -546,6 +572,7 @@
     line-height: 1.3;
     margin-top: var(--spacing-xs);
     display: block;
+    display: none;
   }
 
   .accessibility-options {

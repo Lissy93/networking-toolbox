@@ -1,5 +1,11 @@
 <script lang="ts">
   import { site, author, license } from '$lib/constants/site';
+
+  interface Props {
+    longMode?: boolean;
+  }
+
+  let { longMode = false }: Props = $props();
 </script>
 
 <section id="license">
@@ -12,34 +18,37 @@
     {license.date}
   </p>
 
-  <h3>Conditions</h3>
-  <ul class="license-tldr">
-    <li class="license-tldr-item can">
-      <div class="item-head">You Can</div>
-      <ul>
-        <li>Use commercially</li>
-        <li>Modify the code</li>
-        <li>Distribute the code</li>
-        <li>Sublicense the app</li>
-      </ul>
-    </li>
-    <li class="license-tldr-item cannot">
-      <div class="item-head">You Cannot</div>
-      <ul>
-        <li>Hold the author liable</li>
-      </ul>
-    </li>
-    <li class="license-tldr-item must">
-      <div class="item-head">You Must</div>
-      <ul>
-        <li>Include the original copyright</li>
-        <li>Include the below license in full</li>
-      </ul>
-    </li>
-  </ul>
+  {#if longMode}
+    <h3>Conditions</h3>
+    <ul class="license-tldr">
+      <li class="license-tldr-item can">
+        <div class="item-head">You Can</div>
+        <ul>
+          <li>Use commercially</li>
+          <li>Modify the code</li>
+          <li>Distribute the code</li>
+          <li>Sublicense the app</li>
+        </ul>
+      </li>
+      <li class="license-tldr-item cannot">
+        <div class="item-head">You Cannot</div>
+        <ul>
+          <li>Hold the author liable</li>
+        </ul>
+      </li>
+      <li class="license-tldr-item must">
+        <div class="item-head">You Must</div>
+        <ul>
+          <li>Include the original copyright</li>
+          <li>Include the below license in full</li>
+        </ul>
+      </li>
+    </ul>
+  {/if}
 
-  <h3>Full License</h3>
-
+  {#if longMode}
+    <h3>Full License</h3>
+  {/if}
   <pre class="license-content">
 Copyright (c) 2025 Alicia Sykes [aliciasykes.com]
 

@@ -4,8 +4,7 @@ export const site = {
   description: 'A free set of online tools to help with IP addressing and subnetting.',
   longDescription:
     'Comprehensive IP address calculator with subnet calculations, CIDR conversion, IP format conversion, and network reference tools.',
-  heroDescription:
-    'Comprehensive suite of networking tools for subnet calculations, CIDR conversions, IP format transformations, and network reference information.',
+  heroDescription: 'Your companion for all-things networking',
   keywords: 'IP calculator, subnet calculator, CIDR converter, network tools, IP tools, networking',
   url: 'https://networking-toolbox.as93.net',
   image: 'https://networking-toolbox.as93.net/og-image.png',

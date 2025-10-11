@@ -130,3 +130,17 @@ export const frequentlyUsedTools = derived(toolUsage, ($toolUsage) => {
     ...data,
   }));
 });
+
+/**
+ * Derived store for recently used tools
+ */
+export const recentlyUsedTools = derived(toolUsage, ($toolUsage) => {
+  const sorted = Object.entries($toolUsage)
+    .sort((a, b) => b[1].lastVisited - a[1].lastVisited)
+    .slice(0, maxItems);
+
+  return sorted.map(([href, data]) => ({
+    href,
+    ...data,
+  }));
+});

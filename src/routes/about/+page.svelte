@@ -1,8 +1,6 @@
 <script lang="ts">
   import '../../styles/pages.scss';
   import { author, site } from '$lib/constants/site';
-  import ToolsCarousel from '$lib/components/global/ToolsCarousel.svelte';
-  import { SUB_NAV } from '$lib/constants/nav';
 
   // Import section components
   import ApiSection from '$lib/components/page-specific/about/ApiSection.svelte';
@@ -30,9 +28,6 @@
     network-related tasks for system administrators and network engineers.
   </p>
 </div>
-<section>
-  <ToolsCarousel sections={SUB_NAV} speedBase={36} gap="var(--spacing-sm)" pauseOnHover reverseAlternate />
-</section>
 <!-- Links #1: GitHub -->
 <!-- Links #1: Live Demo, DockerHub, CodeBerg Mirror, Sponsor, More Apps -->
 <section class="contents">
@@ -61,8 +56,8 @@
 <ApiSection />
 <SelfHostingSection />
 <BuildingSection />
-<AuthorSection />
 <AttributionsSection />
+<AuthorSection />
 <LicenseSection />
 
 <style lang="scss">

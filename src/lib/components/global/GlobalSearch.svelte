@@ -9,6 +9,12 @@
   import { frequentlyUsedTools, toolUsage } from '$lib/stores/toolUsage';
   import { tooltip } from '$lib/actions/tooltip';
 
+  interface Props {
+    embedded?: boolean; // Whether this is embedded in a page vs popup modal
+  }
+
+  let { embedded = false }: Props = $props();
+
   // Create reactive state using individual variables
   let isOpen = $state(false);
   let query = $state('');
@@ -88,7 +94,9 @@
     const result = results[index];
     if (result) {
       goto(result.href);
-      close();
+      if (!embedded) {
+        close();
+      }
     }
   }
 
@@ -98,7 +106,15 @@
     switch (e.key) {
       case 'Escape':
         e.preventDefault();
-        close();
+        if (embedded) {
+          // In embedded mode, just clear the input
+          query = '';
+          results = [];
+          selectedIndex = 0;
+        } else {
+          // In modal mode, close the search
+          close();
+        }
         break;
       case 'ArrowDown':
         e.preventDefault();
@@ -130,174 +146,199 @@
   onMount(() => {
     bookmarks.init();
     toolUsage.init();
-    document.addEventListener('keydown', handleGlobalKeydown);
 
-    // Handle browser back button on mobile
-    const handlePopState = (e: PopStateEvent) => {
-      if (isOpen && window.innerWidth <= 768) {
-        e.preventDefault();
-        close();
-      }
-    };
+    // Only register global keyboard shortcut for modal mode
+    if (!embedded) {
+      document.addEventListener('keydown', handleGlobalKeydown);
 
-    window.addEventListener('popstate', handlePopState);
+      // Handle browser back button on mobile
+      const handlePopState = (e: PopStateEvent) => {
+        if (isOpen && window.innerWidth <= 768) {
+          e.preventDefault();
+          close();
+        }
+      };
 
-    return () => {
-      document.removeEventListener('keydown', handleGlobalKeydown);
-      window.removeEventListener('popstate', handlePopState);
-    };
+      window.addEventListener('popstate', handlePopState);
+
+      return () => {
+        document.removeEventListener('keydown', handleGlobalKeydown);
+        window.removeEventListener('popstate', handlePopState);
+      };
+    } else {
+      // In embedded mode, always show search and focus on mount
+      isOpen = true;
+      setTimeout(() => searchInput?.focus(), 100);
+    }
   });
 
   export { showSearch };
 </script>
 
-<!-- Trigger Button -->
-<button
-  class="action-button search-trigger"
-  onclick={openSearch}
-  aria-label="Open search"
-  use:tooltip={`Search (${shortcutKey}+K)`}
->
-  <Icon name="search" size="sm" />
-</button>
-
-<!-- Search Modal -->
-{#if isOpen}
-  <div
-    class="search-overlay"
-    onclick={close}
-    onkeydown={(e) => {
-      if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') close();
-    }}
-    role="button"
-    tabindex="-1"
-    aria-label="Close search"
+<!-- Trigger Button (only in modal mode) -->
+{#if !embedded}
+  <button
+    class="action-button search-trigger"
+    onclick={openSearch}
+    aria-label="Open search"
+    use:tooltip={`Search (${shortcutKey}+K)`}
   >
-    <div
-      class="search-modal"
-      onclick={(e) => e.stopPropagation()}
-      onkeydown={(e) => {
-        if (e.key === 'Escape') close();
-        e.stopPropagation();
-      }}
-      role="dialog"
-      aria-modal="true"
-      tabindex="-1"
-    >
-      <div class="search-header">
-        <Icon name="search" size="sm" />
-        <input
-          bind:this={searchInput}
-          bind:value={query}
-          onkeydown={handleKeydown}
-          placeholder="Search tools and pages..."
-          class="search-input"
-          autocomplete="off"
-          spellcheck="false"
-        />
-        <button class="close-btn" onclick={close} aria-label="Close search">
-          <Icon name="x" size="sm" />
-        </button>
-      </div>
+    <Icon name="search" size="sm" />
+  </button>
+{/if}
 
-      {#if query.trim() && results.length > 0}
-        <div class="search-results">
-          {#each results as result, index (result.href)}
+<!-- Search Content Snippet -->
+{#snippet searchContent()}
+  <div class="search-header">
+    <Icon name="search" size="sm" />
+    <input
+      bind:this={searchInput}
+      bind:value={query}
+      onkeydown={handleKeydown}
+      placeholder="Search tools and pages..."
+      class="search-input"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    {#if !embedded}
+      <button class="close-btn" onclick={close} aria-label="Close search">
+        <Icon name="x" size="sm" />
+      </button>
+    {/if}
+  </div>
+
+  {#if query.trim() && results.length > 0}
+    <div class="search-results">
+      {#each results as result, index (result.href)}
+        <button
+          class="result-item"
+          class:selected={index === selectedIndex}
+          onclick={() => selectResult(index)}
+          onmouseenter={() => (selectedIndex = index)}
+        >
+          <div class="result-content">
+            <div class="result-title">
+              <Icon name={result.icon || 'search'} size="xs" />
+              {result.label}
+            </div>
+            {#if result.description}
+              <div class="result-description">{result.description}</div>
+            {/if}
+          </div>
+          <div class="result-meta">
+            {#if index === selectedIndex}
+              <Icon name="link" size="xs" />
+            {/if}
+            <span class="result-path">{result.href}</span>
+          </div>
+        </button>
+      {/each}
+    </div>
+  {:else if query.trim()}
+    <div class="no-results">
+      <Icon name="search" size="md" />
+      <span>No results found for "{query}"</span>
+    </div>
+  {:else}
+    <div class="search-help">
+      <div class="help-item">
+        <Icon name="search" size="xs" />
+        <span>Search for tools, calculators, and diagnostics</span>
+      </div>
+      <div class="help-item">
+        <Icon name="navigation" size="xs" />
+        <span>Use ↑↓ to navigate, Enter to select</span>
+      </div>
+    </div>
+
+    {#if $bookmarks.length > 0}
+      <div class="bookmarks-section">
+        <div class="bookmarks-header">
+          <Icon name="bookmarks" size="xs" />
+          <span>Bookmarked Tools</span>
+        </div>
+        <div class="bookmarks-list">
+          {#each $bookmarks.slice(0, 6) as bookmark, _index (bookmark.href)}
             <button
-              class="result-item"
-              class:selected={index === selectedIndex}
-              onclick={() => selectResult(index)}
-              onmouseenter={() => (selectedIndex = index)}
+              class="bookmark-item"
+              onclick={() => {
+                goto(bookmark.href);
+                if (!embedded) close();
+              }}
+              tabindex="0"
             >
-              <div class="result-content">
-                <div class="result-title">
-                  <Icon name={result.icon || 'search'} size="xs" />
-                  {result.label}
-                </div>
-                {#if result.description}
-                  <div class="result-description">{result.description}</div>
-                {/if}
+              <div class="bookmark-icon">
+                <Icon name={bookmark.icon} size="xs" />
               </div>
-              <div class="result-meta">
-                {#if index === selectedIndex}
-                  <Icon name="link" size="xs" />
-                {/if}
-                <span class="result-path">{result.href}</span>
-              </div>
+              <span class="bookmark-label">{bookmark.label}</span>
             </button>
           {/each}
         </div>
-      {:else if query.trim()}
-        <div class="no-results">
-          <Icon name="search" size="md" />
-          <span>No results found for "{query}"</span>
-        </div>
-      {:else}
-        <div class="search-help">
-          <div class="help-item">
-            <Icon name="search" size="xs" />
-            <span>Search for tools, calculators, and diagnostics</span>
-          </div>
-          <div class="help-item">
-            <Icon name="navigation" size="xs" />
-            <span>Use ↑↓ to navigate, Enter to select</span>
-          </div>
-        </div>
+      </div>
+    {/if}
 
-        {#if $bookmarks.length > 0}
-          <div class="bookmarks-section">
-            <div class="bookmarks-header">
-              <Icon name="bookmarks" size="xs" />
-              <span>Bookmarked Tools</span>
-            </div>
-            <div class="bookmarks-list">
-              {#each $bookmarks.slice(0, 6) as bookmark, _index (bookmark.href)}
-                <button
-                  class="bookmark-item"
-                  onclick={() => {
-                    goto(bookmark.href);
-                    close();
-                  }}
-                  tabindex="0"
-                >
-                  <div class="bookmark-icon">
-                    <Icon name={bookmark.icon} size="xs" />
-                  </div>
-                  <span class="bookmark-label">{bookmark.label}</span>
-                </button>
-              {/each}
-            </div>
-          </div>
-        {/if}
+    {#if $frequentlyUsedTools.length > 0}
+      <div class="frequently-used-section">
+        <div class="frequently-used-header">
+          <Icon name="clock" size="xs" />
+          <span>Most Used Tools</span>
+        </div>
+        <div class="frequently-used-list">
+          {#each $frequentlyUsedTools.slice(0, 12) as tool, _index (tool.href)}
+            <button
+              class="frequently-used-item"
+              onclick={() => {
+                goto(tool.href);
+                if (!embedded) close();
+              }}
+              tabindex="0"
+            >
+              <div class="frequently-used-icon">
+                <Icon name={tool.icon || ''} size="xs" />
+              </div>
+              <span class="frequently-used-label">{tool.label}</span>
+            </button>
+          {/each}
+        </div>
+      </div>
+    {/if}
+  {/if}
+{/snippet}
 
-        {#if $frequentlyUsedTools.length > 0}
-          <div class="frequently-used-section">
-            <div class="frequently-used-header">
-              <Icon name="clock" size="xs" />
-              <span>Most Used Tools</span>
-            </div>
-            <div class="frequently-used-list">
-              {#each $frequentlyUsedTools.slice(0, 12) as tool, _index (tool.href)}
-                <button
-                  class="frequently-used-item"
-                  onclick={() => {
-                    goto(tool.href);
-                    close();
-                  }}
-                  tabindex="0"
-                >
-                  <div class="frequently-used-icon">
-                    <Icon name={tool.icon || ''} size="xs" />
-                  </div>
-                  <span class="frequently-used-label">{tool.label}</span>
-                </button>
-              {/each}
-            </div>
-          </div>
-        {/if}
-      {/if}
+<!-- Search Modal/Embedded -->
+{#if isOpen}
+  {#if embedded}
+    <!-- Embedded mode: no overlay, direct content -->
+    <div class="search-embedded" role="search">
+      {@render searchContent()}
     </div>
-  </div>
+  {:else}
+    <!-- Modal mode: with overlay -->
+    <div
+      class="search-overlay"
+      onclick={close}
+      onkeydown={(e) => {
+        if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') close();
+      }}
+      role="button"
+      tabindex="-1"
+      aria-label="Close search"
+    >
+      <div
+        class="search-modal"
+        onclick={(e) => e.stopPropagation()}
+        onkeydown={(e) => {
+          if (e.key === 'Escape') close();
+          e.stopPropagation();
+        }}
+        role="dialog"
+        aria-modal="true"
+        tabindex="-1"
+      >
+        {@render searchContent()}
+      </div>
+    </div>
+  {/if}
 {/if}
 
 <style lang="scss">
@@ -429,6 +470,7 @@
     &:hover,
     &.selected {
       background: var(--surface-hover);
+      border-bottom: none;
     }
 
     &:last-child {
@@ -653,6 +695,29 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  // Embedded mode styles
+  .search-embedded {
+    width: 100%;
+    margin: 0 auto;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    animation: fadeIn var(--transition-normal);
+
+    .search-header {
+      border-bottom: 1px solid var(--border-primary);
+      background: var(--bg-secondary);
+    }
+
+    .search-help,
+    .bookmarks-section,
+    .frequently-used-section {
+      background: var(--bg-secondary);
     }
   }
 </style>

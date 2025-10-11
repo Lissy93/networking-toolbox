@@ -108,7 +108,7 @@ ul {
   width: 100%;
   display: flex;
   justify-content: end;
-  margin-top: var(--spacing-md);
+  margin-top: var(--spacing-xs);
 
   a {
     color: var(--bg-secondary);
@@ -123,6 +123,7 @@ ul {
       box-shadow 0.3s;
     min-width: 7.5rem;
     text-align: center;
+    background: var(--bg-tertiary);
 
     &:hover {
       filter: brightness(1.1);
@@ -132,12 +133,12 @@ ul {
   }
 
   &.purple a {
-    background: var(--color-purple);
+    color: var(--color-purple);
   }
   &.pink a {
-    background: var(--color-pink);
+    color: var(--color-pink);
   }
   &.blue a {
-    background: var(--color-info);
+    color: var(--color-info);
   }
 }

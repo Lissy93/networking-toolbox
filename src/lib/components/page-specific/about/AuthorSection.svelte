@@ -1,6 +1,12 @@
 <script lang="ts">
   import { author } from '$lib/constants/site';
 
+  interface Props {
+    longMode?: boolean;
+  }
+
+  let { longMode = false }: Props = $props();
+
   const moreApps = [
     {
       name: 'domain-locker',
@@ -49,7 +55,7 @@
 
 <section id="author">
   <h2>Author</h2>
-  <h3>About Me</h3>
+  {#if longMode}<h3>About Me</h3>{/if}
   <div class="author-section">
     <div class="author-bio">
       <p>
@@ -65,48 +71,50 @@
     </div>
     <img class="profile-photo" src={author.avatar} alt={author.name} width="128" />
   </div>
-  <div class="link-button blue">
-    <a href="https://aliciasykes.com" target="_blank">Website</a>
-  </div>
-
-  <h3>Sponsorship</h3>
-  <p>
-    I have developed, open sourced and maintain 100+ applications and libraries, used by over 1 million people every
-    year. And pretty much everything I build is free to use, open source, and without ads, tracking or paywalls. Because
-    I believe software should be free and accessible to everyone.
-    <br /><br />
-    But running these projects does cost money. And maintaining them takes time. So, if you've found this app useful, please
-    consider <a href={author.sponsor} target="_blank" rel="noopener noreferrer">sponsoring me</a>. My sponsors mean the
-    world to me, and it's because of their generosity that this app can remain free for everyone.
-  </p>
-  <div class="link-button pink">
-    <a href="https://github.com/sponsors/lissy93" target="_blank">Sponsor</a>
-  </div>
-
-  <h3 id="more-apps">More Apps</h3>
-  <p>If you've found this app useful, you might also like some of my other projects:</p>
-  <div class="more-app-list">
-    <div class="links-grid">
-      {#each moreApps as app (app.name)}
-        <a
-          class="link-card"
-          style="--app-color: {app.color}"
-          href="https://github.com/lissy93/{app.name}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h4>{app.title}</h4>
-          <div class="right">
-            <img src={app.icon} alt={app.title} width="40" height="40" />
-            <p>{app.description}</p>
-          </div>
-        </a>
-      {/each}
+  {#if longMode}
+    <div class="link-button blue">
+      <a href="https://aliciasykes.com" target="_blank">Website</a>
     </div>
-  </div>
-  <div class="link-button purple">
-    <a href="https://lissy93.github.io" target="_blank">More Apps</a>
-  </div>
+  {/if}
+  {#if longMode}
+    <h3>Sponsorship</h3>
+    <p>
+      I have developed, open sourced and maintain 100+ applications and libraries, used by over 1 million people every
+      year. And pretty much everything I build is free to use, open source, and without ads, tracking or paywalls.
+      Because I believe software should be free and accessible to everyone.
+      <br /><br />
+      But running these projects does cost money. And maintaining them takes time. So, if you've found this app useful, please
+      consider <a href={author.sponsor} target="_blank" rel="noopener noreferrer">sponsoring me</a>. My sponsors mean
+      the world to me, and it's because of their generosity that this app can remain free for everyone.
+    </p>
+    <div class="link-button pink">
+      <a href="https://github.com/sponsors/lissy93" target="_blank">Sponsor</a>
+    </div>
+
+    <h3 id="more-apps">More Apps</h3>
+    <p>If you've found this app useful, you might also like some of my other projects:</p>
+    <ul class="more-app-list">
+      {#each moreApps as app (app.name)}
+        <li class="app-item">
+          <img src={app.icon} alt={app.title} width="24" height="24" />
+          <div class="app-content">
+            <a
+              href="https://github.com/lissy93/{app.name}"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="--app-color: {app.color}"
+            >
+              {app.title}
+            </a>
+            <span class="app-description">{app.description}</span>
+          </div>
+        </li>
+      {/each}
+    </ul>
+    <div class="link-button purple">
+      <a href="https://lissy93.github.io" target="_blank">More Apps</a>
+    </div>
+  {/if}
 </section>
 
 <style lang="scss">
@@ -129,35 +137,41 @@
   }
 
   .more-app-list {
-    .links-grid {
-      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
-
-      .link-card {
-        border-width: 2px;
+    list-style: none;
+    padding: 0;
+    margin: var(--spacing-md) 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    .app-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+      img {
+        flex-shrink: 0;
+        border-radius: var(--radius-sm);
+      }
+      .app-content {
         display: flex;
-        flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
         gap: var(--spacing-sm);
-        padding: var(--spacing-md);
 
-        h4 {
-          font-size: var(--font-size-lg);
-          margin: 0;
-        }
+        a {
+          font-weight: 600;
+          font-size: var(--font-size-md);
+          text-decoration: none;
+          transition: opacity var(--transition-fast);
+          color: var(--app-color);
 
-        .right {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          gap: var(--spacing-md);
-        }
-
-        &:hover {
-          border-color: var(--app-color, var(--color-primary));
-
-          h4 {
-            color: var(--app-color, var(--color-primary));
+          &:hover {
+            text-decoration: underline;
           }
+        }
+
+        .app-description {
+          color: var(--text-secondary);
+          font-size: var(--font-size-sm);
+          line-height: 1.5;
         }
       }
     }

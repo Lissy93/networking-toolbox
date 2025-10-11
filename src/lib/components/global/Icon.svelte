@@ -3,7 +3,7 @@
 
   interface Props {
     name: IconName;
-    size?: 'xs' | 'sm' | 'md' | 'lg';
+    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     animate?: 'spin' | 'pulse' | 'pulse-once' | 'bounce' | 'fade' | null;
     rotate?: 0 | 90 | 180 | 270;
   }
@@ -15,6 +15,7 @@
     sm: 'w-4 h-4',
     md: 'w-6 h-6',
     lg: 'w-8 h-8',
+    xl: 'w-10 h-10',
   };
 
   type IconName = keyof typeof iconMap;
@@ -90,6 +91,10 @@
   }
   .h-8 {
     height: 1.75rem;
+  }
+  .w-8 {
+    width: 2rem;
+    height: 2rem;
   }
 
   .rotate {

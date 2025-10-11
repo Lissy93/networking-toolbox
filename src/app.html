@@ -3,6 +3,29 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Prevent FOUC by applying theme before page renders -->
+    <script>
+      (function () {
+        try {
+          // Apply theme
+          const theme = localStorage.getItem('theme') || 'dark';
+          if (theme !== 'dark') {
+            document.documentElement.classList.add('theme-' + theme);
+          }
+
+          // Store other preferences as data attributes for initial render
+          const homepageLayout = localStorage.getItem('homepage-layout') || 'categories';
+          const navbarDisplay = localStorage.getItem('navbar-display') || 'default';
+
+          document.documentElement.setAttribute('data-initial-layout', homepageLayout);
+          document.documentElement.setAttribute('data-initial-navbar', navbarDisplay);
+        } catch (e) {
+          // Ignore localStorage errors (private browsing, etc.)
+        }
+      })();
+    </script>
+
     %sveltekit.head%
   </head>
   <body data-sveltekit-preload-data="hover">

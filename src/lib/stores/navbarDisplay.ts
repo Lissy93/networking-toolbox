@@ -35,23 +35,32 @@ export const navbarDisplayOptions: NavbarDisplayOption[] = [
   },
 ];
 
+// Get initial value from data attribute or localStorage (runs immediately on import)
+function getInitialNavbarDisplay(): NavbarDisplayMode {
+  if (typeof window !== 'undefined') {
+    try {
+      const dataAttr = document.documentElement.getAttribute('data-initial-navbar');
+      const stored = dataAttr || localStorage.getItem('navbar-display');
+      const isValidMode = navbarDisplayOptions.some((option) => option.id === stored);
+      return isValidMode ? (stored as NavbarDisplayMode) : 'default';
+    } catch {
+      return 'default';
+    }
+  }
+  return 'default';
+}
+
 function createNavbarDisplayStore() {
-  const { subscribe, set } = writable<NavbarDisplayMode>('default');
+  const { subscribe, set } = writable<NavbarDisplayMode>(getInitialNavbarDisplay());
 
   return {
     subscribe,
 
     // Initialize from localStorage or default
+    // Note: Store is already initialized with correct value on creation,
+    // this is kept for backwards compatibility and does nothing
     init: () => {
-      if (browser) {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        const isValidMode = navbarDisplayOptions.some((option) => option.id === stored);
-        const initialMode = isValidMode ? (stored as NavbarDisplayMode) : 'default';
-
-        set(initialMode);
-        return initialMode;
-      }
-      return 'default';
+      return getInitialNavbarDisplay();
     },
 
     // Set navbar display mode and persist to localStorage

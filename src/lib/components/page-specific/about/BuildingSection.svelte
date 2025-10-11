@@ -14,7 +14,6 @@
     <code>git clone git@github.com:Lissy93/networking-toolbox.git</code>
     <code>cd networking-toolbox</code>
     <code>npm install</code>
-    <code>npm start</code>
   </div>
 
   <h3>Dev</h3>
@@ -24,9 +23,7 @@
 
   <h3>Check 'n Test</h3>
   <div class="code">
-    <code>npm run test</code>
-    <code>npm run tsc</code>
-    <code>npm run lint</code>
+    <code>npm run hold-my-beer</code>
   </div>
   <!-- 
   <h3>Deploying</h3>

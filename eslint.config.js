@@ -30,6 +30,28 @@ export default [
     }
   },
   {
+    files: ['**/*.svelte.ts'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        extraFileExtensions: ['.svelte']
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.es2023,
+        // Svelte 5 runes globals
+        $state: 'readonly',
+        $derived: 'readonly',
+        $effect: 'readonly',
+        $props: 'readonly',
+        $bindable: 'readonly',
+        $inspect: 'readonly'
+      }
+    }
+  },
+  {
     rules: {
       // Prefer TS version of unused-vars, and ignore _-prefixed
       'no-unused-vars': 'off',

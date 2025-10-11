@@ -2,24 +2,34 @@
   import { tooltip } from '$lib/actions/tooltip';
   import { onMount } from 'svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import ContextMenu from '$lib/components/global/ContextMenu.svelte';
   import type { NavItem } from '$lib/constants/nav';
   import { bookmarks, type BookmarkedTool } from '$lib/stores/bookmarks';
+  import { toolUsage, recentlyUsedTools } from '$lib/stores/toolUsage';
+  import { activeContextMenu } from '$lib/stores/contextMenu';
+  import { handleToolContextMenu, getToolContextMenuId, getToolContextMenuItems } from '$lib/utils/tool-context-menu';
 
   export let tool: NavItem;
-  export let small: boolean = false;
+  export let size: 'default' | 'small' | 'compact' = 'default';
 
   let isHovered = false;
   let isBookmarked = false;
 
+  const menuId = getToolContextMenuId(tool);
+
   onMount(() => {
     bookmarks.init();
+    toolUsage.init();
   });
 
   $: isBookmarked = bookmarks.isBookmarked(tool.href, $bookmarks);
+  $: showContextMenu = $activeContextMenu.id === menuId;
 
-  function toggleBookmark(e: Event) {
-    e.preventDefault();
-    e.stopPropagation();
+  function toggleBookmark(e?: Event) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
 
     const bookmarkedTool: BookmarkedTool = {
       href: tool.href,
@@ -30,10 +40,22 @@
 
     bookmarks.toggle(bookmarkedTool);
   }
+
+  $: contextMenuItems = getToolContextMenuItems({
+    tool,
+    bookmarkedTools: $bookmarks,
+    recentTools: $recentlyUsedTools,
+  });
 </script>
 
-{#if small}
-  <a href={tool.href} class="tool-card small" aria-label={tool.label} use:tooltip={{ text: tool.description || '' }}>
+{#if size === 'small'}
+  <a
+    href={tool.href}
+    class="tool-card small"
+    aria-label={tool.label}
+    use:tooltip={{ text: tool.description || '' }}
+    on:contextmenu={(e) => handleToolContextMenu(e, tool)}
+  >
     <div class="left">
       <h3>{tool.label}</h3>
       <div class="tool-icon">
@@ -50,6 +72,21 @@
       </svg>
     </div>
   </a>
+{:else if size === 'compact'}
+  <a
+    href={tool.href}
+    class="tool-card compact"
+    aria-label={tool.label}
+    use:tooltip={{ text: tool.description || '' }}
+    on:contextmenu={(e) => handleToolContextMenu(e, tool)}
+  >
+    <div class="compact-content">
+      <div class="tool-icon">
+        <Icon name={tool.icon || 'default'} />
+      </div>
+      <h3>{tool.label}</h3>
+    </div>
+  </a>
 {:else}
   <a
     href={tool.href}
@@ -57,6 +94,7 @@
     aria-label={tool.label}
     on:mouseenter={() => (isHovered = true)}
     on:mouseleave={() => (isHovered = false)}
+    on:contextmenu={(e) => handleToolContextMenu(e, tool)}
   >
     <div class="card-header">
       <h3>{tool.label}</h3>
@@ -100,6 +138,15 @@
       </div>
     </div>
   </a>
+{/if}
+
+{#if showContextMenu}
+  <ContextMenu
+    x={$activeContextMenu.x}
+    y={$activeContextMenu.y}
+    items={contextMenuItems}
+    onClose={() => activeContextMenu.close()}
+  />
 {/if}
 
 <style lang="scss">
@@ -329,13 +376,19 @@
     justify-content: space-between;
     padding: var(--spacing-sm);
     gap: var(--spacing-sm);
-    background: var(--bg-tertiary);
+    background: linear-gradient(
+      135deg,
+      var(--bg-secondary),
+      color-mix(in srgb, var(--bg-secondary), var(--bg-tertiary) 50%)
+    );
     .left {
       display: flex;
       flex-direction: row-reverse;
       align-items: center;
       gap: var(--spacing-md);
       min-width: 0;
+      position: relative;
+      z-index: 1;
     }
 
     h3 {
@@ -360,6 +413,8 @@
     .tool-arrow {
       width: 1.25rem;
       height: 1.25rem;
+      position: relative;
+      z-index: 1;
 
       @media (max-width: 768px) {
         display: none;
@@ -368,6 +423,69 @@
     &:hover {
       .tool-icon {
         transform: scale(1.1);
+        filter: saturate(1);
+      }
+    }
+
+    &:focus {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary), transparent 85%);
+      border-color: var(--color-primary);
+      background-color: var(--surface-hover);
+    }
+  }
+
+  .tool-card.compact {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm);
+    gap: var(--spacing-xs);
+    text-align: center;
+    min-height: 5rem;
+    // max-width: 10rem;
+    background: linear-gradient(
+      135deg,
+      var(--bg-secondary),
+      color-mix(in srgb, var(--bg-secondary), var(--bg-tertiary) 50%)
+    );
+
+    .compact-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-xs);
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    h3 {
+      font-size: var(--font-size-sm);
+      font-weight: normal;
+      margin: 0;
+      line-height: 1.2;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .tool-icon {
+      width: 1.75rem;
+      height: 1.75rem;
+      transition: all 0.25s;
+      filter: saturate(0.9);
+      padding: var(--spacing-md);
+    }
+
+    &:hover {
+      .tool-icon {
+        transform: scale(1.15);
         filter: saturate(1);
       }
     }

@@ -42,13 +42,27 @@ function loadCustomFont(fontConfig: { name: string; url: string; fallback?: stri
 function applyThemeClasses(theme: ThemeOption) {
   if (!browser) return;
 
+  const targetClass = theme !== 'dark' ? `theme-${theme}` : null;
+
+  // Check if the theme is already applied (prevents flash from re-applying)
+  const currentThemeClass = Array.from(document.documentElement.classList).find((cls) => cls.startsWith('theme-'));
+
+  if (currentThemeClass === targetClass) {
+    // Theme already applied, just ensure font is loaded
+    const themeConfig = themes.find((t) => t.id === theme);
+    if (themeConfig?.font) {
+      loadCustomFont(themeConfig.font);
+    }
+    return;
+  }
+
   // Remove all existing theme classes
   const allThemeClasses = themes.map((t) => `theme-${t.id}`);
   document.documentElement.classList.remove(...allThemeClasses);
 
   // Add the current theme class (except for default 'dark' theme)
-  if (theme !== 'dark') {
-    document.documentElement.classList.add(`theme-${theme}`);
+  if (targetClass) {
+    document.documentElement.classList.add(targetClass);
   }
 
   // Load custom font if the theme has one

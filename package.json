@@ -15,10 +15,11 @@
 		"build-check": "vite build --minify=false --sourcemap=false --logLevel error",
 		"build:node": "DEPLOY_ENV='node' npm run build",
 		"build:static": "DEPLOY_ENV='static' npm run build",
-		"test": "vitest",
+		"test": "vitest run",
 		"test:coverage": "vitest run --coverage",
 		"test:api": "vitest run --config tests/vitest.api.config.ts",
-		"test:e2e": "playwright test"
+		"test:e2e": "playwright test",
+		"hold-my-beer": "npm run format && npm run lint && npm run types && npm run check && npm run build-check && npm run test"
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "^4.10.2",

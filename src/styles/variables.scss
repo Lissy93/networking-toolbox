@@ -44,6 +44,7 @@
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
+  --radius-full: 50%;
 
   /* Spacing */
   --spacing-2xs: 0.125rem;
@@ -71,6 +72,31 @@
   --transition-fast: 0.15s ease;
   --transition-normal: 0.2s ease;
   --transition-slow: 0.3s ease;
+
+  /* Animation durations */
+  --anim-duration-fast: 0.3s;
+  --anim-duration-normal: 0.5s;
+  --anim-duration-slow: 0.8s;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0.01s ease;
+    --transition-normal: 0.01s ease;
+    --transition-slow: 0.01s ease;
+    --anim-duration-fast: 0.01s;
+    --anim-duration-normal: 0.01s;
+    --anim-duration-slow: 0.01s;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01s !important;
+  }
 }
 
 .theme-ocean,
@@ -524,6 +550,7 @@ html[data-theme='light'] {
   --color-error: #f44336;
   --color-info: #00bcd4;
 
+  --border-secondary: #d3ddeb;
   --border-primary: #e0e0e0;
   --surface-hover: #f5f5f5;
   --surface-active: #eeeeee;
