@@ -1,0 +1,154 @@
+name: 📣 Report Tests
+
+on:
+  workflow_run:
+    workflows: ["🧪 Run Tests"]
+    types:
+      - completed
+
+permissions:
+  contents: read
+  checks: write    # For test reporting
+  pull-requests: write  # For PR comments
+
+jobs:
+  report:
+    name: Report Test Results
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion != 'cancelled'
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          merge-multiple: true
+
+      - name: Unit Test Report
+        id: unit-test-report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Unit Tests
+          path: test-results.xml
+          reporter: java-junit
+          fail-on-error: false
+        continue-on-error: true
+
+      - name: API Test Report
+        id: api-test-report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: API Contract Tests
+          path: api-test-results.xml
+          reporter: java-junit
+          fail-on-error: false
+        continue-on-error: true
+
+      - name: E2E Test Report
+        id: e2e-test-report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: E2E Tests
+          path: e2e-results.xml
+          reporter: java-junit
+          fail-on-error: false
+        continue-on-error: true
+
+      - name: Generate detailed summary
+        if: always()
+        run: |
+          # Read test results
+          UNIT=$(cat test-result-unit.txt 2>/dev/null || echo "unknown")
+          API=$(cat test-result-api.txt 2>/dev/null || echo "unknown")
+          E2E=$(cat test-result-e2e.txt 2>/dev/null || echo "unknown")
+
+          # Helper functions
+          em() { case "$1" in success) echo "✅";; failure) echo "❌";; cancelled|skipped) echo "⏭️";; *) echo "❔";; esac; }
+          
+          # Format time helper
+          format_time() {
+            local ms=$1
+            if [ "$ms" -gt 60000 ]; then
+              echo "$((ms / 60000))m $((ms % 60000 / 1000))s"
+            elif [ "$ms" -gt 1000 ]; then
+              echo "$((ms / 1000))s"
+            else
+              echo "${ms}ms"
+            fi
+          }
+
+          # Get report data
+          UNIT_PASSED="${{ steps.unit-test-report.outputs.passed || '0' }}"
+          UNIT_FAILED="${{ steps.unit-test-report.outputs.failed || '0' }}"
+          UNIT_SKIPPED="${{ steps.unit-test-report.outputs.skipped || '0' }}"
+          UNIT_TIME="${{ steps.unit-test-report.outputs.time || '0' }}"
+
+          API_PASSED="${{ steps.api-test-report.outputs.passed || '0' }}"
+          API_FAILED="${{ steps.api-test-report.outputs.failed || '0' }}"
+          API_SKIPPED="${{ steps.api-test-report.outputs.skipped || '0' }}"
+          API_TIME="${{ steps.api-test-report.outputs.time || '0' }}"
+
+          E2E_PASSED="${{ steps.e2e-test-report.outputs.passed || '0' }}"
+          E2E_FAILED="${{ steps.e2e-test-report.outputs.failed || '0' }}"
+          E2E_SKIPPED="${{ steps.e2e-test-report.outputs.skipped || '0' }}"
+          E2E_TIME="${{ steps.e2e-test-report.outputs.time || '0' }}"
+
+          # Count failures
+          failures=0
+          [ "$UNIT" = "failure" ] && failures=$((failures + 1))
+          [ "$API" = "failure" ] && failures=$((failures + 1))
+          [ "$E2E" = "failure" ] && failures=$((failures + 1))
+
+          {
+            echo "## 📊 Detailed Test Report"
+            echo ""
+            echo "**Overall Status:** $(em "${{ github.event.workflow_run.conclusion }}")"
+            echo ""
+
+            if [ "$failures" -eq 0 ]; then
+              echo "🎉 **All test suites passed!**"
+            else
+              echo "⚠️ **$failures test suite(s) failed**"
+            fi
+
+            # Detailed Unit Test Report
+            if [ "$UNIT_PASSED" != "0" ] || [ "$UNIT_FAILED" != "0" ] || [ "$UNIT_SKIPPED" != "0" ]; then
+              echo ""
+              echo "### $(em "$UNIT") Unit Test Details"
+              echo "| Metric | Count |"
+              echo "|--------|-------|"
+              [ "$UNIT_PASSED" != "0" ] && echo "| ✅ Passed | $UNIT_PASSED |"
+              [ "$UNIT_FAILED" != "0" ] && echo "| ❌ Failed | $UNIT_FAILED |"
+              [ "$UNIT_SKIPPED" != "0" ] && echo "| ⏭️ Skipped | $UNIT_SKIPPED |"
+              [ "$UNIT_TIME" != "0" ] && echo "| ⏱️ Duration | $(format_time $UNIT_TIME) |"
+            fi
+
+            # Detailed API Test Report
+            if [ "$API_PASSED" != "0" ] || [ "$API_FAILED" != "0" ] || [ "$API_SKIPPED" != "0" ]; then
+              echo ""
+              echo "### $(em "$API") API Contract Test Details"
+              echo "| Metric | Count |"
+              echo "|--------|-------|"
+              [ "$API_PASSED" != "0" ] && echo "| ✅ Passed | $API_PASSED |"
+              [ "$API_FAILED" != "0" ] && echo "| ❌ Failed | $API_FAILED |"
+              [ "$API_SKIPPED" != "0" ] && echo "| ⏭️ Skipped | $API_SKIPPED |"
+              [ "$API_TIME" != "0" ] && echo "| ⏱️ Duration | $(format_time $API_TIME) |"
+            fi
+
+            # Detailed E2E Test Report
+            if [ "$E2E_PASSED" != "0" ] || [ "$E2E_FAILED" != "0" ] || [ "$E2E_SKIPPED" != "0" ]; then
+              echo ""
+              echo "### $(em "$E2E") E2E Test Details"
+              echo "| Metric | Count |"
+              echo "|--------|-------|"
+              [ "$E2E_PASSED" != "0" ] && echo "| ✅ Passed | $E2E_PASSED |"
+              [ "$E2E_FAILED" != "0" ] && echo "| ❌ Failed | $E2E_FAILED |"
+              [ "$E2E_SKIPPED" != "0" ] && echo "| ⏭️ Skipped | $E2E_SKIPPED |"
+              [ "$E2E_TIME" != "0" ] && echo "| ⏱️ Duration | $(format_time $E2E_TIME) |"
+            fi
+
+          } >> "$GITHUB_STEP_SUMMARY"

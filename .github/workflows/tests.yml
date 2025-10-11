@@ -3,8 +3,6 @@ name: 🧪 Run Tests
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-  pull_request_target:
-    types: [opened, synchronize, reopened]
   push:
     branches: [main]
   workflow_dispatch:
@@ -16,13 +14,9 @@ concurrency:
 permissions:
   contents: read
   id-token: write  # For OIDC with Codecov
-  checks: write    # For test reporting
 
 env:
-  # PR context helpers for conditional logic
-  IS_PR: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
-  IS_FORK: ${{ (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && github.event.pull_request.head.repo.full_name != github.repository }}
-  HAS_BOT_TOKEN: ${{ secrets.BOT_TOKEN != '' }}
+  IS_PR: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   unit-tests:
@@ -32,11 +26,7 @@ jobs:
       NODE_OPTIONS: "--max_old_space_size=8192"
 
     steps:
-      # Secure checkout for external PRs
       - uses: actions/checkout@v4
-        with:
-          # For PRs from forks via pull_request_target, check out the PR head to prevent token exposure
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.ref }}
 
       - uses: actions/setup-node@v4
         with:
@@ -66,8 +56,15 @@ jobs:
           name: test-result-unit
           path: test-result-unit.txt
 
+      - name: Upload test results XML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: test-results.xml
+
       - name: Upload coverage to Codecov
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (env.IS_PR == 'true' && env.IS_FORK != 'true')
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || env.IS_PR == 'true'
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -76,33 +73,6 @@ jobs:
           name: networking-toolbox
           fail_ci_if_error: false
         continue-on-error: true
-
-      - name: Unit Test Report
-        id: unit-test-report
-        uses: dorny/test-reporter@v1
-        if: always() && (env.IS_FORK != 'true' || env.HAS_BOT_TOKEN == 'true')
-        with:
-          name: Unit Tests
-          path: test-results.xml
-          reporter: java-junit
-          fail-on-error: false
-          token: ${{ env.IS_FORK == 'true' && secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Save unit test report data
-        if: always()
-        run: |
-          echo "passed=${{ steps.unit-test-report.outputs.passed || '0' }}" > unit-report-data.txt
-          echo "failed=${{ steps.unit-test-report.outputs.failed || '0' }}" >> unit-report-data.txt
-          echo "skipped=${{ steps.unit-test-report.outputs.skipped || '0' }}" >> unit-report-data.txt
-          echo "time=${{ steps.unit-test-report.outputs.time || '0' }}" >> unit-report-data.txt
-
-      - name: Upload unit test report data
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-report-data
-          path: unit-report-data.txt
 
       - name: Upload coverage artifact
         if: always()
@@ -122,11 +92,7 @@ jobs:
       NODE_OPTIONS: "--max_old_space_size=8192"
 
     steps:
-      # Secure checkout for external PRs
       - uses: actions/checkout@v4
-        with:
-          # For PRs from forks via pull_request_target, check out the PR head to prevent token exposure
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.ref }}
 
       - uses: actions/setup-node@v4
         with:
@@ -162,32 +128,12 @@ jobs:
           name: test-result-api
           path: test-result-api.txt
 
-      - name: API Test Report
-        id: api-test-report
-        uses: dorny/test-reporter@v1
-        if: always() && (env.IS_FORK != 'true' || env.HAS_BOT_TOKEN == 'true')
-        with:
-          name: API Contract Tests
-          path: api-test-results.xml
-          reporter: java-junit
-          fail-on-error: false
-          token: ${{ env.IS_FORK == 'true' && secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Save API test report data
-        if: always()
-        run: |
-          echo "passed=${{ steps.api-test-report.outputs.passed || '0' }}" > api-report-data.txt
-          echo "failed=${{ steps.api-test-report.outputs.failed || '0' }}" >> api-report-data.txt
-          echo "skipped=${{ steps.api-test-report.outputs.skipped || '0' }}" >> api-report-data.txt
-          echo "time=${{ steps.api-test-report.outputs.time || '0' }}" >> api-report-data.txt
-
-      - name: Upload API test report data
+      - name: Upload test results XML
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: api-report-data
-          path: api-report-data.txt
+          name: api-test-results
+          path: api-test-results.xml
 
       - name: Fail if tests failed
         if: steps.test.outcome == 'failure'
@@ -200,11 +146,7 @@ jobs:
       NODE_OPTIONS: "--max_old_space_size=8192"
 
     steps:
-      # Secure checkout for external PRs
       - uses: actions/checkout@v4
-        with:
-          # For PRs from forks via pull_request_target, check out the PR head to prevent token exposure
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.ref }}
 
       - uses: actions/setup-node@v4
         with:
@@ -232,7 +174,7 @@ jobs:
 
       - name: Run e2e tests
         id: test
-        run:  npx playwright test
+        run: npx playwright test
         continue-on-error: true
 
       - name: Save test result
@@ -246,32 +188,12 @@ jobs:
           name: test-result-e2e
           path: test-result-e2e.txt
 
-      - name: E2E Test Report
-        id: e2e-test-report
-        uses: dorny/test-reporter@v1
-        if: always() && (env.IS_FORK != 'true' || env.HAS_BOT_TOKEN == 'true')
-        with:
-          name: E2E Tests
-          path: e2e-results.xml
-          reporter: java-junit
-          fail-on-error: false
-          token: ${{ env.IS_FORK == 'true' && secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Save e2e test report data
-        if: always()
-        run: |
-          echo "passed=${{ steps.e2e-test-report.outputs.passed || '0' }}" > e2e-report-data.txt
-          echo "failed=${{ steps.e2e-test-report.outputs.failed || '0' }}" >> e2e-report-data.txt
-          echo "skipped=${{ steps.e2e-test-report.outputs.skipped || '0' }}" >> e2e-report-data.txt
-          echo "time=${{ steps.e2e-test-report.outputs.time || '0' }}" >> e2e-report-data.txt
-
-      - name: Upload e2e test report data
+      - name: Upload test results XML
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-report-data
-          path: e2e-report-data.txt
+          name: e2e-test-results
+          path: e2e-results.xml
 
       - name: Upload e2e artifacts
         if: always() && steps.test.outcome != 'success'
@@ -298,12 +220,6 @@ jobs:
           pattern: test-result-*
           merge-multiple: true
 
-      - name: Download test report data
-        uses: actions/download-artifact@v4
-        with:
-          pattern: "*-report-data"
-          merge-multiple: true
-
       - name: Write summary
         env:
           UNIT_JOB: ${{ needs.unit-tests.result }}
@@ -319,51 +235,11 @@ jobs:
           em() { case "$1" in success) echo "✅";; failure) echo "❌";; cancelled|skipped) echo "⏭️";; *) echo "❔";; esac; }
           line() { r="$1"; n="$2"; cmd="$3"; s="Passing"; [ "$r" = "failure" ] && s="**Failing** - run \`$cmd\`"; [ "$r" = "skipped" ] && s="Skipped"; echo "- $(em "$r") $n: $s"; }
 
-          # Parse test report data
-          parse_report() {
-            local file=$1
-            if [ -f "$file" ]; then
-              source "$file"
-              echo "passed=${passed:-0} failed=${failed:-0} skipped=${skipped:-0} time=${time:-0}"
-            else
-              echo "passed=0 failed=0 skipped=0 time=0"
-            fi
-          }
-
           # Count failures
           failures=0
           [ "$UNIT" = "failure" ] && failures=$((failures + 1))
           [ "$API" = "failure" ] && failures=$((failures + 1))
           [ "$E2E" = "failure" ] && failures=$((failures + 1))
-
-          # Get detailed test data
-          UNIT_DATA=$(parse_report "unit-report-data.txt")
-          API_DATA=$(parse_report "api-report-data.txt")
-          E2E_DATA=$(parse_report "e2e-report-data.txt")
-
-          # Parse unit test data
-          eval "$UNIT_DATA"
-          UNIT_PASSED=$passed; UNIT_FAILED=$failed; UNIT_SKIPPED=$skipped; UNIT_TIME=$time
-
-          # Parse API test data
-          eval "$API_DATA"
-          API_PASSED=$passed; API_FAILED=$failed; API_SKIPPED=$skipped; API_TIME=$time
-
-          # Parse e2e test data
-          eval "$E2E_DATA"
-          E2E_PASSED=$passed; E2E_FAILED=$failed; E2E_SKIPPED=$skipped; E2E_TIME=$time
-
-          # Format time helper
-          format_time() {
-            local ms=$1
-            if [ "$ms" -gt 60000 ]; then
-              echo "$((ms / 60000))m $((ms % 60000 / 1000))s"
-            elif [ "$ms" -gt 1000 ]; then
-              echo "$((ms / 1000))s"
-            else
-              echo "${ms}ms"
-            fi
-          }
 
           {
             echo "## 🧪 Test Results"
@@ -379,37 +255,6 @@ jobs:
               echo -e "\n⚠️ **$failures test suite(s) failed**"
             fi
 
-            # Detailed Unit Test Report
-            if [ "$UNIT_PASSED" != "0" ] || [ "$UNIT_FAILED" != "0" ] || [ "$UNIT_SKIPPED" != "0" ]; then
-              echo -e "\n### 📊 Unit Test Details"
-              echo "| Metric | Count |"
-              echo "|--------|-------|"
-              [ "$UNIT_PASSED" != "0" ] && echo "| ✅ Passed | $UNIT_PASSED |"
-              [ "$UNIT_FAILED" != "0" ] && echo "| ❌ Failed | $UNIT_FAILED |"
-              [ "$UNIT_SKIPPED" != "0" ] && echo "| ⏭️ Skipped | $UNIT_SKIPPED |"
-              [ "$UNIT_TIME" != "0" ] && echo "| ⏱️ Duration | $(format_time $UNIT_TIME) |"
-            fi
-
-            # Detailed API Test Report
-            if [ "$API_PASSED" != "0" ] || [ "$API_FAILED" != "0" ] || [ "$API_SKIPPED" != "0" ]; then
-              echo -e "\n### 🔗 API Contract Test Details"
-              echo "| Metric | Count |"
-              echo "|--------|-------|"
-              [ "$API_PASSED" != "0" ] && echo "| ✅ Passed | $API_PASSED |"
-              [ "$API_FAILED" != "0" ] && echo "| ❌ Failed | $API_FAILED |"
-              [ "$API_SKIPPED" != "0" ] && echo "| ⏭️ Skipped | $API_SKIPPED |"
-              [ "$API_TIME" != "0" ] && echo "| ⏱️ Duration | $(format_time $API_TIME) |"
-            fi
-
-            # Detailed E2E Test Report
-            if [ "$E2E_PASSED" != "0" ] || [ "$E2E_FAILED" != "0" ] || [ "$E2E_SKIPPED" != "0" ]; then
-              echo -e "\n### 🎭 E2E Test Details"
-              echo "| Metric | Count |"
-              echo "|--------|-------|"
-              [ "$E2E_PASSED" != "0" ] && echo "| ✅ Passed | $E2E_PASSED |"
-              [ "$E2E_FAILED" != "0" ] && echo "| ❌ Failed | $E2E_FAILED |"
-              [ "$E2E_SKIPPED" != "0" ] && echo "| ⏭️ Skipped | $E2E_SKIPPED |"
-              [ "$E2E_TIME" != "0" ] && echo "| ⏱️ Duration | $(format_time $E2E_TIME) |"
-            fi
+            echo -e "\n💡 Detailed test reports will be posted by the Report Tests workflow"
 
           } >> "$GITHUB_STEP_SUMMARY"
