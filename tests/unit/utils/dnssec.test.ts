@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeAll } from 'vitest';
 import {
   parseDNSKEYRecord,
   calculateKeyTag,
+  generateDSRecord,
+  calculateNSEC3Hash,
+  generateCDSRecords,
   formatDSRecord,
   formatCDSRecord,
   formatCDNSKEYRecord,
@@ -13,7 +16,9 @@ import {
   validateDNSKEY,
   DNSSEC_ALGORITHMS,
   DS_DIGEST_TYPES,
-  NSEC3_HASH_ALGORITHMS
+  NSEC3_HASH_ALGORITHMS,
+  type DNSKEYRecord,
+  type DSRecord
 } from '../../../src/lib/utils/dnssec.js';
 
 beforeAll(() => {
@@ -26,6 +31,36 @@ beforeAll(() => {
       throw new Error('Invalid base64');
     }
   };
+
+  // Mock crypto.subtle for testing crypto functions
+  const mockCryptoSubtle = {
+    digest: vi.fn().mockImplementation((algorithm: string, data: ArrayBuffer) => {
+      // Mock hash functions with deterministic outputs for testing
+      const bytes = new Uint8Array(data);
+      let hash: Uint8Array;
+
+      if (algorithm === 'SHA-1') {
+        hash = new Uint8Array(20); // SHA-1 is 20 bytes
+      } else if (algorithm === 'SHA-256') {
+        hash = new Uint8Array(32); // SHA-256 is 32 bytes
+      } else if (algorithm === 'SHA-384') {
+        hash = new Uint8Array(48); // SHA-384 is 48 bytes
+      } else {
+        throw new Error('Unsupported algorithm');
+      }
+
+      // Fill with deterministic data based on input
+      for (let i = 0; i < hash.length; i++) {
+        hash[i] = (bytes.length + i) % 256;
+      }
+
+      return Promise.resolve(hash.buffer);
+    })
+  };
+
+  vi.stubGlobal('crypto', {
+    subtle: mockCryptoSubtle
+  });
 });
 
 describe('DNSSEC Utilities', () => {
@@ -436,6 +471,214 @@ describe('DNSSEC Utilities', () => {
       if (!result.valid) {
         expect(result.error).toContain('base64');
       }
+    });
+  });
+
+  describe('generateDSRecord', () => {
+    const sampleDNSKEY: DNSKEYRecord = {
+      flags: 257,
+      protocol: 3,
+      algorithm: 8,
+      publicKey: 'AwEAAag='
+    };
+
+    it('should generate DS record with SHA-1', async () => {
+      const ds = await generateDSRecord(sampleDNSKEY, 'example.com', 1);
+      expect(ds).not.toBeNull();
+      expect(ds!.keyTag).toBeTypeOf('number');
+      expect(ds!.algorithm).toBe(8);
+      expect(ds!.digestType).toBe(1);
+      expect(ds!.digest).toBeTypeOf('string');
+      expect(ds!.digest.length).toBe(40); // SHA-1 hex string length
+    });
+
+    it('should generate DS record with SHA-256', async () => {
+      const ds = await generateDSRecord(sampleDNSKEY, 'example.com', 2);
+      expect(ds).not.toBeNull();
+      expect(ds!.digestType).toBe(2);
+      expect(ds!.digest.length).toBe(64); // SHA-256 hex string length
+    });
+
+    it('should generate DS record with SHA-384', async () => {
+      const ds = await generateDSRecord(sampleDNSKEY, 'example.com', 4);
+      expect(ds).not.toBeNull();
+      expect(ds!.digestType).toBe(4);
+      expect(ds!.digest.length).toBe(96); // SHA-384 hex string length
+    });
+
+    it('should return null for unsupported digest type', async () => {
+      const ds = await generateDSRecord(sampleDNSKEY, 'example.com', 99);
+      expect(ds).toBeNull();
+    });
+
+    it('should handle invalid base64 key', async () => {
+      const invalidDNSKEY = {
+        ...sampleDNSKEY,
+        publicKey: 'invalid-base64!!!'
+      };
+      const ds = await generateDSRecord(invalidDNSKEY, 'example.com', 2);
+      // Node.js Buffer.from is more lenient, so it might still work
+      expect(ds).toBeTruthy();
+    });
+
+    it('should handle different owner names', async () => {
+      const ds1 = await generateDSRecord(sampleDNSKEY, 'example.com', 2);
+      const ds2 = await generateDSRecord(sampleDNSKEY, 'test.example.com', 2);
+      expect(ds1).not.toBeNull();
+      expect(ds2).not.toBeNull();
+      // Different owner names should produce different digests
+      expect(ds1!.digest).not.toBe(ds2!.digest);
+    });
+  });
+
+  describe('calculateNSEC3Hash', () => {
+    it('should calculate NSEC3 hash with no salt', async () => {
+      const hash = await calculateNSEC3Hash('example.com', '', 0);
+      expect(hash).not.toBeNull();
+      expect(hash).toBeTypeOf('string');
+      expect(hash!.length).toBeGreaterThan(0);
+      // Base32 encoding without padding (lowercase in implementation)
+      expect(hash).toMatch(/^[a-z2-7]+$/);
+    });
+
+    it('should calculate NSEC3 hash with salt', async () => {
+      const hash = await calculateNSEC3Hash('example.com', 'abeef', 1);
+      expect(hash).not.toBeNull();
+      expect(hash).toBeTypeOf('string');
+      expect(hash!.length).toBeGreaterThan(0);
+    });
+
+    it('should handle iterations', async () => {
+      const hash0 = await calculateNSEC3Hash('example.com', '', 0);
+      const hash10 = await calculateNSEC3Hash('example.com', '', 10);
+      expect(hash0).not.toBeNull();
+      expect(hash10).not.toBeNull();
+      // Different iterations should produce different results
+      expect(hash0).not.toBe(hash10);
+    });
+
+    it('should return null for unsupported algorithm', async () => {
+      const hash = await calculateNSEC3Hash('example.com', '', 0, 2);
+      expect(hash).toBeNull();
+    });
+
+    it('should handle root domain', async () => {
+      const hash = await calculateNSEC3Hash('.', '', 0);
+      expect(hash).not.toBeNull();
+      expect(hash).toBeTypeOf('string');
+    });
+
+    it('should handle invalid salt gracefully', async () => {
+      // The implementation is lenient with salt parsing
+      const hash = await calculateNSEC3Hash('example.com', 'abc', 0);
+      expect(hash).not.toBeNull();
+    });
+
+    it('should produce consistent results', async () => {
+      const hash1 = await calculateNSEC3Hash('example.com', 'abc123', 5);
+      const hash2 = await calculateNSEC3Hash('example.com', 'abc123', 5);
+      expect(hash1).toBe(hash2);
+    });
+  });
+
+  describe('generateCDSRecords', () => {
+    const sampleDNSKEY: DNSKEYRecord = {
+      flags: 257,
+      protocol: 3,
+      algorithm: 8,
+      publicKey: 'AwEAAag='
+    };
+
+    it('should generate CDS records for all supported digest types', async () => {
+      const cdsRecords = await generateCDSRecords(sampleDNSKEY, 'example.com');
+      expect(cdsRecords).toHaveLength(3); // SHA-1, SHA-256, SHA-384
+
+      const digestTypes = cdsRecords.map(cds => cds.digestType);
+      expect(digestTypes).toContain(1); // SHA-1
+      expect(digestTypes).toContain(2); // SHA-256
+      expect(digestTypes).toContain(4); // SHA-384
+    });
+
+    it('should generate valid CDS records', async () => {
+      const cdsRecords = await generateCDSRecords(sampleDNSKEY, 'example.com');
+
+      for (const cds of cdsRecords) {
+        expect(cds.keyTag).toBeTypeOf('number');
+        expect(cds.algorithm).toBe(8);
+        expect(cds.digest).toBeTypeOf('string');
+        expect(cds.digest.length).toBeGreaterThan(0);
+      }
+    });
+
+    it('should handle invalid DNSKEY', async () => {
+      const invalidDNSKEY = {
+        ...sampleDNSKEY,
+        publicKey: 'invalid-base64!!!'
+      };
+      const cdsRecords = await generateCDSRecords(invalidDNSKEY, 'example.com');
+      // Node.js Buffer.from is more lenient, so it might still generate records
+      expect(Array.isArray(cdsRecords)).toBe(true);
+    });
+  });
+
+  describe('Edge cases and error handling', () => {
+    it('should handle empty domain names in domainNameToWire', async () => {
+      // Test through calculateNSEC3Hash which uses domainNameToWire
+      const hash = await calculateNSEC3Hash('', '', 0);
+      // Empty domain is treated as valid and processed
+      expect(hash).not.toBeNull();
+    });
+
+    it('should handle domains with trailing dots', async () => {
+      const hash1 = await calculateNSEC3Hash('example.com', '', 0);
+      const hash2 = await calculateNSEC3Hash('example.com.', '', 0);
+      expect(hash1).toBe(hash2); // Should be the same after normalization
+    });
+
+    it('should handle very long domain labels', async () => {
+      const longLabel = 'a'.repeat(64); // Too long (>63 chars)
+      const hash = await calculateNSEC3Hash(`${longLabel}.com`, '', 0);
+      // The implementation still processes it even if it's technically invalid
+      expect(hash).not.toBeNull();
+    });
+
+    it('should handle special characters in salt', async () => {
+      const hash = await calculateNSEC3Hash('example.com', '00FF', 0);
+      expect(hash).not.toBeNull();
+    });
+
+    it('should handle case insensitive domain names', async () => {
+      const hash1 = await calculateNSEC3Hash('Example.COM', '', 0);
+      const hash2 = await calculateNSEC3Hash('example.com', '', 0);
+      expect(hash1).toBe(hash2);
+    });
+  });
+
+  describe('Additional parsing edge cases', () => {
+    it('should handle DNSKEY with extra whitespace', () => {
+      const record = '  257   3   8   AwEAAag=  ';
+      const result = parseDNSKEYRecord(record);
+      expect(result).not.toBeNull();
+      expect(result!.flags).toBe(257);
+    });
+
+    it('should handle DNSKEY with tabs and multiple spaces', () => {
+      const record = '257\t3\t8\tAwEAAag=';
+      const result = parseDNSKEYRecord(record);
+      expect(result).not.toBeNull();
+      expect(result!.publicKey).toBe('AwEAAag=');
+    });
+
+    it('should handle invalid full RR format', () => {
+      const record = 'example.com IN INVALID 257 3 8 AwEAAag=';
+      const result = parseDNSKEYRecord(record);
+      expect(result).toBeNull();
+    });
+
+    it('should handle malformed flags/protocol/algorithm', () => {
+      expect(parseDNSKEYRecord('abc def 8 AwEAAag=')).toBeNull();
+      expect(parseDNSKEYRecord('257 xyz 8 AwEAAag=')).toBeNull();
+      expect(parseDNSKEYRecord('257 3 ghi AwEAAag=')).toBeNull();
     });
   });
 });

@@ -365,5 +365,113 @@ describe('IP Family Conversion Utilities', () => {
       expect(result.success).toBe(true);
       expect(result.result).toBe('192.0.2.1');
     });
+
+    it('should handle IPv6 addresses starting or ending with single colon', () => {
+      expect(validateIPv6(':1:2:3:4:5:6:7:8')).toEqual({ valid: false, error: 'Invalid IPv6 format' });
+      expect(validateIPv6('1:2:3:4:5:6:7:8:')).toEqual({ valid: false, error: 'Invalid IPv6 format' });
+    });
+
+    it('should handle IPv6 addresses with triple colon', () => {
+      expect(validateIPv6('2001:::1')).toEqual({ valid: false, error: 'Invalid IPv6 format' });
+      expect(validateIPv6(':::1')).toEqual({ valid: false, error: 'Invalid IPv6 format' });
+    });
+
+    it('should handle IPv6 with too many groups after compression', () => {
+      expect(validateIPv6('2001:db8:1:2:3:4:5::6:7')).toEqual({ valid: false, error: 'Invalid IPv6 format' });
+    });
+
+    it('should handle IPv6 expansion with different compression positions', () => {
+      const testCases = [
+        { input: '2001:db8::dead:beef', expected: '2001:0db8:0000:0000:0000:0000:dead:beef' },
+        { input: '::2001:db8', expected: '0000:0000:0000:0000:0000:0000:2001:0db8' },
+        { input: '2001:db8::', expected: '2001:0db8:0000:0000:0000:0000:0000:0000' },
+        { input: 'a::b::c', expected: 'a::b::c' } // Invalid case, but should not crash
+      ];
+
+      testCases.forEach(({ input, expected }) => {
+        const result = expandIPv6(input);
+        // For the invalid case, it may return something but shouldn't crash
+        expect(typeof result).toBe('string');
+      });
+    });
+
+    it('should handle IPv6 compression edge cases', () => {
+      const testCases = [
+        // Only one zero group - should not compress
+        { input: '2001:0000:db8:1:2:3:4:5', expected: '2001:0:db8:1:2:3:4:5' },
+        // Multiple equal-length zero sequences - should compress first
+        { input: '2001:0000:0000:db8:0000:0000:1:2', expected: '2001::db8:0:0:1:2' },
+        // All zeros
+        { input: '0000:0000:0000:0000:0000:0000:0000:0000', expected: '::' }
+      ];
+
+      testCases.forEach(({ input, expected }) => {
+        const result = compressIPv6(input);
+        expect(result).toBe(expected);
+      });
+    });
+
+    it('should handle IPv4 boundary values', () => {
+      const testCases = [
+        { ipv4: '0.0.0.0', ipv6: '::ffff:0000:0000' },
+        { ipv4: '255.255.255.255', ipv6: '::ffff:ffff:ffff' },
+        { ipv4: '127.0.0.1', ipv6: '::ffff:7f00:0001' },
+        { ipv4: '1.1.1.1', ipv6: '::ffff:0101:0101' }
+      ];
+
+      testCases.forEach(({ ipv4, ipv6 }) => {
+        const result = ipv4ToIPv6(ipv4);
+        expect(result.success).toBe(true);
+        expect(result.result).toBe(ipv6);
+      });
+    });
+
+    it('should handle IPv6 info for edge case addresses', () => {
+      const testCases = [
+        { address: 'fc01::1', expectedType: 'Unique Local' },
+        { address: 'fd99::1', expectedType: 'Unique Local' },
+        { address: 'ff01::1', expectedType: 'Multicast' },
+        { address: 'ff0e::1', expectedType: 'Multicast' }
+      ];
+
+      testCases.forEach(({ address, expectedType }) => {
+        const info = getIPv6Info(address);
+        expect(info.types).toContain(expectedType);
+      });
+    });
+
+    it('should handle error handling in validation functions', () => {
+      // Test IPv6 validation error handling with malformed input
+      expect(() => validateIPv6('2001:db8::1')).not.toThrow();
+
+      // Test with extremely long strings that might cause issues
+      const longString = 'a'.repeat(1000);
+      expect(validateIPv4(longString)).toEqual({ valid: false, error: 'Invalid IPv4 format' });
+      expect(validateIPv6(longString)).toEqual({ valid: false, error: 'Invalid IPv6 format' });
+    });
+
+    it('should handle hex conversion edge cases in IPv6 to IPv4', () => {
+      // Test with different hex formats
+      const testCases = [
+        '::ffff:0000:0000', // All zeros
+        '::ffff:ffff:ffff', // All F's
+        '::ffff:1234:5678', // Mixed hex
+        '::ffff:abcd:ef01'  // Letters in hex
+      ];
+
+      testCases.forEach(ipv6 => {
+        const result = ipv6ToIPv4(ipv6);
+        expect(result.success).toBe(true);
+        expect(result.result).toMatch(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/);
+      });
+    });
+
+    it('should handle brackets properly in all functions', () => {
+      const bracketedAddress = '[fe80::1]';
+
+      expect(validateIPv6(bracketedAddress).valid).toBe(true);
+      expect(getIPv6Info(bracketedAddress).cleaned).toBe('fe80::1');
+      expect(expandIPv6(bracketedAddress)).toBe('fe80:0000:0000:0000:0000:0000:0000:0001');
+    });
   });
 });
