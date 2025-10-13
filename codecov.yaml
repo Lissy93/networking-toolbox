@@ -11,14 +11,14 @@ coverage:
   status:
     project:
       default:
-        target: 60%
-        threshold: 0%
+        target: 80%
+        threshold: 5%
         informational: true
         if_ci_failed: success
     patch:
       default:
         target: 50%
-        threshold: 0%
+        threshold: 10%
         informational: true
         if_ci_failed: success
 

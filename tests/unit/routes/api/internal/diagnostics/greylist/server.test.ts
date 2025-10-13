@@ -1,6 +1,32 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { POST } from '../../../../../../../src/routes/api/internal/diagnostics/greylist/+server';
 
+// Mock node:net to avoid real TCP connections
+const mockSocket = {
+	connect: vi.fn(),
+	setTimeout: vi.fn(),
+	write: vi.fn(),
+	destroy: vi.fn(),
+	on: vi.fn((event: string, callback: Function) => {
+		// Immediately trigger callbacks for successful connection test
+		if (event === 'data') {
+			// Simulate SMTP greeting
+			setTimeout(() => callback(Buffer.from('220 test.local ESMTP ready\r\n')), 10);
+		} else if (event === 'error') {
+			// Simulate connection error for real tests
+			setTimeout(() => callback(new Error('Connection refused')), 10);
+		}
+		return mockSocket;
+	})
+};
+
+vi.mock('node:net', () => ({
+	default: {
+		connect: vi.fn(() => mockSocket)
+	},
+	connect: vi.fn(() => mockSocket)
+}));
+
 describe('Greylisting Tester API', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
