@@ -2161,10 +2161,34 @@ export const aboutPages: NavItem[] = [
     keywords: ['building', 'sveltekit', 'github', 'npm', 'svelte', 'typescript', 'developing documentation'],
   },
   {
-    href: makePath('/about/license'),
+    href: makePath('/about/legal/license'),
     label: 'MIT License',
     description: `Networking Toolbox's MIT license, summary, and what it means for you`,
     keywords: ['license', 'mit', 'opensource', 'permissions', 'limitations', 'conditions'],
+  },
+  {
+    href: makePath('/about/legal/security'),
+    label: 'Security Policy',
+    description: 'Report security vulnerabilities and learn about our security practices',
+    keywords: ['security', 'policy', 'vulnerability', 'disclosure', 'reporting', 'bug', 'bounty'],
+  },
+  {
+    href: makePath('/about/legal/accessibility'),
+    label: 'Accessibility Policy',
+    description: 'WCAG AA compliant with keyboard navigation, screen reader support, and customizable display options',
+    keywords: ['accessibility', 'wcag', 'a11y', 'keyboard', 'screen reader', 'contrast', 'dyslexic', 'aria'],
+  },
+  {
+    href: makePath('/about/legal/community'),
+    label: 'Community Guidelines',
+    description: 'Code of conduct and community standards for contributors',
+    keywords: ['community', 'guidelines', 'code', 'conduct', 'contributor', 'covenant', 'behavior', 'standards'],
+  },
+  {
+    href: makePath('/about/legal/cookies'),
+    label: 'Cookie Policy',
+    description: "Our cookie policy: we don't use them",
+    keywords: ['cookie', 'cookies', 'policy', 'tracking', 'localstorage', 'privacy'],
   },
   {
     href: makePath('/about/self-hosting'),
@@ -2174,8 +2198,48 @@ export const aboutPages: NavItem[] = [
   },
 ];
 
+export const legalPages: NavItem[] = [
+  {
+    href: makePath('/about/legal/license'),
+    label: 'MIT License',
+    description: 'View the MIT license terms and conditions',
+    icon: 'certificate',
+  },
+  {
+    href: makePath('/about/legal/privacy'),
+    label: 'Privacy Policy',
+    description: 'Learn how we handle your data and protect your privacy',
+    icon: 'hide',
+  },
+  {
+    href: makePath('/about/legal/security'),
+    label: 'Security Policy',
+    description: 'Report vulnerabilities and learn about our security practices',
+    icon: 'shield',
+  },
+  {
+    href: makePath('/about/legal/accessibility'),
+    label: 'Accessibility Policy',
+    description: 'Learn about our accessibility features and WCAG AA compliance',
+    icon: 'accessibility',
+  },
+  {
+    href: makePath('/about/legal/community'),
+    label: 'Community Guidelines',
+    description: 'Code of conduct and community standards for contributors',
+    icon: 'users',
+  },
+  {
+    href: makePath('/about/legal/cookies'),
+    label: 'Cookie Policy',
+    description: "Our cookie policy: we don't use them",
+    icon: 'cookie',
+  },
+];
+
 export const footerLinks: NavItem[] = [
   { href: makePath('/about'), label: 'About' },
+  { href: makePath('/about/legal'), label: 'Legal' },
   { href: site.repo, label: 'GitHub' },
   { href: author.sponsor, label: 'Sponsor' },
   { href: author.portfolio, label: 'More Apps →' },

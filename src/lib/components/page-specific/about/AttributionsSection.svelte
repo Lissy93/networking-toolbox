@@ -58,7 +58,7 @@
     <div class="avatars-grid">
       {#each sponsors.filter((s) => s.login) as sponsor, index (sponsor.login || `sponsor-${index}`)}
         <a href="https://github.com/{sponsor.login}" target="_blank" rel="noopener" class="avatar-link">
-          <img src={sponsor.avatarUrl} alt={sponsor.name || sponsor.login} class="avatar large" />
+          <img width="72" src={sponsor.avatarUrl} alt={sponsor.name || sponsor.login} class="avatar large" />
           <span>{sponsor.name || sponsor.login}</span>
         </a>
       {/each}
@@ -72,7 +72,7 @@
     <div class="avatars-grid">
       {#each contributors.filter((c) => c.login) as contributor, index (contributor.login || `contributor-${index}`)}
         <a href="https://github.com/{contributor.login}" target="_blank" rel="noopener" class="avatar-link">
-          <img src={contributor.avatar_url} alt={contributor.login} class="avatar large" />
+          <img width="72" src={contributor.avatar_url} alt={contributor.login} class="avatar large" />
           <span>{contributor.login}</span>
         </a>
       {/each}
@@ -86,7 +86,7 @@
     <div class="avatars-grid small">
       {#each stargazers.filter((s) => s.login) as stargazer, index (stargazer.login || `stargazer-${index}`)}
         <a href="https://github.com/{stargazer.login}" target="_blank" rel="noopener" class="avatar-link small-link">
-          <img src={stargazer.avatar_url} alt={stargazer.login} class="avatar small" />
+          <img width="72" src={stargazer.avatar_url} alt={stargazer.login} class="avatar small" />
           <span>{stargazer.login}</span>
         </a>
       {/each}

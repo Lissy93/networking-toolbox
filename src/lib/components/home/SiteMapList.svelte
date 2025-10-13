@@ -1,5 +1,13 @@
 <script lang="ts">
-  import { TOP_NAV, aboutPages, SUB_NAV, STANDALONE_PAGES, type NavItem, type NavGroup } from '$lib/constants/nav';
+  import {
+    TOP_NAV,
+    aboutPages,
+    legalPages,
+    SUB_NAV,
+    STANDALONE_PAGES,
+    type NavItem,
+    type NavGroup,
+  } from '$lib/constants/nav';
   import { resolve } from '$app/paths';
   import Icon from '$lib/components/global/Icon.svelte';
 
@@ -52,7 +60,15 @@
             label: 'About',
             href: resolve('/about'),
             description: 'Information about the project and documentation',
-            children: aboutPages.map(mapToNode),
+            children: [
+              ...aboutPages.filter((page) => !page.href.includes('/about/legal/')).map(mapToNode),
+              {
+                label: 'Legal',
+                href: resolve('/about/legal'),
+                description: 'Legal documentation and policies',
+                children: legalPages.map(mapToNode),
+              },
+            ],
           },
         ]
       : []),

@@ -72,7 +72,7 @@
   <p>Your only obligations are:</p>
   <ul>
     <li>
-      Preserve the MIT license. You can view this on the <a href="/about/license">Licensing Page</a>
+      Preserve the MIT license. You can view this on the <a href="/about/legal/license">Licensing Page</a>
     </li>
     <li>
       You can not hold the author liable for any damages, and you understand that the software is provided "as is" with
@@ -88,7 +88,7 @@
     Beyond that, you're free to use it however you want, for personal or commercial use. You can rebrand it, or use
     parts of the code in your own projects and edit anything.
   </p>
-  <p>
+  <p class="sponsor-section">
     If you've found the project helpful, and want to support us, considering <a
       href="https://github.com/sponsors/Lissy93">sponsoring us</a
     > on GitHub. It always means the world to me, and helps cover ongoing running costs 🩷
@@ -101,5 +101,11 @@
   }
   h3 {
     margin-top: var(--spacing-lg);
+  }
+  .sponsor-section {
+    background: color-mix(in srgb, var(--color-pink), transparent 40%);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-pink);
   }
 </style>
