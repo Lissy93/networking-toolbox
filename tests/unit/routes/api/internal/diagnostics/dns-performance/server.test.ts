@@ -1,6 +1,37 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../../../../../../../src/routes/api/internal/diagnostics/dns-performance/+server';
 
+// Mock DNS module to avoid real network calls
+const mockResolverInstance = {
+  setServers: vi.fn(),
+  resolve4: vi.fn().mockResolvedValue(['93.184.216.34']),
+  resolve6: vi.fn().mockResolvedValue(['2606:2800:220:1:248:1893:25c8:1946']),
+  resolveMx: vi.fn().mockResolvedValue([{ priority: 10, exchange: 'mail.example.com' }]),
+  resolveTxt: vi.fn().mockResolvedValue([['v=spf1 include:_spf.example.com ~all']]),
+  resolveNs: vi.fn().mockResolvedValue(['ns1.example.com', 'ns2.example.com']),
+  resolveCname: vi.fn().mockResolvedValue(['alias.example.com']),
+  resolveSoa: vi.fn().mockResolvedValue({
+    nsname: 'ns1.example.com',
+    hostmaster: 'admin.example.com',
+    serial: 2023010101,
+    refresh: 3600,
+    retry: 600,
+    expire: 604800,
+    minttl: 86400
+  })
+};
+
+vi.mock('node:dns', () => ({
+  default: {
+    promises: {
+      Resolver: vi.fn(() => mockResolverInstance)
+    }
+  },
+  promises: {
+    Resolver: vi.fn(() => mockResolverInstance)
+  }
+}));
+
 // Mock the Request constructor for testing
 const createMockRequest = (body: any) => ({
   json: vi.fn().mockResolvedValue(body)
