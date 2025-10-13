@@ -54,6 +54,16 @@
       }
       return section;
     }),
+    ...(STANDALONE_PAGES.length
+      ? [
+          {
+            label: 'Other Pages',
+            href: resolve('/'),
+            description: 'Additional tools and utilities',
+            children: STANDALONE_PAGES.map(mapToNode),
+          },
+        ]
+      : []),
     ...(aboutPages.length
       ? [
           {
@@ -69,16 +79,6 @@
                 children: legalPages.map(mapToNode),
               },
             ],
-          },
-        ]
-      : []),
-    ...(STANDALONE_PAGES.length
-      ? [
-          {
-            label: 'Other Pages',
-            href: resolve('/'),
-            description: 'Additional tools and utilities',
-            children: STANDALONE_PAGES.map(mapToNode),
           },
         ]
       : []),

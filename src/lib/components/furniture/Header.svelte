@@ -50,7 +50,7 @@
             <Icon name="info" size="sm" />
           </button>
 
-          <SettingsMenu onSearchTrigger={() => globalSearchRef?.showSearch()} />
+          <SettingsMenu />
 
           <BurgerMenu />
         </div>

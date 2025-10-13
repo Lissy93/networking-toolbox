@@ -115,6 +115,16 @@
     // Add global keyboard shortcuts
     window.addEventListener('keydown', handleGlobalKeydown);
 
+    // Console message
+    console.log(
+      `\n%c🧰 Networking Toolbox` +
+        '%c\nLicensed under MIT, © Alicia Sykes 2025.\nhttps://github.com/lissy93/networking-toolbox\n',
+      'color:#e3ed70; background:#21262d; font-size:1.6rem; padding:0.15rem 0.25rem; ' +
+        'margin: 1rem auto 0.5rem auto; font-family: Helvetica; border: 2px solid #e3ed70; ' +
+        'border-radius: 4px;font-weight: bold; text-shadow: 1px 1px 4px #000;',
+      'color: #e3ed70; font-size:0.8rem; font-family: Helvetica; margin: 0;',
+    );
+
     return () => {
       window.removeEventListener('keydown', handleGlobalKeydown);
     };

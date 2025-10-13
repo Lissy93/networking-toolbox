@@ -26,15 +26,31 @@ export const STANDALONE_PAGES: NavItem[] = [
   {
     href: makePath('/bookmarks'),
     label: 'Bookmarks',
+    icon: 'bookmarks',
     description: 'Save and organize network calculations and tool results',
     keywords: ['bookmarks', 'saved', 'favorites', 'shortcuts', 'calculations'],
   },
   {
-    href: makePath('/offline'),
-    label: 'Offline',
-    description: 'Access cached tools and data offline',
-    keywords: ['offline', 'cache', 'no-internet', 'local'],
+    href: makePath('/search'),
+    label: 'Search',
+    icon: 'search',
+    description: 'Find tools and reference content quickly',
+    keywords: ['search', 'find', 'lookup', 'tools', 'reference', 'content'],
   },
+  {
+    href: makePath('/settings'),
+    label: 'Settings',
+    icon: 'settings2',
+    description: 'Customize themes, layouts, and accessibility preferences',
+    keywords: ['settings', 'preferences', 'theme', 'layout', 'accessibility', 'customize'],
+  },
+  // {
+  //   href: makePath('/offline'),
+  //   label: 'Offline',
+  //   description: 'Access cached tools and data offline',
+  //   keywords: ['offline', 'cache', 'no-internet', 'local'],
+  //   icon: 'offline',
+  // },
 ];
 
 export const TOP_NAV: NavItem[] = [
@@ -2280,7 +2296,6 @@ function extractAllNavItems(navStructure: (NavItem | NavGroup)[]): NavItem[] {
 
 // All pages for homepage navigation - combines standalone pages with sub-pages
 export const ALL_PAGES: NavItem[] = [
-  ...STANDALONE_PAGES,
   ...Object.values(SUB_NAV)
     .map((section) => extractAllNavItems(section as (NavItem | NavGroup)[]))
     .flat(),
