@@ -6,6 +6,7 @@
   import { theme, themes, type ThemeOption, type Theme } from '$lib/stores/theme';
   import { navbarDisplay, navbarDisplayOptions, type NavbarDisplayMode } from '$lib/stores/navbarDisplay';
   import { homepageLayout, homepageLayoutOptions, type HomepageLayoutMode } from '$lib/stores/homepageLayout';
+  import { customCss } from '$lib/stores/customCss';
 
   interface Props {
     standalone?: boolean;
@@ -20,6 +21,19 @@
   let currentTheme = $state(theme);
   let currentNavbarDisplay = $state(navbarDisplay);
   let currentHomepageLayout = $state(homepageLayout);
+  let currentCustomCss = $state(customCss);
+  let cssInput = $state('');
+  let validationErrors = $state<string[]>([]);
+  let validationWarnings = $state<string[]>([]);
+  let lastStoreValue = $state('');
+
+  // Sync cssInput with store when store changes (not when textarea changes)
+  $effect(() => {
+    if ($currentCustomCss !== lastStoreValue) {
+      cssInput = $currentCustomCss;
+      lastStoreValue = $currentCustomCss;
+    }
+  });
 
   // Language selection
   let selectedLanguage = $state('en');
@@ -66,6 +80,24 @@
   function handleLinkClick() {
     onClose?.();
   }
+
+  // Handle custom CSS changes
+  function handleApplyCustomCss() {
+    const validation = customCss.validate(cssInput);
+    validationErrors = validation.errors;
+    validationWarnings = validation.warnings;
+
+    if (validation.isValid) {
+      customCss.set(cssInput);
+    }
+  }
+
+  function handleClearCustomCss() {
+    cssInput = '';
+    customCss.clear();
+    validationErrors = [];
+    validationWarnings = [];
+  }
 </script>
 
 {#snippet accessibilityOption(option: AccessibilityOption)}
@@ -104,7 +136,7 @@
 
 <div class="settings-panel" class:standalone>
   <!-- Theme Selection -->
-  <div class="settings-section">
+  <div class="settings-section theme-section">
     <h3>Theme</h3>
     <div class="theme-options" role="radiogroup" aria-label="Theme selection">
       <!-- Primary themes (always visible - first 6) -->
@@ -132,7 +164,7 @@
   </div>
 
   <!-- Language Selection -->
-  <div class="settings-section">
+  <div class="settings-section language-section">
     <h3>Language</h3>
     <div class="language-dropdown">
       {#each languages as lang (lang.code)}
@@ -151,7 +183,7 @@
   </div>
 
   <!-- Homepage Layout -->
-  <div class="settings-section">
+  <div class="settings-section homepage-layout-section">
     <h3>Homepage Layout</h3>
     <div class="navbar-select-wrapper">
       <select class="navbar-select" value={$currentHomepageLayout} onchange={handleHomepageLayoutChange}>
@@ -169,7 +201,7 @@
   </div>
 
   <!-- Navbar Display -->
-  <div class="settings-section">
+  <div class="settings-section navbar-display-section">
     <h3>Top Navigation</h3>
     <div class="navbar-select-wrapper">
       <select class="navbar-select" value={$currentNavbarDisplay} onchange={handleNavbarDisplayChange}>
@@ -187,7 +219,7 @@
   </div>
 
   <!-- Accessibility Options -->
-  <div class="settings-section">
+  <div class="settings-section accessibility-section">
     <h3>Accessibility</h3>
     <div class="accessibility-options">
       <!-- Primary options (always visible) -->
@@ -213,6 +245,59 @@
       {/if}
     </div>
   </div>
+
+  <!-- Custom CSS (only in standalone mode) -->
+  {#if standalone}
+    <div class="settings-section custom-css-section">
+      <h3>Custom CSS</h3>
+      <p class="section-description">Add your own CSS to customize the appearance globally.</p>
+
+      <textarea
+        bind:value={cssInput}
+        class="css-editor"
+        placeholder="/* Enter your custom CSS here */"
+        spellcheck="false"
+        rows="10"
+      ></textarea>
+
+      <div class="css-meta">
+        <span class="char-count">{cssInput.length} characters</span>
+      </div>
+
+      {#if validationErrors.length > 0}
+        <div class="validation-messages errors">
+          <Icon name="alert-triangle" size="sm" />
+          <div>
+            {#each validationErrors as error (error)}
+              <p>{error}</p>
+            {/each}
+          </div>
+        </div>
+      {/if}
+
+      {#if validationWarnings.length > 0}
+        <div class="validation-messages warnings">
+          <Icon name="alert-circle" size="sm" />
+          <div>
+            {#each validationWarnings as warning (warning)}
+              <p>{warning}</p>
+            {/each}
+          </div>
+        </div>
+      {/if}
+
+      <div class="css-actions">
+        <button class="action-btn apply" onclick={handleApplyCustomCss}>
+          <Icon name="check" size="sm" />
+          Apply
+        </button>
+        <button class="action-btn clear" onclick={handleClearCustomCss}>
+          <Icon name="x" size="sm" />
+          Clear
+        </button>
+      </div>
+    </div>
+  {/if}
 
   <!-- Navigation Links (only in dropdown mode) -->
   {#if !standalone}
@@ -272,6 +357,25 @@
         border-radius: var(--radius-md);
         padding: var(--spacing-lg);
         margin: 0;
+
+        &.theme-section {
+          grid-row: span 2;
+        }
+        &.accessibility-section {
+          grid-row: span 2;
+        }
+        &.custom-css-section {
+          grid-column: span 2;
+        }
+
+        @media (max-width: 768px) {
+          &.theme-section,
+          &.accessibility-section,
+          &.custom-css-section {
+            grid-row: span 1;
+            grid-column: span 1;
+          }
+        }
       }
 
       .theme-options {
@@ -629,6 +733,131 @@
       &:hover {
         background: var(--surface-hover);
         color: var(--text-primary);
+      }
+    }
+  }
+
+  .custom-css-section {
+    .section-description {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      margin: 0 0 var(--spacing-md) 0;
+    }
+
+    .css-editor {
+      width: 100%;
+      min-height: 200px;
+      padding: var(--spacing-md);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-sm);
+      font-family: 'Courier New', monospace;
+      font-size: var(--font-size-sm);
+      color: var(--text-primary);
+      resize: vertical;
+      transition: all var(--transition-normal);
+
+      &:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary), transparent 85%);
+      }
+
+      &::placeholder {
+        color: var(--text-tertiary);
+      }
+    }
+
+    .css-meta {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: var(--spacing-xs);
+
+      .char-count {
+        font-size: var(--font-size-xs);
+        color: var(--text-tertiary);
+      }
+    }
+
+    .validation-messages {
+      display: flex;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--radius-sm);
+      margin-top: var(--spacing-md);
+      font-size: var(--font-size-sm);
+      line-height: 1.4;
+
+      :global(svg) {
+        flex-shrink: 0;
+        margin-top: 0.125rem;
+      }
+
+      p {
+        margin: 0;
+        &:not(:last-child) {
+          margin-bottom: var(--spacing-xs);
+        }
+      }
+
+      &.errors {
+        background: linear-gradient(
+          135deg,
+          color-mix(in srgb, var(--color-error), transparent 90%),
+          color-mix(in srgb, var(--color-error), transparent 95%)
+        );
+        border: 1px solid color-mix(in srgb, var(--color-error), transparent 70%);
+        color: var(--color-error);
+      }
+
+      &.warnings {
+        background: linear-gradient(
+          135deg,
+          color-mix(in srgb, var(--color-warning), transparent 90%),
+          color-mix(in srgb, var(--color-warning), transparent 95%)
+        );
+        border: 1px solid color-mix(in srgb, var(--color-warning), transparent 70%);
+        color: var(--color-warning);
+      }
+    }
+
+    .css-actions {
+      display: flex;
+      gap: var(--spacing-sm);
+
+      .action-btn {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-size-sm);
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition-normal);
+        border: 1px solid var(--border-primary);
+
+        &.apply {
+          background: var(--color-primary);
+          color: var(--bg-primary);
+          border-color: var(--color-primary);
+
+          &:hover {
+            background: color-mix(in srgb, var(--color-primary), black 10%);
+            border-color: color-mix(in srgb, var(--color-primary), black 10%);
+          }
+        }
+
+        &.clear {
+          background: transparent;
+          color: var(--text-secondary);
+
+          &:hover {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+            border-color: var(--border-secondary);
+          }
+        }
       }
     }
   }

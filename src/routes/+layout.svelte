@@ -16,6 +16,7 @@
   import { toolUsage } from '$lib/stores/toolUsage';
   import { accessibility } from '$lib/stores/accessibility';
   import { theme } from '$lib/stores/theme';
+  import { customCss } from '$lib/stores/customCss';
   import { ALL_PAGES } from '$lib/constants/nav';
   import { initializeOfflineSupport } from '$lib/stores/offline';
   import { bookmarks } from '$lib/stores/bookmarks';
@@ -30,6 +31,7 @@
   let accessibilitySettings = $state(accessibility); // Accessibility settings store
   let currentTheme = $state(theme); // Theme store
   let currentBookmarks = $state(bookmarks); // Bookmarks store
+  let currentCustomCss = $state(customCss); // Custom CSS store
 
   // Get page-specific metadata or fallback to site defaults
   const seoData = $derived.by(() => {
@@ -110,6 +112,7 @@
     toolUsage.init();
     accessibility.init();
     bookmarks.init();
+    customCss.init();
     initializeOfflineSupport();
 
     // Add global keyboard shortcuts
@@ -162,6 +165,27 @@
     setTimeout(() => {
       faviconTrigger++;
     }, 50);
+  });
+
+  // Apply custom CSS to page
+  $effect(() => {
+    if (typeof document === 'undefined') return;
+
+    const customCssValue = $currentCustomCss;
+    let styleEl = document.getElementById('user-custom-css') as HTMLStyleElement | null;
+
+    if (customCssValue && customCssValue.trim()) {
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'user-custom-css';
+        document.head.appendChild(styleEl);
+      }
+      styleEl.textContent = customCssValue;
+    } else {
+      if (styleEl) {
+        styleEl.remove();
+      }
+    }
   });
 
   /* Uses the server-generated breadcrumb data, to build a JSON-LD breadcrumb object */
