@@ -9,6 +9,7 @@
   import { extractNavItems } from '$lib/utils/nav';
   import QuickTips from '$lib/components/furniture/QuickTips.svelte';
   import KeyboardShortcutChip from '$lib/components/common/KeyboardShortcutChip.svelte';
+  import { isStaticDeployment } from '$lib/utils/deployment';
   import { onMount, onDestroy } from 'svelte';
   import { browser } from '$app/environment';
 
@@ -41,7 +42,9 @@
   }
 
   // Memoized categories - computed once at module scope (static data)
-  const categories: CategorySection[] = TOP_NAV.filter((nav) => nav.href !== '/reference')
+  const categories: CategorySection[] = TOP_NAV.filter(
+    (nav) => nav.href !== '/reference' && !(isStaticDeployment && nav.href === '/diagnostics'),
+  )
     .map((nav) => {
       const subItems = SUB_NAV[nav.href] || [];
       return {

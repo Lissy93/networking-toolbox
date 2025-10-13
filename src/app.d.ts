@@ -14,6 +14,7 @@ declare global {
 
   // Make version available globally
   const __APP_VERSION__: string;
+  const __DEPLOY_ENV__: string;
 }
 
 // SVG imports
