@@ -17,6 +17,8 @@
   import { accessibility } from '$lib/stores/accessibility';
   import { theme } from '$lib/stores/theme';
   import { customCss } from '$lib/stores/customCss';
+  import { siteCustomization } from '$lib/stores/siteCustomization';
+  import { primaryColor } from '$lib/stores/primaryColor';
   import { ALL_PAGES } from '$lib/constants/nav';
   import { initializeOfflineSupport } from '$lib/stores/offline';
   import { bookmarks } from '$lib/stores/bookmarks';
@@ -113,6 +115,8 @@
     accessibility.init();
     bookmarks.init();
     customCss.init();
+    siteCustomization.init();
+    primaryColor.init();
     initializeOfflineSupport();
 
     // Add global keyboard shortcuts
@@ -185,6 +189,17 @@
       if (styleEl) {
         styleEl.remove();
       }
+    }
+  });
+
+  // Apply custom primary color
+  $effect(() => {
+    if (typeof document === 'undefined') return;
+    const color = $primaryColor;
+    if (color && color.trim()) {
+      document.documentElement.style.setProperty('--color-primary', color);
+    } else {
+      document.documentElement.style.removeProperty('--color-primary');
     }
   });
 

@@ -1,7 +1,7 @@
-import { SITE_NAME, SITE_TITLE, SITE_DESCRIPTION } from '$lib/config/customizable-settings';
+import { SITE_TITLE, SITE_DESCRIPTION } from '$lib/config/customizable-settings';
 
 export const site = {
-  name: SITE_NAME || 'Networking Toolbox',
+  name: SITE_TITLE || 'Networking Toolbox',
   title: SITE_TITLE || 'Networking Toolbox',
   description: 'A free set of online tools to help with IP addressing and subnetting.',
   longDescription:

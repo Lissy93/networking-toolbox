@@ -7,6 +7,8 @@
   import { navbarDisplay, navbarDisplayOptions, type NavbarDisplayMode } from '$lib/stores/navbarDisplay';
   import { homepageLayout, homepageLayoutOptions, type HomepageLayoutMode } from '$lib/stores/homepageLayout';
   import { customCss } from '$lib/stores/customCss';
+  import { siteCustomization } from '$lib/stores/siteCustomization';
+  import { primaryColor } from '$lib/stores/primaryColor';
 
   interface Props {
     standalone?: boolean;
@@ -26,12 +28,54 @@
   let validationErrors = $state<string[]>([]);
   let validationWarnings = $state<string[]>([]);
   let lastStoreValue = $state('');
+  let siteTitleInput = $state('');
+  let siteDescriptionInput = $state('');
+  let siteIconUrlInput = $state('');
+  let primaryColorInput = $state('');
+  let lastColorStoreValue = $state('');
+  let siteCustomizationErrors = $state<string[]>([]);
+  let showCustomColorInput = $state(false);
+
+  // Preset color palette - bright & vivid
+  const colorPalette = [
+    '#1a75ff',
+    '#7711ff',
+    '#dd11ff',
+    '#ff1aaa',
+    '#ff1a1a',
+    '#ff4422',
+    '#ff7711',
+    '#ffaa00',
+    '#ffdd00',
+    '#aadd00',
+    '#11dd00',
+    '#00ff77',
+    '#00dddd',
+    '#11bbff',
+    '#44aaff',
+    '#7777ff',
+  ];
 
   // Sync cssInput with store when store changes (not when textarea changes)
   $effect(() => {
     if ($currentCustomCss !== lastStoreValue) {
       cssInput = $currentCustomCss;
       lastStoreValue = $currentCustomCss;
+    }
+  });
+
+  // Sync site customization inputs with store
+  $effect(() => {
+    siteTitleInput = $siteCustomization.title;
+    siteDescriptionInput = $siteCustomization.description;
+    siteIconUrlInput = $siteCustomization.iconUrl;
+  });
+
+  // Sync primary color input with store (only when store changes)
+  $effect(() => {
+    if ($primaryColor !== lastColorStoreValue) {
+      primaryColorInput = $primaryColor;
+      lastColorStoreValue = $primaryColor;
     }
   });
 
@@ -97,6 +141,49 @@
     customCss.clear();
     validationErrors = [];
     validationWarnings = [];
+  }
+
+  // Handle site customization
+  function handleApplySiteCustomization() {
+    const data = {
+      title: siteTitleInput.trim(),
+      description: siteDescriptionInput.trim(),
+      iconUrl: siteIconUrlInput.trim(),
+    };
+
+    const validation = siteCustomization.validate(data);
+    siteCustomizationErrors = validation.errors;
+
+    if (validation.isValid) {
+      siteCustomization.set(data);
+      // Reload to apply title/description/icon changes
+      window.location.reload();
+    }
+  }
+
+  // Auto-save color when changed (only when user changes it, store validates)
+  $effect(() => {
+    const trimmed = primaryColorInput.trim();
+    // Only save if different from store (prevents loop) - store handles validation
+    if (trimmed && trimmed !== $primaryColor) {
+      primaryColor.set(trimmed);
+      lastColorStoreValue = trimmed;
+    } else if (!trimmed && $primaryColor) {
+      primaryColor.clear();
+      lastColorStoreValue = '';
+    }
+  });
+
+  // Reset color to default
+  function handleResetColor() {
+    primaryColorInput = '';
+  }
+
+  function handleClearSiteCustomization() {
+    siteCustomization.clear();
+    siteCustomizationErrors = [];
+    // Reload to apply changes
+    window.location.reload();
   }
 </script>
 
@@ -246,8 +333,110 @@
     </div>
   </div>
 
-  <!-- Custom CSS (only in standalone mode) -->
+  <!-- Site Customization (only in standalone mode) -->
   {#if standalone}
+    <div class="settings-section site-branding-section">
+      <h3>Site Branding</h3>
+      <p class="section-description">Customize the site title, description, and icon.</p>
+
+      <div class="form-field">
+        <label for="site-title">Site Title</label>
+        <input
+          id="site-title"
+          type="text"
+          bind:value={siteTitleInput}
+          placeholder="Networking Toolbox"
+          maxlength="100"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="site-description">Description</label>
+        <input
+          id="site-description"
+          type="text"
+          bind:value={siteDescriptionInput}
+          placeholder="Your companion for all-things networking"
+          maxlength="300"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="site-icon-url">Icon URL</label>
+        <input
+          id="site-icon-url"
+          type="text"
+          bind:value={siteIconUrlInput}
+          placeholder="/favicon.svg or https://example.com/icon.png"
+        />
+      </div>
+
+      {#if siteCustomizationErrors.length > 0}
+        <div class="validation-messages errors">
+          <Icon name="alert-triangle" size="sm" />
+          <div>
+            {#each siteCustomizationErrors as error (error)}
+              <p>{error}</p>
+            {/each}
+          </div>
+        </div>
+      {/if}
+
+      <div class="css-actions">
+        <button class="action-btn apply" onclick={handleApplySiteCustomization}>
+          <Icon name="check" size="sm" />
+          Apply
+        </button>
+        <button class="action-btn clear" onclick={handleClearSiteCustomization}>
+          <Icon name="x" size="sm" />
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Primary Color (only in standalone mode) -->
+    <div class="settings-section color-section">
+      <h3>Primary Color</h3>
+      <p class="section-description">Choose a primary color for the interface.</p>
+
+      <div class="color-palette">
+        {#each colorPalette as color (color)}
+          <button
+            class="color-swatch"
+            class:active={primaryColorInput === color}
+            style="background-color: {color};"
+            onclick={() => (primaryColorInput = color)}
+            aria-label="Select color {color}"
+          ></button>
+        {/each}
+      </div>
+
+      <div class="color-actions">
+        <button class="custom-color-toggle" onclick={() => (showCustomColorInput = !showCustomColorInput)}>
+          <Icon name="palette" size="sm" />
+          Use Custom Color
+        </button>
+        <button class="action-btn clear" onclick={handleResetColor}>
+          <Icon name="undo" size="sm" />
+          Reset
+        </button>
+      </div>
+
+      {#if showCustomColorInput}
+        <div class="custom-color-inputs" transition:slide={{ duration: 200 }}>
+          <div class="color-picker-wrapper">
+            <label for="color-picker">Color Picker</label>
+            <input id="color-picker" type="color" bind:value={primaryColorInput} />
+          </div>
+          <div class="form-field">
+            <label for="custom-hex">Hex Code</label>
+            <input id="custom-hex" type="text" bind:value={primaryColorInput} placeholder="#2563eb" maxlength="7" />
+          </div>
+        </div>
+      {/if}
+    </div>
+
+    <!-- Custom CSS (only in standalone mode) -->
     <div class="settings-section custom-css-section">
       <h3>Custom CSS</h3>
       <p class="section-description">Add your own CSS to customize the appearance globally.</p>
@@ -292,7 +481,7 @@
           Apply
         </button>
         <button class="action-btn clear" onclick={handleClearCustomCss}>
-          <Icon name="x" size="sm" />
+          <Icon name="undo" size="sm" />
           Clear
         </button>
       </div>
@@ -364,6 +553,12 @@
         &.accessibility-section {
           grid-row: span 2;
         }
+        &.site-branding-section {
+          grid-column: span 2;
+        }
+        &.color-section {
+          grid-row: span 1;
+        }
         &.custom-css-section {
           grid-column: span 2;
         }
@@ -371,6 +566,8 @@
         @media (max-width: 768px) {
           &.theme-section,
           &.accessibility-section,
+          &.site-branding-section,
+          &.color-section,
           &.custom-css-section {
             grid-row: span 1;
             grid-column: span 1;
@@ -737,13 +934,202 @@
     }
   }
 
+  .site-branding-section,
+  .color-section,
   .custom-css-section {
     .section-description {
       font-size: var(--font-size-sm);
       color: var(--text-secondary);
       margin: 0 0 var(--spacing-md) 0;
     }
+  }
 
+  .site-branding-section,
+  .color-section {
+    .form-field {
+      margin-bottom: var(--spacing-md);
+
+      label {
+        display: block;
+        font-size: var(--font-size-sm);
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-xs);
+      }
+
+      input {
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-sm);
+        font-size: var(--font-size-sm);
+        color: var(--text-primary);
+        transition: all var(--transition-normal);
+
+        &:focus {
+          outline: none;
+          border-color: var(--color-primary);
+          box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary), transparent 85%);
+        }
+
+        &::placeholder {
+          color: var(--text-tertiary);
+        }
+      }
+    }
+  }
+
+  .color-section {
+    .color-palette {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-md);
+      width: 100%;
+    }
+
+    .color-swatch {
+      aspect-ratio: 1;
+      border: 2px solid transparent;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      position: relative;
+      outline: 1px solid var(--border-primary);
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      &.active {
+        outline: 2px solid var(--text-primary);
+        box-shadow: 0 0 0 3px var(--bg-secondary);
+
+        &::after {
+          content: '✓';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: white;
+          font-weight: bold;
+          font-size: 1.2rem;
+          text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+        }
+      }
+    }
+
+    .color-actions {
+      display: flex;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .custom-color-toggle {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: var(--font-size-sm);
+      cursor: pointer;
+      transition: all var(--transition-normal);
+
+      &:hover {
+        background: var(--surface-hover);
+        color: var(--text-primary);
+        border-color: var(--border-secondary);
+      }
+    }
+
+    .custom-color-inputs {
+      display: flex;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-md);
+      overflow: hidden;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+      }
+    }
+
+    .color-picker-wrapper {
+      flex: 0 0 auto;
+
+      label {
+        display: block;
+        font-size: var(--font-size-sm);
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-xs);
+      }
+
+      input[type='color'] {
+        width: 80px;
+        height: 40px;
+        padding: 2px;
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        background: var(--bg-tertiary);
+
+        &:hover {
+          border-color: var(--border-secondary);
+        }
+
+        &:focus {
+          outline: none;
+          border-color: var(--color-primary);
+          box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary), transparent 85%);
+        }
+      }
+    }
+  }
+
+  .action-btn {
+    display: flex;
+    align-items: center;
+    display: inline-flex;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    border: 1px solid var(--border-primary);
+
+    &.apply {
+      background: var(--color-primary);
+      color: var(--bg-primary);
+      border-color: var(--color-primary);
+
+      &:hover {
+        background: color-mix(in srgb, var(--color-primary), black 10%);
+        border-color: color-mix(in srgb, var(--color-primary), black 10%);
+      }
+    }
+
+    &.clear {
+      background: transparent;
+      color: var(--text-secondary);
+
+      &:hover {
+        background: var(--surface-hover);
+        color: var(--text-primary);
+        border-color: var(--border-secondary);
+      }
+    }
+  }
+
+  .custom-css-section {
     .css-editor {
       width: 100%;
       min-height: 200px;
@@ -824,41 +1210,6 @@
     .css-actions {
       display: flex;
       gap: var(--spacing-sm);
-
-      .action-btn {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-xs);
-        padding: var(--spacing-sm) var(--spacing-md);
-        border-radius: var(--radius-sm);
-        font-size: var(--font-size-sm);
-        font-weight: 500;
-        cursor: pointer;
-        transition: all var(--transition-normal);
-        border: 1px solid var(--border-primary);
-
-        &.apply {
-          background: var(--color-primary);
-          color: var(--bg-primary);
-          border-color: var(--color-primary);
-
-          &:hover {
-            background: color-mix(in srgb, var(--color-primary), black 10%);
-            border-color: color-mix(in srgb, var(--color-primary), black 10%);
-          }
-        }
-
-        &.clear {
-          background: transparent;
-          color: var(--text-secondary);
-
-          &:hover {
-            background: var(--surface-hover);
-            color: var(--text-primary);
-            border-color: var(--border-secondary);
-          }
-        }
-      }
     }
   }
 

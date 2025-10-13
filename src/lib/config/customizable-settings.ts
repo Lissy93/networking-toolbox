@@ -9,19 +9,32 @@
  */
 
 import { env } from '$env/dynamic/public';
+import { browser } from '$app/environment';
 import type { HomepageLayoutMode } from '$lib/stores/homepageLayout';
 import type { NavbarDisplayMode } from '$lib/stores/navbarDisplay';
 import type { ThemeOption } from '$lib/stores/theme';
 
-// Site Branding
-export const SITE_NAME = env.NTB_SITE_NAME;
-export const SITE_TITLE = env.NTB_SITE_TITLE;
-export const SITE_DESCRIPTION = env.NTB_SITE_DESCRIPTION;
+// Get user customization from localStorage (browser only)
+function getUserCustomization() {
+  if (!browser) return null;
+  try {
+    const stored = localStorage.getItem('user-site-customization');
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+}
+
+const userCustom = getUserCustomization();
+
+// Site Branding - prioritize user customization, then env vars
+export const SITE_TITLE = userCustom?.title || env.NTB_SITE_TITLE;
+export const SITE_DESCRIPTION = userCustom?.description || env.NTB_SITE_DESCRIPTION;
 
 /**
  * Logo/icon to display in the navbar, specified as a path to an image
  */
-export const SITE_ICON = env.NTB_SITE_ICON ?? '';
+export const SITE_ICON = userCustom?.iconUrl || env.NTB_SITE_ICON || '';
 
 /**
  * Default homepage layout
