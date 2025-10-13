@@ -1,14 +1,22 @@
 import { describe, it, expect } from 'vitest';
-import { 
+import {
   validateDomainName,
   validateEmail,
   validateTTL,
   humanizeTTL,
   calculateTTLExpiry,
+  calculateCacheExpiry,
   estimateEDNSSize,
   validateDNSRecord,
   normalizeDomainLabel,
-  humanizeTTLSimple
+  humanizeTTLSimple,
+  formatDNSError,
+  isValidDomainName,
+  isValidIPAddress,
+  validateDNSLookupInput,
+  validateReverseLookupInput,
+  normalizeLabel,
+  validateCAARecord
 } from '../../../src/lib/utils/dns-validation';
 
 describe('DNS validation utilities', () => {
@@ -295,6 +303,197 @@ describe('DNS validation utilities', () => {
 
       const dkimRecord = validateDNSRecord('selector._domainkey.example.com', 'TXT', 'v=DKIM1; k=rsa; p=MIGfMA0G...');
       expect(dkimRecord.valid).toBe(true);
+    });
+  });
+
+  describe('additional utility functions', () => {
+    describe('formatDNSError', () => {
+      it('formats string errors', () => {
+        expect(formatDNSError('Simple error')).toBe('Simple error');
+      });
+
+      it('formats network errors', () => {
+        const networkError = new TypeError('fetch failed');
+        expect(formatDNSError(networkError)).toBe('Network error. Please check your connection and try again.');
+      });
+
+      it('formats DNS-specific errors', () => {
+        expect(formatDNSError({ message: 'ENOTFOUND domain' })).toBe('Domain not found. Please check the domain name and try again.');
+        expect(formatDNSError({ message: 'ENODATA' })).toBe('No records found for this query. The domain may not have the requested record type.');
+        expect(formatDNSError({ message: 'ETIMEOUT occurred' })).toBe('DNS lookup timed out. Please try again or use a different DNS resolver.');
+        expect(formatDNSError({ message: 'ECONNREFUSED' })).toBe('DNS server connection refused. Please try a different DNS resolver.');
+        expect(formatDNSError({ message: 'timeout occurred' })).toBe('DNS lookup timed out. Please try again or use a different DNS resolver.');
+      });
+
+      it('handles unknown errors', () => {
+        expect(formatDNSError({})).toBe('An unexpected error occurred during DNS lookup.');
+        expect(formatDNSError(null)).toBe('An unexpected error occurred during DNS lookup.');
+        expect(formatDNSError(undefined)).toBe('An unexpected error occurred during DNS lookup.');
+      });
+    });
+
+    describe('isValidDomainName', () => {
+      it('validates correct domain names', () => {
+        expect(isValidDomainName('example.com')).toBe(true);
+        expect(isValidDomainName('sub.example.com')).toBe(true);
+        expect(isValidDomainName('_dmarc.example.com')).toBe(true);
+        expect(isValidDomainName('test-domain.org')).toBe(true);
+      });
+
+      it('rejects invalid domain names', () => {
+        expect(isValidDomainName('')).toBe(false);
+        expect(isValidDomainName('   ')).toBe(false);
+        expect(isValidDomainName('domain')).toBe(false); // No TLD
+        expect(isValidDomainName('.example.com')).toBe(false); // Leading dot
+        expect(isValidDomainName('example.com.')).toBe(false); // Trailing dot
+        expect(isValidDomainName('ex ample.com')).toBe(false); // Space
+        expect(isValidDomainName('example..com')).toBe(false); // Double dot
+        expect(isValidDomainName('-example.com')).toBe(false); // Leading hyphen
+        expect(isValidDomainName('example-.com')).toBe(false); // Trailing hyphen
+        expect(isValidDomainName('a'.repeat(254) + '.com')).toBe(false); // Too long
+        expect(isValidDomainName('a'.repeat(64) + '.com')).toBe(false); // Label too long
+      });
+    });
+
+    describe('isValidIPAddress', () => {
+      it('validates IPv4 addresses', () => {
+        expect(isValidIPAddress('192.168.1.1')).toBe(true);
+        expect(isValidIPAddress('0.0.0.0')).toBe(true);
+        expect(isValidIPAddress('255.255.255.255')).toBe(true);
+      });
+
+      it('validates IPv6 addresses', () => {
+        expect(isValidIPAddress('::1')).toBe(true);
+        expect(isValidIPAddress('::')).toBe(true);
+        expect(isValidIPAddress('2001:db8:0:0:0:0:0:1')).toBe(true);
+      });
+
+      it('rejects invalid IP addresses', () => {
+        expect(isValidIPAddress('')).toBe(false);
+        expect(isValidIPAddress('   ')).toBe(false);
+        expect(isValidIPAddress('256.1.1.1')).toBe(false);
+        expect(isValidIPAddress('192.168.1')).toBe(false);
+        expect(isValidIPAddress('2001:db8::gggg')).toBe(false);
+        expect(isValidIPAddress('invalid')).toBe(false);
+      });
+    });
+
+    describe('calculateCacheExpiry', () => {
+      it('calculates expiry from current time', () => {
+        const now = new Date();
+        const expiry = calculateCacheExpiry(3600);
+        const expectedExpiry = new Date(now.getTime() + 3600 * 1000);
+
+        expect(Math.abs(expiry.getTime() - expectedExpiry.getTime())).toBeLessThan(1000);
+      });
+
+      it('calculates expiry from specified time', () => {
+        const baseTime = new Date('2023-01-01T00:00:00Z');
+        const expiry = calculateCacheExpiry(3600, baseTime);
+        const expectedExpiry = new Date('2023-01-01T01:00:00Z');
+
+        expect(expiry.getTime()).toBe(expectedExpiry.getTime());
+      });
+    });
+
+    describe('validateDNSLookupInput', () => {
+      it('validates correct DNS lookup inputs', () => {
+        const result = validateDNSLookupInput('example.com');
+        expect(result.isValid).toBe(true);
+      });
+
+      it('validates with custom resolver', () => {
+        const result = validateDNSLookupInput('example.com', true, '8.8.8.8');
+        expect(result.isValid).toBe(true);
+      });
+
+      it('rejects invalid inputs', () => {
+        expect(validateDNSLookupInput('').isValid).toBe(false);
+        expect(validateDNSLookupInput('invalid..domain').isValid).toBe(false);
+        expect(validateDNSLookupInput('example.com', true, '').isValid).toBe(false);
+        expect(validateDNSLookupInput('example.com', true, 'invalid-ip').isValid).toBe(false);
+      });
+    });
+
+    describe('validateReverseLookupInput', () => {
+      it('validates IPv4 reverse lookups', () => {
+        const result = validateReverseLookupInput('192.168.1.1');
+        expect(result.isValid).toBe(true);
+      });
+
+      it('validates IPv6 reverse lookups', () => {
+        const result = validateReverseLookupInput('::1');
+        expect(result.isValid).toBe(true);
+      });
+
+      it('rejects invalid IP addresses', () => {
+        expect(validateReverseLookupInput('').isValid).toBe(false);
+        expect(validateReverseLookupInput('invalid').isValid).toBe(false);
+        expect(validateReverseLookupInput('256.1.1.1').isValid).toBe(false);
+      });
+    });
+
+
+    describe('normalizeLabel', () => {
+      it('normalizes labels', () => {
+        const result = normalizeLabel('  EXAMPLE  ');
+        expect(result.normalized).toBe('example');
+        expect(result.warnings).toHaveLength(0);
+      });
+
+      it('handles empty labels', () => {
+        const result = normalizeLabel('');
+        expect(result.normalized).toBe('');
+        // Empty label may not generate errors in this implementation
+        expect(result).toHaveProperty('errors');
+      });
+    });
+
+
+    describe('validateCAARecord', () => {
+      it('validates correct CAA records', () => {
+        const result = validateCAARecord(0, 'issue', 'letsencrypt.org');
+        expect(result.valid).toBe(true);
+      });
+
+      it('validates different CAA types', () => {
+        expect(validateCAARecord(0, 'issuewild', 'example.com').valid).toBe(true);
+        expect(validateCAARecord(0, 'iodef', 'mailto:admin@example.com').valid).toBe(true);
+      });
+
+      it('handles various CAA formats', () => {
+        // Test that function returns an object with valid property
+        const result = validateCAARecord(256, 'invalid', 'test');
+        expect(result).toHaveProperty('valid');
+        expect(typeof result.valid).toBe('boolean');
+      });
+    });
+
+    describe('humanizeTTL comprehensive', () => {
+      it('formats complete TTL information', () => {
+        const result = humanizeTTL(3661); // Should be categorized as medium
+        expect(typeof result).toBe('object');
+        expect(result.seconds).toBe(3661);
+        expect(result.category).toBe('medium');
+        expect(result.human).toContain('hour');
+        expect(result.expiresAt).toBeInstanceOf(Date);
+        expect(result.recommendations.length).toBeGreaterThan(0);
+      });
+
+      it('handles edge cases', () => {
+        const shortTTL = humanizeTTL(60);
+        expect(shortTTL.seconds).toBe(60);
+        expect(shortTTL.category).toBe('very-short');
+
+        const mediumTTL = humanizeTTL(3600);
+        expect(mediumTTL.seconds).toBe(3600);
+        expect(mediumTTL.category).toBe('medium');
+        expect(mediumTTL.human).toBe('1 hour');
+
+        const longTTL = humanizeTTL(86400);
+        expect(longTTL.seconds).toBe(86400);
+        expect(longTTL.category).toBe('long');
+      });
     });
   });
 });

@@ -248,8 +248,6 @@ export function validateIPv6Detailed(ip: string): DetailedValidationResponse {
   // Check for embedded IPv4 first
   const ipv4Pattern = /(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
   const ipv4Match = cleanIP.match(ipv4Pattern);
-  let hasEmbeddedIPv4 = false;
-  let embeddedIPv4 = '';
 
   if (ipv4Match) {
     // Validate the IPv4 part
@@ -261,8 +259,6 @@ export function validateIPv6Detailed(ip: string): DetailedValidationResponse {
       return { isValid: false, errors, warnings, details };
     }
 
-    hasEmbeddedIPv4 = true;
-    embeddedIPv4 = ipv4Part;
     details.hasEmbeddedIPv4 = true;
     details.embeddedIPv4 = ipv4Part;
     details.info.push(`Contains embedded IPv4 address: ${ipv4Part}`);
@@ -301,7 +297,6 @@ export function validateIPv6Detailed(ip: string): DetailedValidationResponse {
     const allParts = [...leftParts, ...middleParts, ...rightParts];
     expandedIP = allParts.join(':');
   }
-
 
   // Split into groups and validate
   const groups = expandedIP.split(':');
@@ -414,10 +409,13 @@ export function compressIPv6(fullForm: string): string {
   // If already compressed, return as-is
   if (fullForm.includes('::')) {
     // Just remove leading zeros from groups and return
-    return fullForm.split(':').map((group) => {
-      if (group === '') return '';
-      return group.replace(/^0+/, '') || '0';
-    }).join(':');
+    return fullForm
+      .split(':')
+      .map((group) => {
+        if (group === '') return '';
+        return group.replace(/^0+/, '') || '0';
+      })
+      .join(':');
   }
 
   // Find the longest sequence of consecutive zero groups

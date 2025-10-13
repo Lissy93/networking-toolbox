@@ -2,6 +2,7 @@ import '@testing-library/jest-dom/vitest';
 import { beforeAll, afterEach, afterAll, vi } from 'vitest';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
+import { createHttpbinMocks, createExampleComMocks } from './helpers/http-mocks';
 
 // Mock SvelteKit env module for tests
 vi.mock('$env/dynamic/public', () => ({
@@ -64,7 +65,68 @@ export const server = setupServer(
         }
       ]
     });
-  })
+  }),
+  // Mock RIPE RIS API endpoints for BGP tests
+  http.get('https://stat.ripe.net/data/prefix-overview/data.json', () => {
+    return HttpResponse.json({
+      status: 'ok',
+      data: {
+        resource: '8.8.8.8',
+        asns: [
+          {
+            asn: 15169,
+            holder: 'Google LLC'
+          }
+        ]
+      }
+    });
+  }),
+  http.get('https://stat.ripe.net/data/as-overview/data.json', () => {
+    return HttpResponse.json({
+      status: 'ok',
+      data: {
+        holder: 'Google LLC',
+        country: 'US'
+      }
+    });
+  }),
+  http.get('https://stat.ripe.net/data/routing-status/data.json', () => {
+    return HttpResponse.json({
+      status: 'ok',
+      data: {
+        announced: true,
+        observed_neighbours: [
+          {
+            asn: 15169,
+            country: 'US',
+            prefix: '8.8.8.0/24'
+          }
+        ],
+        more_specifics: [],
+        less_specifics: []
+      }
+    });
+  }),
+  http.get('https://stat.ripe.net/data/looking-glass/data.json', () => {
+    return HttpResponse.json({
+      status: 'ok',
+      data: {
+        rrcs: [
+          {
+            peers: [
+              {
+                as_path: '15169',
+                origin_asn: 15169
+              }
+            ]
+          }
+        ]
+      }
+    });
+  }),
+  // HTTP diagnostics test mocks
+  ...createHttpbinMocks(),
+  ...createExampleComMocks()
 );
 
 beforeAll(() => {
@@ -135,7 +197,8 @@ beforeAll(() => {
       'Email diagnostics error:',
       'Network diagnostics API error:',
       'RDAP diagnostics error:',
-      'HTTP API error:'
+      'HTTP API error:',
+      'BGP lookup error:'
     ];
 
     // Check if this stderr output should be suppressed
@@ -144,7 +207,7 @@ beforeAll(() => {
     }
 
     // Allow other stderr output through
-    return originalStderrWrite.apply(process.stderr, [chunk, ...args]);
+    return originalStderrWrite.apply(process.stderr, [chunk, ...args] as [any, any?, any?]);
   });
 });
 

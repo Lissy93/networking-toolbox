@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock the DNS functions
 vi.mock('node:dns', async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual: any = await importOriginal();
   return {
     ...actual,
     promises: {
