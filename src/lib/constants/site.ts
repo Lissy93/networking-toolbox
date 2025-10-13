@@ -9,7 +9,7 @@ export const site = {
   heroDescription: SITE_DESCRIPTION || 'Your companion for all-things networking',
   keywords: 'IP calculator, subnet calculator, CIDR converter, network tools, IP tools, networking',
   url: 'https://networking-toolbox.as93.net',
-  image: 'https://networking-toolbox.as93.net/og-image.png',
+  image: 'https://networkingtoolbox.net/banner.png',
   repo: 'https://github.com/lissy93/networking-toolbox',
   mirror: 'https://codeberg.org/alicia/networking-toolbox',
   docker: 'https://hub.docker.com/r/lissy93/networking-toolbox',
