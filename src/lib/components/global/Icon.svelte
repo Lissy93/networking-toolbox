@@ -18,7 +18,7 @@
     xl: 'w-10 h-10',
   };
 
-  type IconName = keyof typeof iconMap;
+  export type IconName = keyof typeof iconMap;
 
   /**
    * Get SVG content for the given icon name

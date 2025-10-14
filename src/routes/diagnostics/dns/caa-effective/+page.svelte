@@ -247,7 +247,7 @@
       <div class="action-section">
         <button class="check-btn lookup-btn" onclick={checkCAA} disabled={loading || !isInputValid}>
           {#if loading}
-            <Icon name="loader-2" size="sm" animate="spin" />
+            <Icon name="loader" size="sm" animate="spin" />
             Checking CAA...
           {:else}
             <Icon name="shield-check" size="sm" />

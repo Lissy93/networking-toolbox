@@ -1,6 +1,8 @@
 <script lang="ts">
   import Icon from '$lib/components/global/Icon.svelte';
   import { greylistContent as content } from '$lib/content/greylist';
+  import { useDiagnosticState } from '$lib/composables';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   interface GreylistAttempt {
@@ -27,7 +29,7 @@
     timestamp: string;
   }
 
-  const examples = [
+  const examplesList = [
     { domain: 'mail.protonmail.ch', port: 25, desc: 'ProtonMail (privacy-focused)' },
     { domain: 'mail.tutanota.de', port: 25, desc: 'Tutanota (encrypted email)' },
     { domain: 'mx01.mail.icloud.com', port: 25, desc: 'iCloud Mail' },
@@ -40,10 +42,9 @@
   let port = $state(25);
   let attempts = $state(2);
   let delayBetweenAttempts = $state(5);
-  let loading = $state(false);
-  let results = $state<GreylistTestResult | null>(null);
-  let error = $state<string | null>(null);
   let selectedExample = $state<string | null>(null);
+
+  const diagnosticState = useDiagnosticState<GreylistTestResult>();
 
   async function loadExample(exampleDomain: string, examplePort: number) {
     domain = exampleDomain;
@@ -54,13 +55,11 @@
 
   async function testGreylist() {
     if (!domain.trim()) {
-      error = 'Please enter a domain name';
+      diagnosticState.setError('Please enter a domain name');
       return;
     }
 
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/greylist', {
@@ -79,11 +78,10 @@
         throw new Error(errorData.message || 'Greylisting test failed');
       }
 
-      results = await response.json();
+      const data = await response.json();
+      diagnosticState.setResults(data);
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : 'Unknown error occurred';
-    } finally {
-      loading = false;
+      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
     }
   }
 
@@ -103,12 +101,12 @@
   const getConfidenceIcon = (c: string) =>
     c === 'high' ? 'check-circle' : c === 'medium' ? 'alert-triangle' : c === 'low' ? 'info' : 'help-circle';
 
-  const connectedCount = $derived(results?.attempts.filter((a) => a.connected).length ?? 0);
+  const connectedCount = $derived(diagnosticState.results?.attempts.filter((a) => a.connected).length ?? 0);
   const testDuration = $derived(
-    results
+    diagnosticState.results
       ? Math.round(
-          (new Date(results.attempts[results.attempts.length - 1].timestamp).getTime() -
-            new Date(results.attempts[0].timestamp).getTime()) /
+          (new Date(diagnosticState.results.attempts[diagnosticState.results.attempts.length - 1].timestamp).getTime() -
+            new Date(diagnosticState.results.attempts[0].timestamp).getTime()) /
             1000,
         )
       : 0,
@@ -136,35 +134,54 @@
             bind:value={domain}
             placeholder="smtp.example.com"
             onkeydown={(e) => e.key === 'Enter' && testGreylist()}
-            disabled={loading}
+            disabled={diagnosticState.loading}
           />
         </div>
         <div class="form-group port-group">
           <label for="port">Port</label>
-          <input type="number" id="port" bind:value={port} placeholder="25" min="1" max="65535" disabled={loading} />
+          <input
+            type="number"
+            id="port"
+            bind:value={port}
+            placeholder="25"
+            min="1"
+            max="65535"
+            disabled={diagnosticState.loading}
+          />
         </div>
       </div>
 
       <div class="form-grid">
         <div class="form-group">
           <label for="attempts">Connection Attempts</label>
-          <input type="number" id="attempts" bind:value={attempts} min="2" max="5" disabled={loading} />
+          <input type="number" id="attempts" bind:value={attempts} min="2" max="5" disabled={diagnosticState.loading} />
         </div>
         <div class="form-group">
           <label for="delay">Delay Between Attempts (seconds)</label>
-          <input type="number" id="delay" bind:value={delayBetweenAttempts} min="1" max="300" disabled={loading} />
+          <input
+            type="number"
+            id="delay"
+            bind:value={delayBetweenAttempts}
+            min="1"
+            max="300"
+            disabled={diagnosticState.loading}
+          />
         </div>
       </div>
 
-      <button class="lookup-btn" onclick={testGreylist} disabled={loading}>
-        <Icon name={loading ? 'loader' : 'play'} size="sm" animate={loading ? 'spin' : undefined} />
-        {loading ? 'Testing...' : 'Test Greylisting'}
+      <button class="lookup-btn" onclick={testGreylist} disabled={diagnosticState.loading}>
+        <Icon
+          name={diagnosticState.loading ? 'loader' : 'play'}
+          size="sm"
+          animate={diagnosticState.loading ? 'spin' : undefined}
+        />
+        {diagnosticState.loading ? 'Testing...' : 'Test Greylisting'}
       </button>
     </div>
   </div>
 
   <!-- Loading State -->
-  {#if loading}
+  {#if diagnosticState.loading}
     <div class="card loading-card">
       <div class="card-content">
         <div class="loading-state">
@@ -184,17 +201,7 @@
     </div>
   {/if}
 
-  <!-- Error Display -->
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-message">
-          <Icon name="alert-circle" size="md" />
-          <span>{error}</span>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard error={diagnosticState.error} />
 
   <!-- Quick Examples -->
   <div class="card examples-card">
@@ -204,12 +211,12 @@
         <h4>Quick Examples</h4>
       </summary>
       <div class="examples-grid">
-        {#each examples as example (example.domain)}
+        {#each examplesList as example (example.domain)}
           <button
             class="example-card"
             class:selected={selectedExample === `${example.domain}:${example.port}`}
             onclick={() => loadExample(example.domain, example.port)}
-            disabled={loading}
+            disabled={diagnosticState.loading}
           >
             <strong>{example.domain}</strong>
             <span>Port {example.port}</span>
@@ -221,20 +228,20 @@
   </div>
 
   <!-- Results -->
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header">
-        <h3>Test Results for {results.domain}:{results.port}</h3>
+        <h3>Test Results for {diagnosticState.results.domain}:{diagnosticState.results.port}</h3>
       </div>
       <div class="card-content">
         <!-- Greylisting Status -->
         <div class="status-overview">
-          {#if results.implementsGreylisting}
+          {#if diagnosticState.results.implementsGreylisting}
             <div class="status-item success">
               <Icon name="check-circle" size="md" />
               <div>
                 <h4>Greylisting Detected</h4>
-                <p>Server implements greylisting (Confidence: {results.analysis.confidence})</p>
+                <p>Server implements greylisting (Confidence: {diagnosticState.results.analysis.confidence})</p>
               </div>
             </div>
           {:else}
@@ -247,12 +254,12 @@
             </div>
           {/if}
 
-          {#if results.analysis.typicalDelay}
+          {#if diagnosticState.results.analysis.typicalDelay}
             <div class="status-item info">
               <Icon name="clock" size="md" />
               <div>
                 <h4>Typical Delay</h4>
-                <p>{results.analysis.typicalDelay} seconds between rejection and acceptance</p>
+                <p>{diagnosticState.results.analysis.typicalDelay} seconds between rejection and acceptance</p>
               </div>
             </div>
           {/if}
@@ -265,7 +272,7 @@
             Connection Attempts
           </h4>
           <div class="attempts-list">
-            {#each results.attempts as attempt (attempt.attemptNumber)}
+            {#each diagnosticState.results.attempts as attempt (attempt.attemptNumber)}
               <div class="attempt-item">
                 <div class="attempt-header">
                   <span class="attempt-number">#{attempt.attemptNumber}</span>
@@ -315,21 +322,21 @@
               <span class="detail-label">Server:</span>
               <span class="detail-value">
                 <Icon name="server" size="sm" />
-                {results.domain}:{results.port}
+                {diagnosticState.results.domain}:{diagnosticState.results.port}
               </span>
             </div>
             <div class="detail-row">
               <span class="detail-label">Total Attempts:</span>
               <span class="detail-value">
                 <Icon name="activity" size="sm" />
-                {results.attempts.length}
+                {diagnosticState.results.attempts.length}
               </span>
             </div>
             <div class="detail-row">
               <span class="detail-label">Successful Connections:</span>
               <span class="detail-value {connectedCount > 0 ? 'success' : 'error'}">
                 <Icon name={connectedCount > 0 ? 'check-circle' : 'x-circle'} size="sm" />
-                {connectedCount} / {results.attempts.length}
+                {connectedCount} / {diagnosticState.results.attempts.length}
               </span>
             </div>
             <div class="detail-row">
@@ -341,32 +348,36 @@
             </div>
             <div class="detail-row">
               <span class="detail-label">Initial Connection:</span>
-              <span class="detail-value {results.analysis.initialRejected ? 'warning' : 'success'}">
-                <Icon name={results.analysis.initialRejected ? 'x-circle' : 'check-circle'} size="sm" />
-                {results.analysis.initialRejected ? 'Temporarily rejected' : 'Accepted immediately'}
+              <span class="detail-value {diagnosticState.results.analysis.initialRejected ? 'warning' : 'success'}">
+                <Icon name={diagnosticState.results.analysis.initialRejected ? 'x-circle' : 'check-circle'} size="sm" />
+                {diagnosticState.results.analysis.initialRejected ? 'Temporarily rejected' : 'Accepted immediately'}
               </span>
             </div>
             <div class="detail-row">
               <span class="detail-label">Subsequent Attempts:</span>
-              <span class="detail-value {results.analysis.subsequentAccepted ? 'success' : 'error'}">
-                <Icon name={results.analysis.subsequentAccepted ? 'check-circle' : 'x-circle'} size="sm" />
-                {results.analysis.subsequentAccepted ? 'Accepted after delay' : 'Still rejected'}
+              <span class="detail-value {diagnosticState.results.analysis.subsequentAccepted ? 'success' : 'error'}">
+                <Icon
+                  name={diagnosticState.results.analysis.subsequentAccepted ? 'check-circle' : 'x-circle'}
+                  size="sm"
+                />
+                {diagnosticState.results.analysis.subsequentAccepted ? 'Accepted after delay' : 'Still rejected'}
               </span>
             </div>
-            {#if results.analysis.typicalDelay}
+            {#if diagnosticState.results.analysis.typicalDelay}
               <div class="detail-row">
                 <span class="detail-label">Delay Duration:</span>
                 <span class="detail-value info">
                   <Icon name="clock" size="sm" />
-                  {results.analysis.typicalDelay} seconds
+                  {diagnosticState.results.analysis.typicalDelay} seconds
                 </span>
               </div>
             {/if}
             <div class="detail-row">
               <span class="detail-label">Confidence Level:</span>
-              <span class="detail-value {getConfidenceBadgeClass(results.analysis.confidence)}">
-                <Icon name={getConfidenceIcon(results.analysis.confidence)} size="sm" />
-                {results.analysis.confidence.charAt(0).toUpperCase() + results.analysis.confidence.slice(1)}
+              <span class="detail-value {getConfidenceBadgeClass(diagnosticState.results.analysis.confidence)}">
+                <Icon name={getConfidenceIcon(diagnosticState.results.analysis.confidence)} size="sm" />
+                {diagnosticState.results.analysis.confidence.charAt(0).toUpperCase() +
+                  diagnosticState.results.analysis.confidence.slice(1)}
               </span>
             </div>
           </div>

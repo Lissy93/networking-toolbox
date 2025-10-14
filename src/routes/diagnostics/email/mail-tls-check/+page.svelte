@@ -1,6 +1,9 @@
 <script lang="ts">
   import Icon from '$lib/components/global/Icon.svelte';
   import { mailTLSContent as content } from '$lib/content/mail-tls';
+  import { useDiagnosticState, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   interface CertificateInfo {
@@ -26,7 +29,7 @@
     timestamp: string;
   }
 
-  const examples = [
+  const examplesList = [
     { domain: 'gmail.com', port: 587, desc: 'Google Mail STARTTLS' },
     { domain: 'outlook.com', port: 587, desc: 'Microsoft Outlook STARTTLS' },
     { domain: 'smtp.gmail.com', port: 465, desc: 'Gmail Direct TLS' },
@@ -34,27 +37,24 @@
 
   let domain = $state('');
   let port = $state(587);
-  let loading = $state(false);
-  let results = $state<TLSCheckResult | null>(null);
-  let error = $state<string | null>(null);
-  let selectedExample = $state<string | null>(null);
 
-  async function loadExample(exampleDomain: string, examplePort: number) {
-    domain = exampleDomain;
-    port = examplePort;
-    selectedExample = `${exampleDomain}:${examplePort}`;
+  const diagnosticState = useDiagnosticState<TLSCheckResult>();
+  const examples = useExamples(examplesList);
+
+  async function loadExample(example: (typeof examplesList)[0], index: number) {
+    domain = example.domain;
+    port = example.port;
+    examples.select(index);
     await checkTLS();
   }
 
   async function checkTLS() {
     if (!domain.trim()) {
-      error = 'Please enter a domain name';
+      diagnosticState.setError('Please enter a domain name');
       return;
     }
 
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/mail-tls', {
@@ -68,11 +68,10 @@
         throw new Error(errorData.message || 'TLS check failed');
       }
 
-      results = await response.json();
+      const data = await response.json();
+      diagnosticState.setResults(data);
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : 'Unknown error occurred';
-    } finally {
-      loading = false;
+      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
     }
   }
 </script>
@@ -95,7 +94,7 @@
           bind:value={domain}
           placeholder="mail.example.com"
           onkeydown={(e) => e.key === 'Enter' && checkTLS()}
-          disabled={loading}
+          disabled={diagnosticState.loading}
         />
         <input
           type="number"
@@ -104,41 +103,33 @@
           max="65535"
           placeholder="Port"
           class="port-input"
-          disabled={loading}
+          disabled={diagnosticState.loading}
         />
-        <button class="lookup-btn" onclick={checkTLS} disabled={loading}>
-          <Icon name={loading ? 'loader' : 'lock'} size="sm" animate={loading ? 'spin' : undefined} />
-          {loading ? 'Checking...' : 'Check TLS'}
+        <button class="lookup-btn" onclick={checkTLS} disabled={diagnosticState.loading}>
+          <Icon
+            name={diagnosticState.loading ? 'loader' : 'lock'}
+            size="sm"
+            animate={diagnosticState.loading ? 'spin' : undefined}
+          />
+          {diagnosticState.loading ? 'Checking...' : 'Check TLS'}
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Quick Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="sm" />
-        <h4>Quick Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example (`${example.domain}:${example.port}`)}
-          <button
-            class="example-card"
-            class:selected={selectedExample === `${example.domain}:${example.port}`}
-            onclick={() => loadExample(example.domain, example.port)}
-            type="button"
-          >
-            <h5>{example.domain}:{example.port}</h5>
-            <p>{example.desc}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <!-- Examples -->
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="Quick Examples"
+    getLabel={(ex) => `${ex.domain}:${ex.port}`}
+    getDescription={(ex) => ex.desc}
+    getTooltip={(ex) => `Check TLS for ${ex.domain} on port ${ex.port}`}
+  />
 
   <!-- Loading -->
-  {#if loading}
+  {#if diagnosticState.loading}
     <div class="card">
       <div class="card-content">
         <div class="loading-state">
@@ -152,28 +143,18 @@
     </div>
   {/if}
 
-  <!-- Error -->
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-message">
-          <Icon name="alert-circle" size="md" />
-          <span>{error}</span>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard error={diagnosticState.error} />
 
   <!-- Results -->
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header">
-        <h3>TLS Check Results for {results.domain}:{results.port}</h3>
+        <h3>TLS Check Results for {diagnosticState.results.domain}:{diagnosticState.results.port}</h3>
       </div>
       <div class="card-content">
         <!-- TLS Support Status -->
         <div class="status-overview">
-          {#if results.supportsSTARTTLS}
+          {#if diagnosticState.results.supportsSTARTTLS}
             <div class="status-item success">
               <Icon name="check-circle" size="md" />
               <div>
@@ -182,7 +163,7 @@
               </div>
             </div>
           {/if}
-          {#if results.supportsDirectTLS}
+          {#if diagnosticState.results.supportsDirectTLS}
             <div class="status-item success">
               <Icon name="lock" size="md" />
               <div>
@@ -191,7 +172,7 @@
               </div>
             </div>
           {/if}
-          {#if !results.supportsSTARTTLS && !results.supportsDirectTLS}
+          {#if !diagnosticState.results.supportsSTARTTLS && !diagnosticState.results.supportsDirectTLS}
             <div class="status-item error">
               <Icon name="x-circle" size="md" />
               <div>
@@ -203,23 +184,23 @@
         </div>
 
         <!-- Connection Details -->
-        {#if results.tlsVersion || results.cipherSuite}
+        {#if diagnosticState.results.tlsVersion || diagnosticState.results.cipherSuite}
           <div class="subsection">
             <h4>
               <Icon name="shield" size="sm" />
               Connection Details
             </h4>
             <div class="details-grid">
-              {#if results.tlsVersion}
+              {#if diagnosticState.results.tlsVersion}
                 <div class="detail-item">
                   <span class="detail-label">TLS Version</span>
-                  <span class="detail-value">{results.tlsVersion}</span>
+                  <span class="detail-value">{diagnosticState.results.tlsVersion}</span>
                 </div>
               {/if}
-              {#if results.cipherSuite}
+              {#if diagnosticState.results.cipherSuite}
                 <div class="detail-item">
                   <span class="detail-label">Cipher Suite</span>
-                  <span class="detail-value mono">{results.cipherSuite}</span>
+                  <span class="detail-value mono">{diagnosticState.results.cipherSuite}</span>
                 </div>
               {/if}
             </div>
@@ -227,7 +208,7 @@
         {/if}
 
         <!-- Certificate Information -->
-        {#if results.certificate}
+        {#if diagnosticState.results.certificate}
           <div class="subsection">
             <h4>
               <Icon name="award" size="sm" />
@@ -236,38 +217,44 @@
             <div class="details-grid">
               <div class="detail-item">
                 <span class="detail-label">Common Name</span>
-                <span class="detail-value">{results.certificate.commonName}</span>
+                <span class="detail-value">{diagnosticState.results.certificate.commonName}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label">Issuer</span>
-                <span class="detail-value">{results.certificate.issuer}</span>
+                <span class="detail-value">{diagnosticState.results.certificate.issuer}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label">Valid From</span>
-                <span class="detail-value">{new Date(results.certificate.validFrom).toLocaleDateString()}</span>
+                <span class="detail-value"
+                  >{new Date(diagnosticState.results.certificate.validFrom).toLocaleDateString()}</span
+                >
               </div>
               <div class="detail-item">
                 <span class="detail-label">Valid To</span>
-                <span class="detail-value {results.certificate.daysUntilExpiry < 30 ? 'warning' : ''}">
-                  {new Date(results.certificate.validTo).toLocaleDateString()}
-                  {#if results.certificate.daysUntilExpiry < 30}
-                    <span class="badge warning">Expires in {results.certificate.daysUntilExpiry} days</span>
+                <span class="detail-value {diagnosticState.results.certificate.daysUntilExpiry < 30 ? 'warning' : ''}">
+                  {new Date(diagnosticState.results.certificate.validTo).toLocaleDateString()}
+                  {#if diagnosticState.results.certificate.daysUntilExpiry < 30}
+                    <span class="badge warning"
+                      >Expires in {diagnosticState.results.certificate.daysUntilExpiry} days</span
+                    >
                   {/if}
                 </span>
               </div>
               <div class="detail-item full-width">
                 <span class="detail-label">Serial Number</span>
-                <span class="detail-value mono">{results.certificate.serialNumber}</span>
+                <span class="detail-value mono">{diagnosticState.results.certificate.serialNumber}</span>
               </div>
               <div class="detail-item full-width">
                 <span class="detail-label">Fingerprint</span>
-                <span class="detail-value mono">{results.certificate.fingerprint}</span>
+                <span class="detail-value mono">{diagnosticState.results.certificate.fingerprint}</span>
               </div>
-              {#if results.certificate.altNames.length > 0}
+              {#if diagnosticState.results.certificate.altNames.length > 0}
                 <div class="detail-item full-width">
-                  <span class="detail-label">Alternative Names ({results.certificate.altNames.length})</span>
+                  <span class="detail-label"
+                    >Alternative Names ({diagnosticState.results.certificate.altNames.length})</span
+                  >
                   <div class="alt-names">
-                    {#each results.certificate.altNames as altName (altName)}
+                    {#each diagnosticState.results.certificate.altNames as altName (altName)}
                       <span class="alt-name-tag">{altName}</span>
                     {/each}
                   </div>
@@ -357,14 +344,6 @@
 </div>
 
 <style lang="scss">
-  .error-message {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    color: var(--color-error);
-    font-weight: 500;
-  }
-
   .subsection {
     margin-top: var(--spacing-lg);
     padding-top: var(--spacing-lg);

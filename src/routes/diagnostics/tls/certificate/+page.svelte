@@ -1,23 +1,24 @@
 <script lang="ts">
-  import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
+  import { tooltip } from '$lib/actions/tooltip.js';
   import '../../../../styles/diagnostics-pages.scss';
 
   let host = $state('google.com:443');
   let servername = $state('');
   let useCustomServername = $state(false);
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let copiedState = $state(false);
-  let selectedExampleIndex = $state<number | null>(null);
+
+  const diagnosticState = useDiagnosticState<any>();
+  const clipboard = useClipboard();
 
   interface Certificate {
     isExpired: boolean;
     daysUntilExpiry: number;
   }
 
-  const examples = [
+  const examplesList = [
     { host: 'google.com:443', description: 'Google TLS certificate' },
     { host: 'github.com:443', description: 'GitHub certificate chain' },
     { host: 'cloudflare.com:443', description: 'Cloudflare certificate' },
@@ -25,6 +26,8 @@
     { host: 'stackoverflow.com:443', description: 'Stack Overflow certificate' },
     { host: 'microsoft.com:443', description: 'Microsoft certificate' },
   ];
+
+  const examples = useExamples(examplesList);
 
   // Reactive validation
   const isInputValid = $derived(() => {
@@ -35,9 +38,7 @@
   });
 
   async function analyzeCertificate() {
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/tls', {
@@ -60,24 +61,19 @@
         }
       }
 
-      results = await response.json();
+      const data = await response.json();
+      diagnosticState.setResults(data);
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : 'Unknown error occurred';
-    } finally {
-      loading = false;
+      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     host = example.host;
     servername = '';
     useCustomServername = false;
-    selectedExampleIndex = index;
+    examples.select(index);
     analyzeCertificate();
-  }
-
-  function clearExampleSelection() {
-    selectedExampleIndex = null;
   }
 
   function getExpiryStatus(cert: Certificate): { status: string; icon: string; class: string } {
@@ -94,9 +90,9 @@
   }
 
   async function copyCertificateInfo() {
-    if (!results?.peerCertificate) return;
+    if (!diagnosticState.results?.peerCertificate) return;
 
-    const cert = results.peerCertificate;
+    const cert = diagnosticState.results.peerCertificate;
     let text = `TLS Certificate Analysis for ${host}\n`;
     text += `Generated at: ${new Date().toISOString()}\n\n`;
     text += `Subject: ${cert.subject.CN}\n`;
@@ -115,9 +111,7 @@
       });
     }
 
-    await navigator.clipboard.writeText(text);
-    copiedState = true;
-    setTimeout(() => (copiedState = false), 1500);
+    await clipboard.copy(text);
   }
 </script>
 
@@ -131,27 +125,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>Certificate Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, i (i)}
-          <button
-            class="example-card"
-            class:selected={selectedExampleIndex === i}
-            onclick={() => loadExample(example, i)}
-            use:tooltip={`Analyze certificate for ${example.host} (${example.description})`}
-          >
-            <h5>{example.host}</h5>
-            <p>{example.description}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="Certificate Examples"
+    getLabel={(example) => example.host}
+    getDescription={(example) => example.description}
+    getTooltip={(example) => `Analyze certificate for ${example.host} (${example.description})`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -161,7 +143,7 @@
     <div class="card-content">
       <div class="form-row">
         <div class="form-group">
-          <label for="host" use:tooltip={'Enter hostname:port (e.g., google.com:443)'}>
+          <label for="host">
             Host:Port
             <input
               id="host"
@@ -169,8 +151,9 @@
               bind:value={host}
               placeholder="google.com:443"
               class:invalid={host && !isInputValid}
+              use:tooltip={'Enter hostname:port (e.g., google.com:443)'}
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (isInputValid()) analyzeCertificate();
               }}
             />
@@ -188,7 +171,7 @@
               type="checkbox"
               bind:checked={useCustomServername}
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (isInputValid()) analyzeCertificate();
               }}
             />
@@ -201,7 +184,7 @@
               placeholder="example.com"
               use:tooltip={'Custom servername for SNI (Server Name Indication)'}
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (isInputValid()) analyzeCertificate();
               }}
             />
@@ -210,8 +193,8 @@
       </div>
 
       <div class="action-section">
-        <button class="lookup-btn" onclick={analyzeCertificate} disabled={loading || !isInputValid}>
-          {#if loading}
+        <button class="lookup-btn" onclick={analyzeCertificate} disabled={diagnosticState.loading || !isInputValid}>
+          {#if diagnosticState.loading}
             <Icon name="loader-2" size="sm" animate="spin" />
             Analyzing Certificate...
           {:else}
@@ -224,19 +207,19 @@
   </div>
 
   <!-- Results -->
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header row">
         <h3>Certificate Analysis Results</h3>
-        <button class="copy-btn" onclick={copyCertificateInfo} disabled={copiedState}>
-          <Icon name={copiedState ? 'check' : 'copy'} size="xs" />
-          {copiedState ? 'Copied!' : 'Copy Certificate Info'}
+        <button class="copy-btn" onclick={copyCertificateInfo} disabled={clipboard.isCopied()}>
+          <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
+          {clipboard.isCopied() ? 'Copied!' : 'Copy Certificate Info'}
         </button>
       </div>
       <div class="card-content">
         <!-- Certificate Overview -->
-        {#if results.peerCertificate}
-          {@const cert = results.peerCertificate}
+        {#if diagnosticState.results.peerCertificate}
+          {@const cert = diagnosticState.results.peerCertificate}
           {@const expiryStatus = getExpiryStatus(cert)}
 
           <div class="cert-overview">
@@ -314,11 +297,11 @@
         {/if}
 
         <!-- Certificate Chain -->
-        {#if results.chain?.length > 0}
+        {#if diagnosticState.results.chain?.length > 0}
           <div class="chain-section">
-            <h4>Certificate Chain ({results.chain.length} certificates)</h4>
+            <h4>Certificate Chain ({diagnosticState.results.chain.length} certificates)</h4>
             <div class="chain-list">
-              {#each results.chain as chainCert, i (i)}
+              {#each diagnosticState.results.chain as chainCert, i (i)}
                 <div class="chain-item">
                   <div class="chain-header">
                     <span class="chain-level">Level {i}</span>
@@ -335,26 +318,26 @@
         {/if}
 
         <!-- Connection Details -->
-        {#if results.protocol || results.cipher || results.alpnProtocol}
+        {#if diagnosticState.results.protocol || diagnosticState.results.cipher || diagnosticState.results.alpnProtocol}
           <div class="connection-section">
             <h4>Connection Details</h4>
             <div class="detail-grid">
-              {#if results.protocol}
+              {#if diagnosticState.results.protocol}
                 <div class="detail-item">
                   <span class="detail-label">TLS Version:</span>
-                  <span class="detail-value">{results.protocol}</span>
+                  <span class="detail-value">{diagnosticState.results.protocol}</span>
                 </div>
               {/if}
-              {#if results.cipher}
+              {#if diagnosticState.results.cipher}
                 <div class="detail-item">
                   <span class="detail-label">Cipher Suite:</span>
-                  <span class="detail-value">{results.cipher.name}</span>
+                  <span class="detail-value">{diagnosticState.results.cipher.name}</span>
                 </div>
               {/if}
-              {#if results.alpnProtocol}
+              {#if diagnosticState.results.alpnProtocol}
                 <div class="detail-item">
                   <span class="detail-label">ALPN Protocol:</span>
-                  <span class="detail-value">{results.alpnProtocol}</span>
+                  <span class="detail-value">{diagnosticState.results.alpnProtocol}</span>
                 </div>
               {/if}
             </div>
@@ -364,19 +347,7 @@
     </div>
   {/if}
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>Certificate Analysis Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="Certificate Analysis Failed" error={diagnosticState.error} />
 </div>
 
 <style lang="scss">

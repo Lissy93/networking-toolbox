@@ -2,17 +2,18 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { formatDNSError } from '$lib/utils/dns-validation.js';
+  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let url = $state('https://bit.ly/3example');
   let maxRedirects = $state(10);
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let copiedState = $state(false);
-  let _selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
+  const diagnosticState = useDiagnosticState<any>();
+  const clipboard = useClipboard();
+
+  const examplesList = [
     { url: 'https://httpbin.org/redirect/3', description: '3-hop redirect chain' },
     { url: 'https://bit.ly/3example', description: 'URL shortener redirect' },
     { url: 'https://httpbin.org/absolute-redirect/2', description: 'Absolute redirects' },
@@ -20,6 +21,8 @@
     { url: 'https://httpbin.org/redirect/5', description: '5-hop redirect chain' },
     { url: 'https://httpbin.org/relative-redirect/2', description: 'Relative path redirects' },
   ];
+
+  const examples = useExamples(examplesList);
 
   // Reactive validation
   const isInputValid = $derived(() => {
@@ -34,31 +37,26 @@
   });
 
   async function traceRedirects() {
-    loading = true;
-    error = null;
-    results = null;
-
     // Validation
     const trimmedUrl = url.trim();
     if (!trimmedUrl) {
-      error = 'URL is required';
-      loading = false;
+      diagnosticState.setError('URL is required');
       return;
     }
 
     try {
       new URL(trimmedUrl);
     } catch {
-      error = 'Invalid URL format';
-      loading = false;
+      diagnosticState.setError('Invalid URL format');
       return;
     }
 
     if (maxRedirects < 1 || maxRedirects > 50) {
-      error = 'Max redirects must be between 1 and 50';
-      loading = false;
+      diagnosticState.setError('Max redirects must be between 1 and 50');
       return;
     }
+
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/http', {
@@ -85,31 +83,28 @@
         throw new Error(errorMessage);
       }
 
-      results = await response.json();
+      const data = await response.json();
+      diagnosticState.setResults(data);
     } catch (err: unknown) {
-      error = formatDNSError(err);
-    } finally {
-      loading = false;
+      diagnosticState.setError(formatDNSError(err));
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     url = example.url;
-    _selectedExampleIndex = index;
+    examples.select(index);
     traceRedirects();
   }
 
-  function _clearExampleSelection() {
-    _selectedExampleIndex = null;
-  }
-
   async function copyResults() {
-    if (!results?.redirectChain) return;
+    if (!diagnosticState.results?.redirectChain) return;
 
-    let text = `Redirect Chain Analysis\nOriginal URL: ${url}\nTotal Redirects: ${results.totalRedirects}\n\n`;
+    let text = `Redirect Chain Analysis\nOriginal URL: ${url}\nTotal Redirects: ${diagnosticState.results.totalRedirects}\n\n`;
 
     (
-      results as { redirectChain: Array<{ url: string; status: number; location?: string; duration: number }> }
+      diagnosticState.results as {
+        redirectChain: Array<{ url: string; status: number; location?: string; duration: number }>;
+      }
     ).redirectChain.forEach((step, i: number) => {
       text += `${i + 1}. ${step.url}\n`;
       text += `   Status: ${step.status}\n`;
@@ -119,11 +114,9 @@
       text += '\n';
     });
 
-    text += `Final URL: ${results.finalUrl}\nFinal Status: ${results.finalStatus}`;
+    text += `Final URL: ${diagnosticState.results.finalUrl}\nFinal Status: ${diagnosticState.results.finalStatus}`;
 
-    await navigator.clipboard.writeText(text);
-    copiedState = true;
-    setTimeout(() => (copiedState = false), 1500);
+    await clipboard.copy(text);
   }
 
   function getStatusClass(status: number): string {
@@ -165,22 +158,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>Redirect Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, index (index)}
-          <button class="example-card" onclick={() => loadExample(example, index)}>
-            <h5>{example.url}</h5>
-            <p>{example.description}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="Redirect Examples"
+    getLabel={(ex) => ex.url}
+    getDescription={(ex) => ex.description}
+    getTooltip={(ex) => `Trace redirects for ${ex.url}`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -226,9 +212,9 @@
       </div>
 
       <div class="action-section">
-        <button class="lookup-btn" onclick={traceRedirects} disabled={loading || !isInputValid}>
-          {#if loading}
-            <Icon name="loader-2" size="sm" animate="spin" />
+        <button class="lookup-btn" onclick={traceRedirects} disabled={diagnosticState.loading || !isInputValid}>
+          {#if diagnosticState.loading}
+            <Icon name="loader" size="sm" animate="spin" />
             Tracing Redirects...
           {:else}
             <Icon name="link" size="sm" />
@@ -240,15 +226,15 @@
   </div>
 
   <!-- Results -->
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header">
         <h3>Redirect Chain Analysis</h3>
-        <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
-          <span class={copiedState ? 'text-green-500' : ''}
-            ><Icon name={copiedState ? 'check' : 'copy'} size="xs" /></span
+        <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
+          <span class={clipboard.isCopied() ? 'text-green-500' : ''}
+            ><Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" /></span
           >
-          {copiedState ? 'Copied!' : 'Copy Chain'}
+          {clipboard.isCopied() ? 'Copied!' : 'Copy Chain'}
         </button>
       </div>
       <div class="card-content">
@@ -257,24 +243,24 @@
           <div class="status-item">
             <Icon name="link" size="sm" />
             <div>
-              <strong>{results.totalRedirects}</strong>
+              <strong>{diagnosticState.results.totalRedirects}</strong>
               <div class="status-text">Total Redirects</div>
             </div>
           </div>
 
-          <div class="status-item {getStatusClass(results.finalStatus)}">
-            <Icon name={getStatusIcon(results.finalStatus)} size="sm" />
+          <div class="status-item {getStatusClass(diagnosticState.results.finalStatus)}">
+            <Icon name={getStatusIcon(diagnosticState.results.finalStatus)} size="sm" />
             <div>
-              <strong>{results.finalStatus}</strong>
+              <strong>{diagnosticState.results.finalStatus}</strong>
               <div class="status-text">Final Status</div>
             </div>
           </div>
 
-          {#if results.timings}
+          {#if diagnosticState.results.timings}
             <div class="status-item">
               <Icon name="clock" size="sm" />
               <div>
-                <strong>{results.timings.total.toFixed(0)}ms</strong>
+                <strong>{diagnosticState.results.timings.total.toFixed(0)}ms</strong>
                 <div class="status-text">Total Time</div>
               </div>
             </div>
@@ -282,11 +268,11 @@
         </div>
 
         <!-- Redirect Chain -->
-        {#if results.redirectChain?.length > 0}
+        {#if diagnosticState.results.redirectChain?.length > 0}
           <div class="record-section">
             <h4>Redirect Chain</h4>
             <div class="redirect-chain">
-              {#each results.redirectChain as step, i (i)}
+              {#each diagnosticState.results.redirectChain as step, i (i)}
                 <div class="redirect-step">
                   <div class="step-number">{i + 1}</div>
                   <div class="step-content">
@@ -301,7 +287,7 @@
                           HSTS
                         </div>
                       {/if}
-                      {#if i < results.redirectChain.length - 1 && isSecureRedirect(step.url, step.location)}
+                      {#if i < diagnosticState.results.redirectChain.length - 1 && isSecureRedirect(step.url, step.location)}
                         <div class="security-badge success" use:tooltip={'HTTP to HTTPS upgrade'}>
                           <Icon name="shield-check" size="xs" />
                           Secure Upgrade
@@ -318,7 +304,7 @@
                   </div>
                 </div>
 
-                {#if i < results.redirectChain.length - 1}
+                {#if i < diagnosticState.results.redirectChain.length - 1}
                   <div class="redirect-arrow">
                     <Icon name="chevron-down" size="sm" />
                   </div>
@@ -330,37 +316,25 @@
           <div class="record-section">
             <h4>Final Destination</h4>
             <div class="final-destination">
-              <div class="final-status {getStatusClass(results.finalStatus)}">
-                <Icon name={getStatusIcon(results.finalStatus)} size="sm" />
-                {results.finalStatus}
+              <div class="final-status {getStatusClass(diagnosticState.results.finalStatus)}">
+                <Icon name={getStatusIcon(diagnosticState.results.finalStatus)} size="sm" />
+                {diagnosticState.results.finalStatus}
               </div>
-              <div class="final-url mono">{results.finalUrl}</div>
+              <div class="final-url mono">{diagnosticState.results.finalUrl}</div>
             </div>
           </div>
         {:else}
           <div class="no-records">
             <Icon name="info" size="md" />
             <p>No redirects found - URL resolved directly</p>
-            <p class="help-text">Final URL: {results.finalUrl}</p>
+            <p class="help-text">Final URL: {diagnosticState.results.finalUrl}</p>
           </div>
         {/if}
       </div>
     </div>
   {/if}
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>Redirect Trace Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="Redirect Trace Failed" error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">

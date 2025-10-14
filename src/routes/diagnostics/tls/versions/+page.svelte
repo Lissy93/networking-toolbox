@@ -1,18 +1,16 @@
 <script lang="ts">
-  import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let host = $state('google.com:443');
   let servername = $state('');
   let useCustomServername = $state(false);
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let copiedState = $state(false);
-  let selectedExampleIndex = $state<number | null>(null);
-
-  const examples = [
+  const diagnosticState = useDiagnosticState<any>();
+  const clipboard = useClipboard();
+  const examplesList = [
     { host: 'google.com:443', description: 'Google TLS version support' },
     { host: 'github.com:443', description: 'GitHub TLS versions' },
     { host: 'cloudflare.com:443', description: 'Cloudflare TLS support' },
@@ -20,6 +18,7 @@
     { host: 'amazon.com:443', description: 'Amazon TLS configuration' },
     { host: 'facebook.com:443', description: 'Facebook TLS versions' },
   ];
+  const examples = useExamples(examplesList);
 
   const tlsVersions = [
     { version: 'TLSv1', name: 'TLS 1.0', deprecated: true },
@@ -36,9 +35,7 @@
   });
 
   async function probeTLSVersions() {
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/tls', {
@@ -61,24 +58,18 @@
         }
       }
 
-      results = await response.json();
+      diagnosticState.setResults(await response.json());
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : 'Unknown error occurred';
-    } finally {
-      loading = false;
+      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     host = example.host;
     servername = '';
     useCustomServername = false;
-    selectedExampleIndex = index;
+    examples.select(index);
     probeTLSVersions();
-  }
-
-  function clearExampleSelection() {
-    selectedExampleIndex = null;
   }
 
   function getVersionStatus(
@@ -96,10 +87,10 @@
   }
 
   function getOverallSecurity(): { level: string; class: string; icon: string; description: string } {
-    if (!results)
+    if (!diagnosticState.results)
       return { level: 'Unknown', class: 'secondary', icon: 'help-circle', description: 'No results available' };
 
-    const supportedVersions = results.supportedVersions || [];
+    const supportedVersions = diagnosticState.results.supportedVersions || [];
     const hasDeprecated = supportedVersions.some((v: string) => v === 'TLSv1' || v === 'TLSv1.1');
     const hasModern = supportedVersions.includes('TLSv1.3');
     const hasSecure = supportedVersions.includes('TLSv1.2');
@@ -130,14 +121,14 @@
   }
 
   async function copyVersionsInfo() {
-    if (!results) return;
+    if (!diagnosticState.results) return;
 
     let text = `TLS Versions Analysis for ${host}\n`;
     text += `Generated at: ${new Date().toISOString()}\n\n`;
-    text += `Supported Versions (${results.totalSupported}):\n`;
+    text += `Supported Versions (${diagnosticState.results.totalSupported}):\n`;
 
     tlsVersions.forEach((tlsVer) => {
-      const supported = results.supported[tlsVer.version];
+      const supported = diagnosticState.results.supported[tlsVer.version];
       text += `  ${tlsVer.name} (${tlsVer.version}): ${supported ? 'Supported' : 'Not Supported'}`;
       if (supported && tlsVer.deprecated) {
         text += ' (DEPRECATED)';
@@ -149,15 +140,13 @@
     text += `\nSecurity Level: ${security.level}\n`;
     text += `Description: ${security.description}\n`;
 
-    if (results.minVersion || results.maxVersion) {
+    if (diagnosticState.results.minVersion || diagnosticState.results.maxVersion) {
       text += `\nVersion Range:\n`;
-      text += `  Minimum: ${results.minVersion || 'Unknown'}\n`;
-      text += `  Maximum: ${results.maxVersion || 'Unknown'}\n`;
+      text += `  Minimum: ${diagnosticState.results.minVersion || 'Unknown'}\n`;
+      text += `  Maximum: ${diagnosticState.results.maxVersion || 'Unknown'}\n`;
     }
 
-    await navigator.clipboard.writeText(text);
-    copiedState = true;
-    setTimeout(() => (copiedState = false), 1500);
+    clipboard.copy(text);
   }
 </script>
 
@@ -171,27 +160,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>TLS Version Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, i (i)}
-          <button
-            class="example-card"
-            class:selected={selectedExampleIndex === i}
-            onclick={() => loadExample(example, i)}
-            use:tooltip={`Probe TLS versions for ${example.host} (${example.description})`}
-          >
-            <h5>{example.host}</h5>
-            <p>{example.description}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="TLS Version Examples"
+    getLabel={(ex) => ex.host}
+    getDescription={(ex) => ex.description}
+    getTooltip={(ex) => `Probe TLS versions for ${ex.host} (${ex.description})`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -201,7 +178,7 @@
     <div class="card-content">
       <div class="form-row">
         <div class="form-group">
-          <label for="host" use:tooltip={'Enter hostname:port (e.g., google.com:443)'}>
+          <label for="host">
             Host:Port
             <input
               id="host"
@@ -210,7 +187,7 @@
               placeholder="google.com:443"
               class:invalid={host && !isInputValid}
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (isInputValid()) probeTLSVersions();
               }}
             />
@@ -228,7 +205,7 @@
               type="checkbox"
               bind:checked={useCustomServername}
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (isInputValid()) probeTLSVersions();
               }}
             />
@@ -239,9 +216,8 @@
               type="text"
               bind:value={servername}
               placeholder="example.com"
-              use:tooltip={'Custom servername for SNI (Server Name Indication)'}
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (isInputValid()) probeTLSVersions();
               }}
             />
@@ -250,9 +226,9 @@
       </div>
 
       <div class="action-section">
-        <button class="lookup-btn" onclick={probeTLSVersions} disabled={loading || !isInputValid}>
-          {#if loading}
-            <Icon name="loader-2" size="sm" animate="spin" />
+        <button class="lookup-btn" onclick={probeTLSVersions} disabled={diagnosticState.loading || !isInputValid}>
+          {#if diagnosticState.loading}
+            <Icon name="loader" size="sm" animate="spin" />
             Probing TLS Versions...
           {:else}
             <Icon name="search" size="sm" />
@@ -264,18 +240,18 @@
   </div>
 
   <!-- Results -->
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header row">
         <h3>TLS Versions Probe Results</h3>
-        <button class="copy-btn" onclick={copyVersionsInfo} disabled={copiedState}>
-          <Icon name={copiedState ? 'check' : 'copy'} size="xs" />
-          {copiedState ? 'Copied!' : 'Copy Results'}
+        <button class="copy-btn" onclick={copyVersionsInfo} disabled={clipboard.isCopied()}>
+          <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
+          {clipboard.isCopied() ? 'Copied!' : 'Copy Results'}
         </button>
       </div>
       <div class="card-content">
         <!-- Security Overview -->
-        {#if results.supported}
+        {#if diagnosticState.results.supported}
           {@const security = getOverallSecurity()}
 
           <div class="security-overview">
@@ -290,7 +266,7 @@
               <div class="status-item success">
                 <Icon name="check-square" size="sm" />
                 <div>
-                  <span class="status-title">{results.totalSupported} Versions Supported</span>
+                  <span class="status-title">{diagnosticState.results.totalSupported} Versions Supported</span>
                   <p class="status-desc">Out of {tlsVersions.length} tested</p>
                 </div>
               </div>
@@ -302,7 +278,7 @@
             <h4>TLS Version Support</h4>
             <div class="versions-grid">
               {#each tlsVersions as tlsVer (tlsVer.version)}
-                {@const supported = results.supported[tlsVer.version]}
+                {@const supported = diagnosticState.results.supported[tlsVer.version]}
                 {@const status = getVersionStatus(tlsVer.version, supported, tlsVer.deprecated)}
 
                 <div class="version-item {status.class}">
@@ -317,9 +293,9 @@
                     <span class="version-status">{status.status}</span>
                   </div>
 
-                  {#if !supported && results.errors[tlsVer.version]}
+                  {#if !supported && diagnosticState.results.errors[tlsVer.version]}
                     <div class="version-error">
-                      <span class="error-detail">{results.errors[tlsVer.version]}</span>
+                      <span class="error-detail">{diagnosticState.results.errors[tlsVer.version]}</span>
                     </div>
                   {/if}
 
@@ -335,17 +311,17 @@
           </div>
 
           <!-- Version Range Summary -->
-          {#if results.minVersion || results.maxVersion}
+          {#if diagnosticState.results.minVersion || diagnosticState.results.maxVersion}
             <div class="range-section">
               <h4>Supported Version Range</h4>
               <div class="range-info">
                 <div class="range-item">
                   <span class="range-label">Minimum Version:</span>
-                  <span class="range-value mono">{results.minVersion || 'Unknown'}</span>
+                  <span class="range-value mono">{diagnosticState.results.minVersion || 'Unknown'}</span>
                 </div>
                 <div class="range-item">
                   <span class="range-label">Maximum Version:</span>
-                  <span class="range-value mono">{results.maxVersion || 'Unknown'}</span>
+                  <span class="range-value mono">{diagnosticState.results.maxVersion || 'Unknown'}</span>
                 </div>
               </div>
             </div>
@@ -355,19 +331,7 @@
     </div>
   {/if}
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>TLS Versions Probe Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="TLS Versions Probe Failed" error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">

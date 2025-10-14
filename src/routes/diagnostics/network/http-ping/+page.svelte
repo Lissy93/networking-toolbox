@@ -1,19 +1,20 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let url = $state('https://google.com');
   let method = $state('HEAD');
   let count = $state(5);
   let timeout = $state(10000);
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let copiedState = $state(false);
-  let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
+  const diagnosticState = useDiagnosticState<any>();
+  const clipboard = useClipboard();
+
+  const examplesList = [
     { url: 'https://google.com', method: 'HEAD', description: 'Google homepage' },
     { url: 'https://github.com', method: 'HEAD', description: 'GitHub homepage' },
     { url: 'https://api.github.com', method: 'GET', description: 'GitHub API' },
@@ -21,6 +22,8 @@
     { url: 'https://www.cloudflare.com', method: 'HEAD', description: 'Cloudflare CDN' },
     { url: 'https://stackoverflow.com', method: 'HEAD', description: 'Stack Overflow' },
   ];
+
+  const examples = useExamples(examplesList);
 
   const httpMethods = [
     { value: 'HEAD', label: 'HEAD', description: 'Headers only, fastest' },
@@ -43,9 +46,7 @@
   });
 
   async function httpPing() {
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/network', {
@@ -70,30 +71,25 @@
         }
       }
 
-      results = await response.json();
+      const data = await response.json();
+      diagnosticState.setResults(data);
     } catch (err: unknown) {
-      error = (err as Error).message;
-    } finally {
-      loading = false;
+      diagnosticState.setError((err as Error).message);
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     url = example.url;
     method = example.method;
     count = 5;
     timeout = 10000;
-    selectedExampleIndex = index;
+    examples.select(index);
     httpPing();
-  }
-
-  function clearExampleSelection() {
-    selectedExampleIndex = null;
   }
 
   function setMethod(newMethod: string) {
     method = newMethod;
-    clearExampleSelection();
+    examples.clear();
     if (isInputValid()) httpPing();
   }
 
@@ -112,45 +108,43 @@
   }
 
   async function copyResults() {
-    if (!results) return;
+    if (!diagnosticState.results) return;
 
-    let text = `HTTP Ping Results for ${results.url}\n`;
+    let text = `HTTP Ping Results for ${diagnosticState.results.url}\n`;
     text += `Generated at: ${new Date().toISOString()}\n\n`;
     text += `Configuration:\n`;
-    text += `  Method: ${results.method}\n`;
-    text += `  Count: ${results.count}\n`;
+    text += `  Method: ${diagnosticState.results.method}\n`;
+    text += `  Count: ${diagnosticState.results.count}\n`;
     text += `  Timeout: ${timeout}ms\n\n`;
     text += `Summary:\n`;
-    text += `  Successful: ${results.successful}\n`;
-    text += `  Failed: ${results.failed}\n`;
-    text += `  Success Rate: ${((results.successful / results.count) * 100).toFixed(1)}%\n\n`;
+    text += `  Successful: ${diagnosticState.results.successful}\n`;
+    text += `  Failed: ${diagnosticState.results.failed}\n`;
+    text += `  Success Rate: ${((diagnosticState.results.successful / diagnosticState.results.count) * 100).toFixed(1)}%\n\n`;
 
-    if (results.statistics && results.successful > 0) {
+    if (diagnosticState.results.statistics && diagnosticState.results.successful > 0) {
       text += `Latency Statistics:\n`;
-      text += `  Min: ${results.statistics.min}ms\n`;
-      text += `  Max: ${results.statistics.max}ms\n`;
-      text += `  Average: ${results.statistics.avg}ms\n`;
-      text += `  Median: ${results.statistics.median}ms\n`;
-      text += `  95th Percentile: ${results.statistics.p95}ms\n\n`;
+      text += `  Min: ${diagnosticState.results.statistics.min}ms\n`;
+      text += `  Max: ${diagnosticState.results.statistics.max}ms\n`;
+      text += `  Average: ${diagnosticState.results.statistics.avg}ms\n`;
+      text += `  Median: ${diagnosticState.results.statistics.median}ms\n`;
+      text += `  95th Percentile: ${diagnosticState.results.statistics.p95}ms\n\n`;
     }
 
-    if (results.latencies?.length > 0) {
+    if (diagnosticState.results.latencies?.length > 0) {
       text += `Individual Results:\n`;
-      results.latencies.forEach((latency: number, i: number) => {
+      diagnosticState.results.latencies.forEach((latency: number, i: number) => {
         text += `  Request ${i + 1}: ${latency}ms\n`;
       });
     }
 
-    if (results.errors?.length > 0) {
+    if (diagnosticState.results.errors?.length > 0) {
       text += `\nErrors:\n`;
-      results.errors.forEach((err: string, i: number) => {
+      diagnosticState.results.errors.forEach((err: string, i: number) => {
         text += `  ${i + 1}: ${err}\n`;
       });
     }
 
-    await navigator.clipboard.writeText(text);
-    copiedState = true;
-    setTimeout(() => (copiedState = false), 1500);
+    await clipboard.copy(text);
   }
 </script>
 
@@ -164,30 +158,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>HTTP Ping Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, i (i)}
-          <button
-            class="example-card"
-            class:selected={selectedExampleIndex === i}
-            onclick={() => loadExample(example, i)}
-            use:tooltip={`Ping ${example.url} using ${example.method} method`}
-          >
-            <h5>{example.description}</h5>
-            <div class="example-details">
-              <span class="example-url mono">{example.url}</span>
-              <span class="example-method">{example.method}</span>
-            </div>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="HTTP Ping Examples"
+    getLabel={(ex) => ex.description}
+    getDescription={(ex) => `${ex.url} (${ex.method})`}
+    getTooltip={(ex) => `Ping ${ex.url} using ${ex.method} method`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -206,7 +185,7 @@
               placeholder="https://example.com"
               class:invalid={url && !isUrlValid()}
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (isInputValid()) httpPing();
               }}
             />
@@ -248,7 +227,7 @@
               min="1"
               max="20"
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (isInputValid()) httpPing();
               }}
             />
@@ -265,7 +244,7 @@
               max="30000"
               step="1000"
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (isInputValid()) httpPing();
               }}
             />
@@ -274,8 +253,8 @@
       </div>
 
       <div class="action-section">
-        <button class="lookup-btn" onclick={httpPing} disabled={loading || !isInputValid()}>
-          {#if loading}
+        <button class="lookup-btn" onclick={httpPing} disabled={diagnosticState.loading || !isInputValid()}>
+          {#if diagnosticState.loading}
             <Icon name="loader-2" size="sm" animate="spin" />
             Pinging...
           {:else}
@@ -288,13 +267,13 @@
   </div>
 
   <!-- Results -->
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header row">
         <h3>HTTP Ping Results</h3>
-        <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
-          <Icon name={copiedState ? 'check' : 'copy'} size="xs" />
-          {copiedState ? 'Copied!' : 'Copy Results'}
+        <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
+          <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
+          {clipboard.isCopied() ? 'Copied!' : 'Copy Results'}
         </button>
       </div>
       <div class="card-content">
@@ -303,68 +282,72 @@
           <div class="status-item success">
             <Icon name="check-circle" size="sm" />
             <div>
-              <span class="status-title">{results.successful}/{results.count}</span>
+              <span class="status-title">{diagnosticState.results.successful}/{diagnosticState.results.count}</span>
               <p class="status-desc">Successful requests</p>
             </div>
           </div>
-          {#if results.statistics?.avg}
-            <div class="status-item {getLatencyClass(results.statistics.avg)}">
+          {#if diagnosticState.results.statistics?.avg}
+            <div class="status-item {getLatencyClass(diagnosticState.results.statistics.avg)}">
               <Icon name="zap" size="sm" />
               <div>
-                <span class="status-title">{results.statistics.avg}ms</span>
-                <p class="status-desc">Average latency ({getLatencyDescription(results.statistics.avg)})</p>
+                <span class="status-title">{diagnosticState.results.statistics.avg}ms</span>
+                <p class="status-desc">
+                  Average latency ({getLatencyDescription(diagnosticState.results.statistics.avg)})
+                </p>
               </div>
             </div>
           {/if}
-          {#if results.failed > 0}
+          {#if diagnosticState.results.failed > 0}
             <div class="status-item error">
               <Icon name="x-circle" size="sm" />
               <div>
-                <span class="status-title">{results.failed}</span>
+                <span class="status-title">{diagnosticState.results.failed}</span>
                 <p class="status-desc">Failed requests</p>
               </div>
             </div>
           {/if}
         </div>
 
-        {#if results.statistics && results.successful > 0}
+        {#if diagnosticState.results.statistics && diagnosticState.results.successful > 0}
           <!-- Statistics -->
           <div class="stats-section">
             <h4>Latency Statistics</h4>
             <div class="stats-grid">
               <div class="stat-item">
                 <span class="stat-label">Minimum:</span>
-                <span class="stat-value">{results.statistics.min}ms</span>
+                <span class="stat-value">{diagnosticState.results.statistics.min}ms</span>
               </div>
               <div class="stat-item">
                 <span class="stat-label">Maximum:</span>
-                <span class="stat-value">{results.statistics.max}ms</span>
+                <span class="stat-value">{diagnosticState.results.statistics.max}ms</span>
               </div>
               <div class="stat-item">
                 <span class="stat-label">Average:</span>
-                <span class="stat-value">{results.statistics.avg}ms</span>
+                <span class="stat-value">{diagnosticState.results.statistics.avg}ms</span>
               </div>
               <div class="stat-item">
                 <span class="stat-label">Median:</span>
-                <span class="stat-value">{results.statistics.median}ms</span>
+                <span class="stat-value">{diagnosticState.results.statistics.median}ms</span>
               </div>
               <div class="stat-item">
                 <span class="stat-label">95th Percentile:</span>
-                <span class="stat-value">{results.statistics.p95}ms</span>
+                <span class="stat-value">{diagnosticState.results.statistics.p95}ms</span>
               </div>
               <div class="stat-item">
                 <span class="stat-label">Range:</span>
-                <span class="stat-value">{results.statistics.max - results.statistics.min}ms</span>
+                <span class="stat-value"
+                  >{diagnosticState.results.statistics.max - diagnosticState.results.statistics.min}ms</span
+                >
               </div>
             </div>
           </div>
 
           <!-- Individual Results -->
-          {#if results.latencies?.length > 0}
+          {#if diagnosticState.results.latencies?.length > 0}
             <div class="results-section">
               <h4>Individual Request Results</h4>
               <div class="requests-list">
-                {#each results.latencies as latency, i (i)}
+                {#each diagnosticState.results.latencies as latency, i (i)}
                   <div class="request-item {getLatencyClass(latency)}">
                     <span class="request-number">#{i + 1}</span>
                     <span class="request-latency">{latency}ms</span>
@@ -377,13 +360,13 @@
         {/if}
 
         <!-- Errors -->
-        {#if results.errors?.length > 0}
+        {#if diagnosticState.results.errors?.length > 0}
           <div class="errors-section">
-            <h4>Request Errors ({results.errors.length})</h4>
+            <h4>Request Errors ({diagnosticState.results.errors.length})</h4>
             <div class="errors-list">
-              {#each results.errors as error, i (i)}
+              {#each diagnosticState.results.errors as error, i (i)}
                 <div class="error-item">
-                  <span class="error-number">#{i + results.successful + 1}</span>
+                  <span class="error-number">#{i + diagnosticState.results.successful + 1}</span>
                   <span class="error-message">{error}</span>
                 </div>
               {/each}
@@ -397,15 +380,17 @@
           <div class="detail-grid">
             <div class="detail-item">
               <span class="detail-label">URL:</span>
-              <span class="detail-value mono">{results.url}</span>
+              <span class="detail-value mono">{diagnosticState.results.url}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">Method:</span>
-              <span class="detail-value">{results.method}</span>
+              <span class="detail-value">{diagnosticState.results.method}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">Success Rate:</span>
-              <span class="detail-value">{((results.successful / results.count) * 100).toFixed(1)}%</span>
+              <span class="detail-value"
+                >{((diagnosticState.results.successful / diagnosticState.results.count) * 100).toFixed(1)}%</span
+              >
             </div>
           </div>
         </div>
@@ -413,19 +398,7 @@
     </div>
   {/if}
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>HTTP Ping Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="HTTP Ping Failed" error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">

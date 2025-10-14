@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let domain = $state('gmail.com');
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let copiedState = $state(false);
-  let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
+  const diagnosticState = useDiagnosticState<any>();
+  const clipboard = useClipboard();
+
+  const examplesList = [
     { domain: 'gmail.com', description: 'Google Gmail DMARC policy' },
     { domain: 'outlook.com', description: 'Microsoft Outlook DMARC setup' },
     { domain: 'github.com', description: 'GitHub enterprise DMARC' },
@@ -19,10 +19,10 @@
     { domain: 'salesforce.com', description: 'Salesforce DMARC configuration' },
   ];
 
+  const examples = useExamples(examplesList);
+
   async function checkDMARC() {
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/email', {
@@ -38,22 +38,17 @@
         throw new Error(`DMARC check failed: ${response.status}`);
       }
 
-      results = await response.json();
+      const data = await response.json();
+      diagnosticState.setResults(data);
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : 'Unknown error occurred';
-    } finally {
-      loading = false;
+      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     domain = example.domain;
-    selectedExampleIndex = index;
+    examples.select(index);
     checkDMARC();
-  }
-
-  function clearExampleSelection() {
-    selectedExampleIndex = null;
   }
 
   function getPolicyColor(policy: string): string {
@@ -94,30 +89,30 @@
   }
 
   async function copyResults() {
-    if (!results) return;
+    if (!diagnosticState.results) return;
 
     let text = `DMARC Check for ${domain}\n`;
     text += `Generated at: ${new Date().toISOString()}\n\n`;
 
-    if (results.record) {
-      text += `DMARC Record:\n${results.record}\n\n`;
+    if (diagnosticState.results.record) {
+      text += `DMARC Record:\n${diagnosticState.results.record}\n\n`;
     }
 
-    if (results.deliverabilityHints) {
+    if (diagnosticState.results.deliverabilityHints) {
       text += `Email Deliverability Impact:\n`;
-      text += `${results.deliverabilityHints.policyImpact}\n\n`;
+      text += `${diagnosticState.results.deliverabilityHints.policyImpact}\n\n`;
 
-      if (results.deliverabilityHints.recommendations.length > 0) {
+      if (diagnosticState.results.deliverabilityHints.recommendations.length > 0) {
         text += `Recommendations:\n`;
-        results.deliverabilityHints.recommendations.forEach((rec: string) => {
+        diagnosticState.results.deliverabilityHints.recommendations.forEach((rec: string) => {
           text += `  • ${rec}\n`;
         });
         text += `\n`;
       }
     }
 
-    if (results.parsed) {
-      const p = results.parsed;
+    if (diagnosticState.results.parsed) {
+      const p = diagnosticState.results.parsed;
       text += `Policy Configuration:\n`;
       text += `  Main Policy: ${p.policy}\n`;
       if (p.subdomainPolicy) text += `  Subdomain Policy: ${p.subdomainPolicy}\n`;
@@ -128,9 +123,7 @@
       if (p.reporting.forensic) text += `  Forensic Reports: ${p.reporting.forensic}\n`;
     }
 
-    await navigator.clipboard.writeText(text);
-    copiedState = true;
-    setTimeout(() => (copiedState = false), 1500);
+    await clipboard.copy(text);
   }
 </script>
 
@@ -144,27 +137,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>DMARC Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, i (i)}
-          <button
-            class="example-card"
-            class:selected={selectedExampleIndex === i}
-            onclick={() => loadExample(example, i)}
-            use:tooltip={`Check DMARC policy for ${example.domain}`}
-          >
-            <h5>{example.domain}</h5>
-            <p>{example.description}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="DMARC Examples"
+    getLabel={(ex) => ex.domain}
+    getDescription={(ex) => ex.description}
+    getTooltip={(ex) => `Check DMARC policy for ${ex.domain}`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -173,7 +154,7 @@
     </div>
     <div class="card-content">
       <div class="form-group">
-        <label for="domain" use:tooltip={'Enter the domain to check DMARC policy for'}>
+        <label for="domain">
           Domain Name
           <input
             id="domain"
@@ -181,7 +162,7 @@
             bind:value={domain}
             placeholder="example.com"
             onchange={() => {
-              clearExampleSelection();
+              examples.clear();
               if (domain) checkDMARC();
             }}
           />
@@ -189,8 +170,8 @@
       </div>
 
       <div class="action-section">
-        <button class="check-btn lookup-btn" onclick={checkDMARC} disabled={loading || !domain.trim()}>
-          {#if loading}
+        <button class="check-btn lookup-btn" onclick={checkDMARC} disabled={diagnosticState.loading || !domain.trim()}>
+          {#if diagnosticState.loading}
             <Icon name="loader" size="sm" animate="spin" />
             Checking DMARC...
           {:else}
@@ -203,33 +184,35 @@
   </div>
 
   <!-- Results -->
-  {#if results && results.hasRecord}
+  {#if diagnosticState.results && diagnosticState.results.hasRecord}
     <div class="card results-card">
       <div class="card-header row">
         <h3>DMARC Policy Analysis</h3>
-        <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
-          <Icon name={copiedState ? 'check' : 'copy'} size="xs" />
-          {copiedState ? 'Copied!' : 'Copy Results'}
+        <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
+          <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
+          {clipboard.isCopied() ? 'Copied!' : 'Copy Results'}
         </button>
       </div>
       <div class="card-content">
-        {#if results.parsed && results.deliverabilityHints}
+        {#if diagnosticState.results.parsed && diagnosticState.results.deliverabilityHints}
           <!-- Email Deliverability Impact -->
           <div class="deliverability-section">
-            <div class="deliverability-overview {getPolicyColor(results.parsed.policy)}">
-              <Icon name={getPolicyIcon(results.parsed.policy)} size="md" />
+            <div class="deliverability-overview {getPolicyColor(diagnosticState.results.parsed.policy)}">
+              <Icon name={getPolicyIcon(diagnosticState.results.parsed.policy)} size="md" />
               <div>
                 <h4>Email Deliverability Impact</h4>
-                <p class="policy-impact">{results.deliverabilityHints.policyImpact}</p>
-                {#if results.deliverabilityHints.alignmentComplexity?.strict}
-                  <p class="alignment-warning">{results.deliverabilityHints.alignmentComplexity.strict}</p>
+                <p class="policy-impact">{diagnosticState.results.deliverabilityHints.policyImpact}</p>
+                {#if diagnosticState.results.deliverabilityHints.alignmentComplexity?.strict}
+                  <p class="alignment-warning">
+                    {diagnosticState.results.deliverabilityHints.alignmentComplexity.strict}
+                  </p>
                 {/if}
               </div>
             </div>
 
             <!-- Recommendations -->
-            {#if results.deliverabilityHints.recommendations.length > 0}
-              {@const hintsData = (results as { deliverabilityHints: { recommendations: string[] } })
+            {#if diagnosticState.results.deliverabilityHints.recommendations.length > 0}
+              {@const hintsData = (diagnosticState.results as { deliverabilityHints: { recommendations: string[] } })
                 .deliverabilityHints}
               <div class="recommendations-section">
                 <h5>Deliverability Recommendations</h5>
@@ -250,7 +233,7 @@
             <h4>DMARC Record</h4>
             <div class="record-display">
               <div class="record-location">_dmarc.{domain}</div>
-              <code>{results.record}</code>
+              <code>{diagnosticState.results.record}</code>
             </div>
           </div>
 
@@ -259,19 +242,19 @@
             <h4>Policy Configuration</h4>
             <div class="policy-grid">
               <!-- Main Policy -->
-              <div class="policy-item {getPolicyColor(results.parsed.policy)}">
+              <div class="policy-item {getPolicyColor(diagnosticState.results.parsed.policy)}">
                 <div class="policy-header">
                   <Icon name="shield" size="sm" />
                   <span>Main Policy</span>
                 </div>
                 <div class="policy-value">
-                  <span class="policy-text">{results.parsed.policy}</span>
+                  <span class="policy-text">{diagnosticState.results.parsed.policy}</span>
                   <span class="policy-description">
-                    {#if results.parsed.policy === 'reject'}
+                    {#if diagnosticState.results.parsed.policy === 'reject'}
                       Reject non-compliant messages
-                    {:else if results.parsed.policy === 'quarantine'}
+                    {:else if diagnosticState.results.parsed.policy === 'quarantine'}
                       Quarantine suspicious messages
-                    {:else if results.parsed.policy === 'none'}
+                    {:else if diagnosticState.results.parsed.policy === 'none'}
                       Monitor only, no action
                     {:else}
                       Unknown policy
@@ -281,40 +264,46 @@
               </div>
 
               <!-- Subdomain Policy -->
-              {#if results.parsed.subdomainPolicy}
-                <div class="policy-item {getPolicyColor(results.parsed.subdomainPolicy)}">
+              {#if diagnosticState.results.parsed.subdomainPolicy}
+                <div class="policy-item {getPolicyColor(diagnosticState.results.parsed.subdomainPolicy)}">
                   <div class="policy-header">
                     <Icon name="git-branch" size="sm" />
                     <span>Subdomain Policy</span>
                   </div>
                   <div class="policy-value">
-                    <span class="policy-text">{results.parsed.subdomainPolicy}</span>
+                    <span class="policy-text">{diagnosticState.results.parsed.subdomainPolicy}</span>
                   </div>
                 </div>
               {/if}
 
               <!-- Coverage Percentage -->
-              <div class="policy-item {parseInt(results.parsed.percentage) === 100 ? 'success' : 'warning'}">
+              <div
+                class="policy-item {parseInt(diagnosticState.results.parsed.percentage) === 100
+                  ? 'success'
+                  : 'warning'}"
+              >
                 <div class="policy-header">
                   <Icon name="percent" size="sm" />
                   <span>Coverage</span>
                 </div>
                 <div class="policy-value">
-                  <span class="policy-text">{results.parsed.percentage}%</span>
+                  <span class="policy-text">{diagnosticState.results.parsed.percentage}%</span>
                   <span class="policy-description">of messages affected</span>
                 </div>
               </div>
 
               <!-- DKIM Alignment -->
-              <div class="policy-item {getAlignmentColor(results.parsed.alignment.dkim)}">
+              <div class="policy-item {getAlignmentColor(diagnosticState.results.parsed.alignment.dkim)}">
                 <div class="policy-header">
                   <Icon name="key" size="sm" />
                   <span>DKIM Alignment</span>
                 </div>
                 <div class="policy-value">
-                  <span class="policy-text">{results.parsed.alignment.dkim === 's' ? 'Strict' : 'Relaxed'}</span>
+                  <span class="policy-text"
+                    >{diagnosticState.results.parsed.alignment.dkim === 's' ? 'Strict' : 'Relaxed'}</span
+                  >
                   <span class="policy-description">
-                    {results.parsed.alignment.dkim === 's'
+                    {diagnosticState.results.parsed.alignment.dkim === 's'
                       ? 'Exact domain match required'
                       : 'Organizational domain match allowed'}
                   </span>
@@ -322,15 +311,17 @@
               </div>
 
               <!-- SPF Alignment -->
-              <div class="policy-item {getAlignmentColor(results.parsed.alignment.spf)}">
+              <div class="policy-item {getAlignmentColor(diagnosticState.results.parsed.alignment.spf)}">
                 <div class="policy-header">
                   <Icon name="mail" size="sm" />
                   <span>SPF Alignment</span>
                 </div>
                 <div class="policy-value">
-                  <span class="policy-text">{results.parsed.alignment.spf === 's' ? 'Strict' : 'Relaxed'}</span>
+                  <span class="policy-text"
+                    >{diagnosticState.results.parsed.alignment.spf === 's' ? 'Strict' : 'Relaxed'}</span
+                  >
                   <span class="policy-description">
-                    {results.parsed.alignment.spf === 's'
+                    {diagnosticState.results.parsed.alignment.spf === 's'
                       ? 'Exact domain match required'
                       : 'Organizational domain match allowed'}
                   </span>
@@ -344,15 +335,15 @@
                   <span>Failure Options</span>
                 </div>
                 <div class="policy-value">
-                  <span class="policy-text">{results.parsed.reporting.failureOptions}</span>
+                  <span class="policy-text">{diagnosticState.results.parsed.reporting.failureOptions}</span>
                   <span class="policy-description">
-                    {#if results.parsed.reporting.failureOptions === '0'}
+                    {#if diagnosticState.results.parsed.reporting.failureOptions === '0'}
                       DKIM and SPF failure
-                    {:else if results.parsed.reporting.failureOptions === '1'}
+                    {:else if diagnosticState.results.parsed.reporting.failureOptions === '1'}
                       Any alignment failure
-                    {:else if results.parsed.reporting.failureOptions === 'd'}
+                    {:else if diagnosticState.results.parsed.reporting.failureOptions === 'd'}
                       DKIM failure only
-                    {:else if results.parsed.reporting.failureOptions === 's'}
+                    {:else if diagnosticState.results.parsed.reporting.failureOptions === 's'}
                       SPF failure only
                     {:else}
                       Custom configuration
@@ -373,8 +364,8 @@
                   <span>Aggregate Reports (RUA)</span>
                 </div>
                 <div class="reporting-value">
-                  {#if results.parsed.reporting.aggregate}
-                    <span class="email-address">{results.parsed.reporting.aggregate}</span>
+                  {#if diagnosticState.results.parsed.reporting.aggregate}
+                    <span class="email-address">{diagnosticState.results.parsed.reporting.aggregate}</span>
                     <span class="reporting-description">Daily summaries of DMARC activity</span>
                   {:else}
                     <span class="not-configured">Not configured</span>
@@ -389,8 +380,8 @@
                   <span>Forensic Reports (RUF)</span>
                 </div>
                 <div class="reporting-value">
-                  {#if results.parsed.reporting.forensic}
-                    <span class="email-address">{results.parsed.reporting.forensic}</span>
+                  {#if diagnosticState.results.parsed.reporting.forensic}
+                    <span class="email-address">{diagnosticState.results.parsed.reporting.forensic}</span>
                     <span class="reporting-description">Real-time failure reports with message samples</span>
                   {:else}
                     <span class="not-configured">Not configured</span>
@@ -406,7 +397,7 @@
   {/if}
 
   <!-- No Record Found -->
-  {#if results && results.hasRecord === false}
+  {#if diagnosticState.results && diagnosticState.results.hasRecord === false}
     <div class="card warning-card none-found">
       <div class="card-content">
         <div class="warning-content">
@@ -429,19 +420,7 @@
     </div>
   {/if}
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>DMARC Check Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="DMARC Check Failed" error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">

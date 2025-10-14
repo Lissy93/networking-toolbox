@@ -1,19 +1,20 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let host = $state('google.com:443');
   let servername = $state('');
   let useCustomServername = $state(false);
   let protocols = $state('h2,http/1.1');
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let copiedState = $state(false);
-  let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
+  const diagnosticState = useDiagnosticState<any>();
+  const clipboard = useClipboard();
+
+  const examplesList = [
     { host: 'google.com:443', protocols: 'h2,http/1.1', description: 'Google HTTP/2 support' },
     { host: 'github.com:443', protocols: 'h2,http/1.1', description: 'GitHub ALPN negotiation' },
     { host: 'cloudflare.com:443', protocols: 'h2,http/1.1,h3', description: 'Cloudflare HTTP/3 support' },
@@ -21,6 +22,8 @@
     { host: 'cdn.jsdelivr.net:443', protocols: 'h2,http/1.1', description: 'CDN ALPN support' },
     { host: 'api.github.com:443', protocols: 'h2,http/1.1', description: 'API server ALPN' },
   ];
+
+  const examples = useExamples(examplesList);
 
   const commonProtocols = [
     { value: 'h2,http/1.1', label: 'HTTP/2 + HTTP/1.1', description: 'Standard web protocols' },
@@ -44,9 +47,7 @@
   });
 
   async function probeALPN() {
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/tls', {
@@ -70,30 +71,25 @@
         }
       }
 
-      results = await response.json();
+      const data = await response.json();
+      diagnosticState.setResults(data);
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : 'Unknown error occurred';
-    } finally {
-      loading = false;
+      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     host = example.host;
     protocols = example.protocols;
     servername = '';
     useCustomServername = false;
-    selectedExampleIndex = index;
+    examples.select(index);
     probeALPN();
-  }
-
-  function clearExampleSelection() {
-    selectedExampleIndex = null;
   }
 
   function setCommonProtocols(protocolSet: string) {
     protocols = protocolSet;
-    clearExampleSelection();
+    examples.clear();
     if (isInputValid()) probeALPN();
   }
 
@@ -113,18 +109,18 @@
   }
 
   function getNegotiationStatus(): { status: string; icon: string; class: string; description: string } {
-    if (!results)
+    if (!diagnosticState.results)
       return { status: 'Unknown', icon: 'help-circle', class: 'secondary', description: 'No results available' };
 
-    if (results.success && results.negotiatedProtocol) {
-      const protocol = getProtocolInfo(results.negotiatedProtocol);
+    if (diagnosticState.results.success && diagnosticState.results.negotiatedProtocol) {
+      const protocol = getProtocolInfo(diagnosticState.results.negotiatedProtocol);
       return {
         status: 'Successful',
         icon: 'check-circle',
         class: 'success',
         description: `Server selected ${protocol.name}`,
       };
-    } else if (!results.success) {
+    } else if (!diagnosticState.results.success) {
       return {
         status: 'Failed',
         icon: 'x-circle',
@@ -142,29 +138,27 @@
   }
 
   async function copyALPNInfo() {
-    if (!results) return;
+    if (!diagnosticState.results) return;
 
     let text = `ALPN Negotiation Results for ${host}\n`;
     text += `Generated at: ${new Date().toISOString()}\n\n`;
-    text += `Requested Protocols: ${results.requestedProtocols.join(', ')}\n`;
-    text += `Negotiated Protocol: ${results.negotiatedProtocol || 'None'}\n`;
-    text += `TLS Version: ${results.tlsVersion || 'Unknown'}\n`;
-    text += `Success: ${results.success ? 'Yes' : 'No'}\n`;
+    text += `Requested Protocols: ${diagnosticState.results.requestedProtocols.join(', ')}\n`;
+    text += `Negotiated Protocol: ${diagnosticState.results.negotiatedProtocol || 'None'}\n`;
+    text += `TLS Version: ${diagnosticState.results.tlsVersion || 'Unknown'}\n`;
+    text += `Success: ${diagnosticState.results.success ? 'Yes' : 'No'}\n`;
 
     const status = getNegotiationStatus();
     text += `\nNegotiation Status: ${status.status}\n`;
     text += `Description: ${status.description}\n`;
 
-    if (results.negotiatedProtocol) {
-      const protocolInfo = getProtocolInfo(results.negotiatedProtocol);
+    if (diagnosticState.results.negotiatedProtocol) {
+      const protocolInfo = getProtocolInfo(diagnosticState.results.negotiatedProtocol);
       text += `\nSelected Protocol Info:\n`;
       text += `  Name: ${protocolInfo.name}\n`;
       text += `  Description: ${protocolInfo.description}\n`;
     }
 
-    await navigator.clipboard.writeText(text);
-    copiedState = true;
-    setTimeout(() => (copiedState = false), 1500);
+    await clipboard.copy(text);
   }
 </script>
 
@@ -178,28 +172,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>ALPN Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, i (i)}
-          <button
-            class="example-card"
-            class:selected={selectedExampleIndex === i}
-            onclick={() => loadExample(example, i)}
-            use:tooltip={`Test ALPN for ${example.host} (${example.description})`}
-          >
-            <h5>{example.host}</h5>
-            <p>{example.description}</p>
-            <div class="example-protocols mono">{example.protocols}</div>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="ALPN Examples"
+    getLabel={(ex) => ex.host}
+    getDescription={(ex) => ex.description}
+    getTooltip={(ex) => `Test ALPN for ${ex.host} (${ex.description})`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -218,7 +199,7 @@
               placeholder="google.com:443"
               class:invalid={host && !isInputValid}
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (isInputValid()) probeALPN();
               }}
             />
@@ -240,7 +221,7 @@
               bind:value={protocols}
               placeholder="h2,http/1.1"
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (isInputValid()) probeALPN();
               }}
             />
@@ -268,7 +249,7 @@
               type="checkbox"
               bind:checked={useCustomServername}
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (isInputValid()) probeALPN();
               }}
             />
@@ -281,7 +262,7 @@
               placeholder="example.com"
               use:tooltip={'Custom servername for SNI (Server Name Indication)'}
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (isInputValid()) probeALPN();
               }}
             />
@@ -290,9 +271,9 @@
       </div>
 
       <div class="action-section">
-        <button class="lookup-btn" onclick={probeALPN} disabled={loading || !isInputValid}>
-          {#if loading}
-            <Icon name="loader-2" size="sm" animate="spin" />
+        <button class="lookup-btn" onclick={probeALPN} disabled={diagnosticState.loading || !isInputValid}>
+          {#if diagnosticState.loading}
+            <Icon name="loader" size="sm" animate="spin" />
             Testing ALPN...
           {:else}
             <Icon name="shuffle" size="sm" />
@@ -304,18 +285,18 @@
   </div>
 
   <!-- Results -->
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header row">
         <h3>ALPN Negotiation Results</h3>
-        <button class="copy-btn" onclick={copyALPNInfo} disabled={copiedState}>
-          <Icon name={copiedState ? 'check' : 'copy'} size="xs" />
-          {copiedState ? 'Copied!' : 'Copy Results'}
+        <button class="copy-btn" onclick={copyALPNInfo} disabled={clipboard.isCopied()}>
+          <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
+          {clipboard.isCopied() ? 'Copied!' : 'Copy Results'}
         </button>
       </div>
       <div class="card-content">
         <!-- Negotiation Overview -->
-        {#if results}
+        {#if diagnosticState.results}
           {@const status = getNegotiationStatus()}
           <div class="status-overview">
             <div class="status-item {status.class}">
@@ -325,11 +306,11 @@
                 <p class="status-desc">{status.description}</p>
               </div>
             </div>
-            {#if results.tlsVersion}
+            {#if diagnosticState.results.tlsVersion}
               <div class="status-item success">
                 <Icon name="shield-check" size="sm" />
                 <div>
-                  <span class="status-title">TLS Version: {results.tlsVersion}</span>
+                  <span class="status-title">TLS Version: {diagnosticState.results.tlsVersion}</span>
                   <p class="status-desc">Connection established successfully</p>
                 </div>
               </div>
@@ -345,7 +326,7 @@
             <div class="detail-section">
               <h5>Requested Protocols</h5>
               <div class="protocol-list">
-                {#each results.requestedProtocols as protocol, i (i)}
+                {#each diagnosticState.results.requestedProtocols as protocol, i (i)}
                   {@const protocolInfo = getProtocolInfo(protocol)}
                   <div class="protocol-item requested">
                     <div class="protocol-header">
@@ -359,8 +340,8 @@
               </div>
             </div>
 
-            {#if results.negotiatedProtocol}
-              {@const selectedProtocol = getProtocolInfo(results.negotiatedProtocol)}
+            {#if diagnosticState.results.negotiatedProtocol}
+              {@const selectedProtocol = getProtocolInfo(diagnosticState.results.negotiatedProtocol)}
               <div class="detail-section">
                 <h5>Selected Protocol</h5>
                 <div class="selected-protocol">
@@ -368,7 +349,7 @@
                     <div class="protocol-header">
                       <span class="success-icon"><Icon name="check-circle" size="sm" /></span>
                       <span class="protocol-name">{selectedProtocol.name}</span>
-                      <span class="protocol-id mono">({results.negotiatedProtocol})</span>
+                      <span class="protocol-id mono">({diagnosticState.results.negotiatedProtocol})</span>
                     </div>
                     <p class="protocol-desc">{selectedProtocol.description}</p>
                   </div>
@@ -387,18 +368,18 @@
         </div>
 
         <!-- Connection Info -->
-        {#if results.servername || results.tlsVersion}
+        {#if diagnosticState.results.servername || diagnosticState.results.tlsVersion}
           <div class="connection-section">
             <h4>Connection Information</h4>
             <div class="detail-grid">
               <div class="detail-item">
                 <span class="detail-label">Server Name:</span>
-                <span class="detail-value mono">{results.servername}</span>
+                <span class="detail-value mono">{diagnosticState.results.servername}</span>
               </div>
-              {#if results.tlsVersion}
+              {#if diagnosticState.results.tlsVersion}
                 <div class="detail-item">
                   <span class="detail-label">TLS Version:</span>
-                  <span class="detail-value">{results.tlsVersion}</span>
+                  <span class="detail-value">{diagnosticState.results.tlsVersion}</span>
                 </div>
               {/if}
             </div>
@@ -408,19 +389,7 @@
     </div>
   {/if}
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>ALPN Negotiation Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="ALPN Negotiation Failed" error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">

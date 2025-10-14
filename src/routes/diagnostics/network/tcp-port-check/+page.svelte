@@ -1,17 +1,18 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let targets = $state('google.com:443\ngithub.com:443\nstackoverflow.com:443');
   let timeout = $state(5000);
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let copiedState = $state(false);
-  let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
+  const diagnosticState = useDiagnosticState<any>();
+  const clipboard = useClipboard();
+
+  const examplesList = [
     {
       targets: 'google.com:443\ngithub.com:443\nstackoverflow.com:443',
       description: 'Common HTTPS ports',
@@ -38,6 +39,8 @@
     },
   ];
 
+  const examples = useExamples(examplesList);
+
   const commonPorts = [
     { port: '22', service: 'SSH', description: 'Secure Shell' },
     { port: '80', service: 'HTTP', description: 'Web traffic' },
@@ -63,9 +66,7 @@
   });
 
   async function checkPorts() {
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     // Calculate targets list at function call time
     const currentTargets = targets
@@ -96,30 +97,25 @@
         }
       }
 
-      results = await response.json();
+      const data = await response.json();
+      diagnosticState.setResults(data);
     } catch (err: unknown) {
-      error = (err as Error).message;
-    } finally {
-      loading = false;
+      diagnosticState.setError((err as Error).message);
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     targets = example.targets;
     timeout = 5000;
-    selectedExampleIndex = index;
+    examples.select(index);
     checkPorts();
-  }
-
-  function clearExampleSelection() {
-    selectedExampleIndex = null;
   }
 
   function addCommonPort(port: string) {
     const currentTargets = targets.trim();
     const newTarget = `example.com:${port}`;
     targets = currentTargets ? `${currentTargets}\n${newTarget}` : newTarget;
-    clearExampleSelection();
+    examples.clear();
   }
 
   function getPortStatus(result: { open: boolean; latency?: number; error?: string }): {
@@ -143,29 +139,29 @@
   }
 
   async function copyResults() {
-    if (!results) return;
+    if (!diagnosticState.results) return;
 
     let text = `TCP Port Check Results\n`;
     text += `Generated at: ${new Date().toISOString()}\n\n`;
     text += `Summary:\n`;
-    text += `  Total ports: ${results.summary.total}\n`;
-    text += `  Open: ${results.summary.open}\n`;
-    text += `  Closed: ${results.summary.closed}\n`;
-    if (results.summary.avgLatency) {
-      text += `  Average latency: ${results.summary.avgLatency}ms\n`;
+    text += `  Total ports: ${diagnosticState.results.summary.total}\n`;
+    text += `  Open: ${diagnosticState.results.summary.open}\n`;
+    text += `  Closed: ${diagnosticState.results.summary.closed}\n`;
+    if (diagnosticState.results.summary.avgLatency) {
+      text += `  Average latency: ${diagnosticState.results.summary.avgLatency}ms\n`;
     }
     text += `\nResults:\n`;
 
     (
-      results as { results: Array<{ host: string; port: number; open: boolean; latency?: number; error?: string }> }
+      diagnosticState.results as {
+        results: Array<{ host: string; port: number; open: boolean; latency?: number; error?: string }>;
+      }
     ).results.forEach((result) => {
       const status = result.open ? `OPEN (${result.latency}ms)` : `CLOSED${result.error ? ` - ${result.error}` : ''}`;
       text += `  ${result.host}:${result.port} - ${status}\n`;
     });
 
-    await navigator.clipboard.writeText(text);
-    copiedState = true;
-    setTimeout(() => (copiedState = false), 1500);
+    await clipboard.copy(text);
   }
 </script>
 
@@ -179,34 +175,19 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>Port Check Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, i (i)}
-          <button
-            class="example-card"
-            class:selected={selectedExampleIndex === i}
-            onclick={() => loadExample(example, i)}
-            use:tooltip={`Test ports: ${example.targets.split('\n').join(', ')}`}
-          >
-            <h5>{example.description}</h5>
-            <div class="example-targets">
-              {#each example.targets.split('\n').slice(0, 3) as target, index (index)}
-                <span class="target-item mono">{target}</span>
-              {/each}
-              {#if example.targets.split('\n').length > 3}
-                <span class="more-targets">+{example.targets.split('\n').length - 3} more</span>
-              {/if}
-            </div>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="Port Check Examples"
+    getLabel={(ex) => ex.description}
+    getDescription={(ex) => {
+      const targets = ex.targets.split('\n');
+      const preview = targets.slice(0, 3).join(', ');
+      return targets.length > 3 ? `${preview} (+${targets.length - 3} more)` : preview;
+    }}
+    getTooltip={(ex) => `Test ports: ${ex.targets.split('\n').join(', ')}`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -225,7 +206,7 @@
               rows="6"
               class:invalid={targets && !isInputValid()}
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (isInputValid()) checkPorts();
               }}
             ></textarea>
@@ -270,7 +251,7 @@
               max="30000"
               step="1000"
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (isInputValid()) checkPorts();
               }}
             />
@@ -279,8 +260,8 @@
       </div>
 
       <div class="action-section">
-        <button class="lookup-btn" onclick={checkPorts} disabled={loading || !isInputValid}>
-          {#if loading}
+        <button class="lookup-btn" onclick={checkPorts} disabled={diagnosticState.loading || !isInputValid()}>
+          {#if diagnosticState.loading}
             <Icon name="loader-2" size="sm" animate="spin" />
             Checking Ports...
           {:else}
@@ -293,13 +274,13 @@
   </div>
 
   <!-- Results -->
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header row">
         <h3>Port Check Results</h3>
-        <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
-          <Icon name={copiedState ? 'check' : 'copy'} size="xs" />
-          {copiedState ? 'Copied!' : 'Copy Results'}
+        <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
+          <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
+          {clipboard.isCopied() ? 'Copied!' : 'Copy Results'}
         </button>
       </div>
       <div class="card-content">
@@ -308,22 +289,22 @@
           <div class="status-item success">
             <Icon name="check-circle" size="sm" />
             <div>
-              <span class="status-title">{results.summary.open} Open</span>
+              <span class="status-title">{diagnosticState.results.summary.open} Open</span>
               <p class="status-desc">Ports accepting connections</p>
             </div>
           </div>
           <div class="status-item error">
             <Icon name="x-circle" size="sm" />
             <div>
-              <span class="status-title">{results.summary.closed} Closed</span>
+              <span class="status-title">{diagnosticState.results.summary.closed} Closed</span>
               <p class="status-desc">Ports not responding</p>
             </div>
           </div>
-          {#if results.summary.avgLatency}
+          {#if diagnosticState.results.summary.avgLatency}
             <div class="status-item">
               <Icon name="zap" size="sm" />
               <div>
-                <span class="status-title">{results.summary.avgLatency}ms</span>
+                <span class="status-title">{diagnosticState.results.summary.avgLatency}ms</span>
                 <p class="status-desc">Average latency</p>
               </div>
             </div>
@@ -332,9 +313,9 @@
 
         <!-- Detailed Results -->
         <div class="ports-section">
-          <h4>Port Status ({results.results.length} targets)</h4>
+          <h4>Port Status ({diagnosticState.results.results.length} targets)</h4>
           <div class="ports-list">
-            {#each results.results as result, index (index)}
+            {#each diagnosticState.results.results as result, index (index)}
               {@const status = getPortStatus(result)}
               <div class="port-result {status.class}">
                 <div class="port-header">
@@ -357,19 +338,7 @@
     </div>
   {/if}
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>Port Check Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="Port Check Failed" error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">

@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import { tlsHandshakeContent } from '$lib/content/tls-handshake';
   import '../../../../styles/diagnostics-pages.scss';
 
@@ -32,13 +34,9 @@
 
   let hostname = $state('google.com');
   let port = $state(443);
-  let loading = $state(false);
-  let results = $state<TLSHandshakeResponse | null>(null);
-  let error = $state<string | null>(null);
-  let copiedState = $state(false);
-  let selectedExampleIndex = $state<number | null>(null);
-
-  const examples = [
+  const diagnosticState = useDiagnosticState<TLSHandshakeResponse>();
+  const clipboard = useClipboard();
+  const examplesList = [
     { hostname: 'as93.net', port: 443, description: 'Alicia Sykes' },
     { hostname: 'apple.com', port: 443, description: 'Apple (Fast - 28ms)' },
     { hostname: 'cloudflare.com', port: 443, description: 'Cloudflare' },
@@ -46,11 +44,10 @@
     { hostname: 'baidu.com', port: 443, description: 'Baidu (China - TLS 1.2)' },
     { hostname: 'zoom.us', port: 443, description: 'Zoom' },
   ];
+  const examples = useExamples(examplesList);
 
   async function analyzeHandshake() {
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/tls-handshake', {
@@ -64,51 +61,43 @@
         throw new Error(errorData.message || `Analysis failed: ${response.status}`);
       }
 
-      results = await response.json();
+      diagnosticState.setResults(await response.json());
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : 'Unknown error occurred';
-    } finally {
-      loading = false;
+      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     hostname = example.hostname;
     port = example.port;
-    selectedExampleIndex = index;
+    examples.select(index);
     analyzeHandshake();
   }
 
-  function clearExampleSelection() {
-    selectedExampleIndex = null;
-  }
-
   async function copyResults() {
-    if (!results) return;
+    if (!diagnosticState.results) return;
 
-    let text = `TLS Handshake Analysis for ${results.hostname}:${results.port}\n`;
-    text += `Generated at: ${results.timestamp}\n\n`;
-    text += `Total Time: ${results.totalTime}ms\n`;
-    text += `TLS Version: ${results.tlsVersion}\n`;
-    text += `Cipher Suite: ${results.cipherSuite}\n`;
-    if (results.alpnProtocol) text += `ALPN Protocol: ${results.alpnProtocol}\n`;
+    let text = `TLS Handshake Analysis for ${diagnosticState.results.hostname}:${diagnosticState.results.port}\n`;
+    text += `Generated at: ${diagnosticState.results.timestamp}\n\n`;
+    text += `Total Time: ${diagnosticState.results.totalTime}ms\n`;
+    text += `TLS Version: ${diagnosticState.results.tlsVersion}\n`;
+    text += `Cipher Suite: ${diagnosticState.results.cipherSuite}\n`;
+    if (diagnosticState.results.alpnProtocol) text += `ALPN Protocol: ${diagnosticState.results.alpnProtocol}\n`;
 
     text += `\nHandshake Phases:\n`;
-    results.phases.forEach((phase) => {
+    diagnosticState.results.phases.forEach((phase) => {
       text += `  ${phase.phase}: ${phase.duration}ms (at ${phase.timestamp}ms)\n`;
     });
 
-    if (results.certificateInfo) {
+    if (diagnosticState.results.certificateInfo) {
       text += `\nCertificate:\n`;
-      text += `  Subject: ${results.certificateInfo.subject}\n`;
-      text += `  Issuer: ${results.certificateInfo.issuer}\n`;
-      text += `  Valid From: ${results.certificateInfo.validFrom}\n`;
-      text += `  Valid To: ${results.certificateInfo.validTo}\n`;
+      text += `  Subject: ${diagnosticState.results.certificateInfo.subject}\n`;
+      text += `  Issuer: ${diagnosticState.results.certificateInfo.issuer}\n`;
+      text += `  Valid From: ${diagnosticState.results.certificateInfo.validFrom}\n`;
+      text += `  Valid To: ${diagnosticState.results.certificateInfo.validTo}\n`;
     }
 
-    await navigator.clipboard.writeText(text);
-    copiedState = true;
-    setTimeout(() => (copiedState = false), 1500);
+    clipboard.copy(text);
   }
 </script>
 
@@ -119,27 +108,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>Example Hosts</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, i (i)}
-          <button
-            class="example-card"
-            class:selected={selectedExampleIndex === i}
-            onclick={() => loadExample(example, i)}
-            use:tooltip={`Analyze ${example.hostname}`}
-          >
-            <h5>{example.hostname}</h5>
-            <p>{example.description}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="Example Hosts"
+    getLabel={(ex) => ex.hostname}
+    getDescription={(ex) => ex.description}
+    getTooltip={(ex) => `Analyze ${ex.hostname}`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -149,24 +126,24 @@
     <div class="card-content">
       <div class="lookup-form">
         <div class="input-row">
-          <label for="hostname" use:tooltip={'Enter hostname (e.g., google.com)'}> Hostname </label>
+          <label for="hostname"> Hostname </label>
           <input
             id="hostname"
             type="text"
             bind:value={hostname}
             placeholder="google.com"
             onchange={() => {
-              clearExampleSelection();
+              examples.clear();
               if (hostname.trim()) analyzeHandshake();
             }}
           />
         </div>
         <div class="port-row">
-          <label for="port" use:tooltip={'Port number (default: 443)'}> Port </label>
+          <label for="port"> Port </label>
           <input id="port" type="number" bind:value={port} placeholder="443" min="1" max="65535" />
         </div>
-        <button class="lookup-btn" onclick={analyzeHandshake} disabled={loading || !hostname.trim()}>
-          {#if loading}
+        <button class="lookup-btn" onclick={analyzeHandshake} disabled={diagnosticState.loading || !hostname.trim()}>
+          {#if diagnosticState.loading}
             <Icon name="loader" size="sm" animate="spin" />
             Analyzing...
           {:else}
@@ -179,15 +156,15 @@
   </div>
 
   <!-- Results -->
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header row">
         <h3>
-          Handshake Results for {results.hostname}:{results.port}
+          Handshake Results for {diagnosticState.results.hostname}:{diagnosticState.results.port}
         </h3>
-        <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
-          <Icon name={copiedState ? 'check' : 'copy'} size="xs" />
-          {copiedState ? 'Copied!' : 'Copy Results'}
+        <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
+          <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
+          {clipboard.isCopied() ? 'Copied!' : 'Copy Results'}
         </button>
       </div>
       <div class="card-content">
@@ -200,29 +177,29 @@
                 <Icon name="clock" size="sm" />
                 <div class="info-content">
                   <span class="info-label">Total Time</span>
-                  <span class="info-value highlight">{results.totalTime}ms</span>
+                  <span class="info-value highlight">{diagnosticState.results.totalTime}ms</span>
                 </div>
               </div>
               <div class="info-item">
                 <Icon name="shield" size="sm" />
                 <div class="info-content">
                   <span class="info-label">TLS Version</span>
-                  <span class="info-value">{results.tlsVersion}</span>
+                  <span class="info-value">{diagnosticState.results.tlsVersion}</span>
                 </div>
               </div>
               <div class="info-item">
                 <Icon name="key" size="sm" />
                 <div class="info-content">
                   <span class="info-label">Cipher Suite</span>
-                  <span class="info-value cipher">{results.cipherSuite}</span>
+                  <span class="info-value cipher">{diagnosticState.results.cipherSuite}</span>
                 </div>
               </div>
-              {#if results.alpnProtocol}
+              {#if diagnosticState.results.alpnProtocol}
                 <div class="info-item">
                   <Icon name="layers" size="sm" />
                   <div class="info-content">
                     <span class="info-label">ALPN Protocol</span>
-                    <span class="info-value">{results.alpnProtocol}</span>
+                    <span class="info-value">{diagnosticState.results.alpnProtocol}</span>
                   </div>
                 </div>
               {/if}
@@ -230,7 +207,7 @@
           </div>
 
           <!-- Certificate Card -->
-          {#if results.certificateInfo}
+          {#if diagnosticState.results.certificateInfo}
             <div class="result-card">
               <h4>Certificate Information</h4>
               <div class="info-list">
@@ -238,14 +215,14 @@
                   <Icon name="file" size="sm" />
                   <div class="info-content">
                     <span class="info-label">Subject</span>
-                    <span class="info-value">{results.certificateInfo.subject}</span>
+                    <span class="info-value">{diagnosticState.results.certificateInfo.subject}</span>
                   </div>
                 </div>
                 <div class="info-item">
                   <Icon name="building" size="sm" />
                   <div class="info-content">
                     <span class="info-label">Issuer</span>
-                    <span class="info-value">{results.certificateInfo.issuer}</span>
+                    <span class="info-value">{diagnosticState.results.certificateInfo.issuer}</span>
                   </div>
                 </div>
                 <div class="info-item">
@@ -253,17 +230,17 @@
                   <div class="info-content">
                     <span class="info-label">Valid</span>
                     <span class="info-value cert-date">
-                      {new Date(results.certificateInfo.validFrom).toLocaleDateString()} →
-                      {new Date(results.certificateInfo.validTo).toLocaleDateString()}
+                      {new Date(diagnosticState.results.certificateInfo.validFrom).toLocaleDateString()} →
+                      {new Date(diagnosticState.results.certificateInfo.validTo).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
-                {#if results.certificateInfo.san}
+                {#if diagnosticState.results.certificateInfo.san}
                   <div class="info-item">
                     <Icon name="globe" size="sm" />
                     <div class="info-content">
                       <span class="info-label">SANs</span>
-                      <span class="info-value">{results.certificateInfo.san.length} domains</span>
+                      <span class="info-value">{diagnosticState.results.certificateInfo.san.length} domains</span>
                     </div>
                   </div>
                 {/if}
@@ -275,7 +252,7 @@
           <div class="result-card timeline-card">
             <h4>Handshake Timeline</h4>
             <div class="timeline">
-              {#each results.phases as phase (phase.phase)}
+              {#each diagnosticState.results.phases as phase (phase.phase)}
                 <div class="timeline-item">
                   <div class="timeline-marker"></div>
                   <div class="timeline-content">
@@ -301,19 +278,7 @@
     </div>
   {/if}
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>Analysis Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="Analysis Failed" error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">

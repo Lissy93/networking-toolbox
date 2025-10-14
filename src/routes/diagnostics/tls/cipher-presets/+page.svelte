@@ -1,30 +1,27 @@
 <script lang="ts">
-  import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useDiagnosticState, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let hostname = $state('example.com');
   let port = $state('443');
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let selectedExampleIndex = $state<number | null>(null);
-
-  const examples = [
+  const diagnosticState = useDiagnosticState<any>();
+  const examplesList = [
     { host: 'github.com', port: '443', description: 'GitHub cipher support' },
     { host: 'cloudflare.com', port: '443', description: 'Cloudflare cipher support' },
     { host: 'google.com', port: '443', description: 'Google cipher support' },
   ];
+  const examples = useExamples(examplesList);
 
   async function testCiphers() {
     if (!hostname?.trim()) {
-      error = 'Please enter a hostname';
+      diagnosticState.setError('Please enter a hostname');
       return;
     }
 
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/tls', {
@@ -43,23 +40,17 @@
         throw new Error(data.message || 'Failed to test cipher presets');
       }
 
-      results = data;
+      diagnosticState.setResults(data);
     } catch (err) {
-      error = err instanceof Error ? err.message : 'An error occurred';
-    } finally {
-      loading = false;
+      diagnosticState.setError(err instanceof Error ? err.message : 'An error occurred');
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     hostname = example.host;
     port = example.port;
-    selectedExampleIndex = index;
+    examples.select(index);
     testCiphers();
-  }
-
-  function clearExampleSelection() {
-    selectedExampleIndex = null;
   }
 
   function getPresetScore(preset: any): number {
@@ -88,27 +79,14 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, i (i)}
-          <button
-            class="example-card"
-            class:selected={selectedExampleIndex === i}
-            onclick={() => loadExample(example, i)}
-            use:tooltip={`Test cipher presets for ${example.host}:${example.port}`}
-          >
-            <h5>{example.host}:{example.port}</h5>
-            <p>{example.description}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    getLabel={(ex) => `${ex.host}:${ex.port}`}
+    getDescription={(ex) => ex.description}
+    getTooltip={(ex) => `Test cipher presets for ${ex.host}:${ex.port}`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -124,8 +102,8 @@
             type="text"
             bind:value={hostname}
             placeholder="example.com"
-            disabled={loading}
-            onchange={() => clearExampleSelection()}
+            disabled={diagnosticState.loading}
+            onchange={() => examples.clear()}
             onkeydown={(e) => e.key === 'Enter' && testCiphers()}
             class="flex-grow"
           />
@@ -134,13 +112,13 @@
             type="text"
             bind:value={port}
             placeholder="443"
-            disabled={loading}
-            onchange={() => clearExampleSelection()}
+            disabled={diagnosticState.loading}
+            onchange={() => examples.clear()}
             onkeydown={(e) => e.key === 'Enter' && testCiphers()}
             class="port-input"
           />
-          <button onclick={testCiphers} disabled={loading} class="primary">
-            {#if loading}
+          <button onclick={testCiphers} disabled={diagnosticState.loading} class="primary">
+            {#if diagnosticState.loading}
               <Icon name="loader" size="sm" animate="spin" />
               Testing...
             {:else}
@@ -153,21 +131,9 @@
     </div>
   </div>
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>Cipher Test Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="Cipher Test Failed" error={diagnosticState.error} />
 
-  {#if loading}
+  {#if diagnosticState.loading}
     <div class="card">
       <div class="card-content">
         <div class="loading-state">
@@ -181,7 +147,7 @@
     </div>
   {/if}
 
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header">
         <h3>Cipher Presets Results</h3>
@@ -189,7 +155,7 @@
       <div class="card-content">
         <div class="results-section">
           <div class="presets-grid">
-            {#each results.presets as preset (preset.name)}
+            {#each diagnosticState.results.presets as preset (preset.name)}
               <div class="preset-card {preset.level}" class:supported={preset.supported}>
                 <div class="preset-header">
                   <div class="preset-title">
@@ -207,15 +173,11 @@
 
                 <div class="preset-stats">
                   <div class="stat">
-                    <span class="stat-label" use:tooltip={'Number of supported ciphers out of total tested'}
-                      >Supported:</span
-                    >
+                    <span class="stat-label">Supported:</span>
                     <span class="stat-value">{preset.supportedCiphers.length}/{preset.ciphers.length}</span>
                   </div>
                   <div class="stat">
-                    <span class="stat-label" use:tooltip={'Percentage of ciphers in this preset that are supported'}
-                      >Coverage:</span
-                    >
+                    <span class="stat-label">Coverage:</span>
                     <span class="stat-value">{getPresetScore(preset)}%</span>
                   </div>
                 </div>
@@ -228,18 +190,10 @@
 
                 {#if preset.protocols}
                   <div class="protocols-section">
-                    <span class="protocols-label" use:tooltip={'TLS/SSL protocol versions supported by this preset'}
-                      >Protocols:</span
-                    >
+                    <span class="protocols-label">Protocols:</span>
                     <div class="protocols-list">
                       {#each preset.protocols as protocol (protocol.name)}
-                        <span
-                          class="protocol-badge"
-                          class:supported={protocol.supported}
-                          use:tooltip={protocol.supported
-                            ? 'Supported protocol version'
-                            : 'Unsupported protocol version'}
-                        >
+                        <span class="protocol-badge" class:supported={protocol.supported}>
                           {protocol.name}
                         </span>
                       {/each}
@@ -285,25 +239,25 @@
             {/each}
           </div>
 
-          {#if results.summary}
+          {#if diagnosticState.results.summary}
             <div class="summary-section">
               <h3>Overall Assessment</h3>
               <div class="summary-content">
                 <div class="summary-score">
-                  <div class="score-circle grade-{results.summary.overallGrade.toLowerCase()}">
-                    {results.summary.overallGrade}
+                  <div class="score-circle grade-{diagnosticState.results.summary.overallGrade.toLowerCase()}">
+                    {diagnosticState.results.summary.overallGrade}
                   </div>
                   <div class="score-details">
-                    <h4>{results.summary.rating}</h4>
-                    <p>{results.summary.description}</p>
+                    <h4>{diagnosticState.results.summary.rating}</h4>
+                    <p>{diagnosticState.results.summary.description}</p>
                   </div>
                 </div>
 
-                {#if results.summary.recommendations && results.summary.recommendations.length > 0}
+                {#if diagnosticState.results.summary.recommendations && diagnosticState.results.summary.recommendations.length > 0}
                   <div class="recommendations">
                     <h4>Recommendations</h4>
                     <ul>
-                      {#each results.summary.recommendations as rec (rec)}
+                      {#each diagnosticState.results.summary.recommendations as rec (rec)}
                         <li>{rec}</li>
                       {/each}
                     </ul>

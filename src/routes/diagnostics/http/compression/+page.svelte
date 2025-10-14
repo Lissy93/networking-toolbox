@@ -1,20 +1,22 @@
 <script lang="ts">
-  import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useDiagnosticState, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let url = $state('https://example.com');
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
+  const diagnosticState = useDiagnosticState<any>();
+
+  const examplesList = [
     { url: 'https://httpbin.org/gzip', description: 'HTTPBin gzip test' },
     { url: 'https://www.google.com', description: 'Google (likely compressed)' },
     { url: 'https://github.com', description: 'GitHub (modern compression)' },
     { url: 'https://www.cloudflare.com', description: 'Cloudflare (brotli support)' },
   ];
+
+  const examples = useExamples(examplesList);
 
   const isInputValid = $derived(() => {
     const trimmedUrl = url.trim();
@@ -29,13 +31,11 @@
 
   async function checkCompression() {
     if (!isInputValid) {
-      error = 'Please enter a valid HTTP/HTTPS URL';
+      diagnosticState.setError('Please enter a valid HTTP/HTTPS URL');
       return;
     }
 
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/http', {
@@ -53,22 +53,16 @@
         throw new Error(data.message || 'Failed to check compression');
       }
 
-      results = data;
+      diagnosticState.setResults(data);
     } catch (err) {
-      error = err instanceof Error ? err.message : 'An error occurred';
-    } finally {
-      loading = false;
+      diagnosticState.setError(err instanceof Error ? err.message : 'An error occurred');
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     url = example.url;
-    selectedExampleIndex = index;
+    examples.select(index);
     checkCompression();
-  }
-
-  function clearExampleSelection() {
-    selectedExampleIndex = null;
   }
 
   function formatBytes(bytes: number): string {
@@ -101,27 +95,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, i (i)}
-          <button
-            class="example-card"
-            class:selected={selectedExampleIndex === i}
-            onclick={() => loadExample(example, i)}
-            use:tooltip={`Test compression for ${example.url}`}
-          >
-            <h5>{example.url}</h5>
-            <p>{example.description}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="Compression Examples"
+    getLabel={(ex) => ex.url}
+    getDescription={(ex) => ex.description}
+    getTooltip={(ex) => `Test compression for ${ex.url}`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -137,12 +119,12 @@
             type="url"
             bind:value={url}
             placeholder="https://example.com"
-            disabled={loading}
-            onchange={() => clearExampleSelection()}
+            disabled={diagnosticState.loading}
+            onchange={() => examples.clear()}
             onkeydown={(e) => e.key === 'Enter' && checkCompression()}
           />
-          <button onclick={checkCompression} disabled={loading || !isInputValid} class="primary">
-            {#if loading}
+          <button onclick={checkCompression} disabled={diagnosticState.loading || !isInputValid} class="primary">
+            {#if diagnosticState.loading}
               <Icon name="loader" size="sm" animate="spin" />
               Testing...
             {:else}
@@ -155,21 +137,9 @@
     </div>
   </div>
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>Compression Test Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="Compression Test Failed" error={diagnosticState.error} />
 
-  {#if loading}
+  {#if diagnosticState.loading}
     <div class="card">
       <div class="card-content">
         <div class="loading-state">
@@ -183,7 +153,7 @@
     </div>
   {/if}
 
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header">
         <h3>Compression Results</h3>
@@ -198,32 +168,35 @@
             <div class="stats-grid">
               <div class="stat-card">
                 <div class="stat-label">Server Compression</div>
-                <div class="stat-value" class:success={results.serverCompression.enabled}>
-                  <Icon name={results.serverCompression.enabled ? 'check-circle' : 'x-circle'} size="sm" />
-                  {results.serverCompression.enabled ? 'Enabled' : 'Disabled'}
+                <div class="stat-value" class:success={diagnosticState.results.serverCompression.enabled}>
+                  <Icon
+                    name={diagnosticState.results.serverCompression.enabled ? 'check-circle' : 'x-circle'}
+                    size="sm"
+                  />
+                  {diagnosticState.results.serverCompression.enabled ? 'Enabled' : 'Disabled'}
                 </div>
-                {#if results.serverCompression.encoding}
-                  <div class="stat-detail">{results.serverCompression.encoding}</div>
+                {#if diagnosticState.results.serverCompression.encoding}
+                  <div class="stat-detail">{diagnosticState.results.serverCompression.encoding}</div>
                 {/if}
               </div>
 
               <div class="stat-card">
                 <div class="stat-label">Best Compression</div>
                 <div class="stat-value">
-                  <Icon name={getCompressionIcon(results.bestCompression.encoding)} size="sm" />
-                  {results.bestCompression.encoding}
+                  <Icon name={getCompressionIcon(diagnosticState.results.bestCompression.encoding)} size="sm" />
+                  {diagnosticState.results.bestCompression.encoding}
                 </div>
-                <div class="stat-detail">{results.bestCompression.ratio.toFixed(1)}% reduction</div>
+                <div class="stat-detail">{diagnosticState.results.bestCompression.ratio.toFixed(1)}% reduction</div>
               </div>
 
               <div class="stat-card">
                 <div class="stat-label">Uncompressed Size</div>
-                <div class="stat-value">{formatBytes(results.uncompressed.size)}</div>
+                <div class="stat-value">{formatBytes(diagnosticState.results.uncompressed.size)}</div>
               </div>
 
               <div class="stat-card">
                 <div class="stat-label">Time Taken</div>
-                <div class="stat-value">{results.timings.total}ms</div>
+                <div class="stat-value">{diagnosticState.results.timings.total}ms</div>
               </div>
             </div>
           </div>
@@ -236,8 +209,11 @@
           </div>
           <div class="card-content">
             <div class="compression-grid">
-              {#each results.compressionResults as result (result.encoding)}
-                <div class="compression-card" class:best={result.encoding === results.bestCompression.encoding}>
+              {#each diagnosticState.results.compressionResults as result (result.encoding)}
+                <div
+                  class="compression-card"
+                  class:best={result.encoding === diagnosticState.results.bestCompression.encoding}
+                >
                   <div class="compression-header">
                     <div class="compression-type">
                       <Icon name={getCompressionIcon(result.encoding)} size="sm" />
@@ -256,11 +232,11 @@
                           <div class="original-bar"></div>
                           <div
                             class="compressed-bar"
-                            style="width: {(result.compressedSize / results.uncompressed.size) * 100}%"
+                            style="width: {(result.compressedSize / diagnosticState.results.uncompressed.size) * 100}%"
                           ></div>
                         </div>
                         <div class="size-labels">
-                          <span class="original-size">{formatBytes(results.uncompressed.size)}</span>
+                          <span class="original-size">{formatBytes(diagnosticState.results.uncompressed.size)}</span>
                           <span class="compressed-size">{formatBytes(result.compressedSize)}</span>
                         </div>
                       </div>
@@ -290,7 +266,7 @@
           </div>
           <div class="card-content">
             <div class="headers-grid">
-              {#each Object.entries(results.headers) as [key, value] (key)}
+              {#each Object.entries(diagnosticState.results.headers) as [key, value] (key)}
                 <div class="header-item">
                   <span class="header-key">{key}</span>
                   <span class="header-value">{value}</span>

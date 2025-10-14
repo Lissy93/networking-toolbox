@@ -1,30 +1,27 @@
 <script lang="ts">
-  import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useDiagnosticState, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let hostname = $state('example.com');
   let port = $state('443');
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let selectedExampleIndex = $state<number | null>(null);
-
-  const examples = [
+  const diagnosticState = useDiagnosticState<any>();
+  const examplesList = [
     { host: 'cloudflare.com', port: '443', description: 'Cloudflare - OCSP stapling enabled' },
     { host: 'www.digicert.com', port: '443', description: 'DigiCert - OCSP stapling enabled' },
     { host: 'github.com', port: '443', description: 'GitHub - OCSP stapling disabled' },
   ];
+  const examples = useExamples(examplesList);
 
   async function checkOCSP() {
     if (!hostname?.trim()) {
-      error = 'Please enter a hostname';
+      diagnosticState.setError('Please enter a hostname');
       return;
     }
 
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/tls', {
@@ -43,23 +40,17 @@
         throw new Error(data.message || 'Failed to check OCSP stapling');
       }
 
-      results = data;
+      diagnosticState.setResults(data);
     } catch (err) {
-      error = err instanceof Error ? err.message : 'An error occurred';
-    } finally {
-      loading = false;
+      diagnosticState.setError(err instanceof Error ? err.message : 'An error occurred');
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     hostname = example.host;
     port = example.port;
-    selectedExampleIndex = index;
+    examples.select(index);
     checkOCSP();
-  }
-
-  function clearExampleSelection() {
-    selectedExampleIndex = null;
   }
 
   function formatDate(dateStr: string): string {
@@ -75,27 +66,14 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, i (i)}
-          <button
-            class="example-card"
-            class:selected={selectedExampleIndex === i}
-            onclick={() => loadExample(example, i)}
-            use:tooltip={`Check OCSP stapling for ${example.host}:${example.port}`}
-          >
-            <h5>{example.host}:{example.port}</h5>
-            <p>{example.description}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    getLabel={(ex) => `${ex.host}:${ex.port}`}
+    getDescription={(ex) => ex.description}
+    getTooltip={(ex) => `Check OCSP stapling for ${ex.host}:${ex.port}`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -111,8 +89,8 @@
             type="text"
             bind:value={hostname}
             placeholder="example.com"
-            disabled={loading}
-            onchange={() => clearExampleSelection()}
+            disabled={diagnosticState.loading}
+            onchange={() => examples.clear()}
             onkeydown={(e) => e.key === 'Enter' && checkOCSP()}
             class="flex-grow"
           />
@@ -121,13 +99,13 @@
             type="text"
             bind:value={port}
             placeholder="443"
-            disabled={loading}
-            onchange={() => clearExampleSelection()}
+            disabled={diagnosticState.loading}
+            onchange={() => examples.clear()}
             onkeydown={(e) => e.key === 'Enter' && checkOCSP()}
             class="port-input"
           />
-          <button onclick={checkOCSP} disabled={loading} class="primary">
-            {#if loading}
+          <button onclick={checkOCSP} disabled={diagnosticState.loading} class="primary">
+            {#if diagnosticState.loading}
               <Icon name="loader" size="sm" animate="spin" />
               Checking...
             {:else}
@@ -140,21 +118,9 @@
     </div>
   </div>
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>OCSP Check Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="OCSP Check Failed" error={diagnosticState.error} />
 
-  {#if loading}
+  {#if diagnosticState.loading}
     <div class="card">
       <div class="card-content">
         <div class="loading-state">
@@ -168,7 +134,7 @@
     </div>
   {/if}
 
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header">
         <h3>OCSP Stapling Results</h3>
@@ -181,7 +147,7 @@
               <h3>OCSP Stapling Status</h3>
             </div>
             <div class="card-content">
-              {#if results.staplingEnabled}
+              {#if diagnosticState.results.staplingEnabled}
                 <div class="status-card enabled">
                   <Icon name="check-circle" size="lg" />
                   <div class="status-content">
@@ -202,7 +168,7 @@
           </div>
 
           <!-- OCSP Response Details Section -->
-          {#if results.staplingEnabled && results.ocspResponse}
+          {#if diagnosticState.results.staplingEnabled && diagnosticState.results.ocspResponse}
             <div class="card response-section">
               <div class="card-header">
                 <h3>OCSP Response Details</h3>
@@ -210,55 +176,51 @@
               <div class="card-content">
                 <div class="stats-grid">
                   <div class="stat-card">
-                    <div class="stat-label" use:tooltip={'Current status of the certificate according to OCSP'}>
-                      Certificate Status
-                    </div>
-                    <div class="stat-value status-{results.ocspResponse.certStatus.toLowerCase()}">
+                    <div class="stat-label">Certificate Status</div>
+                    <div class="stat-value status-{diagnosticState.results.ocspResponse.certStatus.toLowerCase()}">
                       <Icon
-                        name={results.ocspResponse.certStatus.toLowerCase() === 'good'
+                        name={diagnosticState.results.ocspResponse.certStatus.toLowerCase() === 'good'
                           ? 'check-circle'
                           : 'alert-circle'}
                         size="sm"
                       />
-                      {results.ocspResponse.certStatus}
+                      {diagnosticState.results.ocspResponse.certStatus}
                     </div>
                   </div>
 
                   <div class="stat-card">
-                    <div class="stat-label" use:tooltip={'Status of the OCSP response itself'}>Response Status</div>
+                    <div class="stat-label">Response Status</div>
                     <div class="stat-value">
                       <Icon name="check-circle" size="sm" />
-                      {results.ocspResponse.responseStatus}
+                      {diagnosticState.results.ocspResponse.responseStatus}
                     </div>
                   </div>
 
-                  {#if results.ocspResponse.thisUpdate}
+                  {#if diagnosticState.results.ocspResponse.thisUpdate}
                     <div class="stat-card">
-                      <div class="stat-label" use:tooltip={'When this OCSP response was issued'}>This Update</div>
-                      <div class="stat-value mono">{formatDate(results.ocspResponse.thisUpdate)}</div>
+                      <div class="stat-label">This Update</div>
+                      <div class="stat-value mono">{formatDate(diagnosticState.results.ocspResponse.thisUpdate)}</div>
                     </div>
                   {/if}
 
-                  {#if results.ocspResponse.nextUpdate}
+                  {#if diagnosticState.results.ocspResponse.nextUpdate}
                     <div class="stat-card">
-                      <div class="stat-label" use:tooltip={'When the next OCSP response will be available'}>
-                        Next Update
-                      </div>
-                      <div class="stat-value mono">{formatDate(results.ocspResponse.nextUpdate)}</div>
+                      <div class="stat-label">Next Update</div>
+                      <div class="stat-value mono">{formatDate(diagnosticState.results.ocspResponse.nextUpdate)}</div>
                     </div>
                   {/if}
 
-                  {#if results.ocspResponse.producedAt}
+                  {#if diagnosticState.results.ocspResponse.producedAt}
                     <div class="stat-card">
-                      <div class="stat-label" use:tooltip={'When the OCSP response was generated'}>Produced At</div>
-                      <div class="stat-value mono">{formatDate(results.ocspResponse.producedAt)}</div>
+                      <div class="stat-label">Produced At</div>
+                      <div class="stat-value mono">{formatDate(diagnosticState.results.ocspResponse.producedAt)}</div>
                     </div>
                   {/if}
 
-                  {#if results.ocspResponse.responderUrl}
+                  {#if diagnosticState.results.ocspResponse.responderUrl}
                     <div class="stat-card full-width">
-                      <div class="stat-label" use:tooltip={'URL of the OCSP responder service'}>Responder URL</div>
-                      <div class="stat-value mono">{results.ocspResponse.responderUrl}</div>
+                      <div class="stat-label">Responder URL</div>
+                      <div class="stat-value mono">{diagnosticState.results.ocspResponse.responderUrl}</div>
                     </div>
                   {/if}
                 </div>
@@ -266,7 +228,7 @@
             </div>
 
             <!-- Response Validity Section -->
-            {#if results.ocspResponse.validity}
+            {#if diagnosticState.results.ocspResponse.validity}
               <div class="card validity-section">
                 <div class="card-header">
                   <h3>Response Validity</h3>
@@ -275,34 +237,42 @@
                   <div class="validity-info">
                     <div class="validity-stats">
                       <div class="stat-card">
-                        <div class="stat-label" use:tooltip={'How long this OCSP response is valid for'}>Valid For</div>
-                        <div class="stat-value">{results.ocspResponse.validity.validFor}</div>
+                        <div class="stat-label">Valid For</div>
+                        <div class="stat-value">{diagnosticState.results.ocspResponse.validity.validFor}</div>
                       </div>
 
-                      {#if results.ocspResponse.validity.expiresIn}
+                      {#if diagnosticState.results.ocspResponse.validity.expiresIn}
                         <div class="stat-card">
-                          <div class="stat-label" use:tooltip={'Time remaining until this OCSP response expires'}>
-                            Expires In
-                          </div>
-                          <div class="stat-value" class:expiring={results.ocspResponse.validity.expiringSoon}>
+                          <div class="stat-label">Expires In</div>
+                          <div
+                            class="stat-value"
+                            class:expiring={diagnosticState.results.ocspResponse.validity.expiringSoon}
+                          >
                             <Icon
-                              name={results.ocspResponse.validity.expiringSoon ? 'alert-triangle' : 'check-circle'}
+                              name={diagnosticState.results.ocspResponse.validity.expiringSoon
+                                ? 'alert-triangle'
+                                : 'check-circle'}
                               size="sm"
                             />
-                            {results.ocspResponse.validity.expiresIn}
+                            {diagnosticState.results.ocspResponse.validity.expiresIn}
                           </div>
                         </div>
                       {/if}
                     </div>
 
-                    {#if results.ocspResponse.validity.percentage !== undefined}
+                    {#if diagnosticState.results.ocspResponse.validity.percentage !== undefined}
                       <div class="validity-progress">
                         <div class="progress-header">
                           <span class="progress-label">Validity Period Progress</span>
-                          <span class="progress-percentage">{results.ocspResponse.validity.percentage}%</span>
+                          <span class="progress-percentage"
+                            >{diagnosticState.results.ocspResponse.validity.percentage}%</span
+                          >
                         </div>
                         <div class="progress-bar">
-                          <div class="progress-fill" style="width: {results.ocspResponse.validity.percentage}%"></div>
+                          <div
+                            class="progress-fill"
+                            style="width: {diagnosticState.results.ocspResponse.validity.percentage}%"
+                          ></div>
                         </div>
                       </div>
                     {/if}
@@ -313,7 +283,7 @@
           {/if}
 
           <!-- Certificate Information Section -->
-          {#if results.certificate}
+          {#if diagnosticState.results.certificate}
             <div class="card certificate-section">
               <div class="card-header">
                 <h3>Certificate Information</h3>
@@ -321,22 +291,20 @@
               <div class="card-content">
                 <div class="cert-details">
                   <div class="cert-item">
-                    <div class="cert-label" use:tooltip={'Certificate subject (who the certificate was issued to)'}>
-                      Subject
-                    </div>
-                    <div class="cert-value mono">{results.certificate.subject}</div>
+                    <div class="cert-label">Subject</div>
+                    <div class="cert-value mono">{diagnosticState.results.certificate.subject}</div>
                   </div>
 
                   <div class="cert-item">
-                    <div class="cert-label" use:tooltip={'Certificate issuer (who signed the certificate)'}>Issuer</div>
-                    <div class="cert-value mono">{results.certificate.issuer}</div>
+                    <div class="cert-label">Issuer</div>
+                    <div class="cert-value mono">{diagnosticState.results.certificate.issuer}</div>
                   </div>
 
-                  {#if results.certificate.ocspUrls && results.certificate.ocspUrls.length > 0}
+                  {#if diagnosticState.results.certificate.ocspUrls && diagnosticState.results.certificate.ocspUrls.length > 0}
                     <div class="cert-item">
-                      <div class="cert-label" use:tooltip={'OCSP responder URLs from the certificate'}>OCSP URLs</div>
+                      <div class="cert-label">OCSP URLs</div>
                       <div class="cert-urls">
-                        {#each results.certificate.ocspUrls as url (url)}
+                        {#each diagnosticState.results.certificate.ocspUrls as url (url)}
                           <div class="cert-url mono">{url}</div>
                         {/each}
                       </div>
@@ -348,14 +316,14 @@
           {/if}
 
           <!-- Recommendations Section -->
-          {#if results.recommendations && results.recommendations.length > 0}
+          {#if diagnosticState.results.recommendations && diagnosticState.results.recommendations.length > 0}
             <div class="card recommendations-section">
               <div class="card-header">
                 <h3>Recommendations</h3>
               </div>
               <div class="card-content">
                 <div class="recommendations-list">
-                  {#each results.recommendations as rec (rec)}
+                  {#each diagnosticState.results.recommendations as rec (rec)}
                     <div class="recommendation-item">
                       <Icon name="alert-triangle" size="sm" />
                       <span>{rec}</span>

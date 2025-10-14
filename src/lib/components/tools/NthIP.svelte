@@ -221,7 +221,7 @@
     <div class="card loading-card">
       <div class="card-content">
         <div class="loading">
-          <Icon name="loader-2" size="sm" animate="spin" />
+          <Icon name="loader" size="sm" animate="spin" />
           Calculating IPs...
         </div>
       </div>

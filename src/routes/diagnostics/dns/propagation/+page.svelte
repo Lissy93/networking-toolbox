@@ -1,16 +1,18 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ActionButton from '$lib/components/common/ActionButton.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let domainName = $state('example.com');
   let recordType = $state('A');
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let copiedState = $state(false);
   let lastQuery = $state<{ domain: string; type: string } | null>(null);
-  let selectedExampleIndex = $state<number | null>(null);
+
+  const diagnosticState = useDiagnosticState<any>();
+  const clipboard = useClipboard();
 
   const recordTypes = [
     { value: 'A', label: 'A', description: 'IPv4 address records' },
@@ -28,17 +30,17 @@
     opendns: { name: 'OpenDNS', ip: '208.67.222.222', location: 'Global' },
   };
 
-  const examples = [
+  const examplesList = [
     { domain: 'google.com', type: 'A', description: 'Check A record propagation' },
     { domain: 'github.com', type: 'AAAA', description: 'IPv6 propagation check' },
     { domain: 'gmail.com', type: 'MX', description: 'Mail server propagation' },
     { domain: '_dmarc.google.com', type: 'TXT', description: 'DMARC policy propagation' },
   ];
 
+  const examples = useExamples(examplesList);
+
   async function checkPropagation() {
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
     lastQuery = { domain: domainName.trim(), type: recordType };
 
     try {
@@ -57,23 +59,17 @@
       }
 
       const data = await response.json();
-      results = data.results;
+      diagnosticState.setResults(data.results);
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : 'Unknown error occurred';
-    } finally {
-      loading = false;
+      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     domainName = example.domain;
     recordType = example.type;
-    selectedExampleIndex = index;
+    examples.select(index);
     checkPropagation();
-  }
-
-  function clearExampleSelection() {
-    selectedExampleIndex = null;
   }
 
   function getStatusColor(result: unknown): string {
@@ -91,8 +87,8 @@
   }
 
   function areResultsConsistent(): boolean {
-    const resultsArray = results as unknown[];
-    if (!results || resultsArray.length === 0) return false;
+    const resultsArray = diagnosticState.results as unknown[];
+    if (!diagnosticState.results || resultsArray.length === 0) return false;
 
     type DnsResult = { error?: string; result?: { Answer?: Array<{ data: string }> } };
     const successfulResults = resultsArray.filter((r: unknown) => {
@@ -109,7 +105,7 @@
   }
 
   async function copyAllResults() {
-    const resultsArray = results as unknown[];
+    const resultsArray = diagnosticState.results as unknown[];
     if (!resultsArray?.length) return;
 
     const query = lastQuery as { domain?: string; type?: string };
@@ -139,9 +135,7 @@
       text += '\n';
     });
 
-    await navigator.clipboard.writeText(text);
-    copiedState = true;
-    setTimeout(() => (copiedState = false), 1500);
+    await clipboard.copy(text);
   }
 </script>
 
@@ -155,27 +149,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>Propagation Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, i (i)}
-          <button
-            class="example-card"
-            class:selected={selectedExampleIndex === i}
-            onclick={() => loadExample(example, i)}
-            use:tooltip={`Check ${example.type} record propagation for ${example.domain}`}
-          >
-            <h5>{example.domain} ({example.type})</h5>
-            <p>{example.description}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="Propagation Examples"
+    getLabel={(ex) => `${ex.domain} (${ex.type})`}
+    getDescription={(ex) => ex.description}
+    getTooltip={(ex) => `Check ${ex.type} record propagation for ${ex.domain}`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -193,7 +175,7 @@
               bind:value={domainName}
               placeholder="example.com"
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (domainName) checkPropagation();
               }}
             />
@@ -207,7 +189,7 @@
               id="type"
               bind:value={recordType}
               onchange={() => {
-                clearExampleSelection();
+                examples.clear();
                 if (domainName) checkPropagation();
               }}
             >
@@ -220,21 +202,22 @@
       </div>
 
       <div class="action-section">
-        <button class="check-btn" onclick={checkPropagation} disabled={loading || !domainName.trim()}>
-          {#if loading}
-            <Icon name="loader-2" size="sm" animate="spin" />
-            Checking Propagation...
-          {:else}
-            <Icon name="globe" size="sm" />
-            Check DNS Propagation
-          {/if}
-        </button>
+        <ActionButton
+          loading={diagnosticState.loading}
+          disabled={!domainName.trim()}
+          icon="globe"
+          loadingText="Checking Propagation..."
+          onclick={checkPropagation}
+          class="check-btn"
+        >
+          Check DNS Propagation
+        </ActionButton>
       </div>
     </div>
   </div>
 
   <!-- Results -->
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header row">
         <div>
@@ -253,16 +236,16 @@
             {/if}
           </div>
         </div>
-        <button class="copy-btn" onclick={copyAllResults} disabled={copiedState}>
-          <div class={copiedState ? 'status-success' : ''}>
-            <Icon name={copiedState ? 'check' : 'copy'} size="xs" />
+        <button class="copy-btn" onclick={copyAllResults} disabled={clipboard.isCopied()}>
+          <div class={clipboard.isCopied() ? 'status-success' : ''}>
+            <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
           </div>
-          {copiedState ? 'Copied!' : 'Copy All Results'}
+          {clipboard.isCopied() ? 'Copied!' : 'Copy All Results'}
         </button>
       </div>
       <div class="card-content">
         <div class="resolvers-grid">
-          {#each results as result, resultIndex (resultIndex)}
+          {#each diagnosticState.results as result, resultIndex (resultIndex)}
             {@const res = result as { resolver: string }}
             {@const info = resolverInfo[res.resolver as keyof typeof resolverInfo]}
             {@const status = getStatusColor(result)}
@@ -321,19 +304,7 @@
     </div>
   {/if}
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>Propagation Check Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="Propagation Check Failed" error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">

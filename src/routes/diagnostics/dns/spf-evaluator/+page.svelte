@@ -215,7 +215,7 @@
       <div class="action-section">
         <button class="evaluate-btn lookup-btn" onclick={evaluateSPF} disabled={loading || !domain.trim()}>
           {#if loading}
-            <Icon name="loader-2" size="sm" animate="spin" />
+            <Icon name="loader" size="sm" animate="spin" />
             Evaluating SPF...
           {:else}
             <Icon name="shield-check" size="sm" />
