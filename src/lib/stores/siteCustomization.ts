@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { browser } from '$app/environment';
+import { storage } from '$lib/utils/localStorage';
 
 const STORAGE_KEY = 'user-site-customization';
 
@@ -52,26 +52,16 @@ function createSiteCustomizationStore() {
   return {
     subscribe,
     init: () => {
-      if (!browser) return;
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          const loadedData = { ...defaults, ...parsed };
-          set(loadedData);
-        } catch (e) {
-          console.error('Failed to parse site customization:', e);
-        }
-      }
+      const stored = storage.getItem(STORAGE_KEY, { defaultValue: defaults });
+      const loadedData = { ...defaults, ...stored };
+      set(loadedData);
     },
     set: (data: SiteCustomization) => {
-      if (!browser) return;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      storage.setItem(STORAGE_KEY, data);
       set(data);
     },
     clear: () => {
-      if (!browser) return;
-      localStorage.removeItem(STORAGE_KEY);
+      storage.removeItem(STORAGE_KEY);
       set(defaults);
     },
     validate: validateSiteCustomization,

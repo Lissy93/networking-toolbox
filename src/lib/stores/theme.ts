@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
+import { storage } from '$lib/utils/localStorage';
 import { DEFAULT_THEME } from '$lib/config/customizable-settings';
 
 export type ThemeOption = string;
@@ -177,8 +178,8 @@ export const themes: Theme[] = [
   },
 ];
 
-function isValidTheme(theme: string | null) {
-  if (!theme) return false;
+function isValidTheme(theme: unknown): theme is string {
+  if (typeof theme !== 'string' || !theme) return false;
   return themes.some((t) => t.id === theme && t.available);
 }
 
@@ -192,8 +193,12 @@ function createThemeStore() {
     // Initialize theme from localStorage or default
     init: () => {
       if (browser) {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        const initialTheme = isValidTheme(saved) ? (saved as ThemeOption) : defaultTheme;
+        const saved = storage.getItem(STORAGE_KEY, {
+          defaultValue: defaultTheme,
+          validate: isValidTheme,
+          serialize: false,
+        });
+        const initialTheme = saved as ThemeOption;
 
         set(initialTheme);
 
@@ -217,7 +222,7 @@ function createThemeStore() {
       set(theme);
 
       if (browser) {
-        localStorage.setItem(STORAGE_KEY, theme);
+        storage.setItem(STORAGE_KEY, theme, { serialize: false });
 
         // Apply theme classes to document
         applyThemeClasses(theme);
@@ -230,7 +235,7 @@ function createThemeStore() {
         const newTheme = currentTheme === 'light' ? 'dark' : 'light';
 
         if (browser) {
-          localStorage.setItem(STORAGE_KEY, newTheme);
+          storage.setItem(STORAGE_KEY, newTheme, { serialize: false });
 
           applyThemeClasses(newTheme);
         }

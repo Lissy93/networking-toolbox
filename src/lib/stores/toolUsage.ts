@@ -1,5 +1,6 @@
 import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
+import { storage } from '$lib/utils/localStorage';
 
 export interface ToolUsage {
   [toolHref: string]: {
@@ -18,17 +19,7 @@ const maxItems = 12;
 
 // Get initial tool usage from localStorage (runs immediately on import)
 function getInitialToolUsage(): ToolUsage {
-  if (browser) {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        return JSON.parse(stored);
-      }
-    } catch (error) {
-      console.error('Failed to load tool usage data:', error);
-    }
-  }
-  return {};
+  return storage.getItem(STORAGE_KEY, { defaultValue: {} });
 }
 
 function createToolUsageStore() {
@@ -44,17 +35,8 @@ function createToolUsageStore() {
      */
     init() {
       if (!browser) return;
-
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          set(parsed);
-        }
-      } catch (error) {
-        console.error('Failed to load tool usage data:', error);
-        set({});
-      }
+      const stored = storage.getItem(STORAGE_KEY, { defaultValue: {} });
+      set(stored);
     },
 
     /**
@@ -85,11 +67,7 @@ function createToolUsageStore() {
         if (description) newUsage[href].description = description;
 
         // Save to localStorage
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(newUsage));
-        } catch (error) {
-          console.error('Failed to save tool usage data:', error);
-        }
+        storage.setItem(STORAGE_KEY, newUsage);
 
         return newUsage;
       });
@@ -100,13 +78,8 @@ function createToolUsageStore() {
      */
     clear() {
       if (!browser) return;
-
       set({});
-      try {
-        localStorage.removeItem(STORAGE_KEY);
-      } catch (error) {
-        console.error('Failed to clear tool usage data:', error);
-      }
+      storage.removeItem(STORAGE_KEY);
     },
 
     /**
@@ -119,11 +92,7 @@ function createToolUsageStore() {
         const newUsage = { ...usage };
         delete newUsage[href];
 
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(newUsage));
-        } catch (error) {
-          console.error('Failed to save tool usage data:', error);
-        }
+        storage.setItem(STORAGE_KEY, newUsage);
 
         return newUsage;
       });

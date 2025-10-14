@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { browser } from '$app/environment';
+import { storage } from '$lib/utils/localStorage';
 import { DEFAULT_HOMEPAGE_LAYOUT } from '$lib/config/customizable-settings';
 
 export type HomepageLayoutMode =
@@ -81,15 +81,11 @@ function getInitialLayout(): HomepageLayoutMode {
   // Validate DEFAULT_HOMEPAGE_LAYOUT, fallback to 'categories' if invalid
   const validDefault = isValidLayout(DEFAULT_HOMEPAGE_LAYOUT) ? DEFAULT_HOMEPAGE_LAYOUT : 'categories';
 
-  if (browser) {
-    try {
-      const stored = localStorage.getItem('homepage-layout');
-      return isValidLayout(stored) ? (stored as HomepageLayoutMode) : validDefault;
-    } catch {
-      return validDefault;
-    }
-  }
-  return validDefault;
+  return storage.getItem(STORAGE_KEY, {
+    defaultValue: validDefault,
+    validate: (val): val is HomepageLayoutMode => isValidLayout(val as string),
+    serialize: false,
+  });
 }
 
 function createHomepageLayoutStore() {
@@ -114,10 +110,7 @@ function createHomepageLayoutStore() {
       }
 
       set(mode);
-
-      if (browser) {
-        localStorage.setItem(STORAGE_KEY, mode);
-      }
+      storage.setItem(STORAGE_KEY, mode, { serialize: false });
     },
 
     // Get option configuration

@@ -1,8 +1,12 @@
 import { writable } from 'svelte/store';
-import { browser } from '$app/environment';
+import { storage } from '$lib/utils/localStorage';
 
 const STORAGE_KEY = 'user-primary-color';
 const HEX_PATTERN = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+
+const isValidHexColor = (value: unknown): value is string => {
+  return typeof value === 'string' && HEX_PATTERN.test(value);
+};
 
 function createPrimaryColorStore() {
   const { subscribe, set } = writable<string>('');
@@ -10,43 +14,26 @@ function createPrimaryColorStore() {
   return {
     subscribe,
     init: () => {
-      if (!browser) return;
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        // Only load if it's a valid hex color
-        if (stored && HEX_PATTERN.test(stored)) {
-          set(stored);
-        }
-      } catch (e) {
-        console.error('Failed to load primary color:', e);
-      }
+      const stored = storage.getItem(STORAGE_KEY, {
+        defaultValue: '',
+        validate: isValidHexColor,
+        serialize: false,
+      });
+      if (stored) set(stored);
     },
     set: (color: string) => {
-      if (!browser) return;
-      try {
-        if (color && color.trim()) {
-          const trimmed = color.trim();
-          // Only save valid hex colors
-          if (HEX_PATTERN.test(trimmed)) {
-            localStorage.setItem(STORAGE_KEY, trimmed);
-            set(trimmed);
-          }
-        } else {
-          localStorage.removeItem(STORAGE_KEY);
-          set('');
-        }
-      } catch (e) {
-        console.error('Failed to save primary color:', e);
+      const trimmed = color?.trim() || '';
+      if (trimmed && isValidHexColor(trimmed)) {
+        storage.setItem(STORAGE_KEY, trimmed, { serialize: false });
+        set(trimmed);
+      } else if (!trimmed) {
+        storage.removeItem(STORAGE_KEY);
+        set('');
       }
     },
     clear: () => {
-      if (!browser) return;
-      try {
-        localStorage.removeItem(STORAGE_KEY);
-        set('');
-      } catch (e) {
-        console.error('Failed to clear primary color:', e);
-      }
+      storage.removeItem(STORAGE_KEY);
+      set('');
     },
   };
 }

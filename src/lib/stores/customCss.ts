@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { browser } from '$app/environment';
+import { storage } from '$lib/utils/localStorage';
 
 const STORAGE_KEY = 'user-custom-css';
 
@@ -61,20 +61,18 @@ function createCustomCssStore() {
   return {
     subscribe,
     init: () => {
-      if (!browser) return;
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        set(stored);
-      }
+      const stored = storage.getItem(STORAGE_KEY, {
+        defaultValue: '',
+        serialize: false,
+      });
+      if (stored) set(stored);
     },
     set: (css: string) => {
-      if (!browser) return;
-      localStorage.setItem(STORAGE_KEY, css);
+      storage.setItem(STORAGE_KEY, css, { serialize: false });
       set(css);
     },
     clear: () => {
-      if (!browser) return;
-      localStorage.removeItem(STORAGE_KEY);
+      storage.removeItem(STORAGE_KEY);
       set('');
     },
     validate: validateCustomCss,
