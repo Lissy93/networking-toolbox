@@ -399,7 +399,7 @@
   .copy-btn.copied,
   .copy-btn-small.copied {
     background-color: var(--color-success);
-    color: white;
+    color: var(--bg-secondary);
     border-color: var(--color-success);
   }
 

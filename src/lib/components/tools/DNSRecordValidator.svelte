@@ -624,7 +624,7 @@
     font-weight: 600;
     padding: 2px var(--spacing-xs);
     background-color: var(--color-primary);
-    color: white;
+    color: var(--bg-secondary);
     border-radius: var(--radius-sm);
   }
 

@@ -1461,7 +1461,7 @@ export const SUB_NAV: Record<string, (NavItem | NavGroup)[]> = {
           href: makePath('/diagnostics/tls/ct-log-search'),
           label: 'CT Log Search',
           description: 'Search Certificate Transparency logs to discover all certificates issued for a domain',
-          icon: 'certificate',
+          icon: 'badge',
           featured: true,
           keywords: [
             'ct',

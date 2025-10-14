@@ -235,7 +235,7 @@
     aria-checked={$currentTheme === themeOption.id}
     disabled={!themeOption.available}
   >
-    <div class="theme-preview theme-preview-{themeOption.id}"></div>
+    <div class="theme-preview" style="background: {themeOption.preview || 'var(--bg-secondary)'}"></div>
     <span>
       {themeOption.name}
       {!themeOption.available ? ' (Soon)' : ''}
@@ -447,7 +447,7 @@
         class="css-editor"
         placeholder="/* Enter your custom CSS here */"
         spellcheck="false"
-        rows="10"
+        rows="5"
       ></textarea>
 
       <div class="css-meta">
@@ -607,14 +607,17 @@
     }
   }
 
-  .theme-options,
+  .theme-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    gap: var(--spacing-xs);
+  }
+
   .additional-themes {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
     gap: var(--spacing-xs);
-    .additional-themes {
-      grid-column: 1 / -1;
-    }
+    grid-column: 1 / -1;
   }
 
   .theme-option {
@@ -653,40 +656,6 @@
     height: 1rem;
     border-radius: var(--radius-xs);
     border: 1px solid var(--border-secondary);
-    &.theme-preview-light {
-      background: linear-gradient(135deg, #f4f2fa 50%, #fff 50%);
-    }
-    &.theme-preview-dark {
-      background: linear-gradient(135deg, #0d1117 50%, #161b22 50%);
-    }
-    &.theme-preview-ocean {
-      background: linear-gradient(135deg, #131c2b 50%, #70edb7 50%);
-    }
-    &.theme-preview-purple {
-      background: linear-gradient(135deg, #13182b 50%, #cca6ff 50%);
-    }
-    &.theme-preview-cyberpunk {
-      background: linear-gradient(135deg, #000308 30%, #f700ff 70%);
-      box-shadow: 0 0 8px rgba(0, 255, 204, 0.4);
-    }
-    &.theme-preview-midnight {
-      background: linear-gradient(135deg, #0a0e27 50%, #5e72e4 50%);
-    }
-    &.theme-preview-arctic {
-      background: linear-gradient(135deg, #f0f4f8 50%, #00acc1 50%);
-    }
-    &.theme-preview-terminal {
-      background: linear-gradient(135deg, #000000 50%, #00ff00 50%);
-    }
-    &.theme-preview-lightpurple {
-      background: linear-gradient(135deg, #fafafa 50%, #cca6ff 50%);
-    }
-    &.theme-preview-muteddark {
-      background: linear-gradient(135deg, #21252b 50%, #f1f86d 50%);
-    }
-    &.theme-preview-solarized {
-      background: linear-gradient(135deg, #002b36 50%, #268bd2 50%);
-    }
   }
 
   .language-dropdown {
@@ -1268,7 +1237,7 @@
       width: 100%;
       justify-content: center;
       background: var(--color-error);
-      color: white;
+      color: var(--bg-secondary);
       border-color: var(--color-error);
 
       &:hover {

@@ -623,7 +623,7 @@
 
     &.copied {
       background: var(--color-success);
-      color: white;
+      color: var(--bg-secondary);
       border-color: var(--color-success);
       transform: scale(1.05);
     }

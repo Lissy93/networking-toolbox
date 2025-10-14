@@ -3,6 +3,7 @@
   import { page } from '$app/stores';
   import '../styles/base.scss';
   import '../styles/variables.scss';
+  import '../styles/themes.scss';
   import '../styles/components.scss';
   import '../styles/ref-pages.scss';
   import '../styles/diagnostics-pages.scss';

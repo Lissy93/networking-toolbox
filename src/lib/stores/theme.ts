@@ -2,6 +2,7 @@ import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import { storage } from '$lib/utils/localStorage';
 import { DEFAULT_THEME } from '$lib/config/customizable-settings';
+import { themes } from '$lib/constants/theme-list';
 
 export type ThemeOption = string;
 
@@ -16,6 +17,8 @@ export interface Theme {
     fallback?: string;
   };
 }
+
+export { themes };
 
 const STORAGE_KEY = 'theme';
 
@@ -73,110 +76,6 @@ function applyThemeClasses(theme: ThemeOption) {
     loadCustomFont(themeConfig.font);
   }
 }
-
-// Available themes configuration
-export const themes: Theme[] = [
-  {
-    id: 'dark',
-    name: 'Dark',
-    available: true,
-  },
-  {
-    id: 'light',
-    name: 'Light',
-    available: true,
-    font: {
-      name: 'Inter',
-      url: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap',
-      fallback: 'sans-serif',
-    },
-  },
-  {
-    id: 'midnight',
-    name: 'Midnight',
-    available: true,
-    font: {
-      name: 'Montserrat',
-      url: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap',
-      fallback: 'sans-serif',
-    },
-  },
-  {
-    id: 'arctic',
-    name: 'Arctic',
-    available: true,
-    font: {
-      name: 'Raleway',
-      url: 'https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800&family=Source+Code+Pro:wght@400;500;600;700&display=swap',
-      fallback: 'sans-serif',
-    },
-  },
-  {
-    id: 'ocean',
-    name: 'Ocean',
-    available: true,
-    font: {
-      name: 'Inter',
-      url: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
-      fallback: 'sans-serif',
-    },
-  },
-  {
-    id: 'purple',
-    name: 'Purple',
-    available: true,
-    font: {
-      name: 'Poppins',
-      url: 'https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap',
-      fallback: 'sans',
-    },
-  },
-  {
-    id: 'cyberpunk',
-    name: 'Cyberpunk',
-    available: true,
-    font: {
-      name: 'Orbitron',
-      url: 'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap',
-      fallback: 'monospace',
-    },
-  },
-  {
-    id: 'terminal',
-    name: 'Terminal',
-    available: true,
-    font: {
-      name: 'JetBrains Mono',
-      url: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap',
-      fallback: 'monospace',
-    },
-  },
-  {
-    id: 'lightpurple',
-    name: 'Light Purple',
-    available: true,
-  },
-  {
-    id: 'muteddark',
-    name: 'Muted Dark',
-    available: true,
-    font: {
-      name: 'Source Code Pro',
-      url: 'https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&display=swap',
-      fallback: 'monospace',
-    },
-  },
-  {
-    id: 'solarized',
-    name: 'Solarized',
-    available: true,
-    font: {
-      name: 'Inconsolata',
-      url: 'https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;400;500;600;700&family=Lato:wght@300;400;700&display=swap',
-      fallback: 'monospace',
-    },
-  },
-];
 
 function isValidTheme(theme: unknown): theme is string {
   if (typeof theme !== 'string' || !theme) return false;

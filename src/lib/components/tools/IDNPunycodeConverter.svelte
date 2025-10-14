@@ -862,7 +862,7 @@
     gap: var(--spacing-xs);
     padding: var(--spacing-sm) var(--spacing-md);
     background: var(--color-primary-dark);
-    color: white;
+    color: var(--bg-secondary);
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;

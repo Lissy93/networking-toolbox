@@ -607,7 +607,7 @@
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          color: white;
+          color: var(--bg-secondary);
           font-size: 14px;
           font-weight: bold;
           line-height: 1;

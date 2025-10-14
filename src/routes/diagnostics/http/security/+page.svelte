@@ -448,17 +448,17 @@
 
     &.success {
       background: var(--color-success);
-      color: white;
+      color: var(--bg-secondary);
     }
 
     &.warning {
       background: var(--color-warning);
-      color: white;
+      color: var(--bg-secondary);
     }
 
     &.error {
       background: var(--color-error);
-      color: white;
+      color: var(--bg-secondary);
     }
   }
 

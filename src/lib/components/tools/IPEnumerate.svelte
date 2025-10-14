@@ -669,7 +669,7 @@
 
         &::after {
           opacity: 1;
-          color: white;
+          color: var(--bg-secondary);
         }
       }
     }

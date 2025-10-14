@@ -533,7 +533,7 @@
 
     &.active {
       background: var(--color-primary);
-      color: white;
+      color: var(--bg-secondary);
       border-color: var(--color-primary);
     }
   }
