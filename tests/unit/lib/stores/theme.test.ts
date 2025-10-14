@@ -127,7 +127,13 @@ describe('theme store', () => {
     theme.setTheme('unavailable-theme' as ThemeOption);
 
     expect(get(theme)).toBe(initialValue);
-    expect(consoleSpy).toHaveBeenCalledWith('Theme "unavailable-theme" is not available');
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Theme "unavailable-theme" is not available',
+      expect.objectContaining({
+        theme: 'unavailable-theme',
+        component: 'ThemeStore'
+      })
+    );
 
     consoleSpy.mockRestore();
   });

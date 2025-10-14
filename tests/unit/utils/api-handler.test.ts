@@ -198,7 +198,7 @@ describe('API Handler', () => {
   });
 
   describe('Error Handling', () => {
-    it('should log errors to console', async () => {
+    it('should log errors via logger', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const mockEndpoint = {
@@ -211,9 +211,16 @@ describe('API Handler', () => {
 
       await handler.POST({ params: mockParams, request: mockRequest });
 
+      // Logger transforms the error and context
       expect(consoleSpy).toHaveBeenCalledWith(
-        'API Error in test-category/test-tool:',
-        expect.any(Error)
+        'API Error in test-category/test-tool',
+        expect.objectContaining({
+          category: 'test-category',
+          tool: 'test-tool',
+          component: 'APIHandler',
+          errorName: 'Error',
+          errorMessage: 'Test error'
+        })
       );
 
       consoleSpy.mockRestore();

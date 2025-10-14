@@ -3,8 +3,6 @@
  * Used when in dev mode, to outputs error logs + context to the terminal
  */
 
-import { browser, dev } from '$app/environment';
-
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 const LOG_LEVELS: Record<LogLevel, number> = {
@@ -15,24 +13,50 @@ const LOG_LEVELS: Record<LogLevel, number> = {
 };
 
 /**
+ * Safely get environment variables without breaking tests
+ */
+function getEnv(): { browser: boolean; dev: boolean } {
+  // Check if we're in a test environment (vitest sets NODE_ENV or VITEST)
+  if (typeof process !== 'undefined' && (process.env.NODE_ENV === 'test' || process.env.VITEST)) {
+    return { browser: false, dev: true };
+  }
+
+  // In normal app execution, these imports work fine
+  try {
+    // Dynamic import to avoid breaking tests that don't mock $app/environment
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const env = require('$app/environment');
+    return { browser: env.browser, dev: env.dev };
+  } catch {
+    // Fallback for edge cases
+    return { browser: false, dev: true };
+  }
+}
+
+/**
  * Get the configured log level from environment variables
  * Defaults to 'debug' in dev, 'warn' in production
  */
 function getLogLevel(): LogLevel {
+  const { browser, dev } = getEnv();
+
   if (!browser) {
     // Server-side: check Node env vars
-    const level = process.env.VITE_LOG_LEVEL as LogLevel;
+    const level = (typeof process !== 'undefined' ? process.env.VITE_LOG_LEVEL : undefined) as LogLevel;
     return level && level in LOG_LEVELS ? level : dev ? 'debug' : 'warn';
   }
   // Client-side: check Vite-exposed env vars
-  const level = import.meta.env.VITE_LOG_LEVEL as LogLevel;
+  const level = (typeof import.meta !== 'undefined' ? import.meta.env.VITE_LOG_LEVEL : undefined) as LogLevel;
   return level && level in LOG_LEVELS ? level : dev ? 'debug' : 'warn';
 }
 
-const currentLevel = getLogLevel();
+let currentLevel: LogLevel | null = null;
 
 /* Check if a log level should be output */
 function shouldLog(level: LogLevel): boolean {
+  if (!currentLevel) {
+    currentLevel = getLogLevel();
+  }
   return LOG_LEVELS[level] >= LOG_LEVELS[currentLevel];
 }
 
@@ -102,6 +126,8 @@ function printStyled(
 function log(level: LogLevel, message: string, context?: Record<string, unknown>, error?: Error | unknown): void {
   if (!shouldLog(level)) return;
 
+  const { browser } = getEnv();
+
   if (browser) {
     printStyled(level, message, context, error);
   } else {
@@ -124,5 +150,5 @@ export const logger = {
   warn: (message: string, context?: Record<string, unknown>) => log('warn', message, context),
   error: (message: string, error?: Error | unknown, context?: Record<string, unknown>) =>
     log('error', message, context, error),
-  getLevel: () => currentLevel,
+  getLevel: () => currentLevel || getLogLevel(),
 };

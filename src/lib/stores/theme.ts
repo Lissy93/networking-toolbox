@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import { storage } from '$lib/utils/localStorage';
+import { logger } from '$lib/utils/logger';
 import { DEFAULT_THEME } from '$lib/config/customizable-settings';
 import { themes } from '$lib/constants/theme-list';
 
@@ -36,7 +37,7 @@ function loadCustomFont(fontConfig: { name: string; url: string; fallback?: stri
 
   // Add fallback handling
   link.onerror = () => {
-    console.warn(`Failed to load font from ${fontConfig.url}`);
+    logger.warn(`Failed to load font from ${fontConfig.url}`, { url: fontConfig.url, font: fontConfig.name });
   };
 
   document.head.appendChild(link);
@@ -114,7 +115,7 @@ function createThemeStore() {
       // Only set if theme is available
       const themeConfig = themes.find((t) => t.id === theme);
       if (!themeConfig?.available) {
-        console.warn(`Theme "${theme}" is not available`);
+        logger.warn(`Theme "${theme}" is not available`, { theme, component: 'ThemeStore' });
         return;
       }
 

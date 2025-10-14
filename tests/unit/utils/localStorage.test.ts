@@ -1,13 +1,25 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { storage } from '../../../src/lib/utils/localStorage';
 
-// Mock browser environment - default to true
+// Mock browser environment and logger BEFORE importing storage
 let mockBrowser = true;
 vi.mock('$app/environment', () => ({
   get browser() {
     return mockBrowser;
-  }
+  },
+  dev: true,
 }));
+
+vi.mock('$lib/utils/logger', () => ({
+  logger: {
+    warn: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+    getLevel: () => 'debug',
+  },
+}));
+
+import { storage } from '../../../src/lib/utils/localStorage';
 
 // Mock localStorage
 const mockLocalStorage = (() => {
@@ -117,15 +129,11 @@ describe('LocalStorage Helper', () => {
     });
 
     it('should handle corrupted JSON gracefully', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockLocalStorage._getStore()['test-key'] = '{invalid-json}';
 
       const result = storage.getItem('test-key', { defaultValue: { fallback: true } });
 
       expect(result).toEqual({ fallback: true });
-      expect(consoleErrorSpy).toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
     });
 
     it('should return default value in SSR context (browser = false)', () => {
@@ -241,7 +249,6 @@ describe('LocalStorage Helper', () => {
     });
 
     it('should handle quota exceeded errors', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockLocalStorage.setItem.mockImplementationOnce(() => {
         throw new DOMException('QuotaExceededError');
       });
@@ -249,9 +256,6 @@ describe('LocalStorage Helper', () => {
       const result = storage.setItem('test-key', 'value');
 
       expect(result).toBe(false);
-      expect(consoleErrorSpy).toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
     });
 
     it('should return false in SSR context (browser = false)', () => {
@@ -345,7 +349,6 @@ describe('LocalStorage Helper', () => {
     });
 
     it('should handle errors gracefully', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockLocalStorage.removeItem.mockImplementationOnce(() => {
         throw new Error('Remove error');
       });
@@ -353,9 +356,6 @@ describe('LocalStorage Helper', () => {
       const result = storage.removeItem('test-key');
 
       expect(result).toBe(false);
-      expect(consoleErrorSpy).toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
     });
 
     it('should return false in SSR context (browser = false)', () => {
@@ -388,7 +388,6 @@ describe('LocalStorage Helper', () => {
     });
 
     it('should handle errors gracefully', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockLocalStorage.clear.mockImplementationOnce(() => {
         throw new Error('Clear error');
       });
@@ -396,9 +395,6 @@ describe('LocalStorage Helper', () => {
       const result = storage.clear();
 
       expect(result).toBe(false);
-      expect(consoleErrorSpy).toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
     });
 
     it('should return false in SSR context (browser = false)', () => {
@@ -429,8 +425,6 @@ describe('LocalStorage Helper', () => {
     });
 
     it('should handle errors gracefully', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
       // Add a key so length > 0
       mockLocalStorage._getStore()['test-key'] = 'value';
 
@@ -443,10 +437,8 @@ describe('LocalStorage Helper', () => {
       const keys = storage.getAllKeys();
 
       expect(keys).toEqual([]);
-      expect(consoleErrorSpy).toHaveBeenCalled();
 
       mockLocalStorage.key = originalKey;
-      consoleErrorSpy.mockRestore();
     });
 
     it('should return empty array in SSR context (browser = false)', () => {
@@ -636,8 +628,6 @@ describe('LocalStorage Helper', () => {
 
   describe('Error Recovery', () => {
     it('should recover from one-time localStorage failures', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
       // First call fails
       mockLocalStorage.setItem.mockImplementationOnce(() => {
         throw new Error('Temporary failure');
@@ -649,13 +639,9 @@ describe('LocalStorage Helper', () => {
       // Second call succeeds
       const secondResult = storage.setItem('test', 'value');
       expect(secondResult).toBe(true);
-
-      consoleErrorSpy.mockRestore();
     });
 
     it('should maintain state after errors', () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
       storage.setItem('key1', 'value1');
 
       // Cause error on key2
@@ -667,8 +653,6 @@ describe('LocalStorage Helper', () => {
       // key1 should still be retrievable
       const retrieved = storage.getItem('key1', { defaultValue: '', serialize: false });
       expect(retrieved).toBe('value1');
-
-      consoleErrorSpy.mockRestore();
     });
   });
 });

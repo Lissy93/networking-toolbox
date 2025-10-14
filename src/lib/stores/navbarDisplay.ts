@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store';
 import { DEFAULT_NAVBAR_DISPLAY } from '$lib/config/customizable-settings';
 import { storage } from '$lib/utils/localStorage';
+import { logger } from '$lib/utils/logger';
 export type NavbarDisplayMode = 'default' | 'bookmarked' | 'frequent' | 'none';
 
 export interface NavbarDisplayOption {
@@ -69,7 +70,7 @@ function createNavbarDisplayStore() {
     setMode: (mode: NavbarDisplayMode) => {
       const option = navbarDisplayOptions.find((opt) => opt.id === mode);
       if (!option) {
-        console.warn(`Navbar display mode "${mode}" is not valid`);
+        logger.warn(`Navbar display mode "${mode}" is not valid`, { mode, component: 'NavbarDisplayStore' });
         return;
       }
 

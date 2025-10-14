@@ -93,7 +93,13 @@ describe('navbarDisplay store', () => {
     navbarDisplay.setMode('invalid-mode' as NavbarDisplayMode);
 
     expect(get(navbarDisplay)).toBe(initialValue);
-    expect(consoleSpy).toHaveBeenCalledWith('Navbar display mode "invalid-mode" is not valid');
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Navbar display mode "invalid-mode" is not valid',
+      expect.objectContaining({
+        mode: 'invalid-mode',
+        component: 'NavbarDisplayStore'
+      })
+    );
 
     consoleSpy.mockRestore();
   });

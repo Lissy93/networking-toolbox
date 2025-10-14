@@ -1,0 +1,23 @@
+name: "CodeQL Config"
+
+paths:
+  - src/
+
+paths-ignore:
+  - "**/node_modules"
+  - "**/.svelte-kit"
+  - "**/build"
+  - "**/dist"
+  - "**/.next"
+  - "**/coverage"
+  - "**/*.config.js"
+  - "**/*.config.ts"
+  - "**/vite.config.*"
+  - "**/vitest.config.*"
+  - "**/playwright.config.*"
+  - "**/tailwind.config.*"
+  - "**/postcss.config.*"
+  - "**/svelte.config.js"
+
+queries:
+  - uses: security-and-quality

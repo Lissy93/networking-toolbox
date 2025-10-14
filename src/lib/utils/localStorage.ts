@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import { logger } from './logger';
 
 /**
  * Safe, robust localStorage helper
@@ -31,13 +32,13 @@ class LocalStorageHelper {
 
       // Validate if validation function provided
       if (validate && !validate(parsed)) {
-        console.warn(`Invalid data in localStorage key "${key}", using default`);
+        logger.warn(`Invalid data in localStorage key "${key}", using default`, { key });
         return defaultValue;
       }
 
       return parsed as T;
     } catch (error) {
-      console.error(`Failed to get localStorage key "${key}":`, error);
+      logger.error(`Failed to get localStorage key "${key}"`, error, { key });
       return defaultValue;
     }
   }
@@ -55,7 +56,7 @@ class LocalStorageHelper {
       localStorage.setItem(key, data);
       return true;
     } catch (error) {
-      console.error(`Failed to set localStorage key "${key}":`, error);
+      logger.error(`Failed to set localStorage key "${key}"`, error, { key });
       return false;
     }
   }
@@ -70,7 +71,7 @@ class LocalStorageHelper {
       localStorage.removeItem(key);
       return true;
     } catch (error) {
-      console.error(`Failed to remove localStorage key "${key}":`, error);
+      logger.error(`Failed to remove localStorage key "${key}"`, error, { key });
       return false;
     }
   }
@@ -101,7 +102,7 @@ class LocalStorageHelper {
       localStorage.clear();
       return true;
     } catch (error) {
-      console.error('Failed to clear localStorage:', error);
+      logger.error('Failed to clear localStorage', error);
       return false;
     }
   }
@@ -122,7 +123,7 @@ class LocalStorageHelper {
       }
       return keys;
     } catch (error) {
-      console.error('Failed to get localStorage keys:', error);
+      logger.error('Failed to get localStorage keys', error);
       return [];
     }
   }

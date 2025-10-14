@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import { storage } from '$lib/utils/localStorage';
+import { logger } from '$lib/utils/logger';
 import { DEFAULT_HOMEPAGE_LAYOUT } from '$lib/config/customizable-settings';
 
 export type HomepageLayoutMode =
@@ -105,7 +106,7 @@ function createHomepageLayoutStore() {
     setMode: (mode: HomepageLayoutMode) => {
       const option = homepageLayoutOptions.find((opt) => opt.id === mode);
       if (!option) {
-        console.warn(`Homepage layout mode "${mode}" is not valid`);
+        logger.warn(`Homepage layout mode "${mode}" is not valid`, { mode, component: 'HomepageLayoutStore' });
         return;
       }
 

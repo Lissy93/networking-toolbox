@@ -90,7 +90,13 @@ describe('homepageLayout store', () => {
     homepageLayout.setMode('invalid-layout' as HomepageLayoutMode);
 
     expect(get(homepageLayout)).toBe(initialValue);
-    expect(consoleSpy).toHaveBeenCalledWith('Homepage layout mode "invalid-layout" is not valid');
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Homepage layout mode "invalid-layout" is not valid',
+      expect.objectContaining({
+        mode: 'invalid-layout',
+        component: 'HomepageLayoutStore'
+      })
+    );
 
     consoleSpy.mockRestore();
   });

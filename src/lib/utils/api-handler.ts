@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import { getAPIHandler } from './api-registry.js';
+import { logger } from './logger';
 
 export interface APIResponse<T = any> {
   success: boolean;
@@ -34,7 +35,7 @@ export function createAPIHandler(category: string): {
         result,
       });
     } catch (err) {
-      console.error(`API Error in ${category}/${tool}:`, err);
+      logger.error(`API Error in ${category}/${tool}`, err, { category, tool, component: 'APIHandler' });
       return json(
         {
           success: false,
