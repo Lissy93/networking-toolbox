@@ -11,9 +11,9 @@
   --text-tertiary: #6272a4;
 
   /* Primary brand color */
-  --color-primary: #e3ed70; // was #f1fa8c;
-  --color-primary-hover: #ffffa5;
-  --color-primary-dark: #a8c237;
+  --color-primary: #e3ed70;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 70%, white 30%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 70%, black 30%);
 
   /* Action colors */
   --color-success: #50fa7b;

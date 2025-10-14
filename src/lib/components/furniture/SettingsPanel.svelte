@@ -9,6 +9,7 @@
   import { customCss } from '$lib/stores/customCss';
   import { siteCustomization } from '$lib/stores/siteCustomization';
   import { primaryColor } from '$lib/stores/primaryColor';
+  import { storage } from '$lib/utils/localStorage';
 
   interface Props {
     standalone?: boolean;
@@ -17,27 +18,36 @@
 
   let { standalone = false, onClose }: Props = $props();
 
+  // UI State
   let showMoreA11y = $state(standalone);
   let showMoreThemes = $state(standalone);
+  let showCustomColorInput = $state(false);
+  let selectedLanguage = $state('en');
+
+  // Store subscriptions
   let accessibilitySettings = $state(accessibility);
   let currentTheme = $state(theme);
   let currentNavbarDisplay = $state(navbarDisplay);
   let currentHomepageLayout = $state(homepageLayout);
   let currentCustomCss = $state(customCss);
+
+  // Form inputs
   let cssInput = $state('');
-  let validationErrors = $state<string[]>([]);
-  let validationWarnings = $state<string[]>([]);
-  let lastStoreValue = $state('');
   let siteTitleInput = $state('');
   let siteDescriptionInput = $state('');
   let siteIconUrlInput = $state('');
   let primaryColorInput = $state('');
-  let lastColorStoreValue = $state('');
-  let siteCustomizationErrors = $state<string[]>([]);
-  let showCustomColorInput = $state(false);
 
-  // Preset color palette - bright & vivid
-  const colorPalette = [
+  // Validation & sync state
+  let validationErrors = $state<string[]>([]);
+  let validationWarnings = $state<string[]>([]);
+  let siteCustomizationErrors = $state<string[]>([]);
+  let lastStoreValue = $state('');
+  let lastColorStoreValue = $state('');
+
+  // Constants
+  const PRIMARY_A11Y_OPTIONS = ['reduce-motion'];
+  const COLOR_PALETTE = [
     '#1a75ff',
     '#7711ff',
     '#dd11ff',
@@ -55,8 +65,22 @@
     '#44aaff',
     '#7777ff',
   ];
+  const LANGUAGES = [
+    { code: 'en', name: 'English', available: true, flag: '🇺🇸' },
+    { code: 'es', name: 'Español', available: false, flag: '🇪🇸' },
+    { code: 'fr', name: 'Français', available: false, flag: '🇫🇷' },
+    { code: 'de', name: 'Deutsch', available: false, flag: '🇩🇪' },
+  ];
 
-  // Sync cssInput with store when store changes (not when textarea changes)
+  // Derived state
+  const primaryOptions = $derived(
+    $accessibilitySettings.options.filter((opt) => PRIMARY_A11Y_OPTIONS.includes(opt.id)),
+  );
+  const additionalOptions = $derived(
+    $accessibilitySettings.options.filter((opt) => !PRIMARY_A11Y_OPTIONS.includes(opt.id)),
+  );
+
+  // Sync effects
   $effect(() => {
     if ($currentCustomCss !== lastStoreValue) {
       cssInput = $currentCustomCss;
@@ -64,14 +88,12 @@
     }
   });
 
-  // Sync site customization inputs with store
   $effect(() => {
     siteTitleInput = $siteCustomization.title;
     siteDescriptionInput = $siteCustomization.description;
     siteIconUrlInput = $siteCustomization.iconUrl;
   });
 
-  // Sync primary color input with store (only when store changes)
   $effect(() => {
     if ($primaryColor !== lastColorStoreValue) {
       primaryColorInput = $primaryColor;
@@ -79,92 +101,8 @@
     }
   });
 
-  // Language selection
-  let selectedLanguage = $state('en');
-  const languages = [
-    { code: 'en', name: 'English', available: true, flag: '🇺🇸' },
-    { code: 'es', name: 'Español', available: false, flag: '🇪🇸' },
-    { code: 'fr', name: 'Français', available: false, flag: '🇫🇷' },
-    { code: 'de', name: 'Deutsch', available: false, flag: '🇩🇪' },
-  ];
-
-  // Handle theme change
-  function handleThemeChange(themeId: ThemeOption) {
-    theme.setTheme(themeId);
-  }
-
-  // Handle accessibility setting toggle
-  function handleAccessibilityToggle(optionId: string) {
-    accessibility.toggle(optionId);
-  }
-
-  // Handle navbar display mode change
-  function handleNavbarDisplayChange(event: Event) {
-    const target = event.currentTarget as HTMLSelectElement;
-    navbarDisplay.setMode(target.value as NavbarDisplayMode);
-  }
-
-  // Handle homepage layout mode change
-  function handleHomepageLayoutChange(event: Event) {
-    const target = event.currentTarget as HTMLSelectElement;
-    homepageLayout.setMode(target.value as HomepageLayoutMode);
-  }
-
-  // Primary accessibility options (always visible)
-  const primaryA11yOptions = ['reduce-motion'];
-
-  // Get filtered accessibility options
-  const primaryOptions = $derived($accessibilitySettings.options.filter((opt) => primaryA11yOptions.includes(opt.id)));
-
-  const additionalOptions = $derived(
-    $accessibilitySettings.options.filter((opt) => !primaryA11yOptions.includes(opt.id)),
-  );
-
-  // Handle link clicks to close menu
-  function handleLinkClick() {
-    onClose?.();
-  }
-
-  // Handle custom CSS changes
-  function handleApplyCustomCss() {
-    const validation = customCss.validate(cssInput);
-    validationErrors = validation.errors;
-    validationWarnings = validation.warnings;
-
-    if (validation.isValid) {
-      customCss.set(cssInput);
-    }
-  }
-
-  function handleClearCustomCss() {
-    cssInput = '';
-    customCss.clear();
-    validationErrors = [];
-    validationWarnings = [];
-  }
-
-  // Handle site customization
-  function handleApplySiteCustomization() {
-    const data = {
-      title: siteTitleInput.trim(),
-      description: siteDescriptionInput.trim(),
-      iconUrl: siteIconUrlInput.trim(),
-    };
-
-    const validation = siteCustomization.validate(data);
-    siteCustomizationErrors = validation.errors;
-
-    if (validation.isValid) {
-      siteCustomization.set(data);
-      // Reload to apply title/description/icon changes
-      window.location.reload();
-    }
-  }
-
-  // Auto-save color when changed (only when user changes it, store validates)
   $effect(() => {
     const trimmed = primaryColorInput.trim();
-    // Only save if different from store (prevents loop) - store handles validation
     if (trimmed && trimmed !== $primaryColor) {
       primaryColor.set(trimmed);
       lastColorStoreValue = trimmed;
@@ -174,25 +112,109 @@
     }
   });
 
-  // Reset color to default
-  function handleResetColor() {
-    primaryColorInput = '';
-  }
+  // Event handlers
+  const handlers = {
+    themeChange: (themeId: ThemeOption) => theme.setTheme(themeId),
+    a11yToggle: (optionId: string) => accessibility.toggle(optionId),
+    navbarChange: (e: Event) =>
+      navbarDisplay.setMode((e.currentTarget as HTMLSelectElement).value as NavbarDisplayMode),
+    homepageChange: (e: Event) =>
+      homepageLayout.setMode((e.currentTarget as HTMLSelectElement).value as HomepageLayoutMode),
+    linkClick: () => onClose?.(),
 
-  function handleClearSiteCustomization() {
-    siteCustomization.clear();
-    siteCustomizationErrors = [];
-    // Reload to apply changes
-    window.location.reload();
-  }
+    applyCustomCss: () => {
+      const validation = customCss.validate(cssInput);
+      validationErrors = validation.errors;
+      validationWarnings = validation.warnings;
+      if (validation.isValid) customCss.set(cssInput);
+    },
+
+    clearCustomCss: () => {
+      cssInput = '';
+      customCss.clear();
+      validationErrors = [];
+      validationWarnings = [];
+    },
+
+    applySiteCustomization: () => {
+      const data = {
+        title: siteTitleInput.trim(),
+        description: siteDescriptionInput.trim(),
+        iconUrl: siteIconUrlInput.trim(),
+      };
+      const validation = siteCustomization.validate(data);
+      siteCustomizationErrors = validation.errors;
+      if (validation.isValid) {
+        siteCustomization.set(data);
+        window.location.reload();
+      }
+    },
+
+    clearSiteCustomization: () => {
+      siteCustomization.clear();
+      siteCustomizationErrors = [];
+      window.location.reload();
+    },
+
+    resetColor: () => {
+      primaryColorInput = '';
+    },
+
+    clearAllData: () => {
+      if (
+        window.confirm(
+          'Your theme, language, home and nav layout, site branding, accessibility preferences, custom CSS and all other settings will be discarded. This will also clear your bookmarks, recent tools and other history. Are you sure you want to proceed?',
+        )
+      ) {
+        storage.clear();
+        window.location.reload();
+      }
+    },
+  };
 </script>
+
+{#snippet validationMessages(errors: string[], warnings: string[])}
+  {#if errors.length > 0}
+    <div class="validation-messages errors">
+      <Icon name="alert-triangle" size="sm" />
+      <div>
+        {#each errors as error (error)}
+          <p>{error}</p>
+        {/each}
+      </div>
+    </div>
+  {/if}
+  {#if warnings.length > 0}
+    <div class="validation-messages warnings">
+      <Icon name="alert-circle" size="sm" />
+      <div>
+        {#each warnings as warning (warning)}
+          <p>{warning}</p>
+        {/each}
+      </div>
+    </div>
+  {/if}
+{/snippet}
+
+{#snippet actionButtons(applyHandler: () => void, clearHandler: () => void, applyLabel = 'Apply', clearLabel = 'Clear')}
+  <div class="css-actions">
+    <button class="action-btn apply" onclick={applyHandler}>
+      <Icon name="check" size="sm" />
+      {applyLabel}
+    </button>
+    <button class="action-btn clear" onclick={clearHandler}>
+      <Icon name={clearLabel === 'Reset' ? 'x' : 'undo'} size="sm" />
+      {clearLabel}
+    </button>
+  </div>
+{/snippet}
 
 {#snippet accessibilityOption(option: AccessibilityOption)}
   <label class="toggle-option" use:tooltip={option.description}>
     <input
       type="checkbox"
       checked={option.enabled}
-      onchange={() => handleAccessibilityToggle(option.id)}
+      onchange={() => handlers.a11yToggle(option.id)}
       aria-describedby="a11y-{option.id}-desc"
     />
     <span class="toggle-slider"></span>
@@ -208,7 +230,7 @@
     class="theme-option"
     class:active={$currentTheme === themeOption.id}
     class:disabled={!themeOption.available}
-    onclick={() => handleThemeChange(themeOption.id)}
+    onclick={() => handlers.themeChange(themeOption.id)}
     role="radio"
     aria-checked={$currentTheme === themeOption.id}
     disabled={!themeOption.available}
@@ -254,7 +276,7 @@
   <div class="settings-section language-section">
     <h3>Language</h3>
     <div class="language-dropdown">
-      {#each languages as lang (lang.code)}
+      {#each LANGUAGES as lang (lang.code)}
         <button
           class="language-option"
           class:active={selectedLanguage === lang.code}
@@ -273,7 +295,7 @@
   <div class="settings-section homepage-layout-section">
     <h3>Homepage Layout</h3>
     <div class="navbar-select-wrapper">
-      <select class="navbar-select" value={$currentHomepageLayout} onchange={handleHomepageLayoutChange}>
+      <select class="navbar-select" value={$currentHomepageLayout} onchange={handlers.homepageChange}>
         {#each homepageLayoutOptions as option (option.id)}
           <option value={option.id}>{option.name}</option>
         {/each}
@@ -291,7 +313,7 @@
   <div class="settings-section navbar-display-section">
     <h3>Top Navigation</h3>
     <div class="navbar-select-wrapper">
-      <select class="navbar-select" value={$currentNavbarDisplay} onchange={handleNavbarDisplayChange}>
+      <select class="navbar-select" value={$currentNavbarDisplay} onchange={handlers.navbarChange}>
         {#each navbarDisplayOptions as option (option.id)}
           <option value={option.id}>{option.name}</option>
         {/each}
@@ -349,7 +371,6 @@
           maxlength="100"
         />
       </div>
-
       <div class="form-field">
         <label for="site-description">Description</label>
         <input
@@ -360,7 +381,6 @@
           maxlength="300"
         />
       </div>
-
       <div class="form-field">
         <label for="site-icon-url">Icon URL</label>
         <input
@@ -371,27 +391,8 @@
         />
       </div>
 
-      {#if siteCustomizationErrors.length > 0}
-        <div class="validation-messages errors">
-          <Icon name="alert-triangle" size="sm" />
-          <div>
-            {#each siteCustomizationErrors as error (error)}
-              <p>{error}</p>
-            {/each}
-          </div>
-        </div>
-      {/if}
-
-      <div class="css-actions">
-        <button class="action-btn apply" onclick={handleApplySiteCustomization}>
-          <Icon name="check" size="sm" />
-          Apply
-        </button>
-        <button class="action-btn clear" onclick={handleClearSiteCustomization}>
-          <Icon name="x" size="sm" />
-          Reset
-        </button>
-      </div>
+      {@render validationMessages(siteCustomizationErrors, [])}
+      {@render actionButtons(handlers.applySiteCustomization, handlers.clearSiteCustomization, 'Apply', 'Reset')}
     </div>
 
     <!-- Primary Color (only in standalone mode) -->
@@ -400,7 +401,7 @@
       <p class="section-description">Choose a primary color for the interface.</p>
 
       <div class="color-palette">
-        {#each colorPalette as color (color)}
+        {#each COLOR_PALETTE as color (color)}
           <button
             class="color-swatch"
             class:active={primaryColorInput === color}
@@ -416,7 +417,7 @@
           <Icon name="palette" size="sm" />
           Use Custom Color
         </button>
-        <button class="action-btn clear" onclick={handleResetColor}>
+        <button class="action-btn clear" onclick={handlers.resetColor}>
           <Icon name="undo" size="sm" />
           Reset
         </button>
@@ -453,45 +454,44 @@
         <span class="char-count">{cssInput.length} characters</span>
       </div>
 
-      {#if validationErrors.length > 0}
-        <div class="validation-messages errors">
-          <Icon name="alert-triangle" size="sm" />
-          <div>
-            {#each validationErrors as error (error)}
-              <p>{error}</p>
-            {/each}
-          </div>
-        </div>
-      {/if}
+      {@render validationMessages(validationErrors, validationWarnings)}
+      {@render actionButtons(handlers.applyCustomCss, handlers.clearCustomCss)}
+    </div>
+  {/if}
 
-      {#if validationWarnings.length > 0}
-        <div class="validation-messages warnings">
-          <Icon name="alert-circle" size="sm" />
-          <div>
-            {#each validationWarnings as warning (warning)}
-              <p>{warning}</p>
-            {/each}
-          </div>
-        </div>
-      {/if}
-
-      <div class="css-actions">
-        <button class="action-btn apply" onclick={handleApplyCustomCss}>
-          <Icon name="check" size="sm" />
-          Apply
-        </button>
-        <button class="action-btn clear" onclick={handleClearCustomCss}>
-          <Icon name="undo" size="sm" />
-          Clear
-        </button>
+  {#if standalone}
+    <div class="settings-section info-more-section">
+      <h3>Not found what you were looking for?</h3>
+      <p class="line-1">Good news! The code is open source and easy to work with.</p>
+      <p>
+        Simply <a href="https://github.com/Lissy93/networking-toolbox/fork">fork the repo</a>, follow our
+        <a href="/about/building">dev setup instructions</a>, make whatever changes and customizations you like, and
+        then <a href="/about/deploying">deploy your own instance</a>.
+      </p>
+      <p>
+        We also offer enterprise <a href="/about/support">support services</a>, where we can make custom changes for
+        you.
+      </p>
+    </div>
+  {/if}
+  {#if standalone}
+    <div class="settings-section delete-section">
+      <h3>Delete Data</h3>
+      <div class="caution-message">
+        <Icon name="alert-triangle" size="sm" />
+        <p>Caution: This will reset all local data.</p>
       </div>
+      <button class="action-btn danger" onclick={handlers.clearAllData}>
+        <Icon name="trash" size="sm" />
+        Clear all Data
+      </button>
     </div>
   {/if}
 
   <!-- Navigation Links (only in dropdown mode) -->
   {#if !standalone}
     <div class="settings-section settings-links">
-      <a class="settings-link" href="/settings" onclick={handleLinkClick}>
+      <a class="settings-link" href="/settings" onclick={handlers.linkClick}>
         <Icon name="settings" size="sm" />
         <span>More Settings</span>
       </a>
@@ -562,12 +562,16 @@
         &.custom-css-section {
           grid-column: span 2;
         }
+        &.info-more-section {
+          grid-column: span 2;
+        }
 
         @media (max-width: 768px) {
           &.theme-section,
           &.accessibility-section,
           &.site-branding-section,
           &.color-section,
+          &.info-more-section,
           &.custom-css-section {
             grid-row: span 1;
             grid-column: span 1;
@@ -598,7 +602,7 @@
     .standalone & {
       h3 {
         font-size: var(--font-size-lg);
-        margin-bottom: var(--spacing-md);
+        margin-bottom: var(--spacing-sm);
       }
     }
   }
@@ -1132,7 +1136,7 @@
   .custom-css-section {
     .css-editor {
       width: 100%;
-      min-height: 200px;
+      min-height: 120px;
       padding: var(--spacing-md);
       background: var(--bg-tertiary);
       border: 1px solid var(--border-primary);
@@ -1210,6 +1214,74 @@
     .css-actions {
       display: flex;
       gap: var(--spacing-sm);
+    }
+  }
+
+  .info-more-section {
+    .line-1 {
+      font-style: italic;
+      color: var(--text-tertiary);
+      font-size: var(--font-size-md);
+    }
+    p {
+      margin: 0 0 var(--spacing-sm) 0;
+    }
+    a {
+      color: var(--color-primary);
+      transition: all var(--transition-normal);
+      &:hover {
+        text-decoration: underline;
+        color: color-mix(in srgb, var(--color-primary), black 10%);
+      }
+    }
+  }
+
+  .delete-section {
+    .caution-message {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md);
+      background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-warning), transparent 90%),
+        color-mix(in srgb, var(--color-warning), transparent 95%)
+      );
+      border: 1px solid color-mix(in srgb, var(--color-warning), transparent 70%);
+      border-radius: var(--radius-sm);
+      margin-bottom: var(--spacing-md);
+
+      :global(svg) {
+        flex-shrink: 0;
+        color: var(--color-warning);
+      }
+
+      p {
+        margin: 0;
+        font-size: var(--font-size-sm);
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+    }
+
+    .action-btn.danger {
+      width: 100%;
+      justify-content: center;
+      background: var(--color-error);
+      color: white;
+      border-color: var(--color-error);
+
+      &:hover {
+        background: color-mix(in srgb, var(--color-error), black 15%);
+        border-color: color-mix(in srgb, var(--color-error), black 15%);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px color-mix(in srgb, var(--color-error), transparent 60%);
+      }
+
+      &:active {
+        transform: translateY(0);
+        box-shadow: none;
+      }
     }
   }
 
