@@ -1,12 +1,12 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { promises as dns } from 'dns';
 
 export const config = { runtime: 'nodejs22.x' };
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 interface AXFRRequest {
   domain: string;
@@ -48,7 +48,7 @@ async function checkDigAvailable(): Promise<boolean> {
   if (digAvailable !== null) return digAvailable;
 
   try {
-    await execAsync('dig -v', { timeout: 2000 });
+    await execFileAsync('dig', ['-v'], { timeout: 2000 });
     digAvailable = true;
     return true;
   } catch {
@@ -93,10 +93,11 @@ async function testAXFR(domain: string, nameserver: string, ip: string): Promise
 
   try {
     // Use dig for AXFR query with timeout
-    const command = `dig @${ip} ${domain} AXFR +time=5 +retry=1 +noidnout 2>&1`;
+    // Using execFile instead of exec to prevent command injection
+    const args = [`@${ip}`, domain, 'AXFR', '+time=5', '+retry=1', '+noidnout'];
 
     const { stdout, stderr } = await Promise.race([
-      execAsync(command, { maxBuffer: 1024 * 1024 * 5 }), // 5MB max
+      execFileAsync('dig', args, { maxBuffer: 1024 * 1024 * 5 }), // 5MB max
       new Promise<never>((_, reject) => setTimeout(() => reject(new Error('AXFR query timeout')), AXFR_TIMEOUT_MS)),
     ]);
 

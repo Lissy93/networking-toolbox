@@ -101,6 +101,8 @@ function performTLSHandshake(hostname: string, port: number): Promise<TLSHandsha
       {
         socket: tcpSocket,
         servername: hostname,
+        // SECURITY: rejectUnauthorized must be false for this TLS diagnostic tool.
+        // This tool analyzes TLS handshakes including servers with certificate issues.
         rejectUnauthorized: false,
         ALPNProtocols: ['h2', 'http/1.1'],
       },

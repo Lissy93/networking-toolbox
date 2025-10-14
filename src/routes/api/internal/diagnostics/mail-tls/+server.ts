@@ -71,6 +71,8 @@ async function checkSTARTTLS(domain: string, port: number): Promise<Partial<TLSC
         tlsSocket = (tls as any).connect({
           socket,
           servername: domain,
+          // SECURITY: rejectUnauthorized must be false for this mail TLS diagnostic tool.
+          // This tool analyzes mail server certificates including those with issues.
           rejectUnauthorized: false,
         });
 
@@ -127,6 +129,8 @@ async function checkDirectTLS(domain: string, port: number): Promise<Partial<TLS
       host: domain,
       port,
       servername: domain,
+      // SECURITY: rejectUnauthorized must be false for this mail TLS diagnostic tool.
+      // This tool analyzes mail server certificates including those with issues.
       rejectUnauthorized: false,
       timeout: 5000,
     });

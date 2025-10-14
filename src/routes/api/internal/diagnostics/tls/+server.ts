@@ -106,6 +106,9 @@ async function getCertificateInfo(host: string, port: number, servername?: strin
       host,
       port,
       servername: servername || host,
+      // SECURITY: rejectUnauthorized must be false for this diagnostic tool to work.
+      // This is a TLS analysis tool that needs to inspect certificates from servers with
+      // self-signed, expired, or misconfigured certificates. This is intentional and safe.
       rejectUnauthorized: false,
       timeout: 10000,
     };
@@ -194,6 +197,7 @@ async function probeTLSVersions(host: string, port: number, servername?: string)
           servername: servername || host,
           minVersion: version,
           maxVersion: version,
+          // SECURITY: rejectUnauthorized must be false to test TLS version support (see above)
           rejectUnauthorized: false,
           timeout: 5000,
         };
@@ -251,6 +255,7 @@ async function probeALPN(host: string, port: number, protocols: string[], server
       port,
       servername: servername || host,
       ALPNProtocols: protocols,
+      // SECURITY: rejectUnauthorized must be false to test ALPN negotiation (see above)
       rejectUnauthorized: false,
       timeout: 10000,
     };
@@ -313,6 +318,7 @@ async function checkOCSPStapling(hostname: string, port: number = 443): Promise<
       port,
       servername: hostname,
       requestOCSP: true,
+      // SECURITY: rejectUnauthorized must be false to test OCSP stapling (see above)
       rejectUnauthorized: false,
     };
 
@@ -389,6 +395,7 @@ async function testCipherPresets(hostname: string, port: number = 443): Promise<
         {
           host: hostname,
           port,
+          // SECURITY: rejectUnauthorized must be false to test cipher presets (see above)
           rejectUnauthorized: false,
         },
         () => {
