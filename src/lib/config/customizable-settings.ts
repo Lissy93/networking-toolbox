@@ -65,3 +65,5 @@ export const DEFAULT_LANGUAGE = env.NTB_DEFAULT_LANGUAGE ?? 'en';
  * Primary color (for default theme). Specified as a hex code.
  */
 export const PRIMARY_COLOR = env.NTB_PRIMARY_COLOR ?? '';
+
+export const SHOW_TIPS_ON_HOMEPAGE = !!env.NTB_SHOW_TIPS_ON_HOMEPAGE;

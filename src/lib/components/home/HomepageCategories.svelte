@@ -37,14 +37,23 @@
       '/ip-address-convertor': 'hash',
       '/dns': 'server',
       '/diagnostics': 'activity',
+      '/reference': 'book-open',
     };
     return iconMap[path] || 'folder';
   }
 
+  // Define desired category order using paths (more maintainable than indexes)
+  const categoryOrder = ['/diagnostics', '/subnetting', '/dns', '/cidr', '/reference'];
+
   // Memoized categories - computed once at module scope (static data)
-  const categories: CategorySection[] = TOP_NAV.filter(
-    (nav) => nav.href !== '/reference' && !(isStaticDeployment && nav.href === '/diagnostics'),
-  )
+  const categories: CategorySection[] = categoryOrder
+    .map((path) => TOP_NAV.find((nav) => nav.href === path))
+    .filter((nav): nav is NavItem => {
+      if (!nav) return false;
+      // Hide diagnostics in static deployments
+      if (isStaticDeployment && nav.href === '/diagnostics') return false;
+      return true;
+    })
     .map((nav) => {
       const subItems = SUB_NAV[nav.href] || [];
       return {
@@ -54,12 +63,6 @@
         basePath: nav.href,
         items: extractNavItems(subItems),
       };
-    })
-    .sort((a, b) => {
-      // Diagnostics first, then others
-      if (a.id === 'diagnostics') return -1;
-      if (b.id === 'diagnostics') return 1;
-      return 0;
     });
 
   // Get featured tools (up to 6)
@@ -260,7 +263,7 @@
     <div class="categories-grid">
       {#each categories as category (category.id)}
         {#if category.items.length > 0}
-          <section class="category-section" class:full-width={category.id === 'diagnostics'}>
+          <section class="category-section category-{category.id}">
             <div class="section-header">
               <Icon name={category.icon} size="md" />
               <h2>{category.title}</h2>
@@ -270,18 +273,6 @@
           </section>
         {/if}
       {/each}
-
-      <!-- Reference Section -->
-      {#if referencePages.length > 0}
-        <section class="category-section full-width">
-          <div class="section-header">
-            <Icon name="book-open" size="md" />
-            <h2>Reference</h2>
-            <span class="count">{referencePages.length}</span>
-          </div>
-          <ToolsGrid size="small" idPrefix="reference" tools={referencePages} searchQuery="" />
-        </section>
-      {/if}
     </div>
   </div>
 {:else}
@@ -398,17 +389,12 @@
     flex-direction: column;
     gap: var(--spacing-md);
     background: var(--bg-tertiary);
-    // background: radial-gradient(
-    //   color-mix(in srgb, var(--bg-tertiary), transparent 30%),
-    //   color-mix(in srgb, var(--bg-tertiary), var(--bg-primary) 60%)
-    // );
     padding: var(--spacing-md);
     border-radius: var(--radius-md);
     border: 1px solid var(--border-primary);
     box-shadow: var(--shadow-md);
     break-inside: avoid;
     page-break-inside: avoid;
-    max-height: 36rem;
     height: 100%;
     overflow-y: auto;
     animation: slideInFade 0.3s ease-out;
@@ -470,6 +456,10 @@
       color: var(--color-primary);
       flex-shrink: 0;
     }
+  }
+
+  .category-diagnostics {
+    grid-row: span 2;
   }
 
   // Full width sections

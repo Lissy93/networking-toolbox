@@ -96,6 +96,7 @@ export const themes: Theme[] = [
     name: 'Dark',
     available: true,
     preview: makePreviewGradient(['#0d1117', '#e3ed70']),
+    font: fonts.FiraCode,
   },
   {
     id: 'light',
