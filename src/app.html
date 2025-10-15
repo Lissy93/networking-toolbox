@@ -4,12 +4,23 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    <!-- Preload self-hosted fonts for default themes (Tokyo Night, Dark, Light) -->
+    <link rel="preload" as="style" href="/fonts/fonts.css" />
+    <link rel="stylesheet" href="/fonts/fonts.css" media="print" onload="this.media='all';this.onload=null;" />
+    <noscript>
+      <link rel="stylesheet" href="/fonts/fonts.css" />
+    </noscript>
+
+    <!-- Preconnect to Google Fonts for other themes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
     <!-- Prevent FOUC by applying theme before page renders -->
     <script>
       (function () {
         try {
           // Apply theme
-          const theme = localStorage.getItem('theme') || 'dark';
+          const theme = localStorage.getItem('theme') || 'tokyonight';
           if (theme !== 'dark') {
             document.documentElement.classList.add('theme-' + theme);
           }

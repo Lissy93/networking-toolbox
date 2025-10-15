@@ -1,6 +1,6 @@
-// import type { Theme } from "$lib/stores/theme";
+import { USE_SELF_HOSTED_FONTS, SELF_HOSTED_FONTS_PATH, GOOGLE_FONTS_CDN } from '$lib/config/font-config';
 
-const primaryCdn = 'https://fonts.googleapis.com/css2?family=';
+const primaryCdn = GOOGLE_FONTS_CDN;
 
 interface Theme {
   id: string;
@@ -14,70 +14,109 @@ interface Theme {
   };
 }
 
+// Fonts available for self-hosting (only these have been downloaded)
+const SELF_HOSTED_AVAILABLE = ['Fira Code', 'Fira Sans', 'Inter'];
+
+// Helper to get font URL (Google Fonts CDN or self-hosted)
+// Only uses self-hosted path if the font family is available locally
+const getFontUrl = (fontFamily: string, googleFontsUrl: string) => {
+  if (USE_SELF_HOSTED_FONTS && SELF_HOSTED_AVAILABLE.includes(fontFamily)) {
+    return SELF_HOSTED_FONTS_PATH;
+  }
+  return googleFontsUrl;
+};
+
 const fonts = {
   Inter: {
     name: 'Inter',
-    url: `${primaryCdn}Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap`,
+    url: getFontUrl('Inter', `${primaryCdn}Inter:wght@400;500;600;700&display=swap&subset=latin`),
     fallback: 'sans-serif',
   },
   Poppins: {
     name: 'Poppins',
-    url: `${primaryCdn}Lora:ital,wght@0,400..700;1,400..700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap`,
-    fallback: 'sans',
+    url: getFontUrl(
+      'Poppins',
+      `${primaryCdn}Poppins:wght@400;500;600;700&family=Lora:wght@400;500;600;700&display=swap&subset=latin`,
+    ),
+    fallback: 'sans-serif',
   },
   Montserrat: {
     name: 'Montserrat',
-    url: `${primaryCdn}Montserrat:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap`,
+    url: getFontUrl(
+      'Montserrat',
+      `${primaryCdn}Montserrat:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap&subset=latin`,
+    ),
     fallback: 'sans-serif',
   },
   Raleway: {
     name: 'Raleway',
-    url: `${primaryCdn}Raleway:wght@300;400;500;600;700;800&family=Source+Code+Pro:wght@400;500;600;700&display=swap`,
+    url: getFontUrl(
+      'Raleway',
+      `${primaryCdn}Raleway:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap&subset=latin`,
+    ),
     fallback: 'sans-serif',
   },
   Orbitron: {
     name: 'Orbitron',
-    url: `${primaryCdn}Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap`,
+    url: getFontUrl(
+      'Orbitron',
+      `${primaryCdn}Orbitron:wght@400;500;600;700&family=Share+Tech+Mono&display=swap&subset=latin`,
+    ),
     fallback: 'monospace',
   },
   JetBrainsMono: {
     name: 'JetBrains Mono',
-    url: `${primaryCdn}JetBrains+Mono:wght@300;400;500;600;700;800&display=swap`,
+    url: getFontUrl('JetBrains Mono', `${primaryCdn}JetBrains+Mono:wght@400;500;600;700&display=swap&subset=latin`),
     fallback: 'monospace',
   },
   SourceCodePro: {
     name: 'Source Code Pro',
-    url: `${primaryCdn}Source+Code+Pro:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&display=swap`,
+    url: getFontUrl(
+      'Source Code Pro',
+      `${primaryCdn}Source+Code+Pro:wght@400;500;600&family=Open+Sans:wght@400;500;600&display=swap&subset=latin`,
+    ),
     fallback: 'monospace',
   },
   Inconsolata: {
     name: 'Inconsolata',
-    url: `${primaryCdn}Inconsolata:wght@300;400;500;600;700&family=Lato:wght@300;400;700&display=swap`,
+    url: getFontUrl(
+      'Inconsolata',
+      `${primaryCdn}Inconsolata:wght@400;500;600&family=Lato:wght@400;700&display=swap&subset=latin`,
+    ),
     fallback: 'monospace',
   },
   IBMPlexSans: {
     name: 'IBM Plex Sans',
-    url: `${primaryCdn}IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap`,
+    url: getFontUrl(
+      'IBM Plex Sans',
+      `${primaryCdn}IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap&subset=latin`,
+    ),
     fallback: 'sans-serif',
   },
   Ubuntu: {
     name: 'Ubuntu',
-    url: `${primaryCdn}Ubuntu:wght@300;400;500;700&family=Ubuntu+Mono:wght@400;500;700&display=swap`,
+    url: getFontUrl(
+      'Ubuntu',
+      `${primaryCdn}Ubuntu:wght@400;500;700&family=Ubuntu+Mono:wght@400;500;700&display=swap&subset=latin`,
+    ),
     fallback: 'monospace',
   },
   FiraCode: {
     name: 'Fira Code',
-    url: `${primaryCdn}Fira+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500;600;700&display=swap`,
+    url: getFontUrl(
+      'Fira Code',
+      `${primaryCdn}Fira+Sans:wght@400;500;600&family=Fira+Code:wght@400;500;600;700&display=swap&subset=latin`,
+    ),
     fallback: 'monospace',
   },
   Outfit: {
     name: 'Outfit',
-    url: `${primaryCdn}Outfit:wght@300;400;500;600;700&display=swap`,
+    url: getFontUrl('Outfit', `${primaryCdn}Outfit:wght@400;500;600&display=swap&subset=latin`),
     fallback: 'sans-serif',
   },
   Nunito: {
     name: 'Nunito',
-    url: `${primaryCdn}Nunito:wght@300;400;500;600;700;800&display=swap`,
+    url: getFontUrl('Nunito', `${primaryCdn}Nunito:wght@400;500;600;700&display=swap&subset=latin`),
     fallback: 'sans-serif',
   },
 };

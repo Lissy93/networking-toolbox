@@ -26,7 +26,7 @@ const STORAGE_KEY = 'theme';
 // Track loaded fonts to avoid duplicates
 const loadedFonts = new Set<string>();
 
-// Helper function to load custom fonts
+// Helper function to load custom fonts with Font Loading API tracking
 function loadCustomFont(fontConfig: { name: string; url: string; fallback?: string }) {
   if (!browser || loadedFonts.has(fontConfig.url)) return;
 
@@ -35,9 +35,65 @@ function loadCustomFont(fontConfig: { name: string; url: string; fallback?: stri
   link.href = fontConfig.url;
   link.crossOrigin = 'anonymous';
 
-  // Add fallback handling
+  // Add loading state class
+  document.documentElement.classList.add('fonts-loading');
+
+  // Error handling
   link.onerror = () => {
-    logger.warn(`Failed to load font from ${fontConfig.url}`, { url: fontConfig.url, font: fontConfig.name });
+    logger.warn(`Failed to load font from ${fontConfig.url}`, {
+      url: fontConfig.url,
+      font: fontConfig.name,
+      component: 'ThemeStore',
+    });
+    document.documentElement.classList.remove('fonts-loading');
+  };
+
+  // Success handling with Font Loading API
+  link.onload = () => {
+    // Wait for fonts to be ready using Font Loading API
+    if (document.fonts) {
+      document.fonts.ready
+        .then(() => {
+          // Extract font family names from the config
+          const fontFamily = fontConfig.name;
+
+          // Check if font is loaded (try both regular and bold weights)
+          const fontLoaded =
+            document.fonts.check(`1em "${fontFamily}"`) || document.fonts.check(`700 1em "${fontFamily}"`);
+
+          if (fontLoaded) {
+            document.documentElement.classList.remove('fonts-loading');
+            document.documentElement.classList.add('fonts-loaded');
+            logger.debug(`Font loaded successfully: ${fontFamily}`, {
+              font: fontFamily,
+              component: 'ThemeStore',
+            });
+          } else {
+            // Font stylesheet loaded but font not available yet
+            logger.debug(`Font stylesheet loaded, waiting for font: ${fontFamily}`, {
+              font: fontFamily,
+              component: 'ThemeStore',
+            });
+
+            // Set a timeout fallback (3 seconds)
+            setTimeout(() => {
+              document.documentElement.classList.remove('fonts-loading');
+            }, 3000);
+          }
+        })
+        .catch((err) => {
+          logger.warn('Font loading check failed', {
+            error: err,
+            font: fontConfig.name,
+            component: 'ThemeStore',
+          });
+          document.documentElement.classList.remove('fonts-loading');
+        });
+    } else {
+      // Fallback for browsers without Font Loading API
+      document.documentElement.classList.remove('fonts-loading');
+      document.documentElement.classList.add('fonts-loaded');
+    }
   };
 
   document.head.appendChild(link);

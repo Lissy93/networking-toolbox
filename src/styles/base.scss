@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap');
+// Self-hosted fonts (Fira Code, Fira Sans, Inter)
+// Other theme fonts load dynamically via theme.ts
+@import url('/fonts/fonts.css');
 
 /* Reset */
 *,

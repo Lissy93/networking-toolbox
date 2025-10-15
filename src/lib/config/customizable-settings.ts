@@ -53,7 +53,7 @@ export const DEFAULT_NAVBAR_DISPLAY: NavbarDisplayMode = (env.NTB_NAVBAR_DISPLAY
  * Default theme
  * Options: 'dark', 'light', 'midnight', 'arctic', 'ocean', 'purple', 'cyberpunk', 'terminal', 'lightpurple', 'muteddark', 'solarized'
  */
-export const DEFAULT_THEME: ThemeOption = (env.NTB_DEFAULT_THEME as ThemeOption) ?? 'dark';
+export const DEFAULT_THEME: ThemeOption = (env.NTB_DEFAULT_THEME as ThemeOption) ?? 'tokyonight';
 
 /**
  * Default language
