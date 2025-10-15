@@ -3,6 +3,7 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
 
   let setA = $state(`192.168.0.0/16
 10.0.0.0/8`);
@@ -12,7 +13,7 @@
   let mergeContainers = $state(true);
   let strictEquality = $state(false);
   let result = $state<ContainsResult | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExampleIndex = $state<number | null>(null);
   let userModified = $state(false);
 
@@ -57,17 +58,6 @@
     userModified = true;
   }
 
-  /* Copy to clipboard */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => (copiedStates[id] = false), 3000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
-
   /* Export results as CSV */
   function exportAsCSV() {
     if (!result) return;
@@ -82,7 +72,7 @@
     ]);
 
     const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
-    copyToClipboard(csv, 'csv-export');
+    clipboard.copy(csv, 'csv-export');
   }
 
   /* Export results as JSON */
@@ -96,7 +86,7 @@
     };
 
     const json = JSON.stringify(exportData, null, 2);
-    copyToClipboard(json, 'json-export');
+    clipboard.copy(json, 'json-export');
   }
 
   /* Clear inputs */
@@ -303,19 +293,19 @@
               <button
                 type="button"
                 class="btn btn-primary btn-sm"
-                class:copied={copiedStates['csv-export']}
+                class:copied={clipboard.isCopied('csv-export')}
                 onclick={exportAsCSV}
               >
-                <Icon name={copiedStates['csv-export'] ? 'check' : 'csv-file'} size="sm" />
+                <Icon name={clipboard.isCopied('csv-export') ? 'check' : 'csv-file'} size="sm" />
                 CSV
               </button>
               <button
                 type="button"
                 class="btn btn-secondary btn-sm"
-                class:copied={copiedStates['json-export']}
+                class:copied={clipboard.isCopied('json-export')}
                 onclick={exportAsJSON}
               >
-                <Icon name={copiedStates['json-export'] ? 'check' : 'json-file'} size="sm" />
+                <Icon name={clipboard.isCopied('json-export') ? 'check' : 'json-file'} size="sm" />
                 JSON
               </button>
             </div>
@@ -409,10 +399,10 @@
                     <button
                       type="button"
                       class="btn btn-icon btn-xs"
-                      class:copied={copiedStates[`gaps-${check.input}`]}
-                      onclick={() => copyToClipboard(check.gaps.join('\n'), `gaps-${check.input}`)}
+                      class:copied={clipboard.isCopied(`gaps-${check.input}`)}
+                      onclick={() => clipboard.copy(check.gaps.join('\n'), `gaps-${check.input}`)}
                     >
-                      <Icon name={copiedStates[`gaps-${check.input}`] ? 'check' : 'copy'} size="xs" />
+                      <Icon name={clipboard.isCopied(`gaps-${check.input}`) ? 'check' : 'copy'} size="xs" />
                     </button>
                   {:else}
                     <span class="no-gaps">-</span>

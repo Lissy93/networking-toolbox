@@ -6,6 +6,7 @@
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import SvgIcon from '$lib/components/global/SvgIcon.svelte';
   import { tooltip } from '$lib/actions/tooltip.js';
+  import { useClipboard } from '$lib/composables';
   import type { SubnetInfo } from '$lib/types/ip.js';
 
   let cidrInput = $state('192.168.1.0/24');
@@ -40,22 +41,7 @@
     return num.toLocaleString();
   }
 
-  let copiedStates = $state<Record<string, boolean>>({});
-
-  /**
-   * Copy to clipboard with visual feedback
-   */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 3000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
+  const clipboard = useClipboard();
 </script>
 
 <div class="card">
@@ -85,14 +71,17 @@
             <span class="info-label" use:tooltip={'First IP in subnet - identifies the network'}>Network Address</span>
             <div class="value-copy">
               <code class="ip-value success">{subnetInfo.network.octets.join('.')}</code>
-              <Tooltip text={copiedStates['network'] ? 'Copied!' : 'Copy network address to clipboard'} position="top">
+              <Tooltip
+                text={clipboard.isCopied('network') ? 'Copied!' : 'Copy network address to clipboard'}
+                position="top"
+              >
                 <button
                   type="button"
-                  class="btn-icon copy-btn {copiedStates['network'] ? 'copied' : ''}"
-                  onclick={() => copyToClipboard(subnetInfo!.network.octets.join('.'), 'network')}
+                  class="btn-icon copy-btn {clipboard.isCopied('network') ? 'copied' : ''}"
+                  onclick={() => clipboard.copy(subnetInfo!.network.octets.join('.'), 'network')}
                   aria-label="Copy network address"
                 >
-                  <SvgIcon icon={copiedStates['network'] ? 'check' : 'clipboard'} size="md" />
+                  <SvgIcon icon={clipboard.isCopied('network') ? 'check' : 'clipboard'} size="md" />
                 </button>
               </Tooltip>
             </div>
@@ -103,16 +92,16 @@
             <div class="value-copy">
               <code class="ip-value error">{subnetInfo.broadcast.octets.join('.')}</code>
               <Tooltip
-                text={copiedStates['broadcast'] ? 'Copied!' : 'Copy broadcast address to clipboard'}
+                text={clipboard.isCopied('broadcast') ? 'Copied!' : 'Copy broadcast address to clipboard'}
                 position="top"
               >
                 <button
                   type="button"
-                  class="btn-icon copy-btn {copiedStates['broadcast'] ? 'copied' : ''}"
-                  onclick={() => copyToClipboard(subnetInfo!.broadcast.octets.join('.'), 'broadcast')}
+                  class="btn-icon copy-btn {clipboard.isCopied('broadcast') ? 'copied' : ''}"
+                  onclick={() => clipboard.copy(subnetInfo!.broadcast.octets.join('.'), 'broadcast')}
                   aria-label="Copy broadcast address"
                 >
-                  <SvgIcon icon={copiedStates['broadcast'] ? 'check' : 'clipboard'} size="md" />
+                  <SvgIcon icon={clipboard.isCopied('broadcast') ? 'check' : 'clipboard'} size="md" />
                 </button>
               </Tooltip>
             </div>

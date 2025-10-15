@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
   import { generatePTRName, generateCIDRPTRs, type PTRRecord } from '$lib/utils/reverse-dns.js';
 
   let inputValue = $state('192.168.1.100');
@@ -16,7 +17,7 @@
       uniqueZones: number;
     };
   } | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExample = $state<string | null>(null);
   let _userModified = $state(false);
 
@@ -117,18 +118,6 @@
     _userModified = true;
     selectedExample = null;
     generatePTRs();
-  }
-
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
   }
 
   // Generate on component load
@@ -290,10 +279,10 @@
                 <div class="col-ptr">
                   <code>{entry.ptrName}</code>
                   <button
-                    class="copy-button {copiedStates[`ptr-${entry.ip}`] ? 'copied' : ''}"
-                    onclick={() => copyToClipboard(entry.ptrName, `ptr-${entry.ip}`)}
+                    class="copy-button {clipboard.isCopied(`ptr-${entry.ip}`) ? 'copied' : ''}"
+                    onclick={() => clipboard.copy(entry.ptrName, `ptr-${entry.ip}`)}
                   >
-                    <Icon name={copiedStates[`ptr-${entry.ip}`] ? 'check' : 'copy'} size="sm" />
+                    <Icon name={clipboard.isCopied(`ptr-${entry.ip}`) ? 'check' : 'copy'} size="sm" />
                   </button>
                 </div>
                 <div class="col-zone-line">
@@ -304,14 +293,14 @@
                   {/snippet}
                   {@render zoneLine()}
                   <button
-                    class="copy-button {copiedStates[`zone-${entry.ip}`] ? 'copied' : ''}"
+                    class="copy-button {clipboard.isCopied(`zone-${entry.ip}`) ? 'copied' : ''}"
                     onclick={() => {
                       const recordName = entry.ptrName.replace(`.${entry.zone}`, '').replace(/\.$/, '');
                       const hostname = `host-${entry.ip.replace(/[:.]/g, '-')}.example.com.`;
-                      copyToClipboard(`${recordName}    IN    PTR    ${hostname}`, `zone-${entry.ip}`);
+                      clipboard.copy(`${recordName}    IN    PTR    ${hostname}`, `zone-${entry.ip}`);
                     }}
                   >
-                    <Icon name={copiedStates[`zone-${entry.ip}`] ? 'check' : 'copy'} size="sm" />
+                    <Icon name={clipboard.isCopied(`zone-${entry.ip}`) ? 'check' : 'copy'} size="sm" />
                   </button>
                 </div>
                 <div class="col-type">

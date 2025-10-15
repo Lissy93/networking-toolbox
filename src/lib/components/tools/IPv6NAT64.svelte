@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
 
   let inputAddress = $state('192.168.1.100');
   let customPrefix = $state('64:ff9b::/96');
@@ -19,7 +20,7 @@
       explanation: string[];
     };
   } | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExample = $state<string | null>(null);
   let _userModified = $state(false);
 
@@ -401,18 +402,6 @@
     translateAddress();
   }
 
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
-
   // Translate on component load
   translateAddress();
 </script>
@@ -571,10 +560,10 @@
               <div class="step-content">
                 <code class="step-value">{result.translatedAddress}</code>
                 <button
-                  class="copy-button {copiedStates['result'] ? 'copied' : ''}"
-                  onclick={() => result && copyToClipboard(result.translatedAddress, 'result')}
+                  class="copy-button {clipboard.isCopied('result') ? 'copied' : ''}"
+                  onclick={() => result && clipboard.copy(result.translatedAddress, 'result')}
                 >
-                  <Icon name={copiedStates['result'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('result') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
             </div>

@@ -2,6 +2,7 @@
   import { expandIPv6, compressIPv6, validateIPv6Address } from '$lib/utils/ipv6-subnet-calculations.js';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
 
   interface Props {
     mode: 'expand' | 'compress';
@@ -14,7 +15,7 @@
   let inputAddress = $state('2001:db8::1');
   let outputAddress = $state('');
   let conversionError = $state('');
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExampleIndex = $state<number | null>(null);
 
   /* Common IPv6 example addresses for testing */
@@ -47,19 +48,6 @@
   function handleInput() {
     clearExampleSelection();
     performConversion();
-  }
-
-  /* Copy text to clipboard */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 3000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
   }
 
   /* Perform the conversion based on mode */
@@ -208,10 +196,10 @@
                 <button
                   type="button"
                   class="btn btn-icon copy-btn"
-                  class:copied={copiedStates['output']}
-                  onclick={() => copyToClipboard(outputAddress, 'output')}
+                  class:copied={clipboard.isCopied('output')}
+                  onclick={() => clipboard.copy(outputAddress, 'output')}
                 >
-                  <Icon name={copiedStates['output'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('output') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
             </div>

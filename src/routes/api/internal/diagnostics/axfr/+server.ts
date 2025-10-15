@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { promises as dns } from 'dns';
+import { errorManager } from '$lib/utils/error-manager';
 
 export const config = { runtime: 'nodejs22.x' };
 
@@ -308,7 +309,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     return json(response);
   } catch (err) {
-    console.error('AXFR test error:', err);
+    errorManager.captureException(err, 'error', { component: 'AXFR API' });
     if (err && typeof err === 'object' && 'status' in err) {
       throw err;
     }

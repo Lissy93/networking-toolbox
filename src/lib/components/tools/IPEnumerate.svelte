@@ -1,6 +1,7 @@
 <script lang="ts">
   // import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
 
   let input = $state('192.168.1.0/28');
   let maxDisplayLimit = $state(1000);
@@ -23,7 +24,7 @@
     };
   } | null>(null);
   let isGenerating = $state(false);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExample = $state<string | null>(null);
   let _userModified = $state(false);
 
@@ -273,18 +274,6 @@
     enumerateIPs();
   }
 
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
-
   async function exportToCSV() {
     if (!result?.addresses.length) return;
 
@@ -453,10 +442,10 @@
               CSV
             </button>
             <button
-              class="copy-btn {copiedStates['all-addresses'] ? 'copied' : ''}"
-              onclick={() => copyToClipboard((result?.addresses || []).join('\n'), 'all-addresses')}
+              class="copy-btn {clipboard.isCopied('all-addresses') ? 'copied' : ''}"
+              onclick={() => clipboard.copy((result?.addresses || []).join('\n'), 'all-addresses')}
             >
-              <Icon name={copiedStates['all-addresses'] ? 'check' : 'copy'} size="sm" />
+              <Icon name={clipboard.isCopied('all-addresses') ? 'check' : 'copy'} size="sm" />
               Copy All
             </button>
           </div>
@@ -512,10 +501,10 @@
                 <span class="address-index">{index + 1}</span>
                 <code class="address-code">{address}</code>
                 <button
-                  class="copy-btn-small {copiedStates[address] ? 'copied' : ''}"
-                  onclick={() => copyToClipboard(address, address)}
+                  class="copy-btn-small {clipboard.isCopied(address) ? 'copied' : ''}"
+                  onclick={() => clipboard.copy(address, address)}
                 >
-                  <Icon name={copiedStates[address] ? 'check' : 'copy'} size="xs" />
+                  <Icon name={clipboard.isCopied(address) ? 'check' : 'copy'} size="xs" />
                 </button>
               </div>
             {/each}

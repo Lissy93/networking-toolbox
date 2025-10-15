@@ -2,12 +2,13 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { parseZoneFile, compareZones, type ZoneDiff, type ResourceRecord } from '$lib/utils/zone-parser.js';
+  import { useClipboard } from '$lib/composables';
 
   let oldZoneInput = $state('');
   let newZoneInput = $state('');
   let results = $state<ZoneDiff | null>(null);
   let showUnified = $state(false);
-  let copiedState = $state(false);
+  const clipboard = useClipboard();
   let activeExampleIndex = $state<number | null>(null);
 
   const examples = [
@@ -124,20 +125,10 @@ mail	IN	A	203.0.113.10
     return [record.owner, ttl, record.class, record.type, record.rdata].filter(Boolean).join('\t');
   }
 
-  async function copyDiff() {
+  function copyDiff() {
     if (!results) return;
-
-    const content = showUnified ? generateUnifiedDiff() : formatStructuredDiff();
-
-    try {
-      await navigator.clipboard.writeText(content);
-      copiedState = true;
-      setTimeout(() => {
-        copiedState = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy: ', err);
-    }
+    const diffText = showUnified ? generateUnifiedDiff() : formatStructuredDiff();
+    clipboard.copy(diffText);
   }
 
   function formatStructuredDiff(): string {
@@ -274,9 +265,9 @@ mail	IN	A	203.0.113.10
             <input type="checkbox" class="styled-checkbox" bind:checked={showUnified} />
             <span class="checkbox-text">Unified diff format</span>
           </label>
-          <button class="copy-button {copiedState ? 'copied' : ''}" onclick={copyDiff}>
-            <Icon name={copiedState ? 'check' : 'copy'} size="sm" />
-            {copiedState ? 'Copied!' : 'Copy Diff'}
+          <button class="copy-button {clipboard.isCopied() ? 'copied' : ''}" onclick={copyDiff}>
+            <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="sm" />
+            {clipboard.isCopied() ? 'Copied!' : 'Copy Diff'}
           </button>
         </div>
       </div>

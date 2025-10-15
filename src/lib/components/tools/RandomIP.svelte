@@ -2,6 +2,7 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import { generateRandomIPAddresses, type RandomIPResult } from '$lib/utils/random-ip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
   import '../../../styles/diagnostics-pages.scss';
 
   let inputText = $state('192.168.1.0/24 x 10\n10.0.0.0-10.0.0.255 5\n172.16.0.0/16 * 3\n2001:db8::/64[15]');
@@ -12,7 +13,7 @@
   let isLoading = $state(false);
   let selectedExampleIndex = $state<number | null>(null);
   let _userModified = $state(false);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
 
   const examples = [
     {
@@ -108,21 +109,9 @@
     URL.revokeObjectURL(url);
   }
 
-  async function copyToClipboard(text: string, key: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[key] = true;
-      setTimeout(() => {
-        copiedStates[key] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
-
   function copyAllIPs() {
     if (result && result.allGeneratedIPs.length > 0) {
-      copyToClipboard(result.allGeneratedIPs.join('\n'), 'all-ips');
+      clipboard.copy(result.allGeneratedIPs.join('\n'), 'all-ips');
     }
   }
 
@@ -277,18 +266,18 @@
             <h3>Generation Summary</h3>
             <button
               class="copy-btn"
-              class:copied={copiedStates['summary']}
+              class:copied={clipboard.isCopied('summary')}
               onclick={() =>
                 result &&
                 result.summary &&
-                copyToClipboard(
+                clipboard.copy(
                   `Total Networks: ${result.summary.totalNetworks}\nValid: ${result.summary.validNetworks}\nInvalid: ${result.summary.invalidNetworks}\nTotal IPs: ${result.summary.totalIPsGenerated}\nUnique IPs: ${result.summary.uniqueIPsGenerated}`,
                   'summary',
                 )}
               use:tooltip={'Copy summary to clipboard'}
             >
-              <Icon name={copiedStates['summary'] ? 'check' : 'copy'} size="xs" />
-              {copiedStates['summary'] ? 'Copied!' : 'Copy'}
+              <Icon name={clipboard.isCopied('summary') ? 'check' : 'copy'} size="xs" />
+              {clipboard.isCopied('summary') ? 'Copied!' : 'Copy'}
             </button>
           </div>
           <div class="card-content">
@@ -323,12 +312,12 @@
             <div class="export-buttons">
               <button
                 class="copy-btn"
-                class:copied={copiedStates['all-ips']}
+                class:copied={clipboard.isCopied('all-ips')}
                 onclick={copyAllIPs}
                 use:tooltip={'Copy all generated IPs to clipboard'}
               >
-                <Icon name={copiedStates['all-ips'] ? 'check' : 'copy'} size="xs" />
-                {copiedStates['all-ips'] ? 'Copied!' : 'Copy All'}
+                <Icon name={clipboard.isCopied('all-ips') ? 'check' : 'copy'} size="xs" />
+                {clipboard.isCopied('all-ips') ? 'Copied!' : 'Copy All'}
               </button>
               <button onclick={() => exportResults('txt')} use:tooltip={'Export as plain text file'}>
                 <Icon name="download" size="xs" />
@@ -351,12 +340,12 @@
                   <button
                     type="button"
                     class="ip-tag"
-                    class:copied={copiedStates[`ip-${index}`]}
-                    onclick={() => copyToClipboard(ip, `ip-${index}`)}
+                    class:copied={clipboard.isCopied(`ip-${index}`)}
+                    onclick={() => clipboard.copy(ip, `ip-${index}`)}
                     use:tooltip={'Click to copy IP address'}
                   >
                     {ip}
-                    <Icon name={copiedStates[`ip-${index}`] ? 'check' : 'copy'} size="xs" />
+                    <Icon name={clipboard.isCopied(`ip-${index}`) ? 'check' : 'copy'} size="xs" />
                   </button>
                 {/each}
               </div>
@@ -413,7 +402,7 @@
                             <button
                               type="button"
                               class="code-button info-code"
-                              onclick={() => copyToClipboard(generation.seed!, 'seed')}
+                              onclick={() => clipboard.copy(generation.seed!, 'seed')}
                               title="Click to copy"
                             >
                               {generation.seed}
@@ -432,7 +421,7 @@
                             <button
                               type="button"
                               class="code-button range-code"
-                              onclick={() => copyToClipboard(generation.networkDetails!.start, 'start')}
+                              onclick={() => clipboard.copy(generation.networkDetails!.start, 'start')}
                               title="Click to copy"
                             >
                               {generation.networkDetails.start}
@@ -444,7 +433,7 @@
                             <button
                               type="button"
                               class="code-button range-code"
-                              onclick={() => copyToClipboard(generation.networkDetails!.end, 'end')}
+                              onclick={() => clipboard.copy(generation.networkDetails!.end, 'end')}
                               title="Click to copy"
                             >
                               {generation.networkDetails.end}
@@ -469,12 +458,15 @@
                             <button
                               type="button"
                               class="ip-tag"
-                              class:copied={copiedStates[`gen-${index}-ip-${ipIndex}`]}
-                              onclick={() => copyToClipboard(ip, `gen-${index}-ip-${ipIndex}`)}
+                              class:copied={clipboard.isCopied(`gen-${index}-ip-${ipIndex}`)}
+                              onclick={() => clipboard.copy(ip, `gen-${index}-ip-${ipIndex}`)}
                               use:tooltip={'Click to copy IP address'}
                             >
                               {ip}
-                              <Icon name={copiedStates[`gen-${index}-ip-${ipIndex}`] ? 'check' : 'copy'} size="xs" />
+                              <Icon
+                                name={clipboard.isCopied(`gen-${index}-ip-${ipIndex}`) ? 'check' : 'copy'}
+                                size="xs"
+                              />
                             </button>
                           {/each}
                         </div>

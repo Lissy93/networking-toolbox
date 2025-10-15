@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { connect } from 'node:net';
 import * as tls from 'node:tls';
+import { errorManager } from '$lib/utils/error-manager';
 
 interface TLSCheckResult {
   domain: string;
@@ -222,7 +223,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     return json(result);
   } catch (error) {
-    console.error('Mail TLS check error:', error);
+    errorManager.captureException(error, 'error', { component: 'Mail TLS API' });
     return json(
       { message: error instanceof Error ? error.message : 'Failed to check mail server TLS' },
       { status: 500 },

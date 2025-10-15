@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
 
   let inputValue = $state('192.168.1.100');
   let inputType = $state<'single' | 'cidr'>('single');
@@ -25,7 +26,7 @@
       uniqueZones: number;
     };
   } | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExample = $state<string | null>(null);
   let _userModified = $state(false);
   let showZoneFiles = $state(true);
@@ -358,18 +359,6 @@ $TTL 86400
     generatePTRs();
   }
 
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
-
   // Generate on component load
   generatePTRs();
 </script>
@@ -541,10 +530,10 @@ $TTL 86400
                 <div class="col-ptr">
                   <code>{entry.ptrName}</code>
                   <button
-                    class="copy-button {copiedStates[`ptr-${entry.ip}`] ? 'copied' : ''}"
-                    onclick={() => copyToClipboard(entry.ptrName, `ptr-${entry.ip}`)}
+                    class="copy-button {clipboard.isCopied(`ptr-${entry.ip}`) ? 'copied' : ''}"
+                    onclick={() => clipboard.copy(entry.ptrName, `ptr-${entry.ip}`)}
                   >
-                    <Icon name={copiedStates[`ptr-${entry.ip}`] ? 'check' : 'copy'} size="sm" />
+                    <Icon name={clipboard.isCopied(`ptr-${entry.ip}`) ? 'check' : 'copy'} size="sm" />
                   </button>
                 </div>
                 <div class="col-type">
@@ -578,10 +567,10 @@ $TTL 86400
                     <span class="zone-type {zoneFile.type.toLowerCase()}">{zoneFile.type}</span>
                   </div>
                   <button
-                    class="copy-button {copiedStates[`zone-${zoneFile.zone}`] ? 'copied' : ''}"
-                    onclick={() => copyToClipboard(zoneFile.content, `zone-${zoneFile.zone}`)}
+                    class="copy-button {clipboard.isCopied(`zone-${zoneFile.zone}`) ? 'copied' : ''}"
+                    onclick={() => clipboard.copy(zoneFile.content, `zone-${zoneFile.zone}`)}
                   >
-                    <Icon name={copiedStates[`zone-${zoneFile.zone}`] ? 'check' : 'copy'} size="sm" />
+                    <Icon name={clipboard.isCopied(`zone-${zoneFile.zone}`) ? 'check' : 'copy'} size="sm" />
                     Copy Zone File
                   </button>
                 </div>

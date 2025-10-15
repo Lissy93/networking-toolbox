@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
+  import { useClipboard } from '$lib/composables';
 
   let domain = $state('');
   let order = $state('100');
@@ -10,7 +11,7 @@
   let regexp = $state('!^.*$!sip:info@example.com!');
   let replacement = $state('.');
 
-  let buttonStates = $state({} as Record<string, boolean>);
+  const clipboard = useClipboard();
   let showExamples = $state(false);
 
   const flagOptions = [
@@ -85,19 +86,8 @@
     return warns;
   });
 
-  /**
-   * @param {string} buttonId
-   */
-  function showButtonSuccess(buttonId: string) {
-    buttonStates[buttonId] = true;
-    setTimeout(() => {
-      buttonStates[buttonId] = false;
-    }, 2000);
-  }
-
   function copyToClipboard() {
-    navigator.clipboard.writeText(naptrRecord);
-    showButtonSuccess('copy');
+    clipboard.copy(naptrRecord, 'copy');
   }
 
   function downloadRecord() {
@@ -110,7 +100,7 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showButtonSuccess('download');
+    clipboard.copy('', 'download');
   }
 
   function loadExample(exampleType: string) {
@@ -284,13 +274,13 @@
 
           {#if isValid}
             <div class="actions">
-              <button onclick={copyToClipboard} class="btn btn-primary" class:success={buttonStates.copy}>
-                <Icon name={buttonStates.copy ? 'check' : 'copy'} size="sm" />
-                {buttonStates.copy ? 'Copied!' : 'Copy Record'}
+              <button onclick={copyToClipboard} class="btn btn-primary" class:success={clipboard.isCopied('copy')}>
+                <Icon name={clipboard.isCopied('copy') ? 'check' : 'copy'} size="sm" />
+                {clipboard.isCopied('copy') ? 'Copied!' : 'Copy Record'}
               </button>
-              <button onclick={downloadRecord} class="btn btn-success" class:success={buttonStates.download}>
-                <Icon name={buttonStates.download ? 'check' : 'download'} size="sm" />
-                {buttonStates.download ? 'Downloaded!' : 'Download'}
+              <button onclick={downloadRecord} class="btn btn-success" class:success={clipboard.isCopied('download')}>
+                <Icon name={clipboard.isCopied('download') ? 'check' : 'download'} size="sm" />
+                {clipboard.isCopied('download') ? 'Downloaded!' : 'Download'}
               </button>
             </div>
           {/if}

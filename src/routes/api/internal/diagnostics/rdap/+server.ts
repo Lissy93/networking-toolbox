@@ -1,5 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorManager } from '$lib/utils/error-manager';
+import { logger } from '$lib/utils/logger';
 
 type Action = 'domain-lookup' | 'ip-lookup' | 'asn-lookup';
 
@@ -43,7 +45,7 @@ async function _getASNFromTeamCymru(ip: string): Promise<{ asn: string; country:
     // For now, we'll return null and rely on RDAP
     return null;
   } catch (err) {
-    console.warn('Team Cymru ASN lookup failed:', err);
+    logger.warn('Team Cymru ASN lookup failed', { component: 'RDAP API', error: err });
     return null;
   }
 }
@@ -117,7 +119,7 @@ function findRDAPService(registries: any, query: string, type: 'domain' | 'ip' |
 
     return null;
   } catch (err) {
-    console.warn('Error finding RDAP service:', err);
+    logger.warn('Error finding RDAP service', { component: 'RDAP API', error: err });
     return null;
   }
 }
@@ -294,7 +296,10 @@ export const POST: RequestHandler = async ({ request }) => {
           });
         } catch (rdapErr: any) {
           // Fallback to Team Cymru (if we had a working IP)
-          console.warn('RDAP ASN lookup failed, fallback not implemented:', rdapErr.message);
+          logger.warn('RDAP ASN lookup failed, fallback not implemented', {
+            component: 'RDAP API',
+            error: rdapErr.message,
+          });
           throw rdapErr;
         }
       }
@@ -303,7 +308,7 @@ export const POST: RequestHandler = async ({ request }) => {
         throw error(400, `Unknown action: ${(body as any).action}`);
     }
   } catch (err: any) {
-    console.error('RDAP diagnostics error:', err);
+    errorManager.captureException(err, 'error', { component: 'RDAP API' });
     throw error(500, `RDAP lookup failed: ${(err as Error).message}`);
   }
 };

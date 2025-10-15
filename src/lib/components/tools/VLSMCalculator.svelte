@@ -10,6 +10,7 @@
   import IPInput from './IPInput.svelte';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
   import { tooltip } from '$lib/actions/tooltip.js';
   import { SvelteSet } from 'svelte/reactivity';
 
@@ -17,7 +18,7 @@
   let cidr = $state(24);
   let subnets = $state<SubnetRequirement[]>([]);
   let vlsmResult = $state<VLSMResult | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let expandedSubnets = new SvelteSet<string>();
 
   // Add initial subnet requirement
@@ -115,18 +116,6 @@
   /**
    * Copy text to clipboard
    */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 1000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
-
   /**
    * Get efficiency color based on waste percentage
    */
@@ -338,10 +327,10 @@
                   <Tooltip text="Copy network info" position="left">
                     <button
                       type="button"
-                      class="btn btn-ghost {copiedStates[`copy-${subnet.id}`] ? 'copied' : ''}"
-                      onclick={() => copyToClipboard(`${subnet.networkAddress}/${subnet.cidr}`, `copy-${subnet.id}`)}
+                      class="btn btn-ghost {clipboard.isCopied(`copy-${subnet.id}`) ? 'copied' : ''}"
+                      onclick={() => clipboard.copy(`${subnet.networkAddress}/${subnet.cidr}`, `copy-${subnet.id}`)}
                     >
-                      <Icon name={copiedStates[`copy-${subnet.id}`] ? 'tick' : 'copy'} size="sm" />
+                      <Icon name={clipboard.isCopied(`copy-${subnet.id}`) ? 'tick' : 'copy'} size="sm" />
                     </button>
                   </Tooltip>
                 </div>

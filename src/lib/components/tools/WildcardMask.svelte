@@ -3,11 +3,12 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import '../../../styles/diagnostics-pages.scss';
+  import { useClipboard } from '$lib/composables';
 
   let inputText = $state('192.168.1.0/24\n10.0.0.0 255.255.255.0\n172.16.0.0 0.0.255.255');
   let result = $state<WildcardResult | null>(null);
   let isLoading = $state(false);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let _selectedExample = $state<string | null>(null);
   let selectedExampleIndex = $state<number | null>(null);
   let _userModified = $state(false);
@@ -120,21 +121,11 @@
     URL.revokeObjectURL(url);
   }
 
-  async function copyToClipboard(text: string, id: string = text) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => (copiedStates[id] = false), 3000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
-
   function copyACLRules(type: 'cisco' | 'juniper' | 'generic') {
     if (!result) return;
     const rules = result.aclRules[type];
     if (rules.length > 0) {
-      copyToClipboard(rules.join('\n'), `acl-${type}`);
+      clipboard.copy(rules.join('\n'), `acl-${type}`);
     }
   }
 
@@ -341,11 +332,11 @@
                         <button
                           type="button"
                           class="btn btn-icon btn-xs"
-                          class:copied={copiedStates[conversion.cidr]}
-                          onclick={() => copyToClipboard(conversion.cidr, conversion.cidr)}
+                          class:copied={clipboard.isCopied(conversion.cidr)}
+                          onclick={() => clipboard.copy(conversion.cidr, conversion.cidr)}
                           use:tooltip={{ text: 'Copy to clipboard', position: 'top' }}
                         >
-                          <Icon name={copiedStates[conversion.cidr] ? 'check' : 'copy'} size="xs" />
+                          <Icon name={clipboard.isCopied(conversion.cidr) ? 'check' : 'copy'} size="xs" />
                         </button>
                       </div>
                     </div>
@@ -359,11 +350,11 @@
                         <button
                           type="button"
                           class="btn btn-icon btn-xs"
-                          class:copied={copiedStates[conversion.subnetMask]}
-                          onclick={() => copyToClipboard(conversion.subnetMask, conversion.subnetMask)}
+                          class:copied={clipboard.isCopied(conversion.subnetMask)}
+                          onclick={() => clipboard.copy(conversion.subnetMask, conversion.subnetMask)}
                           use:tooltip={{ text: 'Copy to clipboard', position: 'top' }}
                         >
-                          <Icon name={copiedStates[conversion.subnetMask] ? 'check' : 'copy'} size="xs" />
+                          <Icon name={clipboard.isCopied(conversion.subnetMask) ? 'check' : 'copy'} size="xs" />
                         </button>
                       </div>
                     </div>
@@ -377,11 +368,11 @@
                         <button
                           type="button"
                           class="btn btn-icon btn-xs"
-                          class:copied={copiedStates[conversion.wildcardMask]}
-                          onclick={() => copyToClipboard(conversion.wildcardMask, conversion.wildcardMask)}
+                          class:copied={clipboard.isCopied(conversion.wildcardMask)}
+                          onclick={() => clipboard.copy(conversion.wildcardMask, conversion.wildcardMask)}
                           use:tooltip={{ text: 'Copy to clipboard', position: 'top' }}
                         >
-                          <Icon name={copiedStates[conversion.wildcardMask] ? 'check' : 'copy'} size="xs" />
+                          <Icon name={clipboard.isCopied(conversion.wildcardMask) ? 'check' : 'copy'} size="xs" />
                         </button>
                       </div>
                     </div>
@@ -434,11 +425,11 @@
                   <h4 use:tooltip={'Cisco IOS access control list format'}>Cisco ACL</h4>
                   <button
                     onclick={() => copyACLRules('cisco')}
-                    class="copy-btn {copiedStates['acl-cisco'] ? 'copied' : ''}"
+                    class="copy-btn {clipboard.isCopied('acl-cisco') ? 'copied' : ''}"
                     use:tooltip={'Copy all Cisco ACL rules to clipboard'}
                   >
-                    <Icon name={copiedStates['acl-cisco'] ? 'check' : 'copy'} size="xs" />
-                    {copiedStates['acl-cisco'] ? 'Copied!' : 'Copy'}
+                    <Icon name={clipboard.isCopied('acl-cisco') ? 'check' : 'copy'} size="xs" />
+                    {clipboard.isCopied('acl-cisco') ? 'Copied!' : 'Copy'}
                   </button>
                 </div>
                 <div class="acl-code">
@@ -455,11 +446,11 @@
                   <h4 use:tooltip={'Juniper JunOS firewall filter format'}>Juniper ACL</h4>
                   <button
                     onclick={() => copyACLRules('juniper')}
-                    class="copy-btn {copiedStates['acl-juniper'] ? 'copied' : ''}"
+                    class="copy-btn {clipboard.isCopied('acl-juniper') ? 'copied' : ''}"
                     use:tooltip={'Copy all Juniper ACL rules to clipboard'}
                   >
-                    <Icon name={copiedStates['acl-juniper'] ? 'check' : 'copy'} size="xs" />
-                    {copiedStates['acl-juniper'] ? 'Copied!' : 'Copy'}
+                    <Icon name={clipboard.isCopied('acl-juniper') ? 'check' : 'copy'} size="xs" />
+                    {clipboard.isCopied('acl-juniper') ? 'Copied!' : 'Copy'}
                   </button>
                 </div>
                 <div class="acl-code">
@@ -476,11 +467,11 @@
                   <h4 use:tooltip={'Generic access control list format'}>Generic ACL</h4>
                   <button
                     onclick={() => copyACLRules('generic')}
-                    class="copy-btn {copiedStates['acl-generic'] ? 'copied' : ''}"
+                    class="copy-btn {clipboard.isCopied('acl-generic') ? 'copied' : ''}"
                     use:tooltip={'Copy all generic ACL rules to clipboard'}
                   >
-                    <Icon name={copiedStates['acl-generic'] ? 'check' : 'copy'} size="xs" />
-                    {copiedStates['acl-generic'] ? 'Copied!' : 'Copy'}
+                    <Icon name={clipboard.isCopied('acl-generic') ? 'check' : 'copy'} size="xs" />
+                    {clipboard.isCopied('acl-generic') ? 'Copied!' : 'Copy'}
                   </button>
                 </div>
                 <div class="acl-code">

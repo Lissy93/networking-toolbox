@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
+  import { useClipboard } from '$lib/composables';
 
   interface _SSHFPRecord {
     algorithm: number;
@@ -20,7 +21,7 @@
   let selectedExample = $state<string | null>(null);
 
   // Button success states
-  let buttonStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
 
   const algorithmDescriptions = {
     1: 'RSA - Traditional RSA algorithm (most common)',
@@ -121,16 +122,8 @@
     };
   });
 
-  function showButtonSuccess(buttonId: string): void {
-    buttonStates[buttonId] = true;
-    setTimeout(() => {
-      buttonStates[buttonId] = false;
-    }, 2000);
-  }
-
   function copyToClipboard(text: string, buttonId: string): void {
-    navigator.clipboard.writeText(text);
-    showButtonSuccess(buttonId);
+    clipboard.copy(text, buttonId);
   }
 
   function exportAsZoneFile(): void {
@@ -146,7 +139,7 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showButtonSuccess('export-sshfp');
+    clipboard.copy('downloaded', 'export-sshfp');
   }
 
   // Simulate fingerprint generation from public key
@@ -347,22 +340,22 @@
               <button
                 type="button"
                 class="copy-btn"
-                class:success={buttonStates['copy-sshfp']}
+                class:success={clipboard.isCopied('copy-sshfp')}
                 onclick={() => copyToClipboard(dnsRecord, 'copy-sshfp')}
                 use:tooltip={'Copy SSHFP record to clipboard'}
               >
-                <Icon name={buttonStates['copy-sshfp'] ? 'check' : 'copy'} size="sm" />
-                {buttonStates['copy-sshfp'] ? 'Copied!' : 'Copy'}
+                <Icon name={clipboard.isCopied('copy-sshfp') ? 'check' : 'copy'} size="sm" />
+                {clipboard.isCopied('copy-sshfp') ? 'Copied!' : 'Copy'}
               </button>
               <button
                 type="button"
                 class="export-btn"
-                class:success={buttonStates['export-sshfp']}
+                class:success={clipboard.isCopied('export-sshfp')}
                 onclick={exportAsZoneFile}
                 use:tooltip={'Download as zone file'}
               >
-                <Icon name={buttonStates['export-sshfp'] ? 'check' : 'download'} size="sm" />
-                {buttonStates['export-sshfp'] ? 'Downloaded!' : 'Export'}
+                <Icon name={clipboard.isCopied('export-sshfp') ? 'check' : 'download'} size="sm" />
+                {clipboard.isCopied('export-sshfp') ? 'Downloaded!' : 'Export'}
               </button>
             </div>
           </div>

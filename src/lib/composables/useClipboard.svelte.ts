@@ -3,6 +3,8 @@
  * Replaces the repeated copiedState pattern across 81+ files
  */
 
+import { errorManager } from '$lib/utils/error-manager';
+
 export function useClipboard(autoResetMs: number = 1500) {
   let copiedStates = $state<Record<string, boolean>>({});
 
@@ -20,7 +22,7 @@ export function useClipboard(autoResetMs: number = 1500) {
       }, autoResetMs);
       return true;
     } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
+      errorManager.captureException(error, 'warn', { component: 'Clipboard', action: 'copy', id });
       return false;
     }
   }

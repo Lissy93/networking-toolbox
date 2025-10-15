@@ -9,10 +9,11 @@
   import IPInput from './IPInput.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip.js';
+  import { useClipboard } from '$lib/composables';
 
   let networks = $state<NetworkInput[]>([]);
   let supernetResult = $state<SupernetResult | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let showVisualization = $state(false);
   let selectedExample = $state<string | null>(null);
   let _userModified = $state(false);
@@ -54,22 +55,6 @@
   }
 
   /* Calculate supernet - now handled by reactive effect */
-
-  /* Copy text to clipboard */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      // Force reactivity by creating new object
-      copiedStates = { ...copiedStates, [id]: true };
-      setTimeout(() => {
-        const currentStates = { ...copiedStates };
-        delete currentStates[id];
-        copiedStates = currentStates;
-      }, 1000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
 
   const examples = [
     {
@@ -325,12 +310,12 @@
                 <span class="ip-value success">{supernetResult.supernet.network}/{supernetResult.supernet.cidr}</span>
                 <button
                   class="btn btn-icon copy-btn"
-                  class:copied={copiedStates['supernet']}
+                  class:copied={clipboard.isCopied('supernet')}
                   onclick={() =>
                     supernetResult?.supernet &&
-                    copyToClipboard(`${supernetResult.supernet.network}/${supernetResult.supernet.cidr}`, 'supernet')}
+                    clipboard.copy(`${supernetResult.supernet.network}/${supernetResult.supernet.cidr}`, 'supernet')}
                 >
-                  <Icon name={copiedStates['supernet'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('supernet') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
             </div>
@@ -395,11 +380,10 @@
                 <code class="detail-value">{supernetResult.supernet.network}</code>
                 <button
                   class="btn btn-icon copy-btn"
-                  class:copied={copiedStates['network']}
-                  onclick={() =>
-                    supernetResult?.supernet && copyToClipboard(supernetResult.supernet.network, 'network')}
+                  class:copied={clipboard.isCopied('network')}
+                  onclick={() => supernetResult?.supernet && clipboard.copy(supernetResult.supernet.network, 'network')}
                 >
-                  <Icon name={copiedStates['network'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('network') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
             </div>
@@ -416,11 +400,10 @@
                 <code class="detail-value">{supernetResult.supernet.subnetMask}</code>
                 <button
                   class="btn btn-icon copy-btn"
-                  class:copied={copiedStates['mask']}
-                  onclick={() =>
-                    supernetResult?.supernet && copyToClipboard(supernetResult.supernet.subnetMask, 'mask')}
+                  class:copied={clipboard.isCopied('mask')}
+                  onclick={() => supernetResult?.supernet && clipboard.copy(supernetResult.supernet.subnetMask, 'mask')}
                 >
-                  <Icon name={copiedStates['mask'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('mask') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
             </div>
@@ -437,11 +420,11 @@
                 <code class="detail-value">{supernetResult.supernet.wildcardMask}</code>
                 <button
                   class="btn btn-icon copy-btn"
-                  class:copied={copiedStates['wildcard']}
+                  class:copied={clipboard.isCopied('wildcard')}
                   onclick={() =>
-                    supernetResult?.supernet && copyToClipboard(supernetResult.supernet.wildcardMask, 'wildcard')}
+                    supernetResult?.supernet && clipboard.copy(supernetResult.supernet.wildcardMask, 'wildcard')}
                 >
-                  <Icon name={copiedStates['wildcard'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('wildcard') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
             </div>
@@ -460,15 +443,15 @@
                 </code>
                 <button
                   class="btn btn-icon copy-btn"
-                  class:copied={copiedStates['range']}
+                  class:copied={clipboard.isCopied('range')}
                   onclick={() =>
                     supernetResult?.supernet &&
-                    copyToClipboard(
+                    clipboard.copy(
                       `${supernetResult.supernet.addressRange.first} - ${supernetResult.supernet.addressRange.last}`,
                       'range',
                     )}
                 >
-                  <Icon name={copiedStates['range'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('range') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
             </div>
@@ -485,11 +468,11 @@
                 <code class="detail-value binary-mask">{supernetResult.supernet.binaryMask}</code>
                 <button
                   class="btn btn-icon copy-btn"
-                  class:copied={copiedStates['binary']}
+                  class:copied={clipboard.isCopied('binary')}
                   onclick={() =>
-                    supernetResult?.supernet && copyToClipboard(supernetResult.supernet.binaryMask, 'binary')}
+                    supernetResult?.supernet && clipboard.copy(supernetResult.supernet.binaryMask, 'binary')}
                 >
-                  <Icon name={copiedStates['binary'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('binary') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
             </div>

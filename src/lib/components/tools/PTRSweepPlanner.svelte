@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
   import { analyzePTRCoverage, type PTRCoverageAnalysis } from '$lib/utils/reverse-dns.js';
 
   let cidrInput = $state('192.168.1.0/24');
@@ -16,7 +17,7 @@
     analysis: PTRCoverageAnalysis;
   } | null>(null);
 
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExample = $state<string | null>(null);
   let _userModified = $state(false);
 
@@ -107,18 +108,6 @@
     _userModified = true;
     selectedExample = null;
     analyzeCoverage();
-  }
-
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
   }
 
   function _generateDigCommands(missingPTRs: string[]): string {
@@ -345,10 +334,10 @@
                   Missing PTR Records ({results.analysis.missingPTRs.length})
                 </h4>
                 <button
-                  class="copy-button {copiedStates['missing-ptrs'] ? 'copied' : ''}"
-                  onclick={() => results && copyToClipboard(results.analysis.missingPTRs.join('\n'), 'missing-ptrs')}
+                  class="copy-button {clipboard.isCopied('missing-ptrs') ? 'copied' : ''}"
+                  onclick={() => results && clipboard.copy(results.analysis.missingPTRs.join('\n'), 'missing-ptrs')}
                 >
-                  <Icon name={copiedStates['missing-ptrs'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('missing-ptrs') ? 'check' : 'copy'} size="sm" />
                   Copy List
                 </button>
               </div>
@@ -377,10 +366,10 @@
                   Extra PTR Records ({results.analysis.extraPTRs.length})
                 </h4>
                 <button
-                  class="copy-button {copiedStates['extra-ptrs'] ? 'copied' : ''}"
-                  onclick={() => results && copyToClipboard(results.analysis.extraPTRs.join('\n'), 'extra-ptrs')}
+                  class="copy-button {clipboard.isCopied('extra-ptrs') ? 'copied' : ''}"
+                  onclick={() => results && clipboard.copy(results.analysis.extraPTRs.join('\n'), 'extra-ptrs')}
                 >
-                  <Icon name={copiedStates['extra-ptrs'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('extra-ptrs') ? 'check' : 'copy'} size="sm" />
                   Copy List
                 </button>
               </div>
@@ -416,12 +405,12 @@
                     <Icon name="plus" size="sm" />
                     <span>Create Missing PTR Records</span>
                     <button
-                      class="copy-button {copiedStates['create-commands'] ? 'copied' : ''}"
+                      class="copy-button {clipboard.isCopied('create-commands') ? 'copied' : ''}"
                       onclick={() =>
                         results &&
-                        copyToClipboard(generateCreateCommands(results.analysis.missingPTRs), 'create-commands')}
+                        clipboard.copy(generateCreateCommands(results.analysis.missingPTRs), 'create-commands')}
                     >
-                      <Icon name={copiedStates['create-commands'] ? 'check' : 'copy'} size="sm" />
+                      <Icon name={clipboard.isCopied('create-commands') ? 'check' : 'copy'} size="sm" />
                       Copy Zone Lines
                     </button>
                   </div>

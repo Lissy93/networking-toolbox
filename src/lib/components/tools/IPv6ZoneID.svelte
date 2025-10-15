@@ -1,11 +1,12 @@
 <script lang="ts">
   import { processIPv6ZoneIdentifiers, type IPv6ZoneResult } from '$lib/utils/ipv6-zone-id.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
 
   let inputText = $state('fe80::1\nfe80::1%eth0\nfe80::1234:5678:90ab:cdef%wlan0\n::1\n2001:db8::1\nff02::1%eth0');
   let result = $state<IPv6ZoneResult | null>(null);
   let isLoading = $state(false);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
 
   function processAddresses() {
     if (!inputText.trim()) {
@@ -63,20 +64,6 @@
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-  }
-
-  async function copyToClipboard(text: string, id?: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      if (id) {
-        copiedStates[id] = true;
-        setTimeout(() => {
-          copiedStates[id] = false;
-        }, 2000);
-      }
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
   }
 
   function getAddressTypeColor(type: string): string {
@@ -242,11 +229,11 @@
                         <code>{processing.input}</code>
                         <button
                           type="button"
-                          class:copied={copiedStates[`input-${processing.input}`]}
-                          onclick={() => copyToClipboard(processing.input, `input-${processing.input}`)}
+                          class:copied={clipboard.isCopied(`input-${processing.input}`)}
+                          onclick={() => clipboard.copy(processing.input, `input-${processing.input}`)}
                           title="Copy input"
                         >
-                          <Icon name={copiedStates[`input-${processing.input}`] ? 'check' : 'copy'} size="xs" />
+                          <Icon name={clipboard.isCopied(`input-${processing.input}`) ? 'check' : 'copy'} size="xs" />
                         </button>
                       </div>
                     </div>
@@ -270,11 +257,14 @@
                           <code>{processing.address}</code>
                           <button
                             type="button"
-                            class:copied={copiedStates[`address-${processing.address}`]}
-                            onclick={() => copyToClipboard(processing.address, `address-${processing.address}`)}
+                            class:copied={clipboard.isCopied(`address-${processing.address}`)}
+                            onclick={() => clipboard.copy(processing.address, `address-${processing.address}`)}
                             title="Copy address"
                           >
-                            <Icon name={copiedStates[`address-${processing.address}`] ? 'check' : 'copy'} size="xs" />
+                            <Icon
+                              name={clipboard.isCopied(`address-${processing.address}`) ? 'check' : 'copy'}
+                              size="xs"
+                            />
                           </button>
                         </div>
                       </div>
@@ -286,11 +276,14 @@
                             <code>{processing.zoneId}</code>
                             <button
                               type="button"
-                              class:copied={copiedStates[`zone-${processing.zoneId}`]}
-                              onclick={() => copyToClipboard(processing.zoneId, `zone-${processing.zoneId}`)}
+                              class:copied={clipboard.isCopied(`zone-${processing.zoneId}`)}
+                              onclick={() => clipboard.copy(processing.zoneId, `zone-${processing.zoneId}`)}
                               title="Copy zone ID"
                             >
-                              <Icon name={copiedStates[`zone-${processing.zoneId}`] ? 'check' : 'copy'} size="xs" />
+                              <Icon
+                                name={clipboard.isCopied(`zone-${processing.zoneId}`) ? 'check' : 'copy'}
+                                size="xs"
+                              />
                             </button>
                           </div>
                           {#if processing.processing.zoneIdValid}
@@ -345,16 +338,18 @@
                           <code>{processing.processing.withZone}</code>
                           <button
                             type="button"
-                            class:copied={copiedStates[`with-zone-${processing.processing.withZone}`]}
+                            class:copied={clipboard.isCopied(`with-zone-${processing.processing.withZone}`)}
                             onclick={() =>
-                              copyToClipboard(
+                              clipboard.copy(
                                 processing.processing.withZone,
                                 `with-zone-${processing.processing.withZone}`,
                               )}
                             title="Copy with zone"
                           >
                             <Icon
-                              name={copiedStates[`with-zone-${processing.processing.withZone}`] ? 'check' : 'copy'}
+                              name={clipboard.isCopied(`with-zone-${processing.processing.withZone}`)
+                                ? 'check'
+                                : 'copy'}
                               size="xs"
                             />
                           </button>
@@ -367,16 +362,16 @@
                           <code>{processing.processing.withoutZone}</code>
                           <button
                             type="button"
-                            class:copied={copiedStates[`without-zone-${processing.processing.withoutZone}`]}
+                            class:copied={clipboard.isCopied(`without-zone-${processing.processing.withoutZone}`)}
                             onclick={() =>
-                              copyToClipboard(
+                              clipboard.copy(
                                 processing.processing.withoutZone,
                                 `without-zone-${processing.processing.withoutZone}`,
                               )}
                             title="Copy without zone"
                           >
                             <Icon
-                              name={copiedStates[`without-zone-${processing.processing.withoutZone}`]
+                              name={clipboard.isCopied(`without-zone-${processing.processing.withoutZone}`)
                                 ? 'check'
                                 : 'copy'}
                               size="xs"
@@ -394,12 +389,12 @@
                             <button
                               type="button"
                               class="zone-button"
-                              class:copied={copiedStates[`suggested-${zone}`]}
-                              onclick={() => copyToClipboard(`${processing.address}%${zone}`, `suggested-${zone}`)}
+                              class:copied={clipboard.isCopied(`suggested-${zone}`)}
+                              onclick={() => clipboard.copy(`${processing.address}%${zone}`, `suggested-${zone}`)}
                               title="Copy full address"
                             >
                               <code>{zone}</code>
-                              <Icon name={copiedStates[`suggested-${zone}`] ? 'check' : 'copy'} size="xs" />
+                              <Icon name={clipboard.isCopied(`suggested-${zone}`) ? 'check' : 'copy'} size="xs" />
                             </button>
                           {/each}
                         </div>

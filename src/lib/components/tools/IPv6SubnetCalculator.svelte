@@ -7,11 +7,12 @@
   } from '$lib/utils/ipv6-subnet-calculations.js';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
 
   let networkAddress = $state('2001:db8::/64');
   let prefixLength = $state(64);
   let subnetResult = $state<IPv6SubnetResult | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let showBinaryView = $state(false);
 
   const commonPrefixes = getCommonIPv6Prefixes();
@@ -58,19 +59,6 @@
   function setPreset(address: string, prefix: number) {
     networkAddress = `${address}/${prefix}`;
     prefixLength = prefix;
-  }
-
-  /* Copy text to clipboard */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 3000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
   }
 
   /* Get prefix description */
@@ -202,15 +190,15 @@
               <span class="info-value">{subnetResult.subnet.networkCompressed}/{subnetResult.subnet.prefixLength}</span>
               <button
                 class="btn btn-icon copy-btn"
-                class:copied={copiedStates['network']}
+                class:copied={clipboard.isCopied('network')}
                 onclick={() =>
                   subnetResult?.subnet &&
-                  copyToClipboard(
+                  clipboard.copy(
                     `${subnetResult.subnet.networkCompressed}/${subnetResult.subnet.prefixLength}`,
                     'network',
                   )}
               >
-                <Icon name={copiedStates['network'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('network') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>
@@ -246,11 +234,11 @@
               <code class="detail-value">{subnetResult.subnet.networkCompressed}</code>
               <button
                 class="btn btn-icon copy-btn"
-                class:copied={copiedStates['compressed']}
+                class:copied={clipboard.isCopied('compressed')}
                 onclick={() =>
-                  subnetResult?.subnet && copyToClipboard(subnetResult.subnet.networkCompressed, 'compressed')}
+                  subnetResult?.subnet && clipboard.copy(subnetResult.subnet.networkCompressed, 'compressed')}
               >
-                <Icon name={copiedStates['compressed'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('compressed') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>
@@ -266,10 +254,10 @@
               <code class="detail-value expanded">{subnetResult.subnet.networkExpanded}</code>
               <button
                 class="btn btn-icon copy-btn"
-                class:copied={copiedStates['expanded']}
-                onclick={() => subnetResult?.subnet && copyToClipboard(subnetResult.subnet.networkExpanded, 'expanded')}
+                class:copied={clipboard.isCopied('expanded')}
+                onclick={() => subnetResult?.subnet && clipboard.copy(subnetResult.subnet.networkExpanded, 'expanded')}
               >
-                <Icon name={copiedStates['expanded'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('expanded') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>
@@ -285,10 +273,10 @@
               <code class="detail-value">{subnetResult.subnet.subnetMask}</code>
               <button
                 class="btn btn-icon copy-btn"
-                class:copied={copiedStates['mask']}
-                onclick={() => subnetResult?.subnet && copyToClipboard(subnetResult.subnet.subnetMask, 'mask')}
+                class:copied={clipboard.isCopied('mask')}
+                onclick={() => subnetResult?.subnet && clipboard.copy(subnetResult.subnet.subnetMask, 'mask')}
               >
-                <Icon name={copiedStates['mask'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('mask') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>
@@ -306,12 +294,12 @@
               </code>
               <button
                 class="btn btn-icon copy-btn"
-                class:copied={copiedStates['range']}
+                class:copied={clipboard.isCopied('range')}
                 onclick={() =>
                   subnetResult?.subnet &&
-                  copyToClipboard(`${subnetResult.subnet.firstAddress} - ${subnetResult.subnet.lastAddress}`, 'range')}
+                  clipboard.copy(`${subnetResult.subnet.firstAddress} - ${subnetResult.subnet.lastAddress}`, 'range')}
               >
-                <Icon name={copiedStates['range'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('range') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>
@@ -327,11 +315,11 @@
               <code class="detail-value">{formatLargeNumber(subnetResult.subnet.assignableAddresses)}</code>
               <button
                 class="btn btn-icon copy-btn"
-                class:copied={copiedStates['assignable']}
+                class:copied={clipboard.isCopied('assignable')}
                 onclick={() =>
-                  subnetResult?.subnet && copyToClipboard(subnetResult.subnet.assignableAddresses, 'assignable')}
+                  subnetResult?.subnet && clipboard.copy(subnetResult.subnet.assignableAddresses, 'assignable')}
               >
-                <Icon name={copiedStates['assignable'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('assignable') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>
@@ -347,10 +335,10 @@
               <code class="detail-value reverse">{subnetResult.subnet.reverseZone}</code>
               <button
                 class="btn btn-icon copy-btn"
-                class:copied={copiedStates['reverse']}
-                onclick={() => subnetResult?.subnet && copyToClipboard(subnetResult.subnet.reverseZone, 'reverse')}
+                class:copied={clipboard.isCopied('reverse')}
+                onclick={() => subnetResult?.subnet && clipboard.copy(subnetResult.subnet.reverseZone, 'reverse')}
               >
-                <Icon name={copiedStates['reverse'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('reverse') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>
@@ -367,10 +355,10 @@
                 <code class="detail-value binary-display">{subnetResult.subnet.binaryPrefix}</code>
                 <button
                   class="btn btn-icon copy-btn"
-                  class:copied={copiedStates['binary']}
-                  onclick={() => subnetResult?.subnet && copyToClipboard(subnetResult.subnet.binaryPrefix, 'binary')}
+                  class:copied={clipboard.isCopied('binary')}
+                  onclick={() => subnetResult?.subnet && clipboard.copy(subnetResult.subnet.binaryPrefix, 'binary')}
                 >
-                  <Icon name={copiedStates['binary'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('binary') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
             </div>

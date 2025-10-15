@@ -1,13 +1,14 @@
 <script lang="ts">
   import { convertEUI64Addresses, type EUI64Result } from '$lib/utils/eui64.js';
   import { tooltip } from '$lib/actions/tooltip.js';
+  import { useClipboard } from '$lib/composables';
   import Icon from '$lib/components/global/Icon.svelte';
 
   let inputText = $state('00:1A:2B:3C:4D:5E\n02:1A:2B:FF:FE:3C:4D:5F\n08:00:27:12:34:56\n0A:00:27:FF:FE:12:34:57');
   let globalPrefix = $state('2001:db8::/64');
   let result = $state<EUI64Result | null>(null);
   let isLoading = $state(false);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
 
   function convertAddresses() {
     if (!inputText.trim()) {
@@ -60,16 +61,6 @@
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-  }
-
-  async function copyToClipboard(text: string, id: string = text) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => (copiedStates[id] = false), 3000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
   }
 
   // Auto-convert when inputs change
@@ -236,11 +227,11 @@
                           <button
                             type="button"
                             class="btn btn-icon btn-xs"
-                            class:copied={copiedStates[conversion.macAddress]}
-                            onclick={() => copyToClipboard(conversion.macAddress, conversion.macAddress)}
+                            class:copied={clipboard.isCopied(conversion.macAddress)}
+                            onclick={() => clipboard.copy(conversion.macAddress, conversion.macAddress)}
                             use:tooltip={{ text: 'Copy to clipboard', position: 'top' }}
                           >
-                            <Icon name={copiedStates[conversion.macAddress] ? 'check' : 'copy'} size="xs" />
+                            <Icon name={clipboard.isCopied(conversion.macAddress) ? 'check' : 'copy'} size="xs" />
                           </button>
                         </div>
                       </div>
@@ -252,11 +243,11 @@
                           <button
                             type="button"
                             class="btn btn-icon btn-xs"
-                            class:copied={copiedStates[conversion.eui64Address]}
-                            onclick={() => copyToClipboard(conversion.eui64Address, conversion.eui64Address)}
+                            class:copied={clipboard.isCopied(conversion.eui64Address)}
+                            onclick={() => clipboard.copy(conversion.eui64Address, conversion.eui64Address)}
                             use:tooltip={{ text: 'Copy to clipboard', position: 'top' }}
                           >
-                            <Icon name={copiedStates[conversion.eui64Address] ? 'check' : 'copy'} size="xs" />
+                            <Icon name={clipboard.isCopied(conversion.eui64Address) ? 'check' : 'copy'} size="xs" />
                           </button>
                         </div>
                       </div>
@@ -271,11 +262,11 @@
                           <button
                             type="button"
                             class="btn btn-icon btn-xs"
-                            class:copied={copiedStates[conversion.ipv6LinkLocal]}
-                            onclick={() => copyToClipboard(conversion.ipv6LinkLocal, conversion.ipv6LinkLocal)}
+                            class:copied={clipboard.isCopied(conversion.ipv6LinkLocal)}
+                            onclick={() => clipboard.copy(conversion.ipv6LinkLocal, conversion.ipv6LinkLocal)}
                             use:tooltip={{ text: 'Copy to clipboard', position: 'top' }}
                           >
-                            <Icon name={copiedStates[conversion.ipv6LinkLocal] ? 'check' : 'copy'} size="xs" />
+                            <Icon name={clipboard.isCopied(conversion.ipv6LinkLocal) ? 'check' : 'copy'} size="xs" />
                           </button>
                         </div>
                       </div>
@@ -287,11 +278,11 @@
                           <button
                             type="button"
                             class="btn btn-icon btn-xs"
-                            class:copied={copiedStates[conversion.ipv6Global]}
-                            onclick={() => copyToClipboard(conversion.ipv6Global, conversion.ipv6Global)}
+                            class:copied={clipboard.isCopied(conversion.ipv6Global)}
+                            onclick={() => clipboard.copy(conversion.ipv6Global, conversion.ipv6Global)}
                             use:tooltip={{ text: 'Copy to clipboard', position: 'top' }}
                           >
-                            <Icon name={copiedStates[conversion.ipv6Global] ? 'check' : 'copy'} size="xs" />
+                            <Icon name={clipboard.isCopied(conversion.ipv6Global) ? 'check' : 'copy'} size="xs" />
                           </button>
                         </div>
                       </div>

@@ -2,6 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import * as tls from 'node:tls';
 import * as net from 'node:net';
 import type { RequestHandler } from './$types';
+import { errorManager } from '$lib/utils/error-manager';
 
 type Action = 'certificate' | 'versions' | 'alpn' | 'ocsp-stapling' | 'cipher-presets' | 'banner';
 
@@ -915,7 +916,7 @@ export const POST: RequestHandler = async ({ request }) => {
         throw error(400, `Unknown action: ${(body as any).action}`);
     }
   } catch (err: unknown) {
-    console.error('TLS API error:', err);
+    errorManager.captureException(err, 'error', { component: 'TLS API' });
     // If it's already an HttpError (e.g., from validation), rethrow it
     if (err && typeof err === 'object' && 'status' in err) {
       throw err;

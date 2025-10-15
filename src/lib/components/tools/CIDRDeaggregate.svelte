@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
   import { cidrDeaggregate, getSubnetSize, type DeaggregateResult } from '$lib/utils/cidr-deaggregate.js';
   import '../../../styles/diagnostics-pages.scss';
 
@@ -8,7 +9,7 @@
 10.0.0.0-10.0.0.255`);
   let targetPrefix = $state(24);
   let result = $state<DeaggregateResult | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let _selectedExample = $state<string | null>(null);
   let selectedExampleIndex = $state<number | null>(null);
   let _userModified = $state(false);
@@ -76,23 +77,11 @@
     performDeaggregation();
   }
 
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
-
   async function copyAllSubnets() {
     if (!result?.subnets.length) return;
 
     const allText = result.subnets.join('\n');
-    await copyToClipboard(allText, 'all-subnets');
+    await clipboard.copy(allText, 'all-subnets');
   }
 
   // Calculate on component load
@@ -193,9 +182,12 @@
               </span>
             </div>
             {#if result.subnets.length > 0}
-              <button class="copy-all-button {copiedStates['all-subnets'] ? 'copied' : ''}" onclick={copyAllSubnets}>
-                <Icon name={copiedStates['all-subnets'] ? 'check' : 'copy'} size="sm" />
-                {copiedStates['all-subnets'] ? 'Copied!' : 'Copy All'}
+              <button
+                class="copy-all-button {clipboard.isCopied('all-subnets') ? 'copied' : ''}"
+                onclick={copyAllSubnets}
+              >
+                <Icon name={clipboard.isCopied('all-subnets') ? 'check' : 'copy'} size="sm" />
+                {clipboard.isCopied('all-subnets') ? 'Copied!' : 'Copy All'}
               </button>
             {/if}
           </div>
@@ -237,11 +229,11 @@
                 <div class="subnet-header">
                   <code class="subnet-cidr">{subnet}</code>
                   <button
-                    class="copy-button {copiedStates[`subnet-${index}`] ? 'copied' : ''}"
-                    onclick={() => copyToClipboard(subnet, `subnet-${index}`)}
+                    class="copy-button {clipboard.isCopied(`subnet-${index}`) ? 'copied' : ''}"
+                    onclick={() => clipboard.copy(subnet, `subnet-${index}`)}
                     aria-label="Copy CIDR block"
                   >
-                    <Icon name={copiedStates[`subnet-${index}`] ? 'check' : 'copy'} size="xs" />
+                    <Icon name={clipboard.isCopied(`subnet-${index}`) ? 'check' : 'copy'} size="xs" />
                   </button>
                 </div>
                 <div class="subnet-info">

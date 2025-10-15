@@ -1,5 +1,6 @@
 <script lang="ts">
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
   import {
     suggestRRSIGWindows,
     formatRRSIGDates,
@@ -14,7 +15,7 @@
   let clockSkew = $state(1);
   let signatureValidityDays = $state(30);
 
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
 
   const planningOptions = $derived({
     ttl,
@@ -34,25 +35,13 @@
 
   const currentValidation = $derived(currentWindow ? validateRRSIGTiming(currentWindow, ttl) : null);
 
-  async function copyToClipboard(text: string, key: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[key] = true;
-      setTimeout(() => {
-        copiedStates[key] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
-
   function copyCurrentWindow() {
     if (!currentWindowFormatted) return;
     const text = `RRSIG Timing Window:
 Inception: ${currentWindowFormatted.inceptionFormatted} (${currentWindowFormatted.inceptionTimestamp})
 Expiration: ${currentWindowFormatted.expirationFormatted} (${currentWindowFormatted.expirationTimestamp})
 Renewal Time: ${currentWindowFormatted.renewalFormatted}`;
-    copyToClipboard(text, 'current');
+    clipboard.copy(text, 'current');
   }
 
   function copyBothWindows() {
@@ -68,7 +57,7 @@ Next Window:
 Inception: ${nextWindowFormatted.inceptionFormatted} (${nextWindowFormatted.inceptionTimestamp})
 Expiration: ${nextWindowFormatted.expirationFormatted} (${nextWindowFormatted.expirationTimestamp})
 Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
-    copyToClipboard(text, 'both');
+    clipboard.copy(text, 'both');
   }
 
   function formatDuration(hours: number): string {
@@ -214,8 +203,8 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
       <div class="card window-card">
         <div class="window-header">
           <h3>Current Signature Window</h3>
-          <button class="copy-button {copiedStates.current ? 'copied' : ''}" onclick={copyCurrentWindow}>
-            <Icon name={copiedStates.current ? 'check' : 'copy'} size="sm" />
+          <button class="copy-button {clipboard.isCopied('current') ? 'copied' : ''}" onclick={copyCurrentWindow}>
+            <Icon name={clipboard.isCopied('current') ? 'check' : 'copy'} size="sm" />
             Copy
           </button>
         </div>
@@ -302,8 +291,8 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
             </div>
 
             <div class="copy-schedule-section">
-              <button class="copy-button {copiedStates.both ? 'copied' : ''}" onclick={copyBothWindows}>
-                <Icon name={copiedStates.both ? 'check' : 'copy'} size="sm" />
+              <button class="copy-button {clipboard.isCopied('both') ? 'copied' : ''}" onclick={copyBothWindows}>
+                <Icon name={clipboard.isCopied('both') ? 'check' : 'copy'} size="sm" />
                 Copy Full Schedule
               </button>
             </div>

@@ -1,5 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorManager } from '$lib/utils/error-manager';
 
 interface BGPLookupRequest {
   resource: string; // IP address or prefix
@@ -216,7 +217,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     return json(response);
   } catch (err) {
-    console.error('BGP lookup error:', err);
+    errorManager.captureException(err, 'error', { component: 'BGP API' });
     if (err && typeof err === 'object' && 'status' in err) {
       throw err;
     }

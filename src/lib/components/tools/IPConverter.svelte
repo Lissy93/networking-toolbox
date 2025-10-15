@@ -4,6 +4,7 @@
   import IPInput from './IPInput.svelte';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '../global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
 
   let ipAddress = $state('192.168.1.1');
   let formats = $state({
@@ -13,7 +14,7 @@
     octal: '',
   });
   let ipClass = $state({ class: '', type: '', description: '' });
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let formatErrors = $state<Record<string, string>>({});
 
   /**
@@ -171,21 +172,6 @@
       console.error('Invalid hex conversion:', err);
     }
   }
-
-  /**
-   * Copies text to clipboard with visual feedback
-   */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 3000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
 </script>
 
 <div class="card">
@@ -234,14 +220,17 @@
               class="format-field binary {formatErrors.binary ? 'error' : ''}"
               oninput={handleBinaryInput}
             />
-            <Tooltip text={copiedStates['binary'] ? 'Copied!' : 'Copy binary format to clipboard'} position="left">
+            <Tooltip
+              text={clipboard.isCopied('binary') ? 'Copied!' : 'Copy binary format to clipboard'}
+              position="left"
+            >
               <button
                 type="button"
-                class="copy-btn {copiedStates['binary'] ? 'copied' : ''}"
-                onclick={() => copyToClipboard(formats.binary, 'binary')}
+                class="copy-btn {clipboard.isCopied('binary') ? 'copied' : ''}"
+                onclick={() => clipboard.copy(formats.binary, 'binary')}
                 aria-label="Copy binary format to clipboard"
               >
-                {#if copiedStates['binary']}
+                {#if clipboard.isCopied('binary')}
                   <svg fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fill-rule="evenodd"
@@ -277,14 +266,17 @@
               class="format-field decimal {formatErrors.decimal ? 'error' : ''}"
               oninput={handleDecimalInput}
             />
-            <Tooltip text={copiedStates['decimal'] ? 'Copied!' : 'Copy decimal format to clipboard'} position="left">
+            <Tooltip
+              text={clipboard.isCopied('decimal') ? 'Copied!' : 'Copy decimal format to clipboard'}
+              position="left"
+            >
               <button
                 type="button"
-                class="copy-btn {copiedStates['decimal'] ? 'copied' : ''}"
-                onclick={() => copyToClipboard(formats.decimal, 'decimal')}
+                class="copy-btn {clipboard.isCopied('decimal') ? 'copied' : ''}"
+                onclick={() => clipboard.copy(formats.decimal, 'decimal')}
                 aria-label="Copy decimal format to clipboard"
               >
-                {#if copiedStates['decimal']}
+                {#if clipboard.isCopied('decimal')}
                   <svg fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fill-rule="evenodd"
@@ -320,14 +312,17 @@
               class="format-field hex {formatErrors.hex ? 'error' : ''}"
               oninput={handleHexInput}
             />
-            <Tooltip text={copiedStates['hex'] ? 'Copied!' : 'Copy hexadecimal format to clipboard'} position="left">
+            <Tooltip
+              text={clipboard.isCopied('hex') ? 'Copied!' : 'Copy hexadecimal format to clipboard'}
+              position="left"
+            >
               <button
                 type="button"
-                class="copy-btn {copiedStates['hex'] ? 'copied' : ''}"
-                onclick={() => copyToClipboard(formats.hex, 'hex')}
+                class="copy-btn {clipboard.isCopied('hex') ? 'copied' : ''}"
+                onclick={() => clipboard.copy(formats.hex, 'hex')}
                 aria-label="Copy hexadecimal format to clipboard"
               >
-                {#if copiedStates['hex']}
+                {#if clipboard.isCopied('hex')}
                   <svg fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fill-rule="evenodd"
@@ -363,14 +358,14 @@
               class="format-field octal"
               readonly
             />
-            <Tooltip text={copiedStates['octal'] ? 'Copied!' : 'Copy octal format to clipboard'} position="left">
+            <Tooltip text={clipboard.isCopied('octal') ? 'Copied!' : 'Copy octal format to clipboard'} position="left">
               <button
                 type="button"
-                class="copy-btn {copiedStates['octal'] ? 'copied' : ''}"
-                onclick={() => copyToClipboard(formats.octal, 'octal')}
+                class="copy-btn {clipboard.isCopied('octal') ? 'copied' : ''}"
+                onclick={() => clipboard.copy(formats.octal, 'octal')}
                 aria-label="Copy octal format to clipboard"
               >
-                {#if copiedStates['octal']}
+                {#if clipboard.isCopied('octal')}
                   <svg fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fill-rule="evenodd"

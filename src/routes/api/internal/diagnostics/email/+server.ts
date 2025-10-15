@@ -2,6 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import { promises as dns } from 'node:dns';
 import { connect as netConnect } from 'node:net';
 import type { RequestHandler } from './$types';
+import { errorManager } from '$lib/utils/error-manager';
 
 type Action = 'mx-health' | 'spf-check' | 'dmarc-check';
 
@@ -247,7 +248,7 @@ export const POST: RequestHandler = async ({ request }) => {
         throw error(400, `Unknown action: ${(body as any).action}`);
     }
   } catch (err: unknown) {
-    console.error('Email diagnostics error:', err);
+    errorManager.captureException(err, 'error', { component: 'Email API' });
     throw error(500, `Email diagnostics failed: ${(err as Error).message}`);
   }
 };

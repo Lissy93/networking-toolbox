@@ -2,6 +2,7 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { parseZoneFile, checkNameLengths, type NameLengthViolation } from '$lib/utils/zone-parser.js';
+  import { useClipboard } from '$lib/composables';
 
   let zoneInput = $state('');
   let results = $state<{
@@ -9,7 +10,7 @@
     totalNames: number;
     validNames: number;
   } | null>(null);
-  let copiedState = $state(false);
+  const clipboard = useClipboard();
   let activeExampleIndex = $state<number | null>(null);
 
   const examples = [
@@ -84,20 +85,10 @@ very.deep.nested.subdomain.with.lots.of.labels.creating.a.domain.name.that.is.ex
     }
   }
 
-  async function copyResults() {
+  function copyResults() {
     if (!results) return;
-
     const reportText = formatReportForCopy(results);
-
-    try {
-      await navigator.clipboard.writeText(reportText);
-      copiedState = true;
-      setTimeout(() => {
-        copiedState = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy: ', err);
-    }
+    clipboard.copy(reportText);
   }
 
   function formatReportForCopy(data: typeof results): string {
@@ -248,9 +239,9 @@ very-long-subdomain-name.example.com.	IN	A	192.0.2.2"
     <section class="results-section">
       <div class="results-header">
         <h3>Name Length Validation Results</h3>
-        <button class="copy-button {copiedState ? 'copied' : ''}" onclick={copyResults}>
-          <Icon name={copiedState ? 'check' : 'copy'} size="sm" />
-          {copiedState ? 'Copied!' : 'Copy Report'}
+        <button class="copy-button {clipboard.isCopied() ? 'copied' : ''}" onclick={copyResults}>
+          <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="sm" />
+          {clipboard.isCopied() ? 'Copied!' : 'Copy Report'}
         </button>
       </div>
 

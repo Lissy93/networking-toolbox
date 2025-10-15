@@ -2,6 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import * as tls from 'node:tls';
 import * as net from 'node:net';
 import type { RequestHandler } from './$types';
+import { errorManager } from '$lib/utils/error-manager';
 
 interface TLSHandshakeRequest {
   hostname: string;
@@ -48,7 +49,7 @@ export const POST: RequestHandler = async ({ request }) => {
     const result = await performTLSHandshake(trimmedHostname, port);
     return json(result);
   } catch (err) {
-    console.error('TLS handshake error:', err);
+    errorManager.captureException(err, 'error', { component: 'TLS Handshake API' });
     if (err && typeof err === 'object' && 'status' in err) {
       throw err;
     }

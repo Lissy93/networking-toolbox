@@ -3,6 +3,7 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
 
   let setA = $state(`192.168.1.0/24
 10.0.0.0/16`);
@@ -11,7 +12,7 @@
   let mergeInputs = $state(true);
   let showOnlyBoolean = $state(false);
   let result = $state<OverlapResult | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExample = $state<string | null>(null);
   let userModified = $state(false);
 
@@ -49,17 +50,6 @@
     performOverlapCheck();
   }
 
-  /* Copy to clipboard */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => (copiedStates[id] = false), 3000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
-
   /* Copy all results */
   function copyAllResults(format: 'text' | 'json') {
     if (!result) return;
@@ -87,7 +77,7 @@
       content = lines.join('\n');
     }
 
-    copyToClipboard(content, `all-${format}`);
+    clipboard.copy(content, `all-${format}`);
   }
 
   /* Clear inputs */
@@ -323,19 +313,19 @@
               <button
                 type="button"
                 class="btn btn-primary btn-sm"
-                class:copied={copiedStates['all-text']}
+                class:copied={clipboard.isCopied('all-text')}
                 onclick={() => copyAllResults('text')}
               >
-                <Icon name={copiedStates['all-text'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('all-text') ? 'check' : 'copy'} size="sm" />
                 Text
               </button>
               <button
                 type="button"
                 class="btn btn-secondary btn-sm"
-                class:copied={copiedStates['all-json']}
+                class:copied={clipboard.isCopied('all-json')}
                 onclick={() => copyAllResults('json')}
               >
-                <Icon name={copiedStates['all-json'] ? 'check' : 'download'} size="sm" />
+                <Icon name={clipboard.isCopied('all-json') ? 'check' : 'download'} size="sm" />
                 JSON
               </button>
             </div>
@@ -440,10 +430,10 @@
                 <button
                   type="button"
                   class="btn btn-icon"
-                  class:copied={copiedStates['ipv4']}
-                  onclick={() => copyToClipboard((result?.ipv4 || []).join('\n'), 'ipv4')}
+                  class:copied={clipboard.isCopied('ipv4')}
+                  onclick={() => clipboard.copy((result?.ipv4 || []).join('\n'), 'ipv4')}
                 >
-                  <Icon name={copiedStates['ipv4'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('ipv4') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
               <div class="cidr-list">
@@ -453,10 +443,10 @@
                     <button
                       type="button"
                       class="btn btn-icon btn-xs"
-                      class:copied={copiedStates[cidr]}
-                      onclick={() => copyToClipboard(cidr, cidr)}
+                      class:copied={clipboard.isCopied(cidr)}
+                      onclick={() => clipboard.copy(cidr, cidr)}
                     >
-                      <Icon name={copiedStates[cidr] ? 'check' : 'copy'} size="xs" />
+                      <Icon name={clipboard.isCopied(cidr) ? 'check' : 'copy'} size="xs" />
                     </button>
                   </div>
                 {/each}
@@ -472,10 +462,10 @@
                 <button
                   type="button"
                   class="btn btn-icon"
-                  class:copied={copiedStates['ipv6']}
-                  onclick={() => copyToClipboard((result?.ipv6 || []).join('\n'), 'ipv6')}
+                  class:copied={clipboard.isCopied('ipv6')}
+                  onclick={() => clipboard.copy((result?.ipv6 || []).join('\n'), 'ipv6')}
                 >
-                  <Icon name={copiedStates['ipv6'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('ipv6') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
               <div class="cidr-list">
@@ -485,10 +475,10 @@
                     <button
                       type="button"
                       class="btn btn-icon btn-xs"
-                      class:copied={copiedStates[cidr]}
-                      onclick={() => copyToClipboard(cidr, cidr)}
+                      class:copied={clipboard.isCopied(cidr)}
+                      onclick={() => clipboard.copy(cidr, cidr)}
                     >
-                      <Icon name={copiedStates[cidr] ? 'check' : 'copy'} size="xs" />
+                      <Icon name={clipboard.isCopied(cidr) ? 'check' : 'copy'} size="xs" />
                     </button>
                   </div>
                 {/each}

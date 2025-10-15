@@ -1,13 +1,14 @@
 <script lang="ts">
   import { Copy, Download, Check, Mail } from 'lucide-svelte';
   import { tooltip } from '$lib/actions/tooltip.js';
+  import { useClipboard } from '$lib/composables';
 
   let domain = $state('');
   let mailboxDname = $state('admin.example.com.');
   let txtDname = $state('admin-info.example.com.');
   let showExamples = $state(false);
 
-  let buttonStates = $state({} as Record<string, boolean>);
+  const clipboard = useClipboard();
 
   const roleExamples = [
     {
@@ -101,20 +102,12 @@
     return infos;
   });
 
-  function showButtonSuccess(buttonId: string) {
-    buttonStates[buttonId] = true;
-    setTimeout(() => {
-      buttonStates[buttonId] = false;
-    }, 2000);
-  }
-
   function copyToClipboard() {
     let content = rpRecord;
     if (txtRecord) {
       content += '\n\n; Suggested TXT record:\n' + txtRecord;
     }
-    navigator.clipboard.writeText(content);
-    showButtonSuccess('copy');
+    clipboard.copy(content, 'copy');
   }
 
   function downloadRecord() {
@@ -134,7 +127,7 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showButtonSuccess('download');
+    clipboard.copy('downloaded', 'download');
   }
 
   function loadRoleExample(role: { name: string; description: string; mbox: string; txt: string }) {
@@ -306,10 +299,10 @@
               <button
                 onclick={copyToClipboard}
                 class="btn-secondary"
-                class:success={buttonStates.copy}
-                style="transform: {buttonStates.copy ? 'scale(1.05)' : 'scale(1)'}"
+                class:success={clipboard.isCopied('copy')}
+                style="transform: {clipboard.isCopied('copy') ? 'scale(1.05)' : 'scale(1)'}"
               >
-                {#if buttonStates.copy}
+                {#if clipboard.isCopied('copy')}
                   <Check size="16" />
                   Copied!
                 {:else}
@@ -320,10 +313,10 @@
               <button
                 onclick={downloadRecord}
                 class="btn-primary"
-                class:success={buttonStates.download}
-                style="transform: {buttonStates.download ? 'scale(1.05)' : 'scale(1)'}"
+                class:success={clipboard.isCopied('download')}
+                style="transform: {clipboard.isCopied('download') ? 'scale(1.05)' : 'scale(1)'}"
               >
-                {#if buttonStates.download}
+                {#if clipboard.isCopied('download')}
                   <Check size="16" />
                   Downloaded!
                 {:else}

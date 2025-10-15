@@ -2,6 +2,7 @@
   import { computeCIDRDifference, type DiffResult } from '$lib/utils/cidr-diff.js';
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
   import '../../../styles/diagnostics-pages.scss';
 
   let pools = $state(`192.168.0.0/16
@@ -19,7 +20,7 @@
     stats?: DiffResult['stats'];
     visualization?: DiffResult['visualization'];
   } | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let _selectedExample = $state<string | null>(null);
   let selectedExampleIndex = $state<number | null>(null);
   let _userModified = $state(false);
@@ -159,18 +160,6 @@
     _selectedExample = null;
     selectedExampleIndex = null;
     calculateGaps();
-  }
-
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
   }
 
   // Visualization helper functions
@@ -336,11 +325,11 @@
                 <div class="block-header">
                   <code class="block-cidr">{block}</code>
                   <button
-                    class="copy-button {copiedStates[`block-${index}`] ? 'copied' : ''}"
-                    onclick={() => copyToClipboard(block, `block-${index}`)}
+                    class="copy-button {clipboard.isCopied(`block-${index}`) ? 'copied' : ''}"
+                    onclick={() => clipboard.copy(block, `block-${index}`)}
                     aria-label="Copy CIDR block"
                   >
-                    <Icon name={copiedStates[`block-${index}`] ? 'check' : 'copy'} size="xs" />
+                    <Icon name={clipboard.isCopied(`block-${index}`) ? 'check' : 'copy'} size="xs" />
                   </button>
                 </div>
                 <div class="block-info">

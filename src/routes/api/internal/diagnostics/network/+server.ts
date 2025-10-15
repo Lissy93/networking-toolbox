@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import * as net from 'node:net';
 import type { RequestHandler } from './$types';
+import { errorManager } from '$lib/utils/error-manager';
 
 type Action = 'tcp-port-check' | 'http-ping';
 
@@ -284,7 +285,7 @@ export const POST: RequestHandler = async ({ request }) => {
         throw error(400, `Unknown action: ${(body as any).action}`);
     }
   } catch (err: unknown) {
-    console.error('Network diagnostics API error:', err);
+    errorManager.captureException(err, 'error', { component: 'Network API' });
     throw error(500, `Network diagnostic failed: ${(err as Error).message}`);
   }
 };
