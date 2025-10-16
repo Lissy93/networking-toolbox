@@ -3,12 +3,15 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import _Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
+  import { useClipboard } from '$lib/composables';
+  import { formatNumber } from '$lib/utils/formatters';
 
   let parentCIDR = $state('192.168.1.0/24');
   let strategy = $state<'preserve-order' | 'fit-best'>('fit-best');
   let usableHosts = $state(true);
   let result = $state<PlannerResult | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let showVisualization = $state(true);
   let draggedIndex = $state<number | null>(null);
 
@@ -82,17 +85,6 @@
     performPlanning();
   }
 
-  /* Copy to clipboard */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => (copiedStates[id] = false), 3000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
-
   /* Export results */
   function exportResults(format: 'csv' | 'json') {
     if (!result || result.allocated.length === 0) return;
@@ -125,7 +117,7 @@
       content = [headers, ...rows].map((row) => row.join(',')).join('\n');
     }
 
-    copyToClipboard(content, `export-${format}`);
+    clipboard.copy(content, `export-${format}`);
   }
 
   /* Handle drag and drop reordering */
@@ -203,10 +195,10 @@
     type: 'allocated' | 'leftover',
   ): string {
     if (type === 'allocated' && item.name) {
-      const size = item.start && item.end ? (item.end - item.start + 1n).toLocaleString() : 'Unknown';
+      const size = item.start && item.end ? formatNumber(Number(item.end - item.start + 1n)) : 'Unknown';
       return `${item.name}\n${item.cidr}\nSize: ${size} addresses`;
     } else {
-      const size = item.start && item.end ? (item.end - item.start + 1n).toLocaleString() : 'Unknown';
+      const size = item.start && item.end ? formatNumber(Number(item.end - item.start + 1n)) : 'Unknown';
       return `Leftover Space\n${item.cidr}\nSize: ${size} addresses`;
     }
   }
@@ -219,12 +211,10 @@
   });
 </script>
 
-<div class="card">
-  <header class="card-header">
-    <h2>Subnet Planner (VLSM)</h2>
-    <p>Design Variable Length Subnet Mask (VLSM) allocations with drag-and-drop reordering and space optimization.</p>
-  </header>
-
+<ToolContentContainer
+  title="Subnet Planner (VLSM)"
+  description="Design Variable Length Subnet Mask (VLSM) allocations with drag-and-drop reordering and space optimization."
+>
   <!-- Strategy Selection -->
   <div class="strategy-section">
     <h3>Allocation Strategy</h3>
@@ -398,19 +388,19 @@
               <button
                 type="button"
                 class="btn btn-primary btn-sm"
-                class:copied={copiedStates['export-csv']}
+                class:copied={clipboard.isCopied('export-csv')}
                 onclick={() => exportResults('csv')}
               >
-                <Icon name={copiedStates['export-csv'] ? 'check' : 'download'} size="sm" />
+                <Icon name={clipboard.isCopied('export-csv') ? 'check' : 'download'} size="sm" />
                 CSV
               </button>
               <button
                 type="button"
                 class="btn btn-secondary btn-sm"
-                class:copied={copiedStates['export-json']}
+                class:copied={clipboard.isCopied('export-json')}
                 onclick={() => exportResults('json')}
               >
-                <Icon name={copiedStates['export-json'] ? 'check' : 'download'} size="sm" />
+                <Icon name={clipboard.isCopied('export-json') ? 'check' : 'download'} size="sm" />
                 JSON
               </button>
             </div>
@@ -456,7 +446,7 @@
                 class="btn btn-secondary btn-xs"
                 onclick={() => (showVisualization = !showVisualization)}
               >
-                <Icon name="eye-off" size="xs" />
+                <Icon name="hide" size="xs" />
                 Hide
               </button>
             </div>
@@ -545,10 +535,10 @@
                   <button
                     type="button"
                     class="btn btn-icon btn-xs"
-                    class:copied={copiedStates[subnet.cidr]}
-                    onclick={() => copyToClipboard(subnet.cidr, subnet.cidr)}
+                    class:copied={clipboard.isCopied(subnet.cidr)}
+                    onclick={() => clipboard.copy(subnet.cidr, subnet.cidr)}
                   >
-                    <Icon name={copiedStates[subnet.cidr] ? 'check' : 'copy'} size="xs" />
+                    <Icon name={clipboard.isCopied(subnet.cidr) ? 'check' : 'copy'} size="xs" />
                   </button>
                 </div>
               </div>
@@ -583,7 +573,7 @@
       {/if}
     </div>
   {/if}
-</div>
+</ToolContentContainer>
 
 <style lang="scss">
   /* Reusable tokens */
@@ -636,7 +626,6 @@
     .options {
       .checkbox-label {
         display: flex;
-        align-items: flex-start;
         gap: var(--spacing-sm);
         cursor: pointer;
 
@@ -1162,7 +1151,7 @@
   }
 
   /* Responsive */
-  @media (max-width: 768px) {
+  @media (max-width: 600px) {
     .requests-header {
       flex-direction: column;
       gap: var(--spacing-sm);
@@ -1171,7 +1160,11 @@
 
     .request-item {
       flex-direction: column;
+      align-items: flex-start;
       gap: var(--spacing-sm);
+      .drag-handle {
+        display: none;
+      }
 
       .request-fields {
         width: 100%;

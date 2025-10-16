@@ -1,17 +1,17 @@
 <script lang="ts">
-  import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let domain = $state('gmail.com');
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let copiedState = $state(false);
-  let selectedExampleIndex = $state<number | null>(null);
   let checkPorts = $state(false);
 
-  const examples = [
+  const diagnosticState = useDiagnosticState<any>();
+  const clipboard = useClipboard();
+
+  const examplesList = [
     { domain: 'gmail.com', description: 'Google Gmail MX infrastructure' },
     { domain: 'outlook.com', description: 'Microsoft Outlook mail servers' },
     { domain: 'yahoo.com', description: 'Yahoo Mail MX configuration' },
@@ -20,10 +20,10 @@
     { domain: 'github.com', description: 'GitHub enterprise email setup' },
   ];
 
+  const examples = useExamples(examplesList);
+
   async function checkMXHealth() {
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/email', {
@@ -40,22 +40,17 @@
         throw new Error(`MX health check failed: ${response.status}`);
       }
 
-      results = await response.json();
+      const data = await response.json();
+      diagnosticState.setResults(data);
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : 'Unknown error occurred';
-    } finally {
-      loading = false;
+      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     domain = example.domain;
-    selectedExampleIndex = index;
+    examples.select(index);
     checkMXHealth();
-  }
-
-  function clearExampleSelection() {
-    selectedExampleIndex = null;
   }
 
   function getHealthColor(isHealthy: boolean): string {
@@ -81,19 +76,19 @@
   }
 
   async function copyResults() {
-    if (!results) return;
+    if (!diagnosticState.results) return;
 
     let text = `MX Health Check for ${domain}\n`;
     text += `Generated at: ${new Date().toISOString()}\n\n`;
 
     text += `Summary:\n`;
-    text += `  Total MX records: ${results.summary.totalMX}\n`;
-    text += `  Healthy MX records: ${results.summary.healthyMX}\n`;
-    if (results.summary.reachableMX !== null) {
-      text += `  Reachable MX records: ${results.summary.reachableMX}\n`;
+    text += `  Total MX records: ${diagnosticState.results.summary.totalMX}\n`;
+    text += `  Healthy MX records: ${diagnosticState.results.summary.healthyMX}\n`;
+    if (diagnosticState.results.summary.reachableMX !== null) {
+      text += `  Reachable MX records: ${diagnosticState.results.summary.reachableMX}\n`;
     }
-    text += `  Overall health: ${results.summary.healthy ? 'Healthy' : 'Issues detected'}\n`;
-    text += `  Redundancy: ${results.summary.hasRedundancy ? 'Yes' : 'No'}\n\n`;
+    text += `  Overall health: ${diagnosticState.results.summary.healthy ? 'Healthy' : 'Issues detected'}\n`;
+    text += `  Redundancy: ${diagnosticState.results.summary.hasRedundancy ? 'Yes' : 'No'}\n\n`;
 
     text += `MX Records (by priority):\n`;
     type MxRecord = {
@@ -103,7 +98,7 @@
       addresses?: { ipv4: string[]; ipv6: string[] };
       portChecks?: Array<{ port: number; open: boolean; latency?: number }>;
     };
-    const mxRecords = (results as { mxRecords: MxRecord[] }).mxRecords;
+    const mxRecords = (diagnosticState.results as { mxRecords: MxRecord[] }).mxRecords;
     mxRecords.forEach((mx, _index) => {
       text += `${_index + 1}. ${mx.exchange} (Priority: ${mx.priority})\n`;
       if (mx.error) {
@@ -123,9 +118,7 @@
       text += `\n`;
     });
 
-    await navigator.clipboard.writeText(text);
-    copiedState = true;
-    setTimeout(() => (copiedState = false), 1500);
+    await clipboard.copy(text);
   }
 </script>
 
@@ -139,27 +132,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>MX Health Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, i (i)}
-          <button
-            class="example-card"
-            class:selected={selectedExampleIndex === i}
-            onclick={() => loadExample(example, i)}
-            use:tooltip={`Check MX health for ${example.domain}`}
-          >
-            <h5>{example.domain}</h5>
-            <p>{example.description}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="MX Health Examples"
+    getLabel={(ex) => ex.domain}
+    getDescription={(ex) => ex.description}
+    getTooltip={(ex) => `Check MX health for ${ex.domain}`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -168,7 +149,7 @@
     </div>
     <div class="card-content">
       <div class="form-group">
-        <label for="domain" use:tooltip={'Enter the domain to check email server health for'}>
+        <label for="domain">
           Domain Name
           <input
             id="domain"
@@ -176,7 +157,7 @@
             bind:value={domain}
             placeholder="example.com"
             onchange={() => {
-              clearExampleSelection();
+              examples.clear();
               if (domain) checkMXHealth();
             }}
           />
@@ -191,8 +172,12 @@
       </div>
 
       <div class="action-section">
-        <button class="check-btn lookup-btn" onclick={checkMXHealth} disabled={loading || !domain.trim()}>
-          {#if loading}
+        <button
+          class="check-btn lookup-btn"
+          onclick={checkMXHealth}
+          disabled={diagnosticState.loading || !domain.trim()}
+        >
+          {#if diagnosticState.loading}
             <Icon name="loader" size="sm" animate="spin" />
             Checking MX Health...
           {:else}
@@ -205,32 +190,33 @@
   </div>
 
   <!-- Results -->
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header row">
         <h3>MX Health Results</h3>
-        <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
-          <Icon name={copiedState ? 'check' : 'copy'} size="xs" />
-          {copiedState ? 'Copied!' : 'Copy Results'}
+        <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
+          <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
+          {clipboard.isCopied() ? 'Copied!' : 'Copy Results'}
         </button>
       </div>
       <div class="card-content">
         <!-- Health Summary -->
         <div class="summary-section">
-          <div class="health-overview {getHealthColor(results.summary.healthy)}">
-            <Icon name={results.summary.healthy ? 'check-circle' : 'alert-circle'} size="md" />
+          <div class="health-overview {getHealthColor(diagnosticState.results.summary.healthy)}">
+            <Icon name={diagnosticState.results.summary.healthy ? 'check-circle' : 'alert-circle'} size="md" />
             <div>
               <h4>
-                {#if results.summary.healthy}
+                {#if diagnosticState.results.summary.healthy}
                   Mail Infrastructure Healthy
                 {:else}
                   Mail Infrastructure Issues
                 {/if}
               </h4>
               <p>
-                {results.summary.healthyMX} of {results.summary.totalMX} MX records resolved successfully
-                {#if checkPorts && results.summary.reachableMX !== null}
-                  • {results.summary.reachableMX} reachable via SMTP
+                {diagnosticState.results.summary.healthyMX} of {diagnosticState.results.summary.totalMX} MX records resolved
+                successfully
+                {#if checkPorts && diagnosticState.results.summary.reachableMX !== null}
+                  • {diagnosticState.results.summary.reachableMX} reachable via SMTP
                 {/if}
               </p>
             </div>
@@ -241,7 +227,7 @@
               <Icon name="server" size="sm" />
               <div>
                 <span class="stat-label">MX Records</span>
-                <span class="stat-value">{results.summary.totalMX}</span>
+                <span class="stat-value">{diagnosticState.results.summary.totalMX}</span>
               </div>
             </div>
 
@@ -249,17 +235,19 @@
               <Icon name="shield-check" size="sm" />
               <div>
                 <span class="stat-label">Healthy</span>
-                <span class="stat-value {getHealthColor(results.summary.healthy)}">{results.summary.healthyMX}</span>
+                <span class="stat-value {getHealthColor(diagnosticState.results.summary.healthy)}"
+                  >{diagnosticState.results.summary.healthyMX}</span
+                >
               </div>
             </div>
 
-            {#if checkPorts && results.summary.reachableMX !== null}
+            {#if checkPorts && diagnosticState.results.summary.reachableMX !== null}
               <div class="stat-item">
                 <Icon name="wifi" size="sm" />
                 <div>
                   <span class="stat-label">Reachable</span>
-                  <span class="stat-value {getHealthColor(results.summary.reachableMX > 0)}"
-                    >{results.summary.reachableMX}</span
+                  <span class="stat-value {getHealthColor(diagnosticState.results.summary.reachableMX > 0)}"
+                    >{diagnosticState.results.summary.reachableMX}</span
                   >
                 </div>
               </div>
@@ -269,8 +257,8 @@
               <Icon name="copy" size="sm" />
               <div>
                 <span class="stat-label">Redundancy</span>
-                <span class="stat-value {getHealthColor(results.summary.hasRedundancy)}"
-                  >{results.summary.hasRedundancy ? 'Yes' : 'No'}</span
+                <span class="stat-value {getHealthColor(diagnosticState.results.summary.hasRedundancy)}"
+                  >{diagnosticState.results.summary.hasRedundancy ? 'Yes' : 'No'}</span
                 >
               </div>
             </div>
@@ -281,7 +269,7 @@
         <div class="mx-section">
           <h4>MX Records (by priority)</h4>
           <div class="mx-list">
-            {#each (results as { mxRecords: Array<{ error?: string; exchange: string; priority: number; addresses?: { ipv4: string[]; ipv6: string[] }; portChecks?: Array<{ port: number; open: boolean; latency?: number }> }> }).mxRecords as mx, _index (_index)}
+            {#each (diagnosticState.results as { mxRecords: Array<{ error?: string; exchange: string; priority: number; addresses?: { ipv4: string[]; ipv6: string[] }; portChecks?: Array<{ port: number; open: boolean; latency?: number }> }> }).mxRecords as mx, _index (_index)}
               <div class="mx-record {mx.error ? 'error' : 'success'}">
                 <div class="mx-header">
                   <div class="mx-info">
@@ -378,19 +366,7 @@
     </div>
   {/if}
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>MX Health Check Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="MX Health Check Failed" error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">

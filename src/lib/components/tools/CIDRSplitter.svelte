@@ -1,6 +1,7 @@
 <script lang="ts">
   import { splitCIDRByCount, splitCIDRByPrefix, type SplitResult } from '$lib/utils/cidr-split.js';
   import { tooltip } from '$lib/actions/tooltip.js';
+  import { useClipboard } from '$lib/composables';
   import Icon from '$lib/components/global/Icon.svelte';
   import '../../../styles/diagnostics-pages.scss';
 
@@ -9,7 +10,7 @@
   let subnetCount = $state(4);
   let targetPrefix = $state(26);
   let result = $state<SplitResult | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExampleIndex = $state<number | null>(null);
 
   const modes = [
@@ -70,22 +71,11 @@
     selectedExampleIndex = null;
   }
 
-  /* Copy to clipboard */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => (copiedStates[id] = false), 1500);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
-
   /* Copy all subnets */
   function copyAllSubnets() {
     if (!result?.subnets) return;
     const text = result.subnets.map((s) => s.cidr).join('\n');
-    copyToClipboard(text, 'all-subnets');
+    clipboard.copy(text, 'all-subnets');
   }
 
   /* Clear input */
@@ -278,10 +268,10 @@
             <button
               type="button"
               class="btn btn-primary btn-sm"
-              class:copied={copiedStates['all-subnets']}
+              class:copied={clipboard.isCopied('all-subnets')}
               onclick={copyAllSubnets}
             >
-              <Icon name={copiedStates['all-subnets'] ? 'check' : 'copy'} size="sm" />
+              <Icon name={clipboard.isCopied('all-subnets') ? 'check' : 'copy'} size="sm" />
               Copy All CIDRs
             </button>
           </div>
@@ -340,10 +330,10 @@
                   <button
                     type="button"
                     class="btn btn-icon btn-xs"
-                    class:copied={copiedStates[subnet.cidr]}
-                    onclick={() => copyToClipboard(subnet.cidr, subnet.cidr)}
+                    class:copied={clipboard.isCopied(subnet.cidr)}
+                    onclick={() => clipboard.copy(subnet.cidr, subnet.cidr)}
                   >
-                    <Icon name={copiedStates[subnet.cidr] ? 'check' : 'copy'} size="xs" />
+                    <Icon name={clipboard.isCopied(subnet.cidr) ? 'check' : 'copy'} size="xs" />
                   </button>
                 </div>
                 <div class="subnet-details">

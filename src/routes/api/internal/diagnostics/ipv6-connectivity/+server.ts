@@ -1,5 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorManager } from '$lib/utils/error-manager';
 
 interface ConnectivityTest {
   protocol: 'IPv4' | 'IPv6';
@@ -56,7 +57,7 @@ export const POST: RequestHandler = async () => {
 
     return json(response);
   } catch (err) {
-    console.error('IPv6 connectivity test error:', err);
+    errorManager.captureException(err, 'error', { component: 'IPv6 Connectivity API' });
     throw error(500, `Connectivity test failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
   }
 };

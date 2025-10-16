@@ -1,12 +1,13 @@
 <script lang="ts">
   import { Copy, Download, Check, Globe, Type } from 'lucide-svelte';
   import { tooltip } from '$lib/actions/tooltip.js';
+  import { useClipboard } from '$lib/composables';
 
   let inputText = $state('');
   let mode = $state('unicode-to-punycode');
   let showExamples = $state(false);
 
-  let buttonStates = $state({} as Record<string, boolean>);
+  const clipboard = useClipboard();
 
   const domainExamples = [
     { unicode: 'münchen.de', punycode: 'xn--mnchen-3ya.de', description: 'German city domain' },
@@ -231,16 +232,8 @@
     return warns;
   });
 
-  function showButtonSuccess(buttonId: string) {
-    buttonStates[buttonId] = true;
-    setTimeout(() => {
-      buttonStates[buttonId] = false;
-    }, 2000);
-  }
-
   function copyToClipboard() {
-    navigator.clipboard.writeText(result);
-    showButtonSuccess('copy');
+    clipboard.copy(result, 'copy');
   }
 
   function downloadResult() {
@@ -254,7 +247,7 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showButtonSuccess('download');
+    clipboard.copy('downloaded', 'download');
   }
 
   function loadExample(example: (typeof domainExamples)[0]) {
@@ -406,10 +399,10 @@
                   <button
                     onclick={copyToClipboard}
                     class="btn-secondary"
-                    class:success={buttonStates.copy}
-                    style="transform: {buttonStates.copy ? 'scale(1.05)' : 'scale(1)'}"
+                    class:success={clipboard.isCopied('copy')}
+                    style="transform: {clipboard.isCopied('copy') ? 'scale(1.05)' : 'scale(1)'}"
                   >
-                    {#if buttonStates.copy}
+                    {#if clipboard.isCopied('copy')}
                       <Check size="16" />
                       Copied!
                     {:else}
@@ -420,10 +413,10 @@
                   <button
                     onclick={downloadResult}
                     class="btn-primary"
-                    class:success={buttonStates.download}
-                    style="transform: {buttonStates.download ? 'scale(1.05)' : 'scale(1)'}"
+                    class:success={clipboard.isCopied('download')}
+                    style="transform: {clipboard.isCopied('download') ? 'scale(1.05)' : 'scale(1)'}"
                   >
-                    {#if buttonStates.download}
+                    {#if clipboard.isCopied('download')}
                       <Check size="16" />
                       Downloaded!
                     {:else}
@@ -510,6 +503,7 @@
   }
 
   .card {
+    width: 100%;
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
     border-radius: var(--radius-lg);
@@ -862,7 +856,7 @@
     gap: var(--spacing-xs);
     padding: var(--spacing-sm) var(--spacing-md);
     background: var(--color-primary-dark);
-    color: white;
+    color: var(--bg-secondary);
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;

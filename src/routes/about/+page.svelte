@@ -5,6 +5,7 @@
   // Import section components
   import ApiSection from '$lib/components/page-specific/about/ApiSection.svelte';
   import SelfHostingSection from '$lib/components/page-specific/about/SelfHostingSection.svelte';
+  import TipsSection from '$lib/components/page-specific/about/TipsSection.svelte';
   import BuildingSection from '$lib/components/page-specific/about/BuildingSection.svelte';
   import AuthorSection from '$lib/components/page-specific/about/AuthorSection.svelte';
   import AttributionsSection from '$lib/components/page-specific/about/AttributionsSection.svelte';
@@ -53,6 +54,7 @@
   </div>
 </section>
 
+<TipsSection />
 <ApiSection />
 <SelfHostingSection />
 <BuildingSection />

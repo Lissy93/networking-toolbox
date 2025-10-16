@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorManager } from '$lib/utils/error-manager';
 
 export const GET: RequestHandler = async ({ url }) => {
   const oui = url.searchParams.get('oui');
@@ -44,7 +45,7 @@ export const GET: RequestHandler = async ({ url }) => {
       updated: data.updated,
     });
   } catch (error) {
-    console.error('MAC lookup error:', error);
+    errorManager.captureException(error, 'error', { component: 'MAC Lookup API' });
     return json({ error: 'Failed to fetch OUI data', found: false }, { status: 500 });
   }
 };

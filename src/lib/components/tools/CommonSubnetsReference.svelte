@@ -2,6 +2,7 @@
   import { COMMON_SUBNETS } from '$lib/constants/networks.js';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import SvgIcon from '$lib/components/global/SvgIcon.svelte';
+  import { formatNumber } from '$lib/utils/formatters';
   import '../../styles/converters.scss';
   import '../../styles/components.scss';
 </script>
@@ -23,7 +24,7 @@
 
     {#each COMMON_SUBNETS as subnet (subnet.cidr)}
       <Tooltip
-        text="/{subnet.cidr} subnet with mask {subnet.mask} supports {subnet.hosts.toLocaleString()} hosts"
+        text="/{subnet.cidr} subnet with mask {subnet.mask} supports {formatNumber(subnet.hosts)} hosts"
         position="top"
       >
         <div class="table-row">
@@ -34,7 +35,7 @@
             {subnet.mask}
           </span>
           <span class="hosts-cell">
-            {subnet.hosts.toLocaleString()}
+            {formatNumber(subnet.hosts)}
           </span>
           <span class="usage-cell">
             {#if subnet.cidr === 8}

@@ -1,12 +1,29 @@
 <script lang="ts">
   import { calculateSubnet } from '$lib/utils/ip-calculations.js';
   import { validateCIDR } from '$lib/utils/ip-validation.js';
+  import { formatNumber } from '$lib/utils/formatters.js';
   import CIDRInput from '$lib/components/tools/CIDRInput.svelte';
   import NetworkVisualizer from '$lib/components/tools/NetworkVisualizer.svelte';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import SvgIcon from '$lib/components/global/SvgIcon.svelte';
+  import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import { tooltip } from '$lib/actions/tooltip.js';
+  import { useClipboard } from '$lib/composables';
+  import { goto } from '$app/navigation';
   import type { SubnetInfo } from '$lib/types/ip.js';
+
+  const versionOptions = [
+    { value: 'ipv4' as const, label: 'IPv4' },
+    { value: 'ipv6' as const, label: 'IPv6' },
+  ];
+
+  let selectedVersion = $state<'ipv4' | 'ipv6'>('ipv4');
+
+  function handleVersionChange(version: 'ipv4' | 'ipv6') {
+    if (version === 'ipv6') {
+      goto('/subnetting/ipv6-subnet-calculator');
+    }
+  }
 
   let cidrInput = $state('192.168.1.0/24');
   let subnetInfo: SubnetInfo | null = $state(null);
@@ -33,37 +50,16 @@
     }
   });
 
-  /**
-   * Format large numbers
-   */
-  function formatNumber(num: number): string {
-    return num.toLocaleString();
-  }
-
-  let copiedStates = $state<Record<string, boolean>>({});
-
-  /**
-   * Copy to clipboard with visual feedback
-   */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 3000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
+  const clipboard = useClipboard();
 </script>
 
-<div class="card">
-  <header class="card-header">
-    <h2>Subnet Calculator</h2>
-    <p>Calculate network, broadcast, and host information for any subnet.</p>
-  </header>
-
+<ToolContentContainer
+  title="Subnet Calculator"
+  description="Calculate network, broadcast, and host information for any subnet."
+  navOptions={versionOptions}
+  bind:selectedNav={selectedVersion}
+  onNavChange={handleVersionChange}
+>
   <!-- Input -->
   <div class="form-group">
     <CIDRInput bind:value={cidrInput} label="Network Address (CIDR)" placeholder="192.168.1.0/24" />
@@ -85,14 +81,17 @@
             <span class="info-label" use:tooltip={'First IP in subnet - identifies the network'}>Network Address</span>
             <div class="value-copy">
               <code class="ip-value success">{subnetInfo.network.octets.join('.')}</code>
-              <Tooltip text={copiedStates['network'] ? 'Copied!' : 'Copy network address to clipboard'} position="top">
+              <Tooltip
+                text={clipboard.isCopied('network') ? 'Copied!' : 'Copy network address to clipboard'}
+                position="top"
+              >
                 <button
                   type="button"
-                  class="btn-icon copy-btn {copiedStates['network'] ? 'copied' : ''}"
-                  onclick={() => copyToClipboard(subnetInfo!.network.octets.join('.'), 'network')}
+                  class="btn-icon copy-btn {clipboard.isCopied('network') ? 'copied' : ''}"
+                  onclick={() => clipboard.copy(subnetInfo!.network.octets.join('.'), 'network')}
                   aria-label="Copy network address"
                 >
-                  <SvgIcon icon={copiedStates['network'] ? 'check' : 'clipboard'} size="md" />
+                  <SvgIcon icon={clipboard.isCopied('network') ? 'check' : 'clipboard'} size="md" />
                 </button>
               </Tooltip>
             </div>
@@ -103,16 +102,16 @@
             <div class="value-copy">
               <code class="ip-value error">{subnetInfo.broadcast.octets.join('.')}</code>
               <Tooltip
-                text={copiedStates['broadcast'] ? 'Copied!' : 'Copy broadcast address to clipboard'}
+                text={clipboard.isCopied('broadcast') ? 'Copied!' : 'Copy broadcast address to clipboard'}
                 position="top"
               >
                 <button
                   type="button"
-                  class="btn-icon copy-btn {copiedStates['broadcast'] ? 'copied' : ''}"
-                  onclick={() => copyToClipboard(subnetInfo!.broadcast.octets.join('.'), 'broadcast')}
+                  class="btn-icon copy-btn {clipboard.isCopied('broadcast') ? 'copied' : ''}"
+                  onclick={() => clipboard.copy(subnetInfo!.broadcast.octets.join('.'), 'broadcast')}
                   aria-label="Copy broadcast address"
                 >
-                  <SvgIcon icon={copiedStates['broadcast'] ? 'check' : 'clipboard'} size="md" />
+                  <SvgIcon icon={clipboard.isCopied('broadcast') ? 'check' : 'clipboard'} size="md" />
                 </button>
               </Tooltip>
             </div>
@@ -268,7 +267,7 @@
       </ul>
     </div>
   </section>
-</div>
+</ToolContentContainer>
 
 <style lang="scss">
   .explainer-section {
@@ -298,6 +297,10 @@
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
     }
+  }
+
+  .value-copy {
+    flex: none;
   }
 
   .explainer-card {

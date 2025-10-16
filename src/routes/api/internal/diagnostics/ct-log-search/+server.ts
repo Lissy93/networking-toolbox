@@ -1,5 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorManager } from '$lib/utils/error-manager';
 
 interface CTLogRequest {
   domain: string;
@@ -64,7 +65,7 @@ export const POST: RequestHandler = async ({ request }) => {
     const result = await searchCTLogs(trimmedDomain);
     return json(result);
   } catch (err) {
-    console.error('CT log search error:', err);
+    errorManager.captureException(err, 'error', { component: 'CT Log Search API' });
     if (err && typeof err === 'object' && 'status' in err) {
       throw err;
     }

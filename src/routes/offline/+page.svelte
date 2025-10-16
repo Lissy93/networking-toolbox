@@ -33,7 +33,7 @@
   <meta name="description" content="Offline mode - your bookmarked tools are still available" />
 </svelte:head>
 
-<div class="offline-page">
+<div class="offline-page card">
   <div class="status-section">
     <Icon name={isOnline ? 'online' : 'offline'} size="lg" />
 

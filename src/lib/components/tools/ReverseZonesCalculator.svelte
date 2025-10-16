@@ -2,6 +2,7 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { calculateReverseZones, type ReverseZoneInfo } from '$lib/utils/reverse-dns.js';
+  import { useClipboard } from '$lib/composables';
 
   let cidrInput = $state('192.168.1.0/24');
   let results = $state<{
@@ -16,7 +17,7 @@
     };
   } | null>(null);
 
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExample = $state<string | null>(null);
   let _userModified = $state(false);
 
@@ -114,18 +115,6 @@
     _userModified = true;
     selectedExample = null;
     calculateZones();
-  }
-
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
   }
 
   function generateBindConfig(zones: ReverseZoneInfo[]): string {
@@ -269,10 +258,10 @@ chmod 644 /etc/bind/zones/${zone.zone}`;
                     </div>
                   </div>
                   <button
-                    class="copy-button {copiedStates[`zone-${index}`] ? 'copied' : ''}"
-                    onclick={() => copyToClipboard(zone.zone, `zone-${index}`)}
+                    class="copy-button {clipboard.isCopied(`zone-${index}`) ? 'copied' : ''}"
+                    onclick={() => clipboard.copy(zone.zone, `zone-${index}`)}
                   >
-                    <Icon name={copiedStates[`zone-${index}`] ? 'check' : 'copy'} size="sm" />
+                    <Icon name={clipboard.isCopied(`zone-${index}`) ? 'check' : 'copy'} size="sm" />
                   </button>
                 </div>
 
@@ -310,10 +299,10 @@ chmod 644 /etc/bind/zones/${zone.zone}`;
               <div class="config-header">
                 <h5>BIND9 Configuration</h5>
                 <button
-                  class="copy-button {copiedStates['bind-config'] ? 'copied' : ''}"
-                  onclick={() => results && copyToClipboard(generateBindConfig(results.zones), 'bind-config')}
+                  class="copy-button {clipboard.isCopied('bind-config') ? 'copied' : ''}"
+                  onclick={() => results && clipboard.copy(generateBindConfig(results.zones), 'bind-config')}
                 >
-                  <Icon name={copiedStates['bind-config'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('bind-config') ? 'check' : 'copy'} size="sm" />
                   Copy Config
                 </button>
               </div>
@@ -325,11 +314,10 @@ chmod 644 /etc/bind/zones/${zone.zone}`;
               <div class="config-header">
                 <h5>Zone File Setup Commands</h5>
                 <button
-                  class="copy-button {copiedStates['setup-commands'] ? 'copied' : ''}"
-                  onclick={() =>
-                    results && copyToClipboard(generateDelegationCommands(results.zones), 'setup-commands')}
+                  class="copy-button {clipboard.isCopied('setup-commands') ? 'copied' : ''}"
+                  onclick={() => results && clipboard.copy(generateDelegationCommands(results.zones), 'setup-commands')}
                 >
-                  <Icon name={copiedStates['setup-commands'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('setup-commands') ? 'check' : 'copy'} size="sm" />
                   Copy Commands
                 </button>
               </div>

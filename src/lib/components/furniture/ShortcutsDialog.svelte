@@ -4,6 +4,7 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { bookmarks } from '$lib/stores/bookmarks';
   import { formatShortcut } from '$lib/utils/keyboard';
+  import SegmentedControl from '$lib/components/global/SegmentedControl.svelte';
 
   interface Shortcut {
     keys: string;
@@ -102,65 +103,134 @@
     });
     return groups;
   });
+
+  const viewOptions = [
+    { label: 'Keyboard Shortcuts', value: 'keyboard-shortcuts', icon: 'keyboard' },
+    { label: 'About', value: 'about', icon: 'info' },
+  ];
+
+  let activeView = $state('keyboard-shortcuts');
+
+  // Compute dialog title based on active view
+  const dialogTitle = $derived(activeView === 'keyboard-shortcuts' ? 'Command Palette' : 'Networking Toolbox');
+
+  // Close dialog when clicking links in About tab
+  function handleLinkClick() {
+    if (activeView === 'about') {
+      close();
+    }
+  }
 </script>
 
 {#if isOpen}
   <div class="shortcuts-backdrop" onclick={handleBackdropClick} role="presentation">
     <div class="shortcuts-dialog" role="dialog" aria-labelledby="shortcuts-title" aria-modal="true">
       <div class="dialog-header">
-        <h2 id="shortcuts-title">Command Palette</h2>
+        <div class="dialog-header-main">
+          <h2 id="shortcuts-title">{dialogTitle}</h2>
+          <div>
+            <SegmentedControl
+              hideLabel={true}
+              options={viewOptions}
+              bind:value={activeView}
+              onchange={(value) => (activeView = value)}
+            />
+          </div>
+        </div>
         <button class="close-btn" onclick={close} aria-label="Close shortcuts">
           <Icon name="x" size="sm" />
         </button>
       </div>
 
-      <div class="shortcuts-content">
-        {#each Object.entries(groupedShortcuts()) as [category, items] (category)}
-          <div class="shortcuts-category">
-            <h3>{category}</h3>
-            <ul>
-              {#each items as shortcut (shortcut.keys)}
-                <li>
-                  <kbd>{formatShortcut(shortcut.keys)}</kbd>
-                  <span>{shortcut.description}</span>
-                </li>
-              {/each}
-            </ul>
-
-            <!-- Show bookmarked tools if in Bookmarks category -->
-            {#if category === 'Bookmarks' && $bookmarks.length > 0}
-              <details class="bookmarks-details">
-                <summary>Your bookmarked tools ({Math.min($bookmarks.length, 9)})</summary>
-                <ul class="bookmarks-list">
-                  {#each $bookmarks.slice(0, 10) as bookmark, index (bookmark.href)}
-                    <li>
-                      <kbd>{formatShortcut(`^${index + 1 === 10 ? 0 : index + 1}`)}</kbd>
-                      <span>{bookmark.label}</span>
-                    </li>
-                  {/each}
-                  {#if $bookmarks.length <= 9}
-                    <li>
-                      <kbd>{formatShortcut('^0')}</kbd>
-                      <span>Homepage</span>
-                    </li>
-                  {/if}
+      {#if activeView === 'keyboard-shortcuts'}
+        <div class="shortcuts-content">
+          {#each Object.entries(groupedShortcuts()) as [category, items] (category)}
+            <div class="shortcuts-category">
+              <h3>{category}</h3>
+              <ul>
+                {#each items as shortcut (shortcut.keys)}
                   <li>
-                    <kbd>{formatShortcut('^B')}</kbd>
-                    <span>View all Bookmarks</span>
+                    <kbd>{formatShortcut(shortcut.keys)}</kbd>
+                    <span>{shortcut.description}</span>
                   </li>
-                </ul>
-              </details>
-            {/if}
+                {/each}
+              </ul>
 
-            {#if category === 'Bookmarks' && $bookmarks.length === 0}
-              <p class="no-bookmarks-tip">
-                <i>You don't have any bookmarks yet.</i>
-                <span>Right-click on a tool to bookmark it for quick access and offline use.</span>
-              </p>
-            {/if}
+              <!-- Show bookmarked tools if in Bookmarks category -->
+              {#if category === 'Bookmarks' && $bookmarks.length > 0}
+                <details class="bookmarks-details">
+                  <summary>Your bookmarked tools ({Math.min($bookmarks.length, 9)})</summary>
+                  <ul class="bookmarks-list">
+                    {#each $bookmarks.slice(0, 10) as bookmark, index (bookmark.href)}
+                      <li>
+                        <kbd>{formatShortcut(`^${index + 1 === 10 ? 0 : index + 1}`)}</kbd>
+                        <span>{bookmark.label}</span>
+                      </li>
+                    {/each}
+                    {#if $bookmarks.length <= 9}
+                      <li>
+                        <kbd>{formatShortcut('^0')}</kbd>
+                        <span>Homepage</span>
+                      </li>
+                    {/if}
+                    <li>
+                      <kbd>{formatShortcut('^B')}</kbd>
+                      <span>View all Bookmarks</span>
+                    </li>
+                  </ul>
+                </details>
+              {/if}
+
+              {#if category === 'Bookmarks' && $bookmarks.length === 0}
+                <p class="no-bookmarks-tip">
+                  <i>You don't have any bookmarks yet.</i>
+                  <span>Right-click on a tool to bookmark it for quick access and offline use.</span>
+                </p>
+              {/if}
+            </div>
+          {/each}
+        </div>
+      {:else if activeView === 'about'}
+        <div class="about-content">
+          <p>
+            Networking Toolbox is an open-source collection of web-based networking tools designed to make
+            network-related tasks quicker and easier.
+          </p>
+          <p>
+            With 100+ tools, it's privacy-focused and self-hostable, fully customizable, and includes a free REST API
+            for automation.
+          </p>
+          <ul>
+            <li><a href="https://github.com/lissy93/networking-toolbox" onclick={handleLinkClick}>GitHub</a></li>
+            <li><a href="/sitemap" onclick={handleLinkClick}>Page Listing</a></li>
+            <li><a href="/settings" onclick={handleLinkClick}>App Settings</a></li>
+            <li><a href="/about" onclick={handleLinkClick}>Documentation</a></li>
+            <li><a href="/about/support" onclick={handleLinkClick}>Support</a></li>
+            <li><a href="/about/legal" onclick={handleLinkClick}>Legal</a></li>
+          </ul>
+          <p class="sponsor">
+            <Icon name="heart" size="md" />
+            <span>
+              <b>Finding Networking Toolbox useful?</b>
+              Consider <a href="https://github.com/sponsors/Lissy93">sponsoring us on GitHub</a> to support ongoing development!
+            </span>
+          </p>
+
+          <div class="about-license-section">
+            <a
+              href="https://github.com/lissy93/networking-toolbox"
+              target="_blank"
+              rel="noopener"
+              onclick={handleLinkClick}>Networking Toolbox</a
+            >
+            v{import.meta.env.VITE_APP_VERSION}, licensed under
+            <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener" onclick={handleLinkClick}
+              >MIT</a
+            >
+            &copy; {new Date().getFullYear()} Alicia Sykes
           </div>
-        {/each}
-      </div>
+        </div>
+      {/if}
     </div>
   </div>
 {/if}
@@ -197,6 +267,7 @@
     display: flex;
     flex-direction: column;
     animation: slideInScale 0.2s ease-out;
+    min-height: 548px;
 
     @media (max-width: 768px) {
       max-width: 100%;
@@ -207,6 +278,7 @@
       border: none;
       box-shadow: none;
       animation: slideInFromBottom var(--transition-normal);
+      min-height: auto;
     }
   }
 
@@ -216,6 +288,13 @@
     justify-content: space-between;
     padding: var(--spacing-md) var(--spacing-lg);
     border-bottom: 1px solid var(--border-primary);
+    .dialog-header-main {
+      display: flex;
+      width: 100%;
+      padding-right: var(--spacing-sm);
+      align-items: center;
+      justify-content: space-between;
+    }
 
     @media (max-width: 768px) {
       padding: var(--spacing-md);
@@ -392,6 +471,52 @@
           flex: 1;
           font-size: var(--font-size-sm);
           color: var(--text-secondary);
+        }
+      }
+    }
+  }
+
+  .about-content {
+    padding: var(--spacing-md) var(--spacing-lg);
+
+    p {
+      color: var(--text-primary);
+      font-size: var(--font-size-md);
+    }
+    .sponsor {
+      font-size: var(--font-size-xs);
+      color: var(--color-pink);
+      background: color-mix(in srgb, var(--color-pink), transparent 90%);
+      padding: var(--spacing-sm);
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--color-pink);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin: var(--spacing-md) auto;
+      a {
+        color: var(--color-pink);
+        text-decoration: underline;
+      }
+      opacity: 0;
+      animation: fadeIn 1s ease-out 10s forwards;
+    }
+    .about-license-section {
+      font-size: var(--font-size-xs);
+      text-align: center;
+      color: var(--text-secondary);
+      a {
+        color: var(--text-secondary);
+        text-decoration: underline;
+      }
+    }
+    ul {
+      padding-left: var(--spacing-lg);
+      margin: var(--spacing-lg) 0;
+      li {
+        a {
+          color: var(--color-primary);
+          text-decoration: underline;
         }
       }
     }

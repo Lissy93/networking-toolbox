@@ -1,6 +1,8 @@
 import { json, error } from '@sveltejs/kit';
 import { promises as dns } from 'node:dns';
 import type { RequestHandler } from './$types';
+import { errorManager } from '$lib/utils/error-manager';
+import { logger } from '$lib/utils/logger';
 
 type Action =
   | 'lookup'
@@ -187,7 +189,10 @@ async function performDNSLookup(name: string, type: keyof typeof DNS_TYPES, opts
       const result = await doHQuery(endpoint, name, DNS_TYPES[type], timeoutMs);
       return { ...result, warnings };
     } catch (error) {
-      console.warn(`DoH query failed for ${doh}, falling back to Cloudflare DoH:`, (error as Error).message);
+      logger.warn(`DoH query failed for ${doh}, falling back to Cloudflare DoH: ${(error as Error).message}`, {
+        component: 'DNS API',
+        doh,
+      });
 
       // If the failed resolver wasn't Cloudflare, try Cloudflare DoH as fallback
       if (doh !== 'cloudflare') {
@@ -197,7 +202,9 @@ async function performDNSLookup(name: string, type: keyof typeof DNS_TYPES, opts
           warnings.push(`${originalResolver} failed, fell back to Cloudflare DoH which succeeded.`);
           return { ...result, warnings };
         } catch (cloudflareError) {
-          console.warn('Cloudflare DoH also failed, falling back to native DNS:', (cloudflareError as Error).message);
+          logger.warn(`Cloudflare DoH also failed, falling back to native DNS: ${(cloudflareError as Error).message}`, {
+            component: 'DNS API',
+          });
         }
       }
 
@@ -1126,7 +1133,7 @@ export const POST: RequestHandler = async ({ request }) => {
         throw error(400, `Unknown action: ${(body as any).action}`);
     }
   } catch (err: unknown) {
-    console.error('DNS API error:', err);
+    errorManager.captureException(err, 'error', { component: 'DNS API' });
     // If it's already an HttpError (e.g., from validation), rethrow it
     if (err && typeof err === 'object' && 'status' in err) {
       throw err;

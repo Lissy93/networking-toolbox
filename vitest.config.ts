@@ -9,6 +9,14 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
     globals: true,
+    hideSkippedTests: true,
+    onConsoleLog: (log, type) => {
+      // Suppress expected error patterns from appearing in test output
+      if (type === 'stderr' && log.includes('error:')) {
+        return false; // Don't print this log
+      }
+      return undefined; // Use default behavior for other logs
+    },
     coverage: {
       include: ['src/**/*.{js,ts}'],
       exclude: [

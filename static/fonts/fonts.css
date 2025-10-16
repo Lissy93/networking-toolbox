@@ -1,0 +1,128 @@
+/**
+ * Self-Hosted Fonts for Optimal Performance
+ * Place font files in /static/fonts/ directory
+ */
+
+/* Fira Code - Default Theme Font (Tokyo Night) */
+@font-face {
+  font-family: 'Fira Code';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('Fira Code Regular'),
+    local('FiraCode-Regular'),
+    url('/fonts/fira-code-v27-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Fira Code';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    local('Fira Code Medium'),
+    local('FiraCode-Medium'),
+    url('/fonts/fira-code-v27-latin-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Fira Code';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src:
+    local('Fira Code SemiBold'),
+    local('FiraCode-SemiBold'),
+    url('/fonts/fira-code-v27-latin-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Fira Code';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local('Fira Code Bold'),
+    local('FiraCode-Bold'),
+    url('/fonts/fira-code-v27-latin-700.woff2') format('woff2');
+}
+
+/* Fira Sans - Companion Font for Fira Code */
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('Fira Sans Regular'),
+    local('FiraSans-Regular'),
+    url('/fonts/fira-sans-v18-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    local('Fira Sans Medium'),
+    local('FiraSans-Medium'),
+    url('/fonts/fira-sans-v18-latin-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src:
+    local('Fira Sans SemiBold'),
+    local('FiraSans-SemiBold'),
+    url('/fonts/fira-sans-v18-latin-600.woff2') format('woff2');
+}
+
+/* Inter - Light Theme Font */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('Inter Regular'),
+    local('Inter-Regular'),
+    url('/fonts/inter-v20-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    local('Inter Medium'),
+    local('Inter-Medium'),
+    url('/fonts/inter-v20-latin-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src:
+    local('Inter SemiBold'),
+    local('Inter-SemiBold'),
+    url('/fonts/inter-v20-latin-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local('Inter Bold'),
+    local('Inter-Bold'),
+    url('/fonts/inter-v20-latin-700.woff2') format('woff2');
+}

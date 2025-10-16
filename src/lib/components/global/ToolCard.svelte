@@ -443,8 +443,6 @@
     padding: var(--spacing-sm);
     gap: var(--spacing-xs);
     text-align: center;
-    min-height: 5rem;
-    // max-width: 10rem;
     background: linear-gradient(
       135deg,
       var(--bg-secondary),
@@ -453,12 +451,13 @@
 
     .compact-content {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
       gap: var(--spacing-sm);
       width: 100%;
       position: relative;
       z-index: 1;
+      text-align: left;
     }
 
     h3 {

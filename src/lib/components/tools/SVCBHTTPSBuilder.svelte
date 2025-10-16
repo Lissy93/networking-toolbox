@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
+  import { useClipboard } from '$lib/composables';
 
   interface ServiceParameter {
     key: string;
@@ -34,7 +35,7 @@
   let selectedExample = $state<string | null>(null);
 
   // Button success states
-  let buttonStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
 
   const parameterDescriptions = {
     mandatory: 'Mandatory parameters that must be understood by the client',
@@ -186,18 +187,6 @@
     };
   });
 
-  function showButtonSuccess(buttonId: string): void {
-    buttonStates[buttonId] = true;
-    setTimeout(() => {
-      buttonStates[buttonId] = false;
-    }, 2000);
-  }
-
-  function copyToClipboard(text: string, buttonId: string): void {
-    navigator.clipboard.writeText(text);
-    showButtonSuccess(buttonId);
-  }
-
   function exportAsZoneFile(): void {
     if (!dnsRecord) return;
 
@@ -211,7 +200,7 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showButtonSuccess('export-svcb');
+    clipboard.copy('downloaded', 'export-svcb');
   }
 
   function _addParameter(key: string): void {
@@ -401,22 +390,22 @@
             <button
               type="button"
               class="copy-btn"
-              class:success={buttonStates['copy-svcb']}
-              onclick={() => copyToClipboard(dnsRecord, 'copy-svcb')}
+              class:success={clipboard.isCopied('copy-svcb')}
+              onclick={() => clipboard.copy(dnsRecord, 'copy-svcb')}
               use:tooltip={'Copy record to clipboard'}
             >
-              <Icon name={buttonStates['copy-svcb'] ? 'check' : 'copy'} size="sm" />
-              {buttonStates['copy-svcb'] ? 'Copied!' : 'Copy'}
+              <Icon name={clipboard.isCopied('copy-svcb') ? 'check' : 'copy'} size="sm" />
+              {clipboard.isCopied('copy-svcb') ? 'Copied!' : 'Copy'}
             </button>
             <button
               type="button"
               class="export-btn"
-              class:success={buttonStates['export-svcb']}
+              class:success={clipboard.isCopied('export-svcb')}
               onclick={exportAsZoneFile}
               use:tooltip={'Download as zone file'}
             >
-              <Icon name={buttonStates['export-svcb'] ? 'check' : 'download'} size="sm" />
-              {buttonStates['export-svcb'] ? 'Downloaded!' : 'Export'}
+              <Icon name={clipboard.isCopied('export-svcb') ? 'check' : 'download'} size="sm" />
+              {clipboard.isCopied('export-svcb') ? 'Downloaded!' : 'Export'}
             </button>
           </div>
         </div>

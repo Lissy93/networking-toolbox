@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { connect } from 'node:net';
+import { errorManager } from '$lib/utils/error-manager';
 
 interface GreylistTestResult {
   domain: string;
@@ -255,7 +256,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     return json(result);
   } catch (error) {
-    console.error('Greylist test error:', error);
+    errorManager.captureException(error, 'error', { component: 'Greylist API' });
     return json({ message: error instanceof Error ? error.message : 'Failed to test greylisting' }, { status: 500 });
   }
 };

@@ -2,19 +2,18 @@
   import { expandIPv6, compressIPv6, validateIPv6Address } from '$lib/utils/ipv6-subnet-calculations.js';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
 
   interface Props {
     mode: 'expand' | 'compress';
-    title: string;
-    description: string;
   }
 
-  let { mode, title, description }: Props = $props();
+  let { mode }: Props = $props();
 
   let inputAddress = $state('2001:db8::1');
   let outputAddress = $state('');
   let conversionError = $state('');
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExampleIndex = $state<number | null>(null);
 
   /* Common IPv6 example addresses for testing */
@@ -47,19 +46,6 @@
   function handleInput() {
     clearExampleSelection();
     performConversion();
-  }
-
-  /* Copy text to clipboard */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 3000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
   }
 
   /* Perform the conversion based on mode */
@@ -104,210 +90,132 @@
   });
 </script>
 
-<div class="card converter-card">
-  <header class="card-header">
-    <div class="header-content">
-      <div class="header-text">
-        <h2>{title}</h2>
-        <p>{description}</p>
-      </div>
-      <div class="header-actions">
-        <a
-          href={mode === 'expand'
-            ? '/ip-address-convertor/notation/ipv6-compress'
-            : '/ip-address-convertor/notation/ipv6-expand'}
-          class="mode-switch-btn"
-          title="Switch to {mode === 'expand' ? 'Compress' : 'Expand'} mode"
+<!-- Input Section -->
+<div class="converter-section">
+  <h3>Input IPv6 Address</h3>
+
+  <div class="input-group">
+    <div class="form-group">
+      <label for="ipv6-input">
+        IPv6 Address
+        <Tooltip
+          text={mode === 'expand'
+            ? 'Enter compressed IPv6 address to expand'
+            : 'Enter expanded IPv6 address to compress'}
         >
-          <Icon name={mode === 'expand' ? 'ipv6-compress' : 'ipv6-expand'} size="sm" />
-          <span>{mode === 'expand' ? 'Compress' : 'Expand'}</span>
-        </a>
+          <Icon name="help" size="sm" />
+        </Tooltip>
+      </label>
+      <div class="input-wrapper">
+        <input
+          id="ipv6-input"
+          type="text"
+          bind:value={inputAddress}
+          oninput={handleInput}
+          placeholder={mode === 'expand' ? '2001:db8::1' : '2001:0db8:0000:0000:0000:0000:0000:0001'}
+          class="ipv6-input"
+        />
+        <button type="button" class="btn btn-secondary btn-md" onclick={clearAll}>
+          <Icon name="trash" size="md" />
+        </button>
       </div>
-    </div>
-  </header>
-
-  <!-- Input Section -->
-  <div class="converter-section">
-    <h3>Input IPv6 Address</h3>
-
-    <div class="input-group">
-      <div class="form-group">
-        <label for="ipv6-input">
-          IPv6 Address
-          <Tooltip
-            text={mode === 'expand'
-              ? 'Enter compressed IPv6 address to expand'
-              : 'Enter expanded IPv6 address to compress'}
-          >
-            <Icon name="help" size="sm" />
-          </Tooltip>
-        </label>
-        <div class="input-wrapper">
-          <input
-            id="ipv6-input"
-            type="text"
-            bind:value={inputAddress}
-            oninput={handleInput}
-            placeholder={mode === 'expand' ? '2001:db8::1' : '2001:0db8:0000:0000:0000:0000:0000:0001'}
-            class="ipv6-input"
-          />
-          <button type="button" class="btn btn-secondary btn-md" onclick={clearAll}>
-            <Icon name="trash" size="md" />
-          </button>
-        </div>
-        {#if conversionError}
-          <p class="error-message">{conversionError}</p>
-        {/if}
-      </div>
+      {#if conversionError}
+        <p class="error-message">{conversionError}</p>
+      {/if}
     </div>
   </div>
-
-  <!-- Examples Section -->
-  <div class="examples-section">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h3>Common Examples</h3>
-      </summary>
-      <div class="examples-grid">
-        {#each exampleAddresses as example, index (`example-${index}`)}
-          <button
-            type="button"
-            class="example-btn"
-            class:selected={selectedExampleIndex === index}
-            onclick={() => setExample(mode === 'expand' ? example.compressed : example.expanded, index)}
-          >
-            <div class="example-label">{example.label}</div>
-            <code class="example-address">
-              {mode === 'expand' ? example.compressed : example.expanded}
-            </code>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
-
-  <!-- Output Section -->
-  {#if outputAddress && !conversionError}
-    <div class="output-section">
-      <h3>Converted Address</h3>
-
-      <div class="conversion-result">
-        <div class="result-card success">
-          <div class="result-header">
-            <h4>
-              <Icon name={mode === 'expand' ? 'maximize' : 'minimize'} size="sm" />
-              {mode === 'expand' ? 'Expanded Format' : 'Compressed Format'}
-            </h4>
-          </div>
-
-          <div class="result-content">
-            <div class="address-display">
-              <div class="address-wrapper">
-                <code class="converted-address">{outputAddress}</code>
-                <button
-                  type="button"
-                  class="btn btn-icon copy-btn"
-                  class:copied={copiedStates['output']}
-                  onclick={() => copyToClipboard(outputAddress, 'output')}
-                >
-                  <Icon name={copiedStates['output'] ? 'check' : 'copy'} size="sm" />
-                </button>
-              </div>
-            </div>
-
-            <!-- Comparison View -->
-            <div class="comparison-view">
-              <div class="comparison-item">
-                <span class="comparison-label">Input ({mode === 'expand' ? 'Compressed' : 'Expanded'}):</span>
-                <code class="comparison-address input">{inputAddress}</code>
-              </div>
-              <div class="comparison-item">
-                <span class="comparison-label">Output ({mode === 'expand' ? 'Expanded' : 'Compressed'}):</span>
-                <code class="comparison-address output">{outputAddress}</code>
-              </div>
-            </div>
-
-            <!-- Character Count -->
-            <div class="stats-grid">
-              <div class="stat-item">
-                <span class="stat-label">Input Length</span>
-                <span class="stat-value">{inputAddress.length} characters</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Output Length</span>
-                <span class="stat-value">{outputAddress.length} characters</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Difference</span>
-                <span class="stat-value {outputAddress.length > inputAddress.length ? 'expanded' : 'compressed'}">
-                  {outputAddress.length > inputAddress.length ? '+' : ''}{outputAddress.length - inputAddress.length} characters
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
 </div>
 
+<!-- Examples Section -->
+<div class="examples-section">
+  <details class="examples-details">
+    <summary class="examples-summary">
+      <Icon name="chevron-right" size="xs" />
+      <h3>Common Examples</h3>
+    </summary>
+    <div class="examples-grid">
+      {#each exampleAddresses as example, index (`example-${index}`)}
+        <button
+          type="button"
+          class="example-btn"
+          class:selected={selectedExampleIndex === index}
+          onclick={() => setExample(mode === 'expand' ? example.compressed : example.expanded, index)}
+        >
+          <div class="example-label">{example.label}</div>
+          <code class="example-address">
+            {mode === 'expand' ? example.compressed : example.expanded}
+          </code>
+        </button>
+      {/each}
+    </div>
+  </details>
+</div>
+
+<!-- Output Section -->
+{#if outputAddress && !conversionError}
+  <div class="output-section">
+    <h3>Converted Address</h3>
+
+    <div class="conversion-result">
+      <div class="result-card success">
+        <div class="result-header">
+          <h4>
+            <Icon name={mode === 'expand' ? 'maximize' : 'minimize'} size="sm" />
+            {mode === 'expand' ? 'Expanded Format' : 'Compressed Format'}
+          </h4>
+        </div>
+
+        <div class="result-content">
+          <div class="address-display">
+            <div class="address-wrapper">
+              <code class="converted-address">{outputAddress}</code>
+              <button
+                type="button"
+                class="btn btn-icon copy-btn"
+                class:copied={clipboard.isCopied('output')}
+                onclick={() => clipboard.copy(outputAddress, 'output')}
+              >
+                <Icon name={clipboard.isCopied('output') ? 'check' : 'copy'} size="sm" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Comparison View -->
+          <div class="comparison-view">
+            <div class="comparison-item">
+              <span class="comparison-label">Input ({mode === 'expand' ? 'Compressed' : 'Expanded'}):</span>
+              <code class="comparison-address input">{inputAddress}</code>
+            </div>
+            <div class="comparison-item">
+              <span class="comparison-label">Output ({mode === 'expand' ? 'Expanded' : 'Compressed'}):</span>
+              <code class="comparison-address output">{outputAddress}</code>
+            </div>
+          </div>
+
+          <!-- Character Count -->
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Input Length</span>
+              <span class="stat-value">{inputAddress.length} characters</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Output Length</span>
+              <span class="stat-value">{outputAddress.length} characters</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Difference</span>
+              <span class="stat-value {outputAddress.length > inputAddress.length ? 'expanded' : 'compressed'}">
+                {outputAddress.length > inputAddress.length ? '+' : ''}{outputAddress.length - inputAddress.length} characters
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{/if}
+
 <style>
-  .converter-card {
-    max-width: none;
-  }
-
-  .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: var(--spacing-lg);
-  }
-
-  .header-text {
-    flex: 1;
-  }
-
-  .header-actions {
-    display: flex;
-    flex-shrink: 0;
-  }
-
-  .mode-switch-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
-    background-color: var(--bg-secondary);
-    border: 2px solid var(--border-primary);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: var(--font-size-sm);
-    transition: all var(--transition-fast);
-
-    &:hover {
-      background-color: var(--surface-hover);
-      border-color: var(--color-primary);
-      color: var(--color-primary);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-sm);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
-
-    :global(.icon) {
-      transition: transform var(--transition-fast);
-    }
-
-    &:hover :global(.icon) {
-      transform: scale(1.1);
-    }
-  }
-
   .converter-section,
   .examples-section,
   .output-section {
@@ -614,22 +522,6 @@
   }
 
   @media (max-width: 768px) {
-    .header-content {
-      flex-direction: column;
-      align-items: stretch;
-      gap: var(--spacing-md);
-    }
-
-    .header-actions {
-      justify-content: center;
-    }
-
-    .mode-switch-btn {
-      justify-content: center;
-      padding: var(--spacing-md);
-      font-size: var(--font-size-md);
-    }
-
     .examples-grid {
       grid-template-columns: 1fr;
     }

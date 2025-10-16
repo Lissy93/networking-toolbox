@@ -377,6 +377,12 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
+
+    textarea,
+    input[type='text'],
+    input[type='number'] {
+      background: var(--bg-primary);
+    }
   }
 
   .mode-selector {
@@ -570,7 +576,7 @@
     .table-header {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 2fr 1.5fr;
-      background: var(--bg-secondary);
+      background: var(--bg-primary);
       font-weight: 600;
       font-size: var(--font-size-sm);
 

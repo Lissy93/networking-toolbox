@@ -320,6 +320,10 @@ $ORIGIN ${zoneName}.
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
+
+    textarea {
+      background: var(--bg-primary);
+    }
   }
 
   .controls-row {
@@ -479,7 +483,7 @@ $ORIGIN ${zoneName}.
     .table-header {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 2fr;
-      background: var(--bg-secondary);
+      background: var(--bg-primary);
       font-weight: 600;
       font-size: var(--font-size-sm);
 

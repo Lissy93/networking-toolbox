@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
   import {
     generateRegex,
     getLanguageExamples,
@@ -18,7 +19,7 @@
 
   let mode = $state<Mode>('simple');
   let regexType = $state<RegexType>('ipv4');
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
 
   // Advanced options
   let ipv4Options = $state<IPv4Options>({
@@ -130,18 +131,6 @@
       case 'crossOptions':
         (crossOptions as unknown as Record<string, boolean>)[option.key] = value;
         break;
-    }
-  }
-
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
     }
   }
 
@@ -562,11 +551,11 @@
                   Test on RegexR
                 </a>
                 <button
-                  class="copy-button {copiedStates['pattern'] ? 'copied' : ''}"
-                  onclick={() => result && copyToClipboard(result.pattern, 'pattern')}
+                  class="copy-button {clipboard.isCopied('pattern') ? 'copied' : ''}"
+                  onclick={() => result && clipboard.copy(result.pattern, 'pattern')}
                 >
-                  <Icon name={copiedStates['pattern'] ? 'check' : 'copy'} size="sm" />
-                  {copiedStates['pattern'] ? 'Copied!' : 'Copy'}
+                  <Icon name={clipboard.isCopied('pattern') ? 'check' : 'copy'} size="sm" />
+                  {clipboard.isCopied('pattern') ? 'Copied!' : 'Copy'}
                 </button>
               </div>
             </div>
@@ -796,11 +785,11 @@
               <div class="language-content" class:open={openLanguageExample === example.name}>
                 <div class="code-container">
                   <button
-                    class="copy-code-btn {copiedStates[example.name.toLowerCase()] ? 'copied' : ''}"
-                    onclick={() => copyToClipboard(example.code, example.name.toLowerCase())}
+                    class="copy-code-btn {clipboard.isCopied(example.name.toLowerCase()) ? 'copied' : ''}"
+                    onclick={() => clipboard.copy(example.code, example.name.toLowerCase())}
                     use:tooltip={'Copy code snippet'}
                   >
-                    <Icon name={copiedStates[example.name.toLowerCase()] ? 'check' : 'copy'} size="xs" />
+                    <Icon name={clipboard.isCopied(example.name.toLowerCase()) ? 'check' : 'copy'} size="xs" />
                   </button>
                   <pre class="code-block"><code>{example.code}</code></pre>
                 </div>

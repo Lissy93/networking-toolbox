@@ -8,6 +8,7 @@
     DS_DIGEST_TYPES,
   } from '$lib/utils/dnssec';
   import type { DSRecord } from '$lib/utils/dnssec';
+  import { useClipboard } from '$lib/composables';
   import Icon from '$lib/components/global/Icon.svelte';
 
   let dnskeyInput = $state('');
@@ -45,6 +46,7 @@
   let generatingDS = $state(false);
   let dsRecords = $state<DSRecord[]>([]);
   let error = $state<string | null>(null);
+  const clipboard = useClipboard();
 
   async function generateDS() {
     error = null;
@@ -114,25 +116,15 @@
     }
   }
 
-  let copiedStates = $state<{ [key: string]: boolean }>({});
-
   function copyDS(ds: DSRecord) {
     const formatted = formatDSRecord(ds, ownerName);
-    navigator.clipboard.writeText(formatted);
     const key = `ds-${ds.keyTag}-${ds.digestType}`;
-    copiedStates[key] = true;
-    setTimeout(() => {
-      copiedStates[key] = false;
-    }, 1500);
+    clipboard.copy(formatted, key);
   }
 
   function copyAllDS() {
     const formatted = dsRecords.map((ds) => formatDSRecord(ds, ownerName)).join('\n');
-    navigator.clipboard.writeText(formatted);
-    copiedStates['all'] = true;
-    setTimeout(() => {
-      copiedStates['all'] = false;
-    }, 1500);
+    clipboard.copy(formatted, 'all');
   }
 </script>
 
@@ -245,8 +237,13 @@
             <Icon name="shield" />
             <h3>Generated DS Records</h3>
           </div>
-          <button class="copy-btn" class:copied={copiedStates['all']} onclick={copyAllDS} title="Copy all DS records">
-            <Icon name={copiedStates['all'] ? 'check' : 'copy'} />
+          <button
+            class="copy-btn"
+            class:copied={clipboard.isCopied('all')}
+            onclick={copyAllDS}
+            title="Copy all DS records"
+          >
+            <Icon name={clipboard.isCopied('all') ? 'check' : 'copy'} />
             Copy All
           </button>
         </div>
@@ -261,11 +258,11 @@
                 </div>
                 <button
                   class="copy-btn small"
-                  class:copied={copiedStates[`ds-${ds.keyTag}-${ds.digestType}`]}
+                  class:copied={clipboard.isCopied(`ds-${ds.keyTag}-${ds.digestType}`)}
                   onclick={() => copyDS(ds)}
                   title="Copy this DS record"
                 >
-                  <Icon name={copiedStates[`ds-${ds.keyTag}-${ds.digestType}`] ? 'check' : 'copy'} />
+                  <Icon name={clipboard.isCopied(`ds-${ds.keyTag}-${ds.digestType}`) ? 'check' : 'copy'} />
                 </button>
               </div>
 

@@ -2,19 +2,23 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { formatDNSError } from '$lib/utils/dns-validation.js';
+  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ActionButton from '$lib/components/common/ActionButton.svelte';
+  import ResultsCard from '$lib/components/common/ResultsCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let url = $state('https://api.github.com');
   let origin = $state('https://example.com');
   let method = $state('GET');
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let copiedState = $state(false);
+
+  const diagnosticState = useDiagnosticState<any>();
+  const clipboard = useClipboard();
 
   const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
 
-  const examples = [
+  const examplesList = [
     { url: 'https://api.github.com', origin: 'https://example.com', description: 'GitHub API CORS policy' },
     { url: 'https://httpbin.org/get', origin: 'https://test.com', description: 'HTTPBin CORS test' },
     {
@@ -28,6 +32,8 @@
       description: 'JSON Placeholder API',
     },
   ];
+
+  const examples = useExamples(examplesList);
 
   // Reactive validation
   const isInputValid = $derived(() => {
@@ -46,23 +52,19 @@
   });
 
   async function checkCORS() {
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     // Validation
     const trimmedUrl = url.trim();
     const trimmedOrigin = origin.trim();
 
     if (!trimmedUrl) {
-      error = 'URL is required';
-      loading = false;
+      diagnosticState.setError('URL is required');
       return;
     }
 
     if (!trimmedOrigin) {
-      error = 'Origin is required';
-      loading = false;
+      diagnosticState.setError('Origin is required');
       return;
     }
 
@@ -70,8 +72,7 @@
       new URL(trimmedUrl);
       new URL(trimmedOrigin);
     } catch {
-      error = 'Invalid URL or Origin format';
-      loading = false;
+      diagnosticState.setError('Invalid URL or Origin format');
       return;
     }
 
@@ -103,53 +104,51 @@
         throw new Error(errorMessage);
       }
 
-      results = await response.json();
+      const data = await response.json();
+      diagnosticState.setResults(data);
     } catch (err: unknown) {
-      error = formatDNSError(err);
-    } finally {
-      loading = false;
+      diagnosticState.setError(formatDNSError(err));
     }
   }
 
-  function loadExample(example: (typeof examples)[0]) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     url = example.url;
     origin = example.origin;
+    examples.select(index);
     checkCORS();
   }
 
   async function copyResults() {
-    if (!results) return;
+    if (!diagnosticState.results) return;
 
     let text = `CORS Policy Analysis\nURL: ${url}\nOrigin: ${origin}\nMethod: ${method}\n\n`;
 
-    text += `Preflight Status: ${results.preflight.status}\n`;
-    text += `Origin Allowed: ${results.preflight.allowed ? 'Yes' : 'No'}\n`;
-    text += `CORS Enabled: ${results.analysis.corsEnabled ? 'Yes' : 'No'}\n\n`;
+    text += `Preflight Status: ${diagnosticState.results.preflight.status}\n`;
+    text += `Origin Allowed: ${diagnosticState.results.preflight.allowed ? 'Yes' : 'No'}\n`;
+    text += `CORS Enabled: ${diagnosticState.results.analysis.corsEnabled ? 'Yes' : 'No'}\n\n`;
 
-    if (results.analysis.allowedMethods.length > 0) {
-      text += `Allowed Methods: ${results.analysis.allowedMethods.join(', ')}\n`;
+    if (diagnosticState.results.analysis.allowedMethods.length > 0) {
+      text += `Allowed Methods: ${diagnosticState.results.analysis.allowedMethods.join(', ')}\n`;
     }
 
-    if (results.analysis.allowedHeaders.length > 0) {
-      text += `Allowed Headers: ${results.analysis.allowedHeaders.join(', ')}\n`;
+    if (diagnosticState.results.analysis.allowedHeaders.length > 0) {
+      text += `Allowed Headers: ${diagnosticState.results.analysis.allowedHeaders.join(', ')}\n`;
     }
 
-    text += `Credentials Allowed: ${results.analysis.allowsCredentials ? 'Yes' : 'No'}\n`;
+    text += `Credentials Allowed: ${diagnosticState.results.analysis.allowsCredentials ? 'Yes' : 'No'}\n`;
 
-    if (results.analysis.maxAge) {
-      text += `Max Age: ${results.analysis.maxAge} seconds\n`;
+    if (diagnosticState.results.analysis.maxAge) {
+      text += `Max Age: ${diagnosticState.results.analysis.maxAge} seconds\n`;
     }
 
-    if (Object.keys(results.preflight.headers || {}).length > 0) {
+    if (Object.keys(diagnosticState.results.preflight.headers || {}).length > 0) {
       text += '\nCORS Headers:\n';
-      Object.entries(results.preflight.headers).forEach(([key, value]) => {
+      Object.entries(diagnosticState.results.preflight.headers).forEach(([key, value]) => {
         text += `${key}: ${value}\n`;
       });
     }
 
-    await navigator.clipboard.writeText(text);
-    copiedState = true;
-    setTimeout(() => (copiedState = false), 1500);
+    await clipboard.copy(text);
   }
 
   function getAccessClass(allowed: boolean): string {
@@ -161,18 +160,18 @@
   }
 
   function getCORSStatusText(): string {
-    if (!results?.analysis) return 'Unknown';
+    if (!diagnosticState.results?.analysis) return 'Unknown';
 
-    if (!results.analysis.corsEnabled) return 'No CORS Policy';
-    if (results.analysis.allowsOrigin) return 'Access Allowed';
+    if (!diagnosticState.results.analysis.corsEnabled) return 'No CORS Policy';
+    if (diagnosticState.results.analysis.allowsOrigin) return 'Access Allowed';
     return 'Access Denied';
   }
 
   function getCORSStatusClass(): string {
-    if (!results?.analysis) return '';
+    if (!diagnosticState.results?.analysis) return '';
 
-    if (!results.analysis.corsEnabled) return 'warning';
-    if (results.analysis.allowsOrigin) return 'success';
+    if (!diagnosticState.results.analysis.corsEnabled) return 'warning';
+    if (diagnosticState.results.analysis.allowsOrigin) return 'success';
     return 'error';
   }
 </script>
@@ -187,22 +186,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>CORS Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, index (index)}
-          <button class="example-card" onclick={() => loadExample(example)}>
-            <h5>{example.url}</h5>
-            <p>{example.description}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="CORS Examples"
+    getLabel={(ex) => ex.url}
+    getDescription={(ex) => ex.description}
+    getTooltip={(ex) => `Test CORS policy for ${ex.url}`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -221,6 +213,7 @@
               placeholder="https://api.example.com"
               class:invalid={url && !isInputValid()}
               onchange={() => {
+                examples.clear();
                 if (isInputValid()) checkCORS();
               }}
             />
@@ -240,6 +233,7 @@
               placeholder="https://yoursite.com"
               class:invalid={origin && !isInputValid}
               onchange={() => {
+                examples.clear();
                 if (isInputValid()) checkCORS();
               }}
             />
@@ -256,6 +250,7 @@
               id="method"
               bind:value={method}
               onchange={() => {
+                examples.clear();
                 if (isInputValid()) checkCORS();
               }}
             >
@@ -268,36 +263,32 @@
       </div>
 
       <div class="action-section">
-        <button class="lookup-btn" onclick={checkCORS} disabled={loading || !isInputValid}>
-          {#if loading}
-            <Icon name="loader-2" size="sm" animate="spin" />
-            Checking CORS...
-          {:else}
-            <Icon name="globe" size="sm" />
-            Check CORS Policy
-          {/if}
-        </button>
+        <ActionButton
+          loading={diagnosticState.loading}
+          disabled={!isInputValid}
+          icon="globe"
+          loadingText="Checking CORS..."
+          onclick={checkCORS}
+        >
+          Check CORS Policy
+        </ActionButton>
       </div>
     </div>
   </div>
 
   <!-- Results -->
-  {#if results}
-    <div class="card results-card">
-      <div class="card-header">
-        <h3>CORS Policy Analysis</h3>
-        <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
-          <span class={copiedState ? 'text-green-500' : ''}
-            ><Icon name={copiedState ? 'check' : 'copy'} size="xs" /></span
-          >
-          {copiedState ? 'Copied!' : 'Copy Results'}
-        </button>
-      </div>
+  {#if diagnosticState.results}
+    <ResultsCard title="CORS Policy Analysis" onCopy={copyResults} copied={clipboard.isCopied()}>
       <div class="card-content">
         <!-- CORS Overview -->
         <div class="status-overview">
           <div class="status-item {getCORSStatusClass()}">
-            <Icon name={getAccessIcon(results.analysis.corsEnabled && results.analysis.allowsOrigin)} size="sm" />
+            <Icon
+              name={getAccessIcon(
+                diagnosticState.results.analysis.corsEnabled && diagnosticState.results.analysis.allowsOrigin,
+              )}
+              size="sm"
+            />
             <div>
               <strong>{getCORSStatusText()}</strong>
               <div class="status-text">CORS Status</div>
@@ -307,16 +298,16 @@
           <div class="status-item">
             <Icon name="shield" size="sm" />
             <div>
-              <strong>{results.preflight.status || 'Failed'}</strong>
+              <strong>{diagnosticState.results.preflight.status || 'Failed'}</strong>
               <div class="status-text">Preflight Status</div>
             </div>
           </div>
 
-          {#if results.analysis.maxAge}
+          {#if diagnosticState.results.analysis.maxAge}
             <div class="status-item">
               <Icon name="clock" size="sm" />
               <div>
-                <strong>{results.analysis.maxAge}s</strong>
+                <strong>{diagnosticState.results.analysis.maxAge}s</strong>
                 <div class="status-text">Cache Max Age</div>
               </div>
             </div>
@@ -327,24 +318,24 @@
         <div class="record-section">
           <h4>CORS Policy Details</h4>
           <div class="cors-analysis">
-            <div class="cors-item {getAccessClass(results.analysis.corsEnabled)}">
-              <Icon name={results.analysis.corsEnabled ? 'check' : 'x'} size="sm" />
+            <div class="cors-item {getAccessClass(diagnosticState.results.analysis.corsEnabled)}">
+              <Icon name={diagnosticState.results.analysis.corsEnabled ? 'check' : 'x'} size="sm" />
               <div>
                 <strong>CORS Enabled</strong>
                 <p>
-                  {results.analysis.corsEnabled
+                  {diagnosticState.results.analysis.corsEnabled
                     ? 'Server has CORS headers configured'
                     : 'No CORS headers found - requests will be blocked by browsers'}
                 </p>
               </div>
             </div>
 
-            <div class="cors-item {getAccessClass(results.analysis.allowsOrigin)}">
-              <Icon name={getAccessIcon(results.analysis.allowsOrigin)} size="sm" />
+            <div class="cors-item {getAccessClass(diagnosticState.results.analysis.allowsOrigin)}">
+              <Icon name={getAccessIcon(diagnosticState.results.analysis.allowsOrigin)} size="sm" />
               <div>
                 <strong>Origin Access</strong>
                 <p>
-                  {#if results.analysis.allowsOrigin}
+                  {#if diagnosticState.results.analysis.allowsOrigin}
                     Origin '{origin}' is allowed to access this resource
                   {:else}
                     Origin '{origin}' is not allowed to access this resource
@@ -353,12 +344,12 @@
               </div>
             </div>
 
-            <div class="cors-item {getAccessClass(results.analysis.allowsCredentials)}">
-              <Icon name={results.analysis.allowsCredentials ? 'check' : 'x'} size="sm" />
+            <div class="cors-item {getAccessClass(diagnosticState.results.analysis.allowsCredentials)}">
+              <Icon name={diagnosticState.results.analysis.allowsCredentials ? 'check' : 'x'} size="sm" />
               <div>
                 <strong>Credentials Support</strong>
                 <p>
-                  {results.analysis.allowsCredentials
+                  {diagnosticState.results.analysis.allowsCredentials
                     ? 'Cookies and credentials can be sent'
                     : 'Cookies and credentials cannot be sent'}
                 </p>
@@ -368,11 +359,11 @@
         </div>
 
         <!-- Allowed Methods -->
-        {#if results.analysis.allowedMethods?.length > 0}
+        {#if diagnosticState.results.analysis.allowedMethods?.length > 0}
           <div class="record-section">
             <h4>Allowed Methods</h4>
             <div class="method-list">
-              {#each results.analysis.allowedMethods as allowedMethod, index (index)}
+              {#each diagnosticState.results.analysis.allowedMethods as allowedMethod, index (index)}
                 <span class="method-badge {method === allowedMethod ? 'active' : ''}">{allowedMethod}</span>
               {/each}
             </div>
@@ -380,11 +371,11 @@
         {/if}
 
         <!-- Allowed Headers -->
-        {#if results.analysis.allowedHeaders?.length > 0}
+        {#if diagnosticState.results.analysis.allowedHeaders?.length > 0}
           <div class="record-section">
             <h4>Allowed Headers</h4>
             <div class="header-list">
-              {#each results.analysis.allowedHeaders as header, index (index)}
+              {#each diagnosticState.results.analysis.allowedHeaders as header, index (index)}
                 <span class="header-badge">{header}</span>
               {/each}
             </div>
@@ -392,11 +383,11 @@
         {/if}
 
         <!-- Raw CORS Headers -->
-        {#if Object.keys(results.preflight.headers || {}).length > 0}
+        {#if Object.keys(diagnosticState.results.preflight.headers || {}).length > 0}
           <div class="record-section">
             <h4>CORS Headers</h4>
             <div class="records-list">
-              {#each Object.entries(results.preflight.headers) as [name, value] (name)}
+              {#each Object.entries(diagnosticState.results.preflight.headers) as [name, value] (name)}
                 <div class="record-item">
                   <div class="record-data">
                     <strong>{name}:</strong>
@@ -406,7 +397,7 @@
               {/each}
             </div>
           </div>
-        {:else if results.analysis.corsEnabled}
+        {:else if diagnosticState.results.analysis.corsEnabled}
           <div class="no-records">
             <Icon name="info" size="md" />
             <p>CORS enabled but no detailed headers available</p>
@@ -421,22 +412,10 @@
           </div>
         {/if}
       </div>
-    </div>
+    </ResultsCard>
   {/if}
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>CORS Check Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="CORS Check Failed" error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">
@@ -533,7 +512,7 @@
 
     &.active {
       background: var(--color-primary);
-      color: white;
+      color: var(--bg-secondary);
       border-color: var(--color-primary);
     }
   }

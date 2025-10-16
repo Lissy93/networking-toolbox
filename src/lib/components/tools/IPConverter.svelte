@@ -4,6 +4,7 @@
   import IPInput from './IPInput.svelte';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '../global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
 
   let ipAddress = $state('192.168.1.1');
   let formats = $state({
@@ -13,7 +14,7 @@
     octal: '',
   });
   let ipClass = $state({ class: '', type: '', description: '' });
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let formatErrors = $state<Record<string, string>>({});
 
   /**
@@ -171,21 +172,6 @@
       console.error('Invalid hex conversion:', err);
     }
   }
-
-  /**
-   * Copies text to clipboard with visual feedback
-   */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 3000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
 </script>
 
 <div class="card">
@@ -234,29 +220,17 @@
               class="format-field binary {formatErrors.binary ? 'error' : ''}"
               oninput={handleBinaryInput}
             />
-            <Tooltip text={copiedStates['binary'] ? 'Copied!' : 'Copy binary format to clipboard'} position="left">
+            <Tooltip
+              text={clipboard.isCopied('binary') ? 'Copied!' : 'Copy binary format to clipboard'}
+              position="left"
+            >
               <button
                 type="button"
-                class="copy-btn {copiedStates['binary'] ? 'copied' : ''}"
-                onclick={() => copyToClipboard(formats.binary, 'binary')}
+                class="copy-btn {clipboard.isCopied('binary') ? 'copied' : ''}"
+                onclick={() => clipboard.copy(formats.binary, 'binary')}
                 aria-label="Copy binary format to clipboard"
               >
-                {#if copiedStates['binary']}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                {:else}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                    <path
-                      d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
-                    />
-                  </svg>
-                {/if}
+                <Icon name={clipboard.isCopied('binary') ? 'check' : 'copy'} size="sm" />
               </button>
             </Tooltip>
           </div>
@@ -277,29 +251,17 @@
               class="format-field decimal {formatErrors.decimal ? 'error' : ''}"
               oninput={handleDecimalInput}
             />
-            <Tooltip text={copiedStates['decimal'] ? 'Copied!' : 'Copy decimal format to clipboard'} position="left">
+            <Tooltip
+              text={clipboard.isCopied('decimal') ? 'Copied!' : 'Copy decimal format to clipboard'}
+              position="left"
+            >
               <button
                 type="button"
-                class="copy-btn {copiedStates['decimal'] ? 'copied' : ''}"
-                onclick={() => copyToClipboard(formats.decimal, 'decimal')}
+                class="copy-btn {clipboard.isCopied('decimal') ? 'copied' : ''}"
+                onclick={() => clipboard.copy(formats.decimal, 'decimal')}
                 aria-label="Copy decimal format to clipboard"
               >
-                {#if copiedStates['decimal']}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                {:else}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                    <path
-                      d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
-                    />
-                  </svg>
-                {/if}
+                <Icon name={clipboard.isCopied('decimal') ? 'check' : 'copy'} size="sm" />
               </button>
             </Tooltip>
           </div>
@@ -320,29 +282,17 @@
               class="format-field hex {formatErrors.hex ? 'error' : ''}"
               oninput={handleHexInput}
             />
-            <Tooltip text={copiedStates['hex'] ? 'Copied!' : 'Copy hexadecimal format to clipboard'} position="left">
+            <Tooltip
+              text={clipboard.isCopied('hex') ? 'Copied!' : 'Copy hexadecimal format to clipboard'}
+              position="left"
+            >
               <button
                 type="button"
-                class="copy-btn {copiedStates['hex'] ? 'copied' : ''}"
-                onclick={() => copyToClipboard(formats.hex, 'hex')}
+                class="copy-btn {clipboard.isCopied('hex') ? 'copied' : ''}"
+                onclick={() => clipboard.copy(formats.hex, 'hex')}
                 aria-label="Copy hexadecimal format to clipboard"
               >
-                {#if copiedStates['hex']}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                {:else}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                    <path
-                      d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
-                    />
-                  </svg>
-                {/if}
+                <Icon name={clipboard.isCopied('hex') ? 'check' : 'copy'} size="sm" />
               </button>
             </Tooltip>
           </div>
@@ -363,29 +313,14 @@
               class="format-field octal"
               readonly
             />
-            <Tooltip text={copiedStates['octal'] ? 'Copied!' : 'Copy octal format to clipboard'} position="left">
+            <Tooltip text={clipboard.isCopied('octal') ? 'Copied!' : 'Copy octal format to clipboard'} position="left">
               <button
                 type="button"
-                class="copy-btn {copiedStates['octal'] ? 'copied' : ''}"
-                onclick={() => copyToClipboard(formats.octal, 'octal')}
+                class="copy-btn {clipboard.isCopied('octal') ? 'copied' : ''}"
+                onclick={() => clipboard.copy(formats.octal, 'octal')}
                 aria-label="Copy octal format to clipboard"
               >
-                {#if copiedStates['octal']}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                {:else}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                    <path
-                      d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
-                    />
-                  </svg>
-                {/if}
+                <Icon name={clipboard.isCopied('octal') ? 'check' : 'copy'} size="sm" />
               </button>
             </Tooltip>
           </div>
@@ -626,15 +561,15 @@
     transition: all var(--transition-fast);
   }
 
-  .copy-btn svg {
-    width: 1rem;
-    height: 1rem;
-  }
-
   .copy-btn:hover {
     background-color: var(--surface-hover);
     color: var(--text-primary);
     border-color: var(--color-primary);
+  }
+
+  .copy-btn.copied {
+    color: var(--color-success);
+    background-color: rgba(35, 134, 54, 0.1);
   }
 
   .format-field.error {

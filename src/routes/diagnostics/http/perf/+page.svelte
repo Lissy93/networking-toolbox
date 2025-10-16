@@ -2,23 +2,27 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { formatDNSError } from '$lib/utils/dns-validation.js';
+  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let url = $state('https://www.google.com');
   let method = $state('GET');
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let copiedState = $state(false);
+
+  const diagnosticState = useDiagnosticState<any>();
+  const clipboard = useClipboard();
 
   const methods = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE'];
 
-  const examples = [
+  const examplesList = [
     { url: 'https://www.google.com', description: 'Google homepage performance' },
     { url: 'https://httpbin.org/delay/2', description: 'Delayed response (2s)' },
     { url: 'https://api.github.com', description: 'GitHub API response time' },
     { url: 'https://www.cloudflare.com', description: 'Cloudflare CDN performance' },
   ];
+
+  const examples = useExamples(examplesList);
 
   // Reactive validation
   const isInputValid = $derived(() => {
@@ -33,25 +37,21 @@
   });
 
   async function measurePerformance() {
-    loading = true;
-    error = null;
-    results = null;
-
     // Validation
     const trimmedUrl = url.trim();
     if (!trimmedUrl) {
-      error = 'URL is required';
-      loading = false;
+      diagnosticState.setError('URL is required');
       return;
     }
 
     try {
       new URL(trimmedUrl);
     } catch {
-      error = 'Invalid URL format';
-      loading = false;
+      diagnosticState.setError('Invalid URL format');
       return;
     }
+
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/http', {
@@ -78,45 +78,43 @@
         throw new Error(errorMessage);
       }
 
-      results = await response.json();
+      const data = await response.json();
+      diagnosticState.setResults(data);
     } catch (err: unknown) {
-      error = formatDNSError(err);
-    } finally {
-      loading = false;
+      diagnosticState.setError(formatDNSError(err));
     }
   }
 
-  function loadExample(example: (typeof examples)[0]) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     url = example.url;
+    examples.select(index);
     measurePerformance();
   }
 
   async function copyResults() {
-    if (!results?.timings) return;
+    if (!diagnosticState.results?.timings) return;
 
-    let text = `HTTP Performance Analysis\nURL: ${results.url}\nMethod: ${method}\nStatus: ${results.status}\n\n`;
+    let text = `HTTP Performance Analysis\nURL: ${diagnosticState.results.url}\nMethod: ${method}\nStatus: ${diagnosticState.results.status}\n\n`;
 
     text += `Performance Timing:\n`;
-    text += `DNS Resolution: ${results.timings.dns.toFixed(1)}ms ${results.timings.dns_note ? `(${results.timings.dns_note})` : ''}\n`;
-    text += `TCP Connect: ${results.timings.tcp.toFixed(1)}ms ${results.timings.tcp_note ? `(${results.timings.tcp_note})` : ''}\n`;
+    text += `DNS Resolution: ${diagnosticState.results.timings.dns.toFixed(1)}ms ${diagnosticState.results.timings.dns_note ? `(${diagnosticState.results.timings.dns_note})` : ''}\n`;
+    text += `TCP Connect: ${diagnosticState.results.timings.tcp.toFixed(1)}ms ${diagnosticState.results.timings.tcp_note ? `(${diagnosticState.results.timings.tcp_note})` : ''}\n`;
 
-    if (results.timings.tls > 0) {
-      text += `TLS Handshake: ${results.timings.tls.toFixed(1)}ms ${results.timings.tls_note ? `(${results.timings.tls_note})` : ''}\n`;
+    if (diagnosticState.results.timings.tls > 0) {
+      text += `TLS Handshake: ${diagnosticState.results.timings.tls.toFixed(1)}ms ${diagnosticState.results.timings.tls_note ? `(${diagnosticState.results.timings.tls_note})` : ''}\n`;
     }
 
-    text += `Time to First Byte: ${results.timings.ttfb.toFixed(1)}ms\n`;
-    text += `Total Time: ${results.timings.total.toFixed(1)}ms\n\n`;
+    text += `Time to First Byte: ${diagnosticState.results.timings.ttfb.toFixed(1)}ms\n`;
+    text += `Total Time: ${diagnosticState.results.timings.total.toFixed(1)}ms\n\n`;
 
-    if (results.size) {
-      text += `Response Size: ${formatBytes(results.size)}\n`;
+    if (diagnosticState.results.size) {
+      text += `Response Size: ${formatBytes(diagnosticState.results.size)}\n`;
     }
 
-    text += `HTTPS: ${results.performance.isHTTPS ? 'Yes' : 'No'}\n`;
-    text += `Compression: ${results.performance.hasCompression ? 'Yes' : 'No'}\n`;
+    text += `HTTPS: ${diagnosticState.results.performance.isHTTPS ? 'Yes' : 'No'}\n`;
+    text += `Compression: ${diagnosticState.results.performance.hasCompression ? 'Yes' : 'No'}\n`;
 
-    await navigator.clipboard.writeText(text);
-    copiedState = true;
-    setTimeout(() => (copiedState = false), 1500);
+    await clipboard.copy(text);
   }
 
   function formatBytes(bytes: number): string {
@@ -159,22 +157,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>Performance Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, exampleIndex (exampleIndex)}
-          <button class="example-card" onclick={() => loadExample(example)}>
-            <h5>{example.url}</h5>
-            <p>{example.description}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="Performance Examples"
+    getLabel={(ex) => ex.url}
+    getDescription={(ex) => ex.description}
+    getTooltip={(ex) => `Measure performance for ${ex.url}`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -221,9 +212,9 @@
       </div>
 
       <div class="action-section">
-        <button class="lookup-btn" onclick={measurePerformance} disabled={loading || !isInputValid}>
-          {#if loading}
-            <Icon name="loader-2" size="sm" animate="spin" />
+        <button class="lookup-btn" onclick={measurePerformance} disabled={diagnosticState.loading || !isInputValid}>
+          {#if diagnosticState.loading}
+            <Icon name="loader" size="sm" animate="spin" />
             Measuring Performance...
           {:else}
             <Icon name="activity" size="sm" />
@@ -235,16 +226,16 @@
   </div>
 
   <!-- Results -->
-  {#if results}
-    {@const grade = getPerformanceGrade(results.timings.total)}
+  {#if diagnosticState.results}
+    {@const grade = getPerformanceGrade(diagnosticState.results.timings.total)}
     <div class="card results-card">
       <div class="card-header">
         <h3>Performance Analysis</h3>
-        <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
-          <span class={copiedState ? 'text-green-500' : ''}
-            ><Icon name={copiedState ? 'check' : 'copy'} size="xs" /></span
+        <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
+          <span class={clipboard.isCopied() ? 'text-green-500' : ''}
+            ><Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" /></span
           >
-          {copiedState ? 'Copied!' : 'Copy Results'}
+          {clipboard.isCopied() ? 'Copied!' : 'Copy Results'}
         </button>
       </div>
       <div class="card-content">
@@ -254,33 +245,35 @@
             <Icon name="zap" size="sm" />
             <div>
               <strong>Grade {grade.grade}</strong>
-              <div class="status-text">{results.timings.total.toFixed(0)}ms Total</div>
+              <div class="status-text">{diagnosticState.results.timings.total.toFixed(0)}ms Total</div>
             </div>
           </div>
 
           <div class="status-item">
             <Icon name="activity" size="sm" />
             <div>
-              <strong>{results.status}</strong>
+              <strong>{diagnosticState.results.status}</strong>
               <div class="status-text">HTTP Status</div>
             </div>
           </div>
 
-          {#if results.size}
+          {#if diagnosticState.results.size}
             <div class="status-item">
               <Icon name="file" size="sm" />
               <div>
-                <strong>{formatBytes(results.size)}</strong>
+                <strong>{formatBytes(diagnosticState.results.size)}</strong>
                 <div class="status-text">Response Size</div>
               </div>
             </div>
           {/if}
 
-          {#if results.size && results.timings.total}
+          {#if diagnosticState.results.size && diagnosticState.results.timings.total}
             <div class="status-item">
               <Icon name="wifi" size="sm" />
               <div>
-                <strong>{calculateThroughput(results.size, results.timings.total)}</strong>
+                <strong
+                  >{calculateThroughput(diagnosticState.results.size, diagnosticState.results.timings.total)}</strong
+                >
                 <div class="status-text">Throughput</div>
               </div>
             </div>
@@ -291,59 +284,80 @@
         <div class="record-section">
           <h4>Performance Timing Breakdown</h4>
           <div class="timing-chart">
-            <div class="timing-item {getPerformanceClass(results.timings.dns, { good: 20, fair: 100 })}">
+            <div
+              class="timing-item {getPerformanceClass(diagnosticState.results.timings.dns, { good: 20, fair: 100 })}"
+            >
               <div class="timing-label">
                 <Icon name="globe" size="xs" />
                 <span>DNS Resolution</span>
-                {#if results.timings.dns_note}
-                  <span class="timing-note">({results.timings.dns_note})</span>
+                {#if diagnosticState.results.timings.dns_note}
+                  <span class="timing-note">({diagnosticState.results.timings.dns_note})</span>
                 {/if}
               </div>
               <div class="timing-bar">
-                <div class="timing-fill" style="width: {(results.timings.dns / results.timings.total) * 100}%"></div>
+                <div
+                  class="timing-fill"
+                  style="width: {(diagnosticState.results.timings.dns / diagnosticState.results.timings.total) * 100}%"
+                ></div>
               </div>
-              <div class="timing-value">{results.timings.dns.toFixed(1)}ms</div>
+              <div class="timing-value">{diagnosticState.results.timings.dns.toFixed(1)}ms</div>
             </div>
 
-            <div class="timing-item {getPerformanceClass(results.timings.tcp, { good: 50, fair: 200 })}">
+            <div
+              class="timing-item {getPerformanceClass(diagnosticState.results.timings.tcp, { good: 50, fair: 200 })}"
+            >
               <div class="timing-label">
                 <Icon name="link" size="xs" />
                 <span>TCP Connect</span>
-                {#if results.timings.tcp_note}
-                  <span class="timing-note">({results.timings.tcp_note})</span>
+                {#if diagnosticState.results.timings.tcp_note}
+                  <span class="timing-note">({diagnosticState.results.timings.tcp_note})</span>
                 {/if}
               </div>
               <div class="timing-bar">
-                <div class="timing-fill" style="width: {(results.timings.tcp / results.timings.total) * 100}%"></div>
+                <div
+                  class="timing-fill"
+                  style="width: {(diagnosticState.results.timings.tcp / diagnosticState.results.timings.total) * 100}%"
+                ></div>
               </div>
-              <div class="timing-value">{results.timings.tcp.toFixed(1)}ms</div>
+              <div class="timing-value">{diagnosticState.results.timings.tcp.toFixed(1)}ms</div>
             </div>
 
-            {#if results.timings.tls > 0}
-              <div class="timing-item {getPerformanceClass(results.timings.tls, { good: 100, fair: 300 })}">
+            {#if diagnosticState.results.timings.tls > 0}
+              <div
+                class="timing-item {getPerformanceClass(diagnosticState.results.timings.tls, { good: 100, fair: 300 })}"
+              >
                 <div class="timing-label">
                   <Icon name="lock" size="xs" />
                   <span>TLS Handshake</span>
-                  {#if results.timings.tls_note}
-                    <span class="timing-note">({results.timings.tls_note})</span>
+                  {#if diagnosticState.results.timings.tls_note}
+                    <span class="timing-note">({diagnosticState.results.timings.tls_note})</span>
                   {/if}
                 </div>
                 <div class="timing-bar">
-                  <div class="timing-fill" style="width: {(results.timings.tls / results.timings.total) * 100}%"></div>
+                  <div
+                    class="timing-fill"
+                    style="width: {(diagnosticState.results.timings.tls / diagnosticState.results.timings.total) *
+                      100}%"
+                  ></div>
                 </div>
-                <div class="timing-value">{results.timings.tls.toFixed(1)}ms</div>
+                <div class="timing-value">{diagnosticState.results.timings.tls.toFixed(1)}ms</div>
               </div>
             {/if}
 
-            <div class="timing-item {getPerformanceClass(results.timings.ttfb, { good: 200, fair: 500 })}">
+            <div
+              class="timing-item {getPerformanceClass(diagnosticState.results.timings.ttfb, { good: 200, fair: 500 })}"
+            >
               <div class="timing-label">
                 <Icon name="clock" size="xs" />
                 <span>Time to First Byte</span>
               </div>
               <div class="timing-bar">
-                <div class="timing-fill" style="width: {(results.timings.ttfb / results.timings.total) * 100}%"></div>
+                <div
+                  class="timing-fill"
+                  style="width: {(diagnosticState.results.timings.ttfb / diagnosticState.results.timings.total) * 100}%"
+                ></div>
               </div>
-              <div class="timing-value">{results.timings.ttfb.toFixed(1)}ms</div>
+              <div class="timing-value">{diagnosticState.results.timings.ttfb.toFixed(1)}ms</div>
             </div>
 
             <div class="timing-item total">
@@ -354,7 +368,7 @@
               <div class="timing-bar">
                 <div class="timing-fill" style="width: 100%"></div>
               </div>
-              <div class="timing-value">{results.timings.total.toFixed(1)}ms</div>
+              <div class="timing-value">{diagnosticState.results.timings.total.toFixed(1)}ms</div>
             </div>
           </div>
         </div>
@@ -363,19 +377,23 @@
         <div class="record-section">
           <h4>Connection Features</h4>
           <div class="feature-list">
-            <div class="feature-item {results.performance.isHTTPS ? 'success' : 'warning'}">
-              <Icon name={results.performance.isHTTPS ? 'shield' : 'shield-off'} size="sm" />
+            <div class="feature-item {diagnosticState.results.performance.isHTTPS ? 'success' : 'warning'}">
+              <Icon name={diagnosticState.results.performance.isHTTPS ? 'shield' : 'shield-off'} size="sm" />
               <div>
                 <strong>HTTPS</strong>
-                <p>{results.performance.isHTTPS ? 'Secure connection' : 'Unencrypted connection'}</p>
+                <p>{diagnosticState.results.performance.isHTTPS ? 'Secure connection' : 'Unencrypted connection'}</p>
               </div>
             </div>
 
-            <div class="feature-item {results.performance.hasCompression ? 'success' : 'warning'}">
-              <Icon name={results.performance.hasCompression ? 'archive' : 'file'} size="sm" />
+            <div class="feature-item {diagnosticState.results.performance.hasCompression ? 'success' : 'warning'}">
+              <Icon name={diagnosticState.results.performance.hasCompression ? 'archive' : 'file'} size="sm" />
               <div>
                 <strong>Compression</strong>
-                <p>{results.performance.hasCompression ? 'Response is compressed' : 'No compression detected'}</p>
+                <p>
+                  {diagnosticState.results.performance.hasCompression
+                    ? 'Response is compressed'
+                    : 'No compression detected'}
+                </p>
               </div>
             </div>
 
@@ -383,7 +401,7 @@
               <Icon name="server" size="sm" />
               <div>
                 <strong>HTTP Version</strong>
-                <p>{results.performance.httpVersion}</p>
+                <p>{diagnosticState.results.performance.httpVersion}</p>
               </div>
             </div>
 
@@ -391,7 +409,7 @@
               <Icon name="repeat" size="sm" />
               <div>
                 <strong>Connection Reuse</strong>
-                <p>{results.performance.connectionReused}</p>
+                <p>{diagnosticState.results.performance.connectionReused}</p>
               </div>
             </div>
           </div>
@@ -400,19 +418,7 @@
     </div>
   {/if}
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>Performance Test Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="Performance Test Failed" error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">

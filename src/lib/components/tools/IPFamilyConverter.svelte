@@ -12,6 +12,7 @@
   import IPInput from './IPInput.svelte';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import SvgIcon from '$lib/components/global/SvgIcon.svelte';
+  import { useClipboard } from '$lib/composables';
 
   interface Props {
     direction: 'ipv4-to-ipv6' | 'ipv6-to-ipv4';
@@ -23,7 +24,7 @@
 
   let inputValue = $state('');
   let conversionResult = $state<ConversionResult | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let ipv6Info = $state<Record<string, any> | null>(null);
 
   /**
@@ -65,18 +66,6 @@
   /**
    * Copy text to clipboard with visual feedback
    */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 3000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
-
   // React to input changes
   $effect(() => {
     performConversion();
@@ -111,16 +100,16 @@
               <div class="result-value-container">
                 <code class="result-value">{conversionResult.result}</code>
                 <Tooltip
-                  text={copiedStates['result'] ? 'Copied!' : `Copy ${isIPv4ToIPv6 ? 'IPv6' : 'IPv4'} address`}
+                  text={clipboard.isCopied('result') ? 'Copied!' : `Copy ${isIPv4ToIPv6 ? 'IPv6' : 'IPv4'} address`}
                   position="left"
                 >
                   <button
                     type="button"
-                    class="copy-btn {copiedStates['result'] ? 'copied' : ''}"
-                    onclick={() => copyToClipboard(conversionResult?.result || '', 'result')}
+                    class="copy-btn {clipboard.isCopied('result') ? 'copied' : ''}"
+                    onclick={() => clipboard.copy(conversionResult?.result || '', 'result')}
                     aria-label="Copy result to clipboard"
                   >
-                    <SvgIcon icon={copiedStates['result'] ? 'check' : 'clipboard'} size="sm" />
+                    <SvgIcon icon={clipboard.isCopied('result') ? 'check' : 'clipboard'} size="sm" />
                   </button>
                 </Tooltip>
               </div>
@@ -145,13 +134,16 @@
                   <span class="detail-label">Compressed Format</span>
                   <div class="detail-value-container">
                     <code class="detail-value">{conversionResult.details.compressed}</code>
-                    <Tooltip text={copiedStates['compressed'] ? 'Copied!' : 'Copy compressed format'} position="left">
+                    <Tooltip
+                      text={clipboard.isCopied('compressed') ? 'Copied!' : 'Copy compressed format'}
+                      position="left"
+                    >
                       <button
                         type="button"
-                        class="copy-btn-small {copiedStates['compressed'] ? 'copied' : ''}"
-                        onclick={() => copyToClipboard(conversionResult?.details?.compressed || '', 'compressed')}
+                        class="copy-btn-small {clipboard.isCopied('compressed') ? 'copied' : ''}"
+                        onclick={() => clipboard.copy(conversionResult?.details?.compressed || '', 'compressed')}
                       >
-                        <SvgIcon icon={copiedStates['compressed'] ? 'check' : 'clipboard'} size="sm" />
+                        <SvgIcon icon={clipboard.isCopied('compressed') ? 'check' : 'clipboard'} size="sm" />
                       </button>
                     </Tooltip>
                   </div>
@@ -161,13 +153,13 @@
                   <span class="detail-label">Expanded Format</span>
                   <div class="detail-value-container">
                     <code class="detail-value">{conversionResult.details.expanded}</code>
-                    <Tooltip text={copiedStates['expanded'] ? 'Copied!' : 'Copy expanded format'} position="left">
+                    <Tooltip text={clipboard.isCopied('expanded') ? 'Copied!' : 'Copy expanded format'} position="left">
                       <button
                         type="button"
-                        class="copy-btn-small {copiedStates['expanded'] ? 'copied' : ''}"
-                        onclick={() => copyToClipboard(conversionResult?.details?.expanded || '', 'expanded')}
+                        class="copy-btn-small {clipboard.isCopied('expanded') ? 'copied' : ''}"
+                        onclick={() => clipboard.copy(conversionResult?.details?.expanded || '', 'expanded')}
                       >
-                        <SvgIcon icon={copiedStates['expanded'] ? 'check' : 'clipboard'} size="sm" />
+                        <SvgIcon icon={clipboard.isCopied('expanded') ? 'check' : 'clipboard'} size="sm" />
                       </button>
                     </Tooltip>
                   </div>
@@ -177,13 +169,13 @@
                   <span class="detail-label">Dotted Notation</span>
                   <div class="detail-value-container">
                     <code class="detail-value">{conversionResult.details.dotted}</code>
-                    <Tooltip text={copiedStates['dotted'] ? 'Copied!' : 'Copy dotted notation'} position="left">
+                    <Tooltip text={clipboard.isCopied('dotted') ? 'Copied!' : 'Copy dotted notation'} position="left">
                       <button
                         type="button"
-                        class="copy-btn-small {copiedStates['dotted'] ? 'copied' : ''}"
-                        onclick={() => copyToClipboard(conversionResult?.details?.dotted || '', 'dotted')}
+                        class="copy-btn-small {clipboard.isCopied('dotted') ? 'copied' : ''}"
+                        onclick={() => clipboard.copy(conversionResult?.details?.dotted || '', 'dotted')}
                       >
-                        <SvgIcon icon={copiedStates['dotted'] ? 'check' : 'clipboard'} size="sm" />
+                        <SvgIcon icon={clipboard.isCopied('dotted') ? 'check' : 'clipboard'} size="sm" />
                       </button>
                     </Tooltip>
                   </div>
@@ -224,13 +216,16 @@
                 <span class="analysis-label">Expanded Format</span>
                 <div class="detail-value-container">
                   <code class="detail-value">{expandIPv6(ipv6Info.cleaned)}</code>
-                  <Tooltip text={copiedStates['ipv6-expanded'] ? 'Copied!' : 'Copy expanded IPv6'} position="left">
+                  <Tooltip
+                    text={clipboard.isCopied('ipv6-expanded') ? 'Copied!' : 'Copy expanded IPv6'}
+                    position="left"
+                  >
                     <button
                       type="button"
-                      class="copy-btn-small {copiedStates['ipv6-expanded'] ? 'copied' : ''}"
-                      onclick={() => copyToClipboard(expandIPv6(ipv6Info?.cleaned || ''), 'ipv6-expanded')}
+                      class="copy-btn-small {clipboard.isCopied('ipv6-expanded') ? 'copied' : ''}"
+                      onclick={() => clipboard.copy(expandIPv6(ipv6Info?.cleaned || ''), 'ipv6-expanded')}
                     >
-                      <SvgIcon icon={copiedStates['ipv6-expanded'] ? 'check' : 'clipboard'} size="sm" />
+                      <SvgIcon icon={clipboard.isCopied('ipv6-expanded') ? 'check' : 'clipboard'} size="sm" />
                     </button>
                   </Tooltip>
                 </div>
@@ -240,13 +235,16 @@
                 <span class="analysis-label">Compressed Format</span>
                 <div class="detail-value-container">
                   <code class="detail-value">{compressIPv6(ipv6Info.cleaned)}</code>
-                  <Tooltip text={copiedStates['ipv6-compressed'] ? 'Copied!' : 'Copy compressed IPv6'} position="left">
+                  <Tooltip
+                    text={clipboard.isCopied('ipv6-compressed') ? 'Copied!' : 'Copy compressed IPv6'}
+                    position="left"
+                  >
                     <button
                       type="button"
-                      class="copy-btn-small {copiedStates['ipv6-compressed'] ? 'copied' : ''}"
-                      onclick={() => copyToClipboard(compressIPv6(ipv6Info?.cleaned || ''), 'ipv6-compressed')}
+                      class="copy-btn-small {clipboard.isCopied('ipv6-compressed') ? 'copied' : ''}"
+                      onclick={() => clipboard.copy(compressIPv6(ipv6Info?.cleaned || ''), 'ipv6-compressed')}
                     >
-                      <SvgIcon icon={copiedStates['ipv6-compressed'] ? 'check' : 'clipboard'} size="sm" />
+                      <SvgIcon icon={clipboard.isCopied('ipv6-compressed') ? 'check' : 'clipboard'} size="sm" />
                     </button>
                   </Tooltip>
                 </div>
@@ -399,7 +397,7 @@
   .copy-btn.copied,
   .copy-btn-small.copied {
     background-color: var(--color-success);
-    color: white;
+    color: var(--bg-secondary);
     border-color: var(--color-success);
   }
 

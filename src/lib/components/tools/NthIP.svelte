@@ -2,6 +2,7 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import { calculateNthIPs, type NthIPResult } from '$lib/utils/nth-ip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
   import '../../../styles/diagnostics-pages.scss';
 
   let inputText = $state('192.168.1.0/24 @ 10\n10.0.0.0-10.0.0.255 [50]\n172.16.0.0/16 100\n2001:db8::/64#1000');
@@ -10,7 +11,7 @@
   let isLoading = $state(false);
   let selectedExampleIndex = $state<number | null>(null);
   let userModified = $state(false);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
 
   const examples = [
     {
@@ -119,18 +120,6 @@
     selectedExampleIndex = null;
   }
 
-  async function copyToClipboard(text: string, key: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[key] = true;
-      setTimeout(() => {
-        copiedStates[key] = false;
-      }, 1500);
-    } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
-    }
-  }
-
   // Auto-calculate when inputs change
   $effect(() => {
     if (inputText.trim()) {
@@ -221,7 +210,7 @@
     <div class="card loading-card">
       <div class="card-content">
         <div class="loading">
-          <Icon name="loader-2" size="sm" animate="spin" />
+          <Icon name="loader" size="sm" animate="spin" />
           Calculating IPs...
         </div>
       </div>
@@ -252,18 +241,18 @@
             <h3>Calculation Summary</h3>
             <button
               class="copy-btn"
-              class:copied={copiedStates['summary']}
+              class:copied={clipboard.isCopied('summary')}
               onclick={() =>
                 result &&
                 result.summary &&
-                copyToClipboard(
+                clipboard.copy(
                   `Total: ${result.summary.totalCalculations}\nValid: ${result.summary.validCalculations}\nInvalid: ${result.summary.invalidCalculations}\nOut of Bounds: ${result.summary.outOfBoundsCalculations}`,
                   'summary',
                 )}
               use:tooltip={'Copy summary to clipboard'}
             >
-              <Icon name={copiedStates['summary'] ? 'check' : 'copy'} size="xs" />
-              {copiedStates['summary'] ? 'Copied!' : 'Copy'}
+              <Icon name={clipboard.isCopied('summary') ? 'check' : 'copy'} size="xs" />
+              {clipboard.isCopied('summary') ? 'Copied!' : 'Copy'}
             </button>
           </div>
           <div class="card-content">
@@ -321,11 +310,11 @@
                         <span class="input-text">{calculation.input}</span>
                         <button
                           class="copy-btn"
-                          class:copied={copiedStates[`input-${index}`]}
-                          onclick={() => copyToClipboard(calculation.input, `input-${index}`)}
+                          class:copied={clipboard.isCopied(`input-${index}`)}
+                          onclick={() => clipboard.copy(calculation.input, `input-${index}`)}
                           use:tooltip={'Copy input specification'}
                         >
-                          <Icon name={copiedStates[`input-${index}`] ? 'check' : 'copy'} size="xs" />
+                          <Icon name={clipboard.isCopied(`input-${index}`) ? 'check' : 'copy'} size="xs" />
                         </button>
                       </div>
                       <div class="input-meta">
@@ -366,11 +355,11 @@
                             <span class="result-value">{calculation.resultIP}</span>
                             <button
                               class="copy-btn"
-                              class:copied={copiedStates[`result-${index}`]}
-                              onclick={() => copyToClipboard(calculation.resultIP, `result-${index}`)}
+                              class:copied={clipboard.isCopied(`result-${index}`)}
+                              onclick={() => clipboard.copy(calculation.resultIP, `result-${index}`)}
                               use:tooltip={'Copy result IP address'}
                             >
-                              <Icon name={copiedStates[`result-${index}`] ? 'check' : 'copy'} size="xs" />
+                              <Icon name={clipboard.isCopied(`result-${index}`) ? 'check' : 'copy'} size="xs" />
                             </button>
                           </div>
                         </div>
@@ -394,11 +383,11 @@
                               <span class="ip-value">{calculation.network}</span>
                               <button
                                 class="copy-btn"
-                                class:copied={copiedStates[`network-${index}`]}
-                                onclick={() => copyToClipboard(calculation.network, `network-${index}`)}
+                                class:copied={clipboard.isCopied(`network-${index}`)}
+                                onclick={() => clipboard.copy(calculation.network, `network-${index}`)}
                                 use:tooltip={'Copy network address'}
                               >
-                                <Icon name={copiedStates[`network-${index}`] ? 'check' : 'copy'} size="xs" />
+                                <Icon name={clipboard.isCopied(`network-${index}`) ? 'check' : 'copy'} size="xs" />
                               </button>
                             </div>
                           </div>
@@ -437,13 +426,13 @@
                                   <span class="ip-value">{calculation.details.networkStart}</span>
                                   <button
                                     class="copy-btn"
-                                    class:copied={copiedStates[`start-${index}`]}
+                                    class:copied={clipboard.isCopied(`start-${index}`)}
                                     onclick={() =>
                                       calculation.details &&
-                                      copyToClipboard(calculation.details.networkStart, `start-${index}`)}
+                                      clipboard.copy(calculation.details.networkStart, `start-${index}`)}
                                     use:tooltip={'Copy network start address'}
                                   >
-                                    <Icon name={copiedStates[`start-${index}`] ? 'check' : 'copy'} size="xs" />
+                                    <Icon name={clipboard.isCopied(`start-${index}`) ? 'check' : 'copy'} size="xs" />
                                   </button>
                                 </div>
                               </div>
@@ -454,13 +443,13 @@
                                   <span class="ip-value">{calculation.details.networkEnd}</span>
                                   <button
                                     class="copy-btn"
-                                    class:copied={copiedStates[`end-${index}`]}
+                                    class:copied={clipboard.isCopied(`end-${index}`)}
                                     onclick={() =>
                                       calculation.details &&
-                                      copyToClipboard(calculation.details.networkEnd, `end-${index}`)}
+                                      clipboard.copy(calculation.details.networkEnd, `end-${index}`)}
                                     use:tooltip={'Copy network end address'}
                                   >
-                                    <Icon name={copiedStates[`end-${index}`] ? 'check' : 'copy'} size="xs" />
+                                    <Icon name={clipboard.isCopied(`end-${index}`) ? 'check' : 'copy'} size="xs" />
                                   </button>
                                 </div>
                               </div>

@@ -2,15 +2,17 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { formatDNSError } from '$lib/utils/dns-validation.js';
+  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let url = $state('https://github.com');
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let copiedState = $state(false);
 
-  const examples = [
+  const diagnosticState = useDiagnosticState<any>();
+  const clipboard = useClipboard();
+
+  const examplesList = [
     { url: 'https://github.com', description: 'GitHub security headers' },
     { url: 'https://www.cloudflare.com', description: 'Cloudflare security setup' },
     {
@@ -19,6 +21,8 @@
     },
     { url: 'https://example.com', description: 'Basic site (minimal headers)' },
   ];
+
+  const examples = useExamples(examplesList);
 
   // Reactive validation
   const isInputValid = $derived(() => {
@@ -33,25 +37,21 @@
   });
 
   async function analyzeSecurity() {
-    loading = true;
-    error = null;
-    results = null;
-
     // Validation
     const trimmedUrl = url.trim();
     if (!trimmedUrl) {
-      error = 'URL is required';
-      loading = false;
+      diagnosticState.setError('URL is required');
       return;
     }
 
     try {
       new URL(trimmedUrl);
     } catch {
-      error = 'Invalid URL format';
-      loading = false;
+      diagnosticState.setError('Invalid URL format');
       return;
     }
+
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/http', {
@@ -77,42 +77,40 @@
         throw new Error(errorMessage);
       }
 
-      results = await response.json();
+      const data = await response.json();
+      diagnosticState.setResults(data);
     } catch (err: unknown) {
-      error = formatDNSError(err);
-    } finally {
-      loading = false;
+      diagnosticState.setError(formatDNSError(err));
     }
   }
 
-  function loadExample(example: (typeof examples)[0]) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     url = example.url;
+    examples.select(index);
     analyzeSecurity();
   }
 
   async function copyResults() {
-    if (!results?.analysis) return;
+    if (!diagnosticState.results?.analysis) return;
 
-    let text = `Security Headers Analysis\nURL: ${results.url}\nStatus: ${results.status}\n\n`;
+    let text = `Security Headers Analysis\nURL: ${diagnosticState.results.url}\nStatus: ${diagnosticState.results.status}\n\n`;
 
     text += 'Security Headers Found:\n';
-    Object.entries(results.headers || {}).forEach(([key, value]) => {
+    Object.entries(diagnosticState.results.headers || {}).forEach(([key, value]) => {
       text += `${key}: ${value}\n`;
     });
 
     text += '\nSecurity Analysis:\n';
-    (results as { analysis: Array<{ header: string; message: string; recommendation?: string }> }).analysis.forEach(
-      (item) => {
-        text += `• ${item.header}: ${item.message}\n`;
-        if (item.recommendation) {
-          text += `  Recommendation: ${item.recommendation}\n`;
-        }
-      },
-    );
+    (
+      diagnosticState.results as { analysis: Array<{ header: string; message: string; recommendation?: string }> }
+    ).analysis.forEach((item) => {
+      text += `• ${item.header}: ${item.message}\n`;
+      if (item.recommendation) {
+        text += `  Recommendation: ${item.recommendation}\n`;
+      }
+    });
 
-    await navigator.clipboard.writeText(text);
-    copiedState = true;
-    setTimeout(() => (copiedState = false), 1500);
+    await clipboard.copy(text);
   }
 
   function getAnalysisClass(status: string): string {
@@ -142,13 +140,13 @@
   }
 
   function getOverallScore(): { score: number; grade: string; class: string } {
-    if (!results?.analysis) return { score: 0, grade: 'F', class: 'error' };
+    if (!diagnosticState.results?.analysis) return { score: 0, grade: 'F', class: 'error' };
 
-    const total = results.analysis.length;
-    const present = (results as { analysis: Array<{ status: string }> }).analysis.filter(
+    const total = diagnosticState.results.analysis.length;
+    const present = (diagnosticState.results as { analysis: Array<{ status: string }> }).analysis.filter(
       (a) => a.status === 'present',
     ).length;
-    const weak = (results as { analysis: Array<{ status: string }> }).analysis.filter(
+    const weak = (diagnosticState.results as { analysis: Array<{ status: string }> }).analysis.filter(
       (a) => a.status === 'weak',
     ).length;
 
@@ -188,22 +186,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>Security Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, index (index)}
-          <button class="example-card" onclick={() => loadExample(example)}>
-            <h5>{example.url}</h5>
-            <p>{example.description}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="Security Examples"
+    getLabel={(ex) => ex.url}
+    getDescription={(ex) => ex.description}
+    getTooltip={(ex) => `Analyze security headers for ${ex.url}`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -231,9 +222,9 @@
       </div>
 
       <div class="action-section">
-        <button class="lookup-btn" onclick={analyzeSecurity} disabled={loading || !isInputValid}>
-          {#if loading}
-            <Icon name="loader-2" size="sm" animate="spin" />
+        <button class="lookup-btn" onclick={analyzeSecurity} disabled={diagnosticState.loading || !isInputValid}>
+          {#if diagnosticState.loading}
+            <Icon name="loader" size="sm" animate="spin" />
             Analyzing Security...
           {:else}
             <Icon name="shield" size="sm" />
@@ -245,16 +236,16 @@
   </div>
 
   <!-- Results -->
-  {#if results}
+  {#if diagnosticState.results}
     {@const overallScore = getOverallScore()}
     <div class="card results-card">
       <div class="card-header">
         <h3>Security Headers Analysis</h3>
-        <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
-          <span class={copiedState ? 'text-green-500' : ''}
-            ><Icon name={copiedState ? 'check' : 'copy'} size="xs" /></span
+        <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
+          <span class={clipboard.isCopied() ? 'text-green-500' : ''}
+            ><Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" /></span
           >
-          {copiedState ? 'Copied!' : 'Copy Analysis'}
+          {clipboard.isCopied() ? 'Copied!' : 'Copy Analysis'}
         </button>
       </div>
       <div class="card-content">
@@ -272,8 +263,9 @@
             <Icon name="check-circle" size="sm" />
             <div>
               <strong
-                >{(results as { analysis?: Array<{ status: string }> })?.analysis?.filter((a) => a.status === 'present')
-                  .length || 0}</strong
+                >{(diagnosticState.results as { analysis?: Array<{ status: string }> })?.analysis?.filter(
+                  (a) => a.status === 'present',
+                ).length || 0}</strong
               >
               <div class="status-text">Headers Present</div>
             </div>
@@ -283,8 +275,9 @@
             <Icon name="alert-triangle" size="sm" />
             <div>
               <strong
-                >{(results as { analysis?: Array<{ status: string }> })?.analysis?.filter((a) => a.status === 'missing')
-                  .length || 0}</strong
+                >{(diagnosticState.results as { analysis?: Array<{ status: string }> })?.analysis?.filter(
+                  (a) => a.status === 'missing',
+                ).length || 0}</strong
               >
               <div class="status-text">Headers Missing</div>
             </div>
@@ -295,7 +288,7 @@
         <div class="record-section">
           <h4>Security Header Analysis</h4>
           <div class="security-analysis">
-            {#each results.analysis as analysis, index (index)}
+            {#each diagnosticState.results.analysis as analysis, index (index)}
               <div class="analysis-item {getAnalysisClass(analysis.status)}">
                 <div class="analysis-header">
                   <div class="analysis-status">
@@ -319,11 +312,11 @@
         </div>
 
         <!-- Present Headers -->
-        {#if Object.keys(results.headers || {}).length > 0}
+        {#if Object.keys(diagnosticState.results.headers || {}).length > 0}
           <div class="record-section">
             <h4>Security Headers Found</h4>
             <div class="records-list">
-              {#each Object.entries(results.headers) as [name, value], index (index)}
+              {#each Object.entries(diagnosticState.results.headers) as [name, value], index (index)}
                 <div class="record-item">
                   <div class="record-data">
                     <strong>{name}:</strong>
@@ -344,19 +337,7 @@
     </div>
   {/if}
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>Security Analysis Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="Security Analysis Failed" error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">
@@ -448,17 +429,17 @@
 
     &.success {
       background: var(--color-success);
-      color: white;
+      color: var(--bg-secondary);
     }
 
     &.warning {
       background: var(--color-warning);
-      color: white;
+      color: var(--bg-secondary);
     }
 
     &.error {
       background: var(--color-error);
-      color: white;
+      color: var(--bg-secondary);
     }
   }
 

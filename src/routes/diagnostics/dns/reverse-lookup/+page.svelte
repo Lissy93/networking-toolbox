@@ -241,7 +241,7 @@
           disabled={loading || !ipAddress.trim() || !isValidIP(ipAddress.trim())}
         >
           {#if loading}
-            <Icon name="loader-2" size="sm" animate="spin" />
+            <Icon name="loader" size="sm" animate="spin" />
             Performing Reverse Lookup...
           {:else}
             <Icon name="search" size="sm" />

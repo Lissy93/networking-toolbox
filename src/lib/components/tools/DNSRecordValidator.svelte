@@ -11,6 +11,7 @@
     validateCAARecord,
     type ValidationResult,
   } from '$lib/utils/dns-validation.js';
+  import { useClipboard } from '$lib/composables';
 
   let recordType = $state('A');
   let recordName = $state('example.com');
@@ -27,7 +28,7 @@
   let tag = $state('issue');
 
   let results = $state<ValidationResult | null>(null);
-  let copiedState = $state(false);
+  const clipboard = useClipboard();
 
   const recordTypes = [
     { value: 'A', label: 'A (IPv4 Address)', description: 'Maps domain to IPv4 address' },
@@ -159,18 +160,6 @@
         return `${recordName} ${ttl} IN CAA ${flags} ${tag} "${recordValue}"`;
       default:
         return `${recordName} ${ttl} IN ${recordType} ${recordValue}`;
-    }
-  }
-
-  async function copyRecord() {
-    try {
-      await navigator.clipboard.writeText(formatRecord());
-      copiedState = true;
-      setTimeout(() => {
-        copiedState = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy: ', err);
     }
   }
 
@@ -427,8 +416,11 @@
           <Icon name={results.valid ? 'check-circle' : 'x-circle'} size="sm" />
           <span>{results.valid ? 'Valid' : 'Invalid'} DNS Record</span>
         </div>
-        <button class="copy-button {copiedState ? 'copied' : ''}" onclick={copyRecord}>
-          <Icon name={copiedState ? 'check' : 'copy'} size="sm" />
+        <button
+          class="copy-button {clipboard.isCopied() ? 'copied' : ''}"
+          onclick={() => clipboard.copy(formatRecord())}
+        >
+          <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="sm" />
           Copy Zone Line
         </button>
       </div>
@@ -624,7 +616,7 @@
     font-weight: 600;
     padding: 2px var(--spacing-xs);
     background-color: var(--color-primary);
-    color: white;
+    color: var(--bg-secondary);
     border-radius: var(--radius-sm);
   }
 

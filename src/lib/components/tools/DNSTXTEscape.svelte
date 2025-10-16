@@ -349,6 +349,11 @@
 <style lang="scss">
   .text-input-config {
     margin-bottom: var(--spacing-lg);
+
+    textarea,
+    input[type='number'] {
+      background: var(--bg-primary);
+    }
   }
 
   .config-row {
@@ -377,6 +382,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
+    align-items: baseline;
   }
 
   .checkbox-label {
@@ -424,20 +430,20 @@
     font-size: var(--font-size-sm);
 
     &.success {
-      background: var(--color-success-bg);
+      background: color-mix(in srgb, var(--color-success), transparent 95%);
       color: var(--color-success);
       border: 1px solid var(--color-success);
     }
 
     &.warning {
-      background: var(--color-warning-bg);
       color: var(--color-warning);
+      background: color-mix(in srgb, var(--color-warning), transparent 95%);
       border: 1px solid var(--color-warning);
     }
 
     &.error {
-      background: var(--color-error-bg);
       color: var(--color-error);
+      background: color-mix(in srgb, var(--color-error), transparent 95%);
       border: 1px solid var(--color-error);
     }
   }

@@ -3,6 +3,8 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
+  import { formatNumber } from '$lib/utils/formatters';
 
   let setA = $state(`192.168.0.0/16
 10.0.0.0/8`);
@@ -12,7 +14,7 @@
   let mergeContainers = $state(true);
   let strictEquality = $state(false);
   let result = $state<ContainsResult | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExampleIndex = $state<number | null>(null);
   let userModified = $state(false);
 
@@ -57,17 +59,6 @@
     userModified = true;
   }
 
-  /* Copy to clipboard */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => (copiedStates[id] = false), 3000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
-
   /* Export results as CSV */
   function exportAsCSV() {
     if (!result) return;
@@ -82,7 +73,7 @@
     ]);
 
     const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
-    copyToClipboard(csv, 'csv-export');
+    clipboard.copy(csv, 'csv-export');
   }
 
   /* Export results as JSON */
@@ -96,7 +87,7 @@
     };
 
     const json = JSON.stringify(exportData, null, 2);
-    copyToClipboard(json, 'json-export');
+    clipboard.copy(json, 'json-export');
   }
 
   /* Clear inputs */
@@ -161,7 +152,7 @@
     const size = range.end - range.start + 1n;
     const label = type === 'candidate' ? 'Candidate' : type === 'container' ? 'Container' : 'Gap';
 
-    return `${label}${range.label ? ` (${range.label})` : ''}\nSize: ${size.toLocaleString()}${range.cidr ? `\nCIDR: ${range.cidr}` : ''}`;
+    return `${label}${range.label ? ` (${range.label})` : ''}\nSize: ${formatNumber(Number(size))}${range.cidr ? `\nCIDR: ${range.cidr}` : ''}`;
   }
 
   // Reactive computation
@@ -172,336 +163,326 @@
   });
 </script>
 
-<div class="card">
-  <header class="card-header">
-    <h2>CIDR Containment Checker</h2>
-    <p>
-      Check if set A fully contains each item in set B. Supports many-to-many containment analysis with detailed
-      classification.
-    </p>
-  </header>
+<!-- Options -->
+<div class="options-section">
+  <h3>Options</h3>
+  <div class="options-grid">
+    <label class="checkbox-label">
+      <input type="checkbox" bind:checked={mergeContainers} />
+      <span class="checkbox-text">
+        Merge/normalize containers first
+        <Tooltip text="Combine overlapping ranges in set A before checking containment">
+          <Icon name="help" size="sm" />
+        </Tooltip>
+      </span>
+    </label>
+    <label class="checkbox-label">
+      <input type="checkbox" bind:checked={strictEquality} />
+      <span class="checkbox-text">
+        Strict equality counts as contain
+        <Tooltip text="Treat exact matches as 'equal' instead of 'inside'">
+          <Icon name="help" size="sm" />
+        </Tooltip>
+      </span>
+    </label>
+  </div>
+</div>
 
-  <!-- Options -->
-  <div class="options-section">
-    <h3>Options</h3>
-    <div class="options-grid">
-      <label class="checkbox-label">
-        <input type="checkbox" bind:checked={mergeContainers} />
-        <span class="checkbox-text">
-          Merge/normalize containers first
-          <Tooltip text="Combine overlapping ranges in set A before checking containment">
-            <Icon name="help" size="sm" />
-          </Tooltip>
-        </span>
-      </label>
-      <label class="checkbox-label">
-        <input type="checkbox" bind:checked={strictEquality} />
-        <span class="checkbox-text">
-          Strict equality counts as contain
-          <Tooltip text="Treat exact matches as 'equal' instead of 'inside'">
-            <Icon name="help" size="sm" />
-          </Tooltip>
-        </span>
-      </label>
+<!-- Input Section -->
+<div class="input-section">
+  <div class="input-grid">
+    <!-- Set A -->
+    <div class="input-group">
+      <h3>
+        Set A (Containers)
+        <Tooltip text="The containing set - these ranges may contain items from Set B">
+          <Icon name="help" size="sm" />
+        </Tooltip>
+      </h3>
+      <div class="input-wrapper">
+        <textarea
+          bind:value={setA}
+          placeholder="192.168.0.0/16&#10;10.0.0.0/8"
+          class="input-textarea set-a"
+          rows="6"
+          oninput={handleInputChange}
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Set B -->
+    <div class="input-group">
+      <h3>
+        Set B (Candidates)
+        <Tooltip text="Items to check for containment within Set A">
+          <Icon name="help" size="sm" />
+        </Tooltip>
+      </h3>
+      <div class="input-wrapper">
+        <textarea
+          bind:value={setB}
+          placeholder="192.168.1.0/24&#10;172.16.0.0/24"
+          class="input-textarea set-b"
+          rows="6"
+          oninput={handleInputChange}
+        ></textarea>
+      </div>
     </div>
   </div>
 
-  <!-- Input Section -->
-  <div class="input-section">
-    <div class="input-grid">
-      <!-- Set A -->
-      <div class="input-group">
-        <h3>
-          Set A (Containers)
-          <Tooltip text="The containing set - these ranges may contain items from Set B">
-            <Icon name="help" size="sm" />
-          </Tooltip>
-        </h3>
-        <div class="input-wrapper">
-          <textarea
-            bind:value={setA}
-            placeholder="192.168.0.0/16&#10;10.0.0.0/8"
-            class="input-textarea set-a"
-            rows="6"
-            oninput={handleInputChange}
-          ></textarea>
-        </div>
+  <div class="input-actions">
+    <button type="button" class="btn btn-secondary btn-sm" onclick={clearInputs}>
+      <Icon name="trash" size="sm" />
+      Clear All
+    </button>
+  </div>
+
+  <!-- Examples -->
+  <div class="card examples-card">
+    <details class="examples-details">
+      <summary class="examples-summary">
+        <Icon name="chevron-right" size="xs" />
+        <h4>Quick Examples</h4>
+      </summary>
+      <div class="examples-grid">
+        {#each examples as example, i (example.label)}
+          <button
+            class="example-card"
+            class:selected={selectedExampleIndex === i && !userModified}
+            onclick={() => setExample(example, i)}
+          >
+            <div class="example-label">{example.label}</div>
+            <div class="example-preview">
+              {example.setA.split('\n')[0]}... ⊆ {example.setB.split('\n')[0]}...
+            </div>
+          </button>
+        {/each}
       </div>
+    </details>
+  </div>
+</div>
 
-      <!-- Set B -->
-      <div class="input-group">
-        <h3>
-          Set B (Candidates)
-          <Tooltip text="Items to check for containment within Set A">
-            <Icon name="help" size="sm" />
-          </Tooltip>
-        </h3>
-        <div class="input-wrapper">
-          <textarea
-            bind:value={setB}
-            placeholder="192.168.1.0/24&#10;172.16.0.0/24"
-            class="input-textarea set-b"
-            rows="6"
-            oninput={handleInputChange}
-          ></textarea>
-        </div>
+<!-- Results Section -->
+{#if result}
+  <div class="results-section">
+    {#if result.errors.length > 0}
+      <div class="info-panel error">
+        <h3>Parse Errors</h3>
+        <ul class="error-list">
+          {#each result.errors as error (error)}
+            <li>{error}</li>
+          {/each}
+        </ul>
       </div>
-    </div>
+    {/if}
 
-    <div class="input-actions">
-      <button type="button" class="btn btn-secondary btn-sm" onclick={clearInputs}>
-        <Icon name="trash" size="sm" />
-        Clear All
-      </button>
-    </div>
-
-    <!-- Examples -->
-    <div class="card examples-card">
-      <details class="examples-details">
-        <summary class="examples-summary">
-          <Icon name="chevron-right" size="xs" />
-          <h4>Quick Examples</h4>
-        </summary>
-        <div class="examples-grid">
-          {#each examples as example, i (example.label)}
+    {#if result.checks.length > 0}
+      <!-- Summary Statistics -->
+      <div class="stats-section">
+        <div class="summary-header">
+          <h3>Containment Analysis</h3>
+          <div class="export-buttons">
             <button
-              class="example-card"
-              class:selected={selectedExampleIndex === i && !userModified}
-              onclick={() => setExample(example, i)}
+              type="button"
+              class="btn btn-primary btn-sm"
+              class:copied={clipboard.isCopied('csv-export')}
+              onclick={exportAsCSV}
             >
-              <div class="example-label">{example.label}</div>
-              <div class="example-preview">
-                {example.setA.split('\n')[0]}... ⊆ {example.setB.split('\n')[0]}...
-              </div>
+              <Icon name={clipboard.isCopied('csv-export') ? 'check' : 'csv-file'} size="sm" />
+              CSV
             </button>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              class:copied={clipboard.isCopied('json-export')}
+              onclick={exportAsJSON}
+            >
+              <Icon name={clipboard.isCopied('json-export') ? 'check' : 'json-file'} size="sm" />
+              JSON
+            </button>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card containers">
+            <span class="stat-label">Containers (A)</span>
+            <span class="stat-value">{result.stats.setA.count} items</span>
+            <span class="stat-detail">{result.stats.setA.addresses} addresses</span>
+          </div>
+          <div class="stat-card candidates">
+            <span class="stat-label">Candidates (B)</span>
+            <span class="stat-value">{result.stats.totalChecked} items</span>
+            <span class="stat-detail">checked for containment</span>
+          </div>
+          <div class="stat-card inside">
+            <span class="stat-label">Inside</span>
+            <span class="stat-value">{result.stats.inside}</span>
+            <span class="stat-detail">fully contained</span>
+          </div>
+          <div class="stat-card equal">
+            <span class="stat-label">Equal</span>
+            <span class="stat-value">{result.stats.equal}</span>
+            <span class="stat-detail">exact matches</span>
+          </div>
+          <div class="stat-card partial">
+            <span class="stat-label">Partial</span>
+            <span class="stat-value">{result.stats.partial}</span>
+            <span class="stat-detail">partial overlap</span>
+          </div>
+          <div class="stat-card outside">
+            <span class="stat-label">Outside</span>
+            <span class="stat-value">{result.stats.outside}</span>
+            <span class="stat-detail">no overlap</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Containment Results Table -->
+      <div class="table-section">
+        <h4>Containment Results</h4>
+        <div class="results-table">
+          <div class="table-header">
+            <div class="col-input">Candidate</div>
+            <div class="col-status">Status</div>
+            <div class="col-coverage">Coverage</div>
+            <div class="col-containers">Containers</div>
+            <div class="col-gaps">Gaps</div>
+          </div>
+
+          {#each result.checks as check, index (`${check.input}-${index}`)}
+            {@const statusInfo = getStatusInfo(check.status)}
+            <div class="table-row status-{check.status}">
+              <div class="col-input">
+                <code class="candidate-input">{check.input}</code>
+              </div>
+              <div class="col-status">
+                <div class="status-badge" style="color: {statusInfo.color}">
+                  <Icon name={statusInfo.icon} size="sm" />
+                  {statusInfo.label}
+                </div>
+              </div>
+              <div class="col-coverage">
+                <div class="coverage-bar">
+                  <div
+                    class="coverage-fill"
+                    style="width: {check.coverage}%; background-color: {statusInfo.color}"
+                  ></div>
+                  <span class="coverage-text">{check.coverage}%</span>
+                </div>
+              </div>
+              <div class="col-containers">
+                {#if check.matchingContainers.length > 0}
+                  <div class="container-list">
+                    {#each check.matchingContainers as container (container)}
+                      <code class="container-item">{container}</code>
+                    {/each}
+                  </div>
+                {:else}
+                  <span class="no-containers">-</span>
+                {/if}
+              </div>
+              <div class="col-gaps">
+                {#if check.gaps.length > 0}
+                  <div class="gaps-list">
+                    {#each check.gaps as gap (gap)}
+                      <code class="gap-item">{gap}</code>
+                    {/each}
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-icon btn-xs"
+                    class:copied={clipboard.isCopied(`gaps-${check.input}`)}
+                    onclick={() => clipboard.copy(check.gaps.join('\n'), `gaps-${check.input}`)}
+                  >
+                    <Icon name={clipboard.isCopied(`gaps-${check.input}`) ? 'check' : 'copy'} size="xs" />
+                  </button>
+                {:else}
+                  <span class="no-gaps">-</span>
+                {/if}
+              </div>
+            </div>
           {/each}
         </div>
-      </details>
-    </div>
-  </div>
+      </div>
 
-  <!-- Results Section -->
-  {#if result}
-    <div class="results-section">
-      {#if result.errors.length > 0}
-        <div class="info-panel error">
-          <h3>Parse Errors</h3>
-          <ul class="error-list">
-            {#each result.errors as error (error)}
-              <li>{error}</li>
-            {/each}
-          </ul>
-        </div>
-      {/if}
-
-      {#if result.checks.length > 0}
-        <!-- Summary Statistics -->
-        <div class="stats-section">
-          <div class="summary-header">
-            <h3>Containment Analysis</h3>
-            <div class="export-buttons">
-              <button
-                type="button"
-                class="btn btn-primary btn-sm"
-                class:copied={copiedStates['csv-export']}
-                onclick={exportAsCSV}
-              >
-                <Icon name={copiedStates['csv-export'] ? 'check' : 'csv-file'} size="sm" />
-                CSV
-              </button>
-              <button
-                type="button"
-                class="btn btn-secondary btn-sm"
-                class:copied={copiedStates['json-export']}
-                onclick={exportAsJSON}
-              >
-                <Icon name={copiedStates['json-export'] ? 'check' : 'json-file'} size="sm" />
-                JSON
-              </button>
+      <!-- Visualization -->
+      {#if result.visualization.length > 0}
+        <div class="visualization-section">
+          <h4>Containment Visualization</h4>
+          <div class="viz-legend">
+            <div class="legend-item">
+              <div class="legend-color candidate-color"></div>
+              <span>Candidate Range</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color container-color"></div>
+              <span>Container Coverage</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color gap-color"></div>
+              <span>Uncovered Gaps</span>
             </div>
           </div>
 
-          <div class="stats-grid">
-            <div class="stat-card containers">
-              <span class="stat-label">Containers (A)</span>
-              <span class="stat-value">{result.stats.setA.count} items</span>
-              <span class="stat-detail">{result.stats.setA.addresses} addresses</span>
-            </div>
-            <div class="stat-card candidates">
-              <span class="stat-label">Candidates (B)</span>
-              <span class="stat-value">{result.stats.totalChecked} items</span>
-              <span class="stat-detail">checked for containment</span>
-            </div>
-            <div class="stat-card inside">
-              <span class="stat-label">Inside</span>
-              <span class="stat-value">{result.stats.inside}</span>
-              <span class="stat-detail">fully contained</span>
-            </div>
-            <div class="stat-card equal">
-              <span class="stat-label">Equal</span>
-              <span class="stat-value">{result.stats.equal}</span>
-              <span class="stat-detail">exact matches</span>
-            </div>
-            <div class="stat-card partial">
-              <span class="stat-label">Partial</span>
-              <span class="stat-value">{result.stats.partial}</span>
-              <span class="stat-detail">partial overlap</span>
-            </div>
-            <div class="stat-card outside">
-              <span class="stat-label">Outside</span>
-              <span class="stat-value">{result.stats.outside}</span>
-              <span class="stat-detail">no overlap</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Containment Results Table -->
-        <div class="table-section">
-          <h4>Containment Results</h4>
-          <div class="results-table">
-            <div class="table-header">
-              <div class="col-input">Candidate</div>
-              <div class="col-status">Status</div>
-              <div class="col-coverage">Coverage</div>
-              <div class="col-containers">Containers</div>
-              <div class="col-gaps">Gaps</div>
-            </div>
-
-            {#each result.checks as check, index (`${check.input}-${index}`)}
+          <div class="visualization-list">
+            {#each result.visualization as viz, index (viz.candidate)}
+              {@const check = result.checks[index]}
               {@const statusInfo = getStatusInfo(check.status)}
-              <div class="table-row status-{check.status}">
-                <div class="col-input">
-                  <code class="candidate-input">{check.input}</code>
-                </div>
-                <div class="col-status">
-                  <div class="status-badge" style="color: {statusInfo.color}">
+              <div class="viz-item status-{check.status}">
+                <div class="viz-header">
+                  <code class="viz-candidate">{viz.candidate}</code>
+                  <div class="viz-status" style="color: {statusInfo.color}">
                     <Icon name={statusInfo.icon} size="sm" />
-                    {statusInfo.label}
+                    {statusInfo.label} ({check.coverage}%)
                   </div>
                 </div>
-                <div class="col-coverage">
-                  <div class="coverage-bar">
+
+                <div class="viz-bar-container">
+                  <!-- Candidate base -->
+                  <div class="viz-bar candidate-bar">
                     <div
-                      class="coverage-fill"
-                      style="width: {check.coverage}%; background-color: {statusInfo.color}"
+                      class="viz-segment candidate-segment"
+                      style="width: {getBarWidth(viz.candidateRange, viz.totalRange)}%; left: {getBarOffset(
+                        viz.candidateRange,
+                        viz.totalRange,
+                      )}%"
+                      use:tooltip={{ text: getSegmentTooltip(viz.candidateRange, 'candidate'), position: 'top' }}
                     ></div>
-                    <span class="coverage-text">{check.coverage}%</span>
-                  </div>
-                </div>
-                <div class="col-containers">
-                  {#if check.matchingContainers.length > 0}
-                    <div class="container-list">
-                      {#each check.matchingContainers as container (container)}
-                        <code class="container-item">{container}</code>
-                      {/each}
-                    </div>
-                  {:else}
-                    <span class="no-containers">-</span>
-                  {/if}
-                </div>
-                <div class="col-gaps">
-                  {#if check.gaps.length > 0}
-                    <div class="gaps-list">
-                      {#each check.gaps as gap (gap)}
-                        <code class="gap-item">{gap}</code>
-                      {/each}
-                    </div>
-                    <button
-                      type="button"
-                      class="btn btn-icon btn-xs"
-                      class:copied={copiedStates[`gaps-${check.input}`]}
-                      onclick={() => copyToClipboard(check.gaps.join('\n'), `gaps-${check.input}`)}
-                    >
-                      <Icon name={copiedStates[`gaps-${check.input}`] ? 'check' : 'copy'} size="xs" />
-                    </button>
-                  {:else}
-                    <span class="no-gaps">-</span>
-                  {/if}
-                </div>
-              </div>
-            {/each}
-          </div>
-        </div>
-
-        <!-- Visualization -->
-        {#if result.visualization.length > 0}
-          <div class="visualization-section">
-            <h4>Containment Visualization</h4>
-            <div class="viz-legend">
-              <div class="legend-item">
-                <div class="legend-color candidate-color"></div>
-                <span>Candidate Range</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color container-color"></div>
-                <span>Container Coverage</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color gap-color"></div>
-                <span>Uncovered Gaps</span>
-              </div>
-            </div>
-
-            <div class="visualization-list">
-              {#each result.visualization as viz, index (viz.candidate)}
-                {@const check = result.checks[index]}
-                {@const statusInfo = getStatusInfo(check.status)}
-                <div class="viz-item status-{check.status}">
-                  <div class="viz-header">
-                    <code class="viz-candidate">{viz.candidate}</code>
-                    <div class="viz-status" style="color: {statusInfo.color}">
-                      <Icon name={statusInfo.icon} size="sm" />
-                      {statusInfo.label} ({check.coverage}%)
-                    </div>
                   </div>
 
-                  <div class="viz-bar-container">
-                    <!-- Candidate base -->
-                    <div class="viz-bar candidate-bar">
+                  <!-- Container overlays -->
+                  <div class="viz-bar container-bar">
+                    {#each viz.containers as container (`${container.start}-${container.end}`)}
                       <div
-                        class="viz-segment candidate-segment"
-                        style="width: {getBarWidth(viz.candidateRange, viz.totalRange)}%; left: {getBarOffset(
-                          viz.candidateRange,
+                        class="viz-segment container-segment"
+                        style="width: {getBarWidth(container, viz.totalRange)}%; left: {getBarOffset(
+                          container,
                           viz.totalRange,
                         )}%"
-                        use:tooltip={{ text: getSegmentTooltip(viz.candidateRange, 'candidate'), position: 'top' }}
+                        use:tooltip={{ text: getSegmentTooltip(container, 'container'), position: 'top' }}
                       ></div>
-                    </div>
+                    {/each}
+                  </div>
 
-                    <!-- Container overlays -->
-                    <div class="viz-bar container-bar">
-                      {#each viz.containers as container (`${container.start}-${container.end}`)}
-                        <div
-                          class="viz-segment container-segment"
-                          style="width: {getBarWidth(container, viz.totalRange)}%; left: {getBarOffset(
-                            container,
-                            viz.totalRange,
-                          )}%"
-                          use:tooltip={{ text: getSegmentTooltip(container, 'container'), position: 'top' }}
-                        ></div>
-                      {/each}
-                    </div>
-
-                    <!-- Gap highlights -->
-                    <div class="viz-bar gap-bar">
-                      {#each viz.gaps as gap (`${gap.start}-${gap.end}`)}
-                        <div
-                          class="viz-segment gap-segment"
-                          style="width: {getBarWidth(gap, viz.totalRange)}%; left: {getBarOffset(gap, viz.totalRange)}%"
-                          use:tooltip={{ text: getSegmentTooltip(gap, 'gap'), position: 'bottom' }}
-                        ></div>
-                      {/each}
-                    </div>
+                  <!-- Gap highlights -->
+                  <div class="viz-bar gap-bar">
+                    {#each viz.gaps as gap (`${gap.start}-${gap.end}`)}
+                      <div
+                        class="viz-segment gap-segment"
+                        style="width: {getBarWidth(gap, viz.totalRange)}%; left: {getBarOffset(gap, viz.totalRange)}%"
+                        use:tooltip={{ text: getSegmentTooltip(gap, 'gap'), position: 'bottom' }}
+                      ></div>
+                    {/each}
                   </div>
                 </div>
-              {/each}
-            </div>
+              </div>
+            {/each}
           </div>
-        {/if}
+        </div>
       {/if}
-    </div>
-  {/if}
-</div>
+    {/if}
+  </div>
+{/if}
 
 <style lang="scss">
   /* Reuse base styles from previous components */
@@ -562,6 +543,7 @@
       height: 140px;
       font-family: var(--font-mono);
       font-size: var(--font-size-sm);
+      background: var(--bg-primary);
       resize: vertical;
 
       &.set-a {
@@ -694,7 +676,7 @@
   /* Stats grid */
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-lg);
   }

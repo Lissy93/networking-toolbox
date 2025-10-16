@@ -107,9 +107,8 @@
   }
 
   .search-container {
-    max-width: 900px;
+    max-width: 800px;
     margin: 0 auto;
-    // width: 100%;
-    // padding: 0 var(--spacing-md);
+    width: 100%;
   }
 </style>

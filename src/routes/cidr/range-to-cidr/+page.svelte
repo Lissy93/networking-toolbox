@@ -2,6 +2,7 @@
   import { convertRangeToCIDR, type RangeConversionResult } from '$lib/utils/range-to-cidr.js';
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
 
   let startIP = $state('192.168.1.10');
   let endIP = $state('192.168.1.50');
@@ -95,12 +96,10 @@
   });
 </script>
 
-<div class="card">
-  <header class="card-header">
-    <h2>IP Range to CIDR Converter</h2>
-    <p>Convert an IP address range (start IP → end IP) into the minimal set of CIDR blocks that cover the range</p>
-  </header>
-
+<ToolContentContainer
+  title="IP Range to CIDR Converter"
+  description="Convert an IP address range (start IP → end IP) into the minimal set of CIDR blocks that cover the range"
+>
   <!-- Quick Examples -->
   <div class="card examples-card">
     <details class="examples-details">
@@ -286,35 +285,9 @@
       <p>Useful for converting firewall rules, ACLs, or vendor-provided IP ranges to CIDR format.</p>
     </div>
   </div>
-</div>
+</ToolContentContainer>
 
 <style lang="scss">
-  .card {
-    max-width: 90rem;
-    margin: 0 auto;
-    padding: var(--spacing-xl);
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-  }
-
-  .card-header {
-    margin-bottom: var(--spacing-xl);
-
-    h2 {
-      font-size: var(--font-size-2xl);
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: var(--spacing-sm);
-    }
-
-    p {
-      font-size: var(--font-size-md);
-      color: var(--text-secondary);
-      line-height: 1.6;
-    }
-  }
-
   // Examples card (matches diagnostics pages style)
   .examples-card {
     background: var(--bg-tertiary);
@@ -323,6 +296,7 @@
     margin-bottom: var(--spacing-lg);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
+    padding: 0;
 
     .examples-details {
       border: none;

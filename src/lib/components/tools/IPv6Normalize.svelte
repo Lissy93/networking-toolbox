@@ -1,13 +1,14 @@
 <script lang="ts">
   import { normalizeIPv6Addresses, type IPv6NormalizeResult } from '$lib/utils/ipv6-normalize.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
 
   let inputText = $state(
     '2001:0db8:0000:0000:0000:ff00:0042:8329\n2001:db8:0:0:1:0:0:1\n2001:0db8:0001:0000:0000:0ab9:C0A8:0102\n2001:db8::1\nfe80::1%eth0',
   );
   let result = $state<IPv6NormalizeResult | null>(null);
   let isLoading = $state(false);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
 
   function normalizeAddresses() {
     if (!inputText.trim()) {
@@ -71,27 +72,13 @@
     URL.revokeObjectURL(url);
   }
 
-  async function copyToClipboard(text: string, id?: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      if (id) {
-        copiedStates[id] = true;
-        setTimeout(() => {
-          copiedStates[id] = false;
-        }, 2000);
-      }
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
-
   function copyAllNormalized() {
     if (result) {
       const normalized = result.normalizations
         .filter((n) => n.isValid)
         .map((n) => n.normalized)
         .join('\n');
-      copyToClipboard(normalized, 'copy-all');
+      clipboard.copy(normalized, 'copy-all');
     }
   }
 
@@ -183,8 +170,8 @@
           <div class="normalized-header">
             <h3>Normalized Addresses</h3>
             <div class="export-buttons">
-              <button onclick={copyAllNormalized} class:copied={copiedStates['copy-all']}>
-                <Icon name={copiedStates['copy-all'] ? 'check' : 'copy'} />
+              <button onclick={copyAllNormalized} class:copied={clipboard.isCopied('copy-all')}>
+                <Icon name={clipboard.isCopied('copy-all') ? 'check' : 'copy'} />
                 Copy All
               </button>
               <button onclick={() => exportResults('txt')}>
@@ -226,7 +213,7 @@
                       <button
                         type="button"
                         class="code-button"
-                        onclick={() => copyToClipboard(normalization.input, `original-${index}`)}
+                        onclick={() => clipboard.copy(normalization.input, `original-${index}`)}
                         title="Click to copy"
                       >
                         {normalization.input}
@@ -240,7 +227,7 @@
                           <button
                             type="button"
                             class="code-button normalized"
-                            onclick={() => copyToClipboard(normalization.normalized, `normalized-${index}`)}
+                            onclick={() => clipboard.copy(normalization.normalized, `normalized-${index}`)}
                             title="Click to copy"
                           >
                             {normalization.normalized}
@@ -248,11 +235,11 @@
                           <button
                             type="button"
                             class="copy-button"
-                            class:copied={copiedStates[`copy-${index}`]}
-                            onclick={() => copyToClipboard(normalization.normalized, `copy-${index}`)}
+                            class:copied={clipboard.isCopied(`copy-${index}`)}
+                            onclick={() => clipboard.copy(normalization.normalized, `copy-${index}`)}
                             title="Copy normalized address"
                           >
-                            <Icon name={copiedStates[`copy-${index}`] ? 'check' : 'copy'} size="sm" />
+                            <Icon name={clipboard.isCopied(`copy-${index}`) ? 'check' : 'copy'} size="sm" />
                           </button>
                         </div>
                       </div>
@@ -623,7 +610,7 @@
 
     &.copied {
       background: var(--color-success);
-      color: white;
+      color: var(--bg-secondary);
       border-color: var(--color-success);
       transform: scale(1.05);
     }

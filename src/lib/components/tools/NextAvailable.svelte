@@ -8,6 +8,8 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import _Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
+  import { formatNumber } from '$lib/utils/formatters';
 
   let pools = $state(`192.168.0.0/16
 10.0.0.0/8`);
@@ -21,7 +23,7 @@
   let policy = $state<AllocationPolicy>('first-fit');
   let maxCandidates = $state(5);
   let result = $state<NextAvailableResult | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExample = $state<string | null>(null);
   let userModified = $state(false);
   let showVisualization = $state(true);
@@ -85,17 +87,6 @@
     performSearch();
   }
 
-  /* Copy to clipboard */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => (copiedStates[id] = false), 3000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
-
   /* Export results */
   function exportResults(format: 'csv' | 'json') {
     if (!result || result.candidates.length === 0) return;
@@ -128,7 +119,7 @@
       content = [headers, ...rows].map((row) => row.join(',')).join('\n');
     }
 
-    copyToClipboard(content, `export-${format}`);
+    clipboard.copy(content, `export-${format}`);
   }
 
   /* Clear inputs */
@@ -186,7 +177,7 @@
       candidate: 'Candidate',
     };
 
-    const size = range.start && range.end ? (range.end - range.start + 1n).toLocaleString() : 'Unknown';
+    const size = range.start && range.end ? formatNumber(Number(range.end - range.start + 1n)) : 'Unknown';
     return `${labels[type]}\n${range.cidr}\nSize: ${size} addresses`;
   }
 
@@ -437,19 +428,19 @@
               <button
                 type="button"
                 class="btn btn-primary btn-sm"
-                class:copied={copiedStates['export-csv']}
+                class:copied={clipboard.isCopied('export-csv')}
                 onclick={() => exportResults('csv')}
               >
-                <Icon name={copiedStates['export-csv'] ? 'check' : 'download'} size="sm" />
+                <Icon name={clipboard.isCopied('export-csv') ? 'check' : 'download'} size="sm" />
                 CSV
               </button>
               <button
                 type="button"
                 class="btn btn-secondary btn-sm"
-                class:copied={copiedStates['export-json']}
+                class:copied={clipboard.isCopied('export-json')}
                 onclick={() => exportResults('json')}
               >
-                <Icon name={copiedStates['export-json'] ? 'check' : 'download'} size="sm" />
+                <Icon name={clipboard.isCopied('export-json') ? 'check' : 'download'} size="sm" />
                 JSON
               </button>
             </div>
@@ -489,7 +480,7 @@
                 class="btn btn-secondary btn-xs"
                 onclick={() => (showVisualization = !showVisualization)}
               >
-                <Icon name="eye-off" size="sm" />
+                <Icon name="hide" size="sm" />
                 Hide
               </button>
             </div>
@@ -586,10 +577,10 @@
                   <button
                     type="button"
                     class="btn btn-icon btn-xs"
-                    class:copied={copiedStates[candidate.cidr]}
-                    onclick={() => copyToClipboard(candidate.cidr, candidate.cidr)}
+                    class:copied={clipboard.isCopied(candidate.cidr)}
+                    onclick={() => clipboard.copy(candidate.cidr, candidate.cidr)}
                   >
-                    <Icon name={copiedStates[candidate.cidr] ? 'check' : 'copy'} size="xs" />
+                    <Icon name={clipboard.isCopied(candidate.cidr) ? 'check' : 'copy'} size="xs" />
                   </button>
                 </div>
                 <div class="candidate-details">

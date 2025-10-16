@@ -2,20 +2,24 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { formatDNSError } from '$lib/utils/dns-validation.js';
+  import { formatBytes, getStatusClass } from '$lib/utils/formatters.js';
+  import { useDiagnosticState, useClipboard, useExamples, useSimpleValidation } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ActionButton from '$lib/components/common/ActionButton.svelte';
+  import ResultsCard from '$lib/components/common/ResultsCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let url = $state('https://example.com');
   let method = $state('GET');
   let customHeadersText = $state('');
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let copiedState = $state(false);
-  let selectedExampleIndex = $state<number | null>(null);
+
+  const diagnosticState = useDiagnosticState<any>();
+  const clipboard = useClipboard();
 
   const methods = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'];
 
-  const examples = [
+  const examplesList = [
     { url: 'https://httpbin.org/get', method: 'GET', description: 'Basic GET request headers' },
     { url: 'https://api.github.com', method: 'HEAD', description: 'GitHub API headers (HEAD)' },
     { url: 'https://www.cloudflare.com', method: 'GET', description: 'Cloudflare response headers' },
@@ -24,8 +28,10 @@
     { url: 'https://httpbin.org/gzip', method: 'GET', description: 'Compressed response headers' },
   ];
 
+  const examples = useExamples(examplesList);
+
   // Reactive validation
-  const isInputValid = $derived(() => {
+  const validation = useSimpleValidation(() => {
     const trimmedUrl = url.trim();
     if (!trimmedUrl) return false;
     try {
@@ -58,25 +64,21 @@
   }
 
   async function checkHeaders() {
-    loading = true;
-    error = null;
-    results = null;
-
     // Validation
     const trimmedUrl = url.trim();
     if (!trimmedUrl) {
-      error = 'URL is required';
-      loading = false;
+      diagnosticState.setError('URL is required');
       return;
     }
 
     try {
       new URL(trimmedUrl);
     } catch {
-      error = 'Invalid URL format';
-      loading = false;
+      diagnosticState.setError('Invalid URL format');
       return;
     }
+
+    diagnosticState.startOperation();
 
     try {
       const customHeaders = parseCustomHeaders();
@@ -106,56 +108,34 @@
         throw new Error(errorMessage);
       }
 
-      results = await response.json();
+      const data = await response.json();
+      diagnosticState.setResults(data);
     } catch (err: unknown) {
-      error = formatDNSError(err);
-    } finally {
-      loading = false;
+      diagnosticState.setError(formatDNSError(err));
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     url = example.url;
     method = example.method;
     customHeadersText = '';
-    selectedExampleIndex = index;
+    examples.select(index);
     checkHeaders();
   }
 
-  function clearExampleSelection() {
-    selectedExampleIndex = null;
-  }
-
   async function copyResults() {
-    if (!results?.headers) return;
+    if (!diagnosticState.results?.headers) return;
 
-    let text = `${method} ${results.url}\nStatus: ${results.status} ${results.statusText}\n\nResponse Headers:\n`;
-    Object.entries(results.headers).forEach(([key, value]) => {
+    let text = `${method} ${diagnosticState.results.url}\nStatus: ${diagnosticState.results.status} ${diagnosticState.results.statusText}\n\nResponse Headers:\n`;
+    Object.entries(diagnosticState.results.headers).forEach(([key, value]) => {
       text += `${key}: ${value}\n`;
     });
 
-    if (results.size) {
-      text += `\nContent-Length: ${results.size} bytes`;
+    if (diagnosticState.results.size) {
+      text += `\nContent-Length: ${diagnosticState.results.size} bytes`;
     }
 
-    await navigator.clipboard.writeText(text);
-    copiedState = true;
-    setTimeout(() => (copiedState = false), 1500);
-  }
-
-  function formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
-  }
-
-  function getStatusClass(status: number): string {
-    if (status >= 200 && status < 300) return 'success';
-    if (status >= 300 && status < 400) return 'warning';
-    if (status >= 400) return 'error';
-    return '';
+    await clipboard.copy(text);
   }
 </script>
 
@@ -169,27 +149,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>Header Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, i (i)}
-          <button
-            class="example-card"
-            class:selected={selectedExampleIndex === i}
-            onclick={() => loadExample(example, i)}
-            use:tooltip={`Analyze headers for ${example.url}`}
-          >
-            <h5>{example.method} {example.url}</h5>
-            <p>{example.description}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="Header Examples"
+    getLabel={(ex) => `${ex.method} ${ex.url}`}
+    getDescription={(ex) => ex.description}
+    getTooltip={(ex) => `Analyze headers for ${ex.url}`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -206,13 +174,13 @@
               type="url"
               bind:value={url}
               placeholder="https://example.com"
-              class:invalid={url && !isInputValid()}
+              class:invalid={url && !validation.isValid}
               onchange={() => {
-                clearExampleSelection();
-                if (isInputValid()) checkHeaders();
+                examples.clear();
+                if (validation.isValid) checkHeaders();
               }}
             />
-            {#if url && !isInputValid()}
+            {#if url && !validation.isValid}
               <span class="error-text">Invalid URL format</span>
             {/if}
           </label>
@@ -225,8 +193,8 @@
               id="method"
               bind:value={method}
               onchange={() => {
-                clearExampleSelection();
-                if (isInputValid()) checkHeaders();
+                examples.clear();
+                if (validation.isValid) checkHeaders();
               }}
             >
               {#each methods as methodOption (methodOption)}
@@ -246,133 +214,110 @@
             placeholder="User-Agent: My Custom Agent&#10;Authorization: Bearer token123"
             rows="3"
             onchange={() => {
-              clearExampleSelection();
-              if (isInputValid()) checkHeaders();
+              examples.clear();
+              if (validation.isValid) checkHeaders();
             }}
           ></textarea>
         </label>
       </div>
 
       <div class="action-section">
-        <button class="lookup-btn" onclick={checkHeaders} disabled={loading || !isInputValid}>
-          {#if loading}
-            <Icon name="loader-2" size="sm" animate="spin" />
-            Analyzing Headers...
-          {:else}
-            <Icon name="globe" size="sm" />
-            Analyze Headers
-          {/if}
-        </button>
+        <ActionButton
+          loading={diagnosticState.loading}
+          disabled={!validation.isValid}
+          icon="globe"
+          loadingText="Analyzing Headers..."
+          onclick={checkHeaders}
+        >
+          Analyze Headers
+        </ActionButton>
       </div>
     </div>
   </div>
 
   <!-- Results -->
-  {#if results}
-    <div class="card results-card">
-      <div class="card-header row">
-        <h3>HTTP Response Analysis</h3>
-        <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
-          <span class={copiedState ? 'text-green-500' : ''}
-            ><Icon name={copiedState ? 'check' : 'copy'} size="xs" /></span
-          >
-          {copiedState ? 'Copied!' : 'Copy Results'}
-        </button>
-      </div>
-      <div class="card-content">
-        <!-- Status Overview -->
-        <div class="status-overview">
-          <div class="status-item {getStatusClass(results.status)}">
-            <Icon name="activity" size="sm" />
+  {#if diagnosticState.results}
+    <ResultsCard title="HTTP Response Analysis" onCopy={copyResults} copied={clipboard.isCopied()}>
+      <!-- Status Overview -->
+      <div class="status-overview">
+        <div class="status-item {getStatusClass(diagnosticState.results.status)}">
+          <Icon name="activity" size="sm" />
+          <div>
+            <strong>{diagnosticState.results.status} {diagnosticState.results.statusText}</strong>
+            <div class="status-text">HTTP Status</div>
+          </div>
+        </div>
+
+        {#if diagnosticState.results.size}
+          <div class="status-item">
+            <Icon name="file" size="sm" />
             <div>
-              <strong>{results.status} {results.statusText}</strong>
-              <div class="status-text">HTTP Status</div>
+              <strong>{formatBytes(diagnosticState.results.size)}</strong>
+              <div class="status-text">Response Size</div>
             </div>
           </div>
+        {/if}
 
-          {#if results.size}
-            <div class="status-item">
-              <Icon name="file" size="sm" />
-              <div>
-                <strong>{formatBytes(results.size)}</strong>
-                <div class="status-text">Response Size</div>
-              </div>
+        {#if diagnosticState.results.timings}
+          <div class="status-item">
+            <Icon name="clock" size="sm" />
+            <div>
+              <strong>{diagnosticState.results.timings.total.toFixed(0)}ms</strong>
+              <div class="status-text">Total Time</div>
             </div>
-          {/if}
-
-          {#if results.timings}
-            <div class="status-item">
-              <Icon name="clock" size="sm" />
-              <div>
-                <strong>{results.timings.total.toFixed(0)}ms</strong>
-                <div class="status-text">Total Time</div>
-              </div>
-            </div>
-          {/if}
-        </div>
-
-        <!-- Response Headers -->
-        <div class="record-section card">
-          <h4>Response Headers</h4>
-          <div class="records-list">
-            {#each Object.entries(results.headers) as [name, value] (name)}
-              <div class="record-item">
-                <div class="record-data">
-                  <strong>{name}:</strong>
-                  {value}
-                </div>
-              </div>
-            {/each}
-          </div>
-        </div>
-
-        {#if results.timings}
-          <div class="record-section card">
-            <h4>Performance Timing</h4>
-            <div class="records-list">
-              <div class="record-item">
-                <div class="record-data">
-                  <strong>DNS Resolution:</strong> ~{results.timings.dns.toFixed(1)}ms
-                </div>
-              </div>
-              <div class="record-item">
-                <div class="record-data">
-                  <strong>TCP Connect:</strong> ~{results.timings.tcp.toFixed(1)}ms
-                </div>
-              </div>
-              {#if results.timings.tls > 0}
-                <div class="record-item">
-                  <div class="record-data">
-                    <strong>TLS Handshake:</strong> ~{results.timings.tls.toFixed(1)}ms
-                  </div>
-                </div>
-              {/if}
-              <div class="record-item">
-                <div class="record-data">
-                  <strong>Time to First Byte:</strong> ~{results.timings.ttfb.toFixed(1)}ms
-                </div>
-              </div>
-            </div>
-            <p class="help-text">* Timing values are approximations when not isolated</p>
           </div>
         {/if}
       </div>
-    </div>
-  {/if}
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>Request Failed</strong>
-            <p>{error}</p>
-          </div>
+      <!-- Response Headers -->
+      <div class="record-section card">
+        <h4>Response Headers</h4>
+        <div class="records-list">
+          {#each Object.entries(diagnosticState.results.headers) as [name, value] (name)}
+            <div class="record-item">
+              <div class="record-data">
+                <strong>{name}:</strong>
+                {value}
+              </div>
+            </div>
+          {/each}
         </div>
       </div>
-    </div>
+
+      {#if diagnosticState.results.timings}
+        <div class="record-section card">
+          <h4>Performance Timing</h4>
+          <div class="records-list">
+            <div class="record-item">
+              <div class="record-data">
+                <strong>DNS Resolution:</strong> ~{diagnosticState.results.timings.dns.toFixed(1)}ms
+              </div>
+            </div>
+            <div class="record-item">
+              <div class="record-data">
+                <strong>TCP Connect:</strong> ~{diagnosticState.results.timings.tcp.toFixed(1)}ms
+              </div>
+            </div>
+            {#if diagnosticState.results.timings.tls > 0}
+              <div class="record-item">
+                <div class="record-data">
+                  <strong>TLS Handshake:</strong> ~{diagnosticState.results.timings.tls.toFixed(1)}ms
+                </div>
+              </div>
+            {/if}
+            <div class="record-item">
+              <div class="record-data">
+                <strong>Time to First Byte:</strong> ~{diagnosticState.results.timings.ttfb.toFixed(1)}ms
+              </div>
+            </div>
+          </div>
+          <p class="help-text">* Timing values are approximations when not isolated</p>
+        </div>
+      {/if}
+    </ResultsCard>
   {/if}
+
+  <ErrorCard title="Request Failed" error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">

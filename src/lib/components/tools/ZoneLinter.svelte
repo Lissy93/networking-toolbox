@@ -2,13 +2,14 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { parseZoneFile, normalizeZone, formatZoneFile, type ParsedZone } from '$lib/utils/zone-parser.js';
+  import { useClipboard } from '$lib/composables';
 
   let zoneInput = $state('');
   let results = $state<{
     normalized: ParsedZone;
     formattedZone: string;
   } | null>(null);
-  let copiedState = $state(false);
+  const clipboard = useClipboard();
   let activeExampleIndex = $state<number | null>(null);
 
   const examples = [
@@ -103,18 +104,9 @@ _https._tcp	IN	SRV	0 5 443 www.example.com.`,
     }
   }
 
-  async function copyZone() {
+  function copyZone() {
     if (!results) return;
-
-    try {
-      await navigator.clipboard.writeText(results.formattedZone);
-      copiedState = true;
-      setTimeout(() => {
-        copiedState = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy: ', err);
-    }
+    clipboard.copy(results.formattedZone);
   }
 
   function handleInputChange() {
@@ -299,9 +291,9 @@ www	IN	A	192.0.2.1"
               Normalized Zone File
             </h4>
             <div class="output-actions">
-              <button class="copy-button {copiedState ? 'copied' : ''}" onclick={copyZone}>
-                <Icon name={copiedState ? 'check' : 'copy'} size="sm" />
-                {copiedState ? 'Copied!' : 'Copy'}
+              <button class="copy-button {clipboard.isCopied() ? 'copied' : ''}" onclick={copyZone}>
+                <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="sm" />
+                {clipboard.isCopied() ? 'Copied!' : 'Copy'}
               </button>
               <button class="download-button" onclick={downloadZone}>
                 <Icon name="download" size="sm" />

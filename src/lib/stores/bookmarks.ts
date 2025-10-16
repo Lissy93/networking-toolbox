@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
+import { storage } from '$lib/utils/localStorage';
 import { cacheBookmark, cacheAllBookmarks } from './offline';
 
 export interface BookmarkedTool {
@@ -13,17 +14,7 @@ const STORAGE_KEY = 'bookmarked-tools';
 
 // Get initial bookmarks from localStorage (runs immediately on import)
 function getInitialBookmarks(): BookmarkedTool[] {
-  if (browser) {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        return JSON.parse(stored);
-      }
-    } catch {
-      return [];
-    }
-  }
-  return [];
+  return storage.getItem(STORAGE_KEY, { defaultValue: [] });
 }
 
 function createBookmarksStore() {
@@ -48,7 +39,7 @@ function createBookmarksStore() {
         if (!bookmarks.find((b) => b.href === tool.href)) {
           const newBookmarks = [...bookmarks, tool];
           if (browser) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(newBookmarks));
+            storage.setItem(STORAGE_KEY, newBookmarks);
             // Cache the bookmarked tool for offline access
             cacheBookmark(tool.href);
           }
@@ -61,7 +52,7 @@ function createBookmarksStore() {
       update((bookmarks) => {
         const newBookmarks = bookmarks.filter((b) => b.href !== href);
         if (browser) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(newBookmarks));
+          storage.setItem(STORAGE_KEY, newBookmarks);
         }
         return newBookmarks;
       });
@@ -71,7 +62,7 @@ function createBookmarksStore() {
         const existing = bookmarks.find((b) => b.href === tool.href);
         const newBookmarks = existing ? bookmarks.filter((b) => b.href !== tool.href) : [...bookmarks, tool];
         if (browser) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(newBookmarks));
+          storage.setItem(STORAGE_KEY, newBookmarks);
           // Cache the bookmarked tool for offline access when adding
           if (!existing) {
             cacheBookmark(tool.href);

@@ -5,7 +5,10 @@
 
 declare global {
   namespace App {
-    // interface Error {}
+    interface Error {
+      message: string;
+      errorId?: string;
+    }
     // interface Locals {}
     // interface PageData {}
     // interface PageState {}
@@ -14,6 +17,7 @@ declare global {
 
   // Make version available globally
   const __APP_VERSION__: string;
+  const __DEPLOY_ENV__: string;
 }
 
 // SVG imports

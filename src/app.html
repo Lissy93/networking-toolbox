@@ -4,17 +4,63 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    <!-- Preload self-hosted fonts for default themes (Tokyo Night, Dark, Light) -->
+    <link rel="preload" as="style" href="/fonts/fonts.css" />
+    <link rel="stylesheet" href="/fonts/fonts.css" media="print" onload="this.media='all';this.onload=null;" />
+    <noscript>
+      <link rel="stylesheet" href="/fonts/fonts.css" />
+    </noscript>
+
+    <!-- Preconnect to Google Fonts for other themes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
     <!-- Prevent FOUC by applying theme before page renders -->
     <script>
       (function () {
         try {
-          // Apply theme
-          const theme = localStorage.getItem('theme') || 'dark';
+          // Get saved theme from localStorage
+          const savedTheme = localStorage.getItem('theme');
+
+          let theme;
+          if (savedTheme) {
+            // Use saved theme if it exists
+            theme = savedTheme;
+          } else {
+            // No saved theme - check system preference
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+            if (prefersLight) {
+              theme = 'light';
+            } else if (prefersDark) {
+              theme = 'dark';
+            } else {
+              theme = 'ocean';
+            }
+          }
+
+          // Apply theme class (dark theme doesn't need a class)
           if (theme !== 'dark') {
             document.documentElement.classList.add('theme-' + theme);
           }
         } catch (e) {
           // Ignore localStorage errors (private browsing, etc.)
+          // Fall back to system preference or ocean
+          try {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+
+            if (prefersLight) {
+              document.documentElement.classList.add('theme-light');
+            } else if (!prefersDark) {
+              // Neither dark nor light preferred - use ocean
+              document.documentElement.classList.add('theme-ocean');
+            }
+            // If prefersDark, no class needed (dark is default)
+          } catch (e2) {
+            // If all fails, use ocean
+            document.documentElement.classList.add('theme-ocean');
+          }
         }
       })();
     </script>

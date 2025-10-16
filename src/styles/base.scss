@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap');
+// Self-hosted fonts (Fira Code, Fira Sans, Inter)
+// Other theme fonts load dynamically via theme.ts
+@import url('/fonts/fonts.css');
 
 /* Reset */
 *,
@@ -162,6 +164,10 @@ pre {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  &.col {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .logo {
@@ -213,6 +219,35 @@ pre {
 
 .card-header {
   margin-bottom: var(--spacing-md);
+  display: flex;
+  // flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    p {
+      text-align: left;
+    }
+  }
+}
+
+.card-header .header-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.card-header .header-controls {
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    margin: 0 auto;
+  }
 }
 
 .card-header h2 {

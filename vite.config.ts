@@ -12,4 +12,7 @@ export default defineConfig({
     }),
 	],
   envPrefix: ['VITE_', 'PUBLIC_', 'NTB_'],
+  define: {
+    __DEPLOY_ENV__: JSON.stringify(process.env.DEPLOY_ENV || ''),
+  },
 });

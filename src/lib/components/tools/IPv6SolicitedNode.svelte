@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
 
   let input = $state('2001:db8::1234:5678');
   let result = $state<{
@@ -15,7 +16,7 @@
       explanation: string[];
     };
   } | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExample = $state<string | null>(null);
   let _userModified = $state(false);
 
@@ -190,18 +191,6 @@
     calculateSolicitedNode();
   }
 
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
-
   // Calculate on component load
   calculateSolicitedNode();
 </script>
@@ -304,10 +293,10 @@
             <div class="result-content">
               <code class="result-value unicast">{result.details.normalizedUnicast}</code>
               <button
-                class="copy-button {copiedStates['unicast'] ? 'copied' : ''}"
-                onclick={() => result && copyToClipboard(result.details.normalizedUnicast, 'unicast')}
+                class="copy-button {clipboard.isCopied('unicast') ? 'copied' : ''}"
+                onclick={() => result && clipboard.copy(result.details.normalizedUnicast, 'unicast')}
               >
-                <Icon name={copiedStates['unicast'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('unicast') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>
@@ -324,10 +313,10 @@
             <div class="result-content">
               <code class="result-value multicast">{result.solicitedNodeAddress}</code>
               <button
-                class="copy-button {copiedStates['multicast'] ? 'copied' : ''}"
-                onclick={() => result && copyToClipboard(result.solicitedNodeAddress, 'multicast')}
+                class="copy-button {clipboard.isCopied('multicast') ? 'copied' : ''}"
+                onclick={() => result && clipboard.copy(result.solicitedNodeAddress, 'multicast')}
               >
-                <Icon name={copiedStates['multicast'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('multicast') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>

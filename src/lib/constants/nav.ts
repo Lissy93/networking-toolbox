@@ -26,15 +26,31 @@ export const STANDALONE_PAGES: NavItem[] = [
   {
     href: makePath('/bookmarks'),
     label: 'Bookmarks',
+    icon: 'bookmarks',
     description: 'Save and organize network calculations and tool results',
     keywords: ['bookmarks', 'saved', 'favorites', 'shortcuts', 'calculations'],
   },
   {
-    href: makePath('/offline'),
-    label: 'Offline',
-    description: 'Access cached tools and data offline',
-    keywords: ['offline', 'cache', 'no-internet', 'local'],
+    href: makePath('/search'),
+    label: 'Search',
+    icon: 'search',
+    description: 'Find tools and reference content quickly',
+    keywords: ['search', 'find', 'lookup', 'tools', 'reference', 'content'],
   },
+  {
+    href: makePath('/settings'),
+    label: 'Settings',
+    icon: 'settings2',
+    description: 'Customize themes, layouts, and accessibility preferences',
+    keywords: ['settings', 'preferences', 'theme', 'layout', 'accessibility', 'customize'],
+  },
+  // {
+  //   href: makePath('/offline'),
+  //   label: 'Offline',
+  //   description: 'Access cached tools and data offline',
+  //   keywords: ['offline', 'cache', 'no-internet', 'local'],
+  //   icon: 'offline',
+  // },
 ];
 
 export const TOP_NAV: NavItem[] = [
@@ -1445,7 +1461,7 @@ export const SUB_NAV: Record<string, (NavItem | NavGroup)[]> = {
           href: makePath('/diagnostics/tls/ct-log-search'),
           label: 'CT Log Search',
           description: 'Search Certificate Transparency logs to discover all certificates issued for a domain',
-          icon: 'certificate',
+          icon: 'badge',
           featured: true,
           keywords: [
             'ct',
@@ -2139,38 +2155,113 @@ export const aboutPages: NavItem[] = [
   {
     href: makePath('/about/api'),
     label: 'API Usage',
+    icon: 'cli',
     description: 'Using our free public REST API for network calculations and IP tools',
     keywords: ['api', 'networking', 'ipv4', 'ipv6', 'network', 'tools', 'dns', 'cidr', 'subnet'],
   },
   {
     href: makePath('/about/attributions'),
     label: 'Attributions',
+    icon: 'clap',
     description: 'Shout outs to sponsors, contributors and other authors who made Networking Toolbox possible',
     keywords: ['attributions', 'credits', 'thanks', 'sponsors', 'contributors', 'libraries'],
   },
   {
     href: makePath('/about/author'),
     label: 'Author',
+    icon: 'dead-bot',
     description: 'About Alicia Sykes, and how and why she built Networking Toolbox',
     keywords: ['author', 'about', 'bio', 'Alicia Sykes', 'github'],
   },
   {
     href: makePath('/about/building'),
     label: 'Building',
+    icon: 'hammer',
     description: 'Build Networking Toolbox from source, self-host, edit, or contribute to the project',
     keywords: ['building', 'sveltekit', 'github', 'npm', 'svelte', 'typescript', 'developing documentation'],
   },
   {
-    href: makePath('/about/license'),
+    href: makePath('/about/support'),
+    label: 'Support',
+    icon: 'headset',
+    description: 'Get support, dedicated hosting, enterprise SSO, SLA or custom feature/tool development',
+    keywords: ['support', 'enterprise', 'sso', 'sla', 'custom', 'development', 'hosting', 'contact'],
+  },
+  {
+    href: makePath('/about/legal/license'),
     label: 'MIT License',
     description: `Networking Toolbox's MIT license, summary, and what it means for you`,
     keywords: ['license', 'mit', 'opensource', 'permissions', 'limitations', 'conditions'],
   },
   {
+    href: makePath('/about/legal/security'),
+    label: 'Security Policy',
+    description: 'Report security vulnerabilities and learn about our security practices',
+    keywords: ['security', 'policy', 'vulnerability', 'disclosure', 'reporting', 'bug', 'bounty'],
+  },
+  {
+    href: makePath('/about/legal/accessibility'),
+    label: 'Accessibility Policy',
+    description: 'WCAG AA compliant with keyboard navigation, screen reader support, and customizable display options',
+    keywords: ['accessibility', 'wcag', 'a11y', 'keyboard', 'screen reader', 'contrast', 'dyslexic', 'aria'],
+  },
+  {
+    href: makePath('/about/legal/community'),
+    label: 'Community Guidelines',
+    description: 'Code of conduct and community standards for contributors',
+    keywords: ['community', 'guidelines', 'code', 'conduct', 'contributor', 'covenant', 'behavior', 'standards'],
+  },
+  {
+    href: makePath('/about/legal/cookies'),
+    label: 'Cookie Policy',
+    description: "Our cookie policy: we don't use them",
+    keywords: ['cookie', 'cookies', 'policy', 'tracking', 'localstorage', 'privacy'],
+  },
+  {
     href: makePath('/about/self-hosting'),
     label: 'Self-Hosting',
+    icon: 'docker',
     description: 'Guide to self-hosting Networking Toolbox on your own server or infrastructure',
     keywords: ['self-hosting', 'deployment', 'docker', 'portainer', 'vercel', 'node', 'nginx'],
+  },
+];
+
+export const legalPages: NavItem[] = [
+  {
+    href: makePath('/about/legal/license'),
+    label: 'MIT License',
+    description: 'View the MIT license terms and conditions',
+    icon: 'certificate',
+  },
+  {
+    href: makePath('/about/legal/privacy'),
+    label: 'Privacy Policy',
+    description: 'Learn how we handle your data and protect your privacy',
+    icon: 'hide',
+  },
+  {
+    href: makePath('/about/legal/security'),
+    label: 'Security Policy',
+    description: 'Report vulnerabilities and learn about our security practices',
+    icon: 'shield',
+  },
+  {
+    href: makePath('/about/legal/accessibility'),
+    label: 'Accessibility Policy',
+    description: 'Learn about our accessibility features and WCAG AA compliance',
+    icon: 'accessibility',
+  },
+  {
+    href: makePath('/about/legal/community'),
+    label: 'Community Guidelines',
+    description: 'Code of conduct and community standards for contributors',
+    icon: 'users',
+  },
+  {
+    href: makePath('/about/legal/cookies'),
+    label: 'Cookie Policy',
+    description: "Our cookie policy: we don't use them",
+    icon: 'cookie',
   },
 ];
 
@@ -2216,7 +2307,6 @@ function extractAllNavItems(navStructure: (NavItem | NavGroup)[]): NavItem[] {
 
 // All pages for homepage navigation - combines standalone pages with sub-pages
 export const ALL_PAGES: NavItem[] = [
-  ...STANDALONE_PAGES,
   ...Object.values(SUB_NAV)
     .map((section) => extractAllNavItems(section as (NavItem | NavGroup)[]))
     .flat(),

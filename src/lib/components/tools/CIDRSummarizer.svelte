@@ -1,5 +1,6 @@
 <script lang="ts">
   import { summarizeCIDRs, type SummarizationResult } from '$lib/utils/cidr-summarization-fixed.js';
+  import { useClipboard } from '$lib/composables';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
   import SvgIcon from '$lib/components/global/SvgIcon.svelte';
@@ -11,7 +12,7 @@
 2001:db8::/64`);
   let mode = $state<'exact-merge' | 'minimal-cover'>('exact-merge');
   let result = $state<SummarizationResult | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExample = $state<string | null>(null);
 
   const modes = [
@@ -74,17 +75,6 @@ fe80::/10`,
     performSummarization();
   }
 
-  /* Copy text to clipboard */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => (copiedStates[id] = false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
-
   /* Copy all results */
   function copyAllResults() {
     if (!result) return;
@@ -97,7 +87,7 @@ fe80::/10`,
       sections.push('IPv6:', ...result.ipv6);
     }
 
-    copyToClipboard(sections.join('\n'), 'all-results');
+    clipboard.copy(sections.join('\n'), 'all-results');
   }
 
   /* Clear input */
@@ -238,10 +228,10 @@ fe80::/10`,
             <button
               type="button"
               class="btn btn-primary btn-sm"
-              class:copied={copiedStates['all-results']}
+              class:copied={clipboard.isCopied('all-results')}
               onclick={copyAllResults}
             >
-              <SvgIcon icon={copiedStates['all-results'] ? 'check' : 'clipboard'} size="md" />
+              <SvgIcon icon={clipboard.isCopied('all-results') ? 'check' : 'clipboard'} size="md" />
               Copy All
             </button>
           </Tooltip>
@@ -257,10 +247,10 @@ fe80::/10`,
                   <button
                     type="button"
                     class="btn btn-icon"
-                    class:copied={copiedStates['ipv4']}
-                    onclick={() => copyToClipboard((result?.ipv4 || []).join('\n'), 'ipv4')}
+                    class:copied={clipboard.isCopied('ipv4')}
+                    onclick={() => clipboard.copy((result?.ipv4 || []).join('\n'), 'ipv4')}
                   >
-                    <SvgIcon icon={copiedStates['ipv4'] ? 'check' : 'clipboard'} size="md" />
+                    <SvgIcon icon={clipboard.isCopied('ipv4') ? 'check' : 'clipboard'} size="md" />
                   </button>
                 </Tooltip>
               </div>
@@ -272,10 +262,10 @@ fe80::/10`,
                       <button
                         type="button"
                         class="btn btn-icon btn-xs"
-                        class:copied={copiedStates[cidr]}
-                        onclick={() => copyToClipboard(cidr, cidr)}
+                        class:copied={clipboard.isCopied(cidr)}
+                        onclick={() => clipboard.copy(cidr, cidr)}
                       >
-                        <SvgIcon icon={copiedStates[cidr] ? 'check' : 'clipboard'} size="sm" />
+                        <SvgIcon icon={clipboard.isCopied(cidr) ? 'check' : 'clipboard'} size="sm" />
                       </button>
                     </Tooltip>
                   </div>
@@ -293,10 +283,10 @@ fe80::/10`,
                   <button
                     type="button"
                     class="btn btn-icon"
-                    class:copied={copiedStates['ipv6']}
-                    onclick={() => copyToClipboard((result?.ipv6 || []).join('\n'), 'ipv6')}
+                    class:copied={clipboard.isCopied('ipv6')}
+                    onclick={() => clipboard.copy((result?.ipv6 || []).join('\n'), 'ipv6')}
                   >
-                    <SvgIcon icon={copiedStates['ipv6'] ? 'check' : 'clipboard'} size="md" />
+                    <SvgIcon icon={clipboard.isCopied('ipv6') ? 'check' : 'clipboard'} size="md" />
                   </button>
                 </Tooltip>
               </div>
@@ -308,10 +298,10 @@ fe80::/10`,
                       <button
                         type="button"
                         class="btn btn-icon btn-xs"
-                        class:copied={copiedStates[cidr]}
-                        onclick={() => copyToClipboard(cidr, cidr)}
+                        class:copied={clipboard.isCopied(cidr)}
+                        onclick={() => clipboard.copy(cidr, cidr)}
                       >
-                        <SvgIcon icon={copiedStates[cidr] ? 'check' : 'clipboard'} size="sm" />
+                        <SvgIcon icon={clipboard.isCopied(cidr) ? 'check' : 'clipboard'} size="sm" />
                       </button>
                     </Tooltip>
                   </div>

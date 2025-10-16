@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { performance } from 'perf_hooks';
+import { errorManager } from '$lib/utils/error-manager';
 
 interface HTTPTimings {
   dns: number;
@@ -804,7 +805,7 @@ export const POST: RequestHandler = async ({ request }) => {
         throw error(400, `Unknown action: ${action}`);
     }
   } catch (err: unknown) {
-    console.error('HTTP API error:', err);
+    errorManager.captureException(err, 'error', { component: 'HTTP API' });
 
     if ((err as any).status) {
       throw err; // Re-throw SvelteKit errors

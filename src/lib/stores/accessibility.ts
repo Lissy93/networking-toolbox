@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
+import { storage } from '$lib/utils/localStorage';
 
 export interface AccessibilityOption {
   id: string;
@@ -113,16 +114,9 @@ function createAccessibilityStore() {
 
     init: () => {
       if (browser) {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        let storedSettings: Partial<AccessibilitySettings> = {};
-
-        if (stored) {
-          try {
-            storedSettings = JSON.parse(stored);
-          } catch {
-            storedSettings = {};
-          }
-        }
+        const storedSettings = storage.getItem(STORAGE_KEY, {
+          defaultValue: { options: [] } as Partial<AccessibilitySettings>,
+        });
 
         // Merge stored settings with defaults, checking system preferences
         const options = DEFAULT_OPTIONS.map((defaultOption) => {
@@ -155,7 +149,7 @@ function createAccessibilityStore() {
         const newSettings = { ...settings, options: newOptions };
 
         if (browser) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
+          storage.setItem(STORAGE_KEY, newSettings);
 
           // Load dyslexic font if dyslexia-font option was just enabled
           if (optionId === 'dyslexia-font') {
@@ -179,7 +173,7 @@ function createAccessibilityStore() {
         const newSettings = { ...settings, options: newOptions };
 
         if (browser) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
+          storage.setItem(STORAGE_KEY, newSettings);
         }
 
         return newSettings;
@@ -195,7 +189,7 @@ function createAccessibilityStore() {
         const newSettings = { ...settings, options: newOptions };
 
         if (browser) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
+          storage.setItem(STORAGE_KEY, newSettings);
         }
 
         return newSettings;
@@ -226,7 +220,7 @@ function createAccessibilityStore() {
       set(defaultSettings);
 
       if (browser) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultSettings));
+        storage.setItem(STORAGE_KEY, defaultSettings);
       }
     },
   };

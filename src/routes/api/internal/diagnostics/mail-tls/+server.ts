@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { connect } from 'node:net';
 import * as tls from 'node:tls';
+import { errorManager } from '$lib/utils/error-manager';
 
 interface TLSCheckResult {
   domain: string;
@@ -71,6 +72,8 @@ async function checkSTARTTLS(domain: string, port: number): Promise<Partial<TLSC
         tlsSocket = (tls as any).connect({
           socket,
           servername: domain,
+          // SECURITY: rejectUnauthorized must be false for this mail TLS diagnostic tool.
+          // This tool analyzes mail server certificates including those with issues.
           rejectUnauthorized: false,
         });
 
@@ -127,6 +130,8 @@ async function checkDirectTLS(domain: string, port: number): Promise<Partial<TLS
       host: domain,
       port,
       servername: domain,
+      // SECURITY: rejectUnauthorized must be false for this mail TLS diagnostic tool.
+      // This tool analyzes mail server certificates including those with issues.
       rejectUnauthorized: false,
       timeout: 5000,
     });
@@ -218,7 +223,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     return json(result);
   } catch (error) {
-    console.error('Mail TLS check error:', error);
+    errorManager.captureException(error, 'error', { component: 'Mail TLS API' });
     return json(
       { message: error instanceof Error ? error.message : 'Failed to check mail server TLS' },
       { status: 500 },

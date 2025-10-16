@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { promises as dns } from 'node:dns';
+import { errorManager } from '$lib/utils/error-manager';
 
 interface DNSBLRequest {
   target: string; // IP or domain
@@ -498,7 +499,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     return json(response);
   } catch (err) {
-    console.error('DNSBL check error:', err);
+    errorManager.captureException(err, 'error', { component: 'DNSBL API' });
     if (err && typeof err === 'object' && 'status' in err) {
       throw err;
     }

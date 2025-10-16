@@ -2,6 +2,7 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { estimateEDNSSize, type DNSRecord, type EDNSEstimate } from '$lib/utils/dns-validation.js';
+  import { useClipboard } from '$lib/composables';
 
   let queryName = $state('example.com');
   let queryType = $state('A');
@@ -10,7 +11,7 @@
   let records = $state<DNSRecord[]>([{ name: 'example.com', type: 'A', value: '192.0.2.1', ttl: 3600 }]);
 
   let results = $state<EDNSEstimate | null>(null);
-  let copiedState = $state(false);
+  const clipboard = useClipboard();
   let activeExampleIndex = $state<number | null>(null);
 
   const recordTypes = ['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'SRV', 'NS', 'SOA', 'CAA', 'DNSKEY', 'RRSIG'];
@@ -176,22 +177,6 @@
 
   function hasRecommendations(): boolean {
     return !!(results && results.recommendations && results.recommendations.length > 0);
-  }
-
-  async function copyEstimate() {
-    try {
-      const summary = `DNS Message Size Estimate:
-Total Size: ${results?.totalSize || 0} bytes
-UDP Safe: ${results?.udpSafe ? 'Yes' : 'No'}
-Fragmentation Risk: ${results?.fragmentationRisk || 'unknown'}`;
-      await navigator.clipboard.writeText(summary);
-      copiedState = true;
-      setTimeout(() => {
-        copiedState = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy: ', err);
-    }
   }
 
   function handleInputChange() {
@@ -399,8 +384,15 @@ Fragmentation Risk: ${results?.fragmentationRisk || 'unknown'}`;
               <Icon name="ruler" size="sm" />
               Size Breakdown
             </h4>
-            <button class="copy-button {copiedState ? 'copied' : ''}" onclick={copyEstimate}>
-              <Icon name={copiedState ? 'check' : 'copy'} size="sm" />
+            <button
+              class="copy-button {clipboard.isCopied() ? 'copied' : ''}"
+              onclick={() =>
+                clipboard.copy(`DNS Message Size Estimate:
+Total Size: ${results?.totalSize || 0} bytes
+UDP Safe: ${results?.udpSafe ? 'Yes' : 'No'}
+Fragmentation Risk: ${results?.fragmentationRisk || 'unknown'}`)}
+            >
+              <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="sm" />
               Copy Summary
             </button>
           </div>

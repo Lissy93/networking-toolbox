@@ -1,5 +1,6 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
+  import { useClipboard } from '$lib/composables';
   import Icon from '$lib/components/global/Icon.svelte';
   import { SvelteSet } from 'svelte/reactivity';
   import '../../../styles/diagnostics-pages.scss';
@@ -27,7 +28,7 @@
       unchangedCount: number;
     };
   } | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let _selectedExample = $state<string | null>(null);
   let selectedExampleIndex = $state<number | null>(null);
   let _userModified = $state(false);
@@ -254,23 +255,11 @@
     performComparison();
   }
 
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
-
   async function copyCategory(items: string[], category: string) {
     if (!items.length) return;
 
     const text = items.join('\n');
-    await copyToClipboard(text, `category-${category}`);
+    await clipboard.copy(text, `category-${category}`);
   }
 
   function swapLists() {
@@ -418,10 +407,10 @@
               </h4>
               {#if result.added.length > 0}
                 <button
-                  class="copy-category {copiedStates['category-added'] ? 'copied' : ''}"
+                  class="copy-category {clipboard.isCopied('category-added') ? 'copied' : ''}"
                   onclick={() => result && copyCategory(result.added, 'added')}
                 >
-                  <Icon name={copiedStates['category-added'] ? 'check-circle' : 'copy'} size="xs" />
+                  <Icon name={clipboard.isCopied('category-added') ? 'check-circle' : 'copy'} size="xs" />
                 </button>
               {/if}
             </div>
@@ -432,10 +421,10 @@
                   <div class="network-item added">
                     <code class="network-cidr">{network}</code>
                     <button
-                      class="copy-button {copiedStates[`added-${network}`] ? 'copied' : ''}"
-                      onclick={() => copyToClipboard(network, `added-${network}`)}
+                      class="copy-button {clipboard.isCopied(`added-${network}`) ? 'copied' : ''}"
+                      onclick={() => clipboard.copy(network, `added-${network}`)}
                     >
-                      <Icon name={copiedStates[`added-${network}`] ? 'check-circle' : 'copy'} size="xs" />
+                      <Icon name={clipboard.isCopied(`added-${network}`) ? 'check-circle' : 'copy'} size="xs" />
                     </button>
                   </div>
                 {/each}
@@ -457,10 +446,10 @@
               </h4>
               {#if result.removed.length > 0}
                 <button
-                  class="copy-category {copiedStates['category-removed'] ? 'copied' : ''}"
+                  class="copy-category {clipboard.isCopied('category-removed') ? 'copied' : ''}"
                   onclick={() => result && copyCategory(result.removed, 'removed')}
                 >
-                  <Icon name={copiedStates['category-removed'] ? 'check-circle' : 'copy'} size="xs" />
+                  <Icon name={clipboard.isCopied('category-removed') ? 'check-circle' : 'copy'} size="xs" />
                 </button>
               {/if}
             </div>
@@ -471,10 +460,10 @@
                   <div class="network-item removed">
                     <code class="network-cidr">{network}</code>
                     <button
-                      class="copy-button {copiedStates[`removed-${network}`] ? 'copied' : ''}"
-                      onclick={() => copyToClipboard(network, `removed-${network}`)}
+                      class="copy-button {clipboard.isCopied(`removed-${network}`) ? 'copied' : ''}"
+                      onclick={() => clipboard.copy(network, `removed-${network}`)}
                     >
-                      <Icon name={copiedStates[`removed-${network}`] ? 'check-circle' : 'copy'} size="xs" />
+                      <Icon name={clipboard.isCopied(`removed-${network}`) ? 'check-circle' : 'copy'} size="xs" />
                     </button>
                   </div>
                 {/each}
@@ -496,10 +485,10 @@
               </h4>
               {#if result.unchanged.length > 0}
                 <button
-                  class="copy-category {copiedStates['category-unchanged'] ? 'copied' : ''}"
+                  class="copy-category {clipboard.isCopied('category-unchanged') ? 'copied' : ''}"
                   onclick={() => copyCategory(result?.unchanged || [], 'unchanged')}
                 >
-                  <Icon name={copiedStates['category-unchanged'] ? 'check-circle' : 'copy'} size="xs" />
+                  <Icon name={clipboard.isCopied('category-unchanged') ? 'check-circle' : 'copy'} size="xs" />
                 </button>
               {/if}
             </div>
@@ -510,10 +499,10 @@
                   <div class="network-item unchanged">
                     <code class="network-cidr">{network}</code>
                     <button
-                      class="copy-button {copiedStates[`unchanged-${network}`] ? 'copied' : ''}"
-                      onclick={() => copyToClipboard(network, `unchanged-${network}`)}
+                      class="copy-button {clipboard.isCopied(`unchanged-${network}`) ? 'copied' : ''}"
+                      onclick={() => clipboard.copy(network, `unchanged-${network}`)}
                     >
-                      <Icon name={copiedStates[`unchanged-${network}`] ? 'check-circle' : 'copy'} size="xs" />
+                      <Icon name={clipboard.isCopied(`unchanged-${network}`) ? 'check-circle' : 'copy'} size="xs" />
                     </button>
                   </div>
                 {/each}
@@ -849,5 +838,9 @@
       gap: var(--spacing-sm);
       align-items: stretch;
     }
+  }
+
+  textarea {
+    background: var(--bg-primary);
   }
 </style>

@@ -2,6 +2,7 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { calculateNSEC3Hash, NSEC3_HASH_ALGORITHMS } from '$lib/utils/dnssec';
+  import { useClipboard } from '$lib/composables';
 
   let domainName = $state('www.example.com.');
   let salt = $state('');
@@ -9,7 +10,7 @@
   let algorithm = $state(1);
   let activeExampleIndex = $state<number | null>(null);
   let isActiveExample = $state(true);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
 
   const examples = [
     {
@@ -132,28 +133,16 @@
     }
   }
 
-  async function copyToClipboard(text: string, key: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[key] = true;
-      setTimeout(() => {
-        copiedStates[key] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
-
   function copyHash() {
     if (result?.hash) {
-      copyToClipboard(result.hash, 'hash');
+      clipboard.copy(result.hash, 'hash');
     }
   }
 
   function copyNSEC3Record() {
     if (result?.hash && result?.originalName) {
       const record = `${result.hash}.example.com. IN NSEC3 1 0 ${iterations} ${salt || '-'} ${result.hash} A RRSIG`;
-      copyToClipboard(record, 'record');
+      clipboard.copy(record, 'record');
     }
   }
 
@@ -332,12 +321,12 @@
       <div class="results-header">
         <h3>NSEC3 Hash Result</h3>
         <div class="header-actions">
-          <button class="copy-button {copiedStates.hash ? 'copied' : ''}" onclick={copyHash}>
-            <Icon name={copiedStates.hash ? 'check' : 'copy'} size="sm" />
+          <button class="copy-button {clipboard.isCopied('hash') ? 'copied' : ''}" onclick={copyHash}>
+            <Icon name={clipboard.isCopied('hash') ? 'check' : 'copy'} size="sm" />
             Copy Hash
           </button>
-          <button class="copy-button {copiedStates.record ? 'copied' : ''}" onclick={copyNSEC3Record}>
-            <Icon name={copiedStates.record ? 'check' : 'copy'} size="sm" />
+          <button class="copy-button {clipboard.isCopied('record') ? 'copied' : ''}" onclick={copyNSEC3Record}>
+            <Icon name={clipboard.isCopied('record') ? 'check' : 'copy'} size="sm" />
             Copy Record
           </button>
         </div>

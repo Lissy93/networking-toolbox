@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
   import {
     generateCIDRPTRs,
     generateReverseZoneFile,
@@ -30,7 +31,7 @@
     };
   } | null>(null);
 
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExample = $state<string | null>(null);
   let _userModified = $state(false);
 
@@ -146,18 +147,6 @@
     _userModified = true;
     selectedExample = null;
     generateZones();
-  }
-
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
   }
 
   // Generate on component load
@@ -361,10 +350,10 @@
                   </div>
                 </div>
                 <button
-                  class="copy-button {copiedStates[`zone-${index}`] ? 'copied' : ''}"
-                  onclick={() => copyToClipboard(zone.content, `zone-${index}`)}
+                  class="copy-button {clipboard.isCopied(`zone-${index}`) ? 'copied' : ''}"
+                  onclick={() => clipboard.copy(zone.content, `zone-${index}`)}
                 >
-                  <Icon name={copiedStates[`zone-${index}`] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied(`zone-${index}`) ? 'check' : 'copy'} size="sm" />
                   Copy Zone File
                 </button>
               </div>

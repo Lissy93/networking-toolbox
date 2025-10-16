@@ -1,10 +1,11 @@
 <script lang="ts">
   import { browser } from '$app/environment';
+  import { page } from '$app/stores';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { isStaticDeployment } from '$lib/utils/deployment';
   import { onMount } from 'svelte';
 
   let isOffline = false;
-  let isStaticDeployment = false;
 
   onMount(() => {
     if (browser) {
@@ -18,16 +19,6 @@
       window.addEventListener('online', handleOnline);
       window.addEventListener('offline', handleOffline);
 
-      // Check for static deployment environment
-      // This checks for common static deployment indicators
-      isStaticDeployment =
-        import.meta.env.DEPLOY_ENV === 'static' ||
-        import.meta.env.DEPLOY_ENV === 'STATIC' ||
-        import.meta.env.VITE_DEPLOY_ENV === 'static' ||
-        import.meta.env.VITE_DEPLOY_ENV === 'STATIC' ||
-        // Fallback: check if we're missing server-side features
-        (typeof window !== 'undefined' && !window.fetch);
-
       return () => {
         window.removeEventListener('online', handleOnline);
         window.removeEventListener('offline', handleOffline);
@@ -36,6 +27,8 @@
   });
 
   $: showWarning = isOffline || isStaticDeployment;
+  $: currentPath = $page.url.pathname;
+  $: publicUrl = `https://www.networkingtoolbox.net${currentPath}`;
 </script>
 
 {#if showWarning}
@@ -43,13 +36,26 @@
     <div class="warning-content">
       <Icon name="warning" size="sm" />
       <div class="warning-text">
-        <strong>Limited Functionality:</strong>
+        <strong>Warning:</strong>
         {#if isOffline && isStaticDeployment}
-          Diagnostic tools are unavailable due to offline status and static deployment.
+          Diagnostic tools are unavailable while offline and on static deployments. Try using <a
+            href={publicUrl}
+            target="_blank"
+            rel="noopener noreferrer">the public instance</a
+          > instead.
         {:else if isOffline}
-          Diagnostic tools are unavailable while offline.
+          Diagnostic tools are unavailable while offline. Try using <a
+            href={publicUrl}
+            target="_blank"
+            rel="noopener noreferrer">the public instance</a
+          > instead.
         {:else}
-          Diagnostic tools will not work properly on static deployments.
+          Looks like you might have deployed your app to a static host. Since API endpoints are not available in your
+          environment, this tool won't work as expected. You can use it <a
+            href={publicUrl}
+            target="_blank"
+            rel="noopener noreferrer">here</a
+          > instead.
         {/if}
       </div>
     </div>
@@ -92,6 +98,16 @@
       strong {
         font-weight: 600;
         color: var(--color-warning);
+      }
+
+      a {
+        color: var(--color-primary);
+        text-decoration: underline;
+        font-weight: 500;
+
+        &:hover {
+          opacity: 0.8;
+        }
       }
     }
   }

@@ -1,14 +1,16 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
   import { cidrDeaggregate, getSubnetSize, type DeaggregateResult } from '$lib/utils/cidr-deaggregate.js';
+  import { formatNumber } from '$lib/utils/formatters';
   import '../../../styles/diagnostics-pages.scss';
 
   let input = $state(`192.168.0.0/22
 10.0.0.0-10.0.0.255`);
   let targetPrefix = $state(24);
   let result = $state<DeaggregateResult | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let _selectedExample = $state<string | null>(null);
   let selectedExampleIndex = $state<number | null>(null);
   let _userModified = $state(false);
@@ -76,23 +78,11 @@
     performDeaggregation();
   }
 
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
-
   async function copyAllSubnets() {
     if (!result?.subnets.length) return;
 
     const allText = result.subnets.join('\n');
-    await copyToClipboard(allText, 'all-subnets');
+    await clipboard.copy(allText, 'all-subnets');
   }
 
   // Calculate on component load
@@ -168,7 +158,7 @@
         <div class="prefix-info">
           {#if targetPrefix}
             {@const addresses = getSubnetSize(targetPrefix)}
-            Each /{targetPrefix} subnet = {addresses.toLocaleString()} addresses
+            Each /{targetPrefix} subnet = {formatNumber(addresses)} addresses
           {/if}
         </div>
       </div>
@@ -189,13 +179,16 @@
               </span>
               <span class="metric">
                 <Icon name="database" size="sm" />
-                {result.totalAddresses.toLocaleString()} addresses
+                {formatNumber(result.totalAddresses)} addresses
               </span>
             </div>
             {#if result.subnets.length > 0}
-              <button class="copy-all-button {copiedStates['all-subnets'] ? 'copied' : ''}" onclick={copyAllSubnets}>
-                <Icon name={copiedStates['all-subnets'] ? 'check' : 'copy'} size="sm" />
-                {copiedStates['all-subnets'] ? 'Copied!' : 'Copy All'}
+              <button
+                class="copy-all-button {clipboard.isCopied('all-subnets') ? 'copied' : ''}"
+                onclick={copyAllSubnets}
+              >
+                <Icon name={clipboard.isCopied('all-subnets') ? 'check' : 'copy'} size="sm" />
+                {clipboard.isCopied('all-subnets') ? 'Copied!' : 'Copy All'}
               </button>
             {/if}
           </div>
@@ -206,13 +199,13 @@
           <div class="summary-item">
             <span class="summary-label" use:tooltip={'Original networks, ranges, and addresses provided'}>Input:</span>
             <span class="summary-value">
-              {result.inputSummary.totalInputs} items, {result.inputSummary.totalInputAddresses.toLocaleString()} addresses
+              {result.inputSummary.totalInputs} items, {formatNumber(result.inputSummary.totalInputAddresses)} addresses
             </span>
           </div>
           <div class="summary-item">
             <span class="summary-label" use:tooltip={'Uniform subnets generated from input'}>Output:</span>
             <span class="summary-value">
-              {result.totalSubnets} /{targetPrefix} subnets, {result.totalAddresses.toLocaleString()} addresses
+              {result.totalSubnets} /{targetPrefix} subnets, {formatNumber(result.totalAddresses)} addresses
             </span>
           </div>
           {#if result.totalAddresses !== result.inputSummary.totalInputAddresses}
@@ -221,9 +214,9 @@
                 >Note:</span
               >
               <span class="summary-value address-diff">
-                {result.totalAddresses > result.inputSummary.totalInputAddresses ? 'Expanded' : 'Reduced'} by {Math.abs(
-                  result.totalAddresses - result.inputSummary.totalInputAddresses,
-                ).toLocaleString()} addresses (due to alignment to /{targetPrefix} boundaries)
+                {result.totalAddresses > result.inputSummary.totalInputAddresses ? 'Expanded' : 'Reduced'} by {formatNumber(
+                  Math.abs(result.totalAddresses - result.inputSummary.totalInputAddresses),
+                )} addresses (due to alignment to /{targetPrefix} boundaries)
               </span>
             </div>
           {/if}
@@ -237,16 +230,16 @@
                 <div class="subnet-header">
                   <code class="subnet-cidr">{subnet}</code>
                   <button
-                    class="copy-button {copiedStates[`subnet-${index}`] ? 'copied' : ''}"
-                    onclick={() => copyToClipboard(subnet, `subnet-${index}`)}
+                    class="copy-button {clipboard.isCopied(`subnet-${index}`) ? 'copied' : ''}"
+                    onclick={() => clipboard.copy(subnet, `subnet-${index}`)}
                     aria-label="Copy CIDR block"
                   >
-                    <Icon name={copiedStates[`subnet-${index}`] ? 'check' : 'copy'} size="xs" />
+                    <Icon name={clipboard.isCopied(`subnet-${index}`) ? 'check' : 'copy'} size="xs" />
                   </button>
                 </div>
                 <div class="subnet-info">
                   <span class="address-count">
-                    {subnetSize.toLocaleString()} addresses
+                    {formatNumber(subnetSize)} addresses
                   </span>
                   {#if subnetSize >= 256}
                     <span class="subnet-size">
@@ -330,7 +323,7 @@
     gap: var(--spacing-md);
 
     h3 {
-      color: var(--color-success-light);
+      color: var(--color-primary);
       margin: 0;
     }
   }
@@ -552,5 +545,10 @@
     .results-summary {
       justify-content: center;
     }
+  }
+
+  input,
+  textarea {
+    background: var(--bg-primary);
   }
 </style>

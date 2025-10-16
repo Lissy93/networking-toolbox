@@ -7,11 +7,27 @@
   } from '$lib/utils/ipv6-subnet-calculations.js';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
+  import { useClipboard } from '$lib/composables';
+  import { goto } from '$app/navigation';
+
+  const versionOptions = [
+    { value: 'ipv4' as const, label: 'IPv4' },
+    { value: 'ipv6' as const, label: 'IPv6' },
+  ];
+
+  let selectedVersion = $state<'ipv4' | 'ipv6'>('ipv6');
+
+  function handleVersionChange(version: 'ipv4' | 'ipv6') {
+    if (version === 'ipv4') {
+      goto('/subnetting/ipv4-subnet-calculator');
+    }
+  }
 
   let networkAddress = $state('2001:db8::/64');
   let prefixLength = $state(64);
   let subnetResult = $state<IPv6SubnetResult | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let showBinaryView = $state(false);
 
   const commonPrefixes = getCommonIPv6Prefixes();
@@ -60,19 +76,6 @@
     prefixLength = prefix;
   }
 
-  /* Copy text to clipboard */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 3000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
-
   /* Get prefix description */
   function getPrefixDescription(prefix: number): string {
     const common = commonPrefixes.find((p) => p.prefix === prefix);
@@ -100,12 +103,14 @@
   // activePreset is now derived automatically
 </script>
 
-<div class="card ipv6-calc-card">
-  <header class="card-header">
-    <h2>IPv6 Subnet Calculator</h2>
-    <p>Calculate IPv6 subnet information with 128-bit addressing and modern network prefix notation.</p>
-  </header>
-
+<ToolContentContainer
+  title="IPv6 Subnet Calculator"
+  description="Calculate IPv6 subnet information with 128-bit addressing and modern network prefix notation."
+  navOptions={versionOptions}
+  bind:selectedNav={selectedVersion}
+  onNavChange={handleVersionChange}
+  contentClass="ipv6-calc-card"
+>
   <!-- Input Section -->
   <div class="input-section">
     <h3>Network Configuration</h3>
@@ -202,15 +207,15 @@
               <span class="info-value">{subnetResult.subnet.networkCompressed}/{subnetResult.subnet.prefixLength}</span>
               <button
                 class="btn btn-icon copy-btn"
-                class:copied={copiedStates['network']}
+                class:copied={clipboard.isCopied('network')}
                 onclick={() =>
                   subnetResult?.subnet &&
-                  copyToClipboard(
+                  clipboard.copy(
                     `${subnetResult.subnet.networkCompressed}/${subnetResult.subnet.prefixLength}`,
                     'network',
                   )}
               >
-                <Icon name={copiedStates['network'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('network') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>
@@ -246,11 +251,11 @@
               <code class="detail-value">{subnetResult.subnet.networkCompressed}</code>
               <button
                 class="btn btn-icon copy-btn"
-                class:copied={copiedStates['compressed']}
+                class:copied={clipboard.isCopied('compressed')}
                 onclick={() =>
-                  subnetResult?.subnet && copyToClipboard(subnetResult.subnet.networkCompressed, 'compressed')}
+                  subnetResult?.subnet && clipboard.copy(subnetResult.subnet.networkCompressed, 'compressed')}
               >
-                <Icon name={copiedStates['compressed'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('compressed') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>
@@ -266,10 +271,10 @@
               <code class="detail-value expanded">{subnetResult.subnet.networkExpanded}</code>
               <button
                 class="btn btn-icon copy-btn"
-                class:copied={copiedStates['expanded']}
-                onclick={() => subnetResult?.subnet && copyToClipboard(subnetResult.subnet.networkExpanded, 'expanded')}
+                class:copied={clipboard.isCopied('expanded')}
+                onclick={() => subnetResult?.subnet && clipboard.copy(subnetResult.subnet.networkExpanded, 'expanded')}
               >
-                <Icon name={copiedStates['expanded'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('expanded') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>
@@ -285,10 +290,10 @@
               <code class="detail-value">{subnetResult.subnet.subnetMask}</code>
               <button
                 class="btn btn-icon copy-btn"
-                class:copied={copiedStates['mask']}
-                onclick={() => subnetResult?.subnet && copyToClipboard(subnetResult.subnet.subnetMask, 'mask')}
+                class:copied={clipboard.isCopied('mask')}
+                onclick={() => subnetResult?.subnet && clipboard.copy(subnetResult.subnet.subnetMask, 'mask')}
               >
-                <Icon name={copiedStates['mask'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('mask') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>
@@ -306,12 +311,12 @@
               </code>
               <button
                 class="btn btn-icon copy-btn"
-                class:copied={copiedStates['range']}
+                class:copied={clipboard.isCopied('range')}
                 onclick={() =>
                   subnetResult?.subnet &&
-                  copyToClipboard(`${subnetResult.subnet.firstAddress} - ${subnetResult.subnet.lastAddress}`, 'range')}
+                  clipboard.copy(`${subnetResult.subnet.firstAddress} - ${subnetResult.subnet.lastAddress}`, 'range')}
               >
-                <Icon name={copiedStates['range'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('range') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>
@@ -327,11 +332,11 @@
               <code class="detail-value">{formatLargeNumber(subnetResult.subnet.assignableAddresses)}</code>
               <button
                 class="btn btn-icon copy-btn"
-                class:copied={copiedStates['assignable']}
+                class:copied={clipboard.isCopied('assignable')}
                 onclick={() =>
-                  subnetResult?.subnet && copyToClipboard(subnetResult.subnet.assignableAddresses, 'assignable')}
+                  subnetResult?.subnet && clipboard.copy(subnetResult.subnet.assignableAddresses, 'assignable')}
               >
-                <Icon name={copiedStates['assignable'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('assignable') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>
@@ -347,10 +352,10 @@
               <code class="detail-value reverse">{subnetResult.subnet.reverseZone}</code>
               <button
                 class="btn btn-icon copy-btn"
-                class:copied={copiedStates['reverse']}
-                onclick={() => subnetResult?.subnet && copyToClipboard(subnetResult.subnet.reverseZone, 'reverse')}
+                class:copied={clipboard.isCopied('reverse')}
+                onclick={() => subnetResult?.subnet && clipboard.copy(subnetResult.subnet.reverseZone, 'reverse')}
               >
-                <Icon name={copiedStates['reverse'] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied('reverse') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
           </div>
@@ -367,10 +372,10 @@
                 <code class="detail-value binary-display">{subnetResult.subnet.binaryPrefix}</code>
                 <button
                   class="btn btn-icon copy-btn"
-                  class:copied={copiedStates['binary']}
-                  onclick={() => subnetResult?.subnet && copyToClipboard(subnetResult.subnet.binaryPrefix, 'binary')}
+                  class:copied={clipboard.isCopied('binary')}
+                  onclick={() => subnetResult?.subnet && clipboard.copy(subnetResult.subnet.binaryPrefix, 'binary')}
                 >
-                  <Icon name={copiedStates['binary'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('binary') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
             </div>
@@ -426,13 +431,13 @@
       </div>
     </div>
   {/if}
-</div>
+</ToolContentContainer>
 
 <style>
-  .ipv6-calc-card .btn :global(.icon) {
-    width: 1rem;
-    height: 1rem;
+  .btn {
     vertical-align: middle;
+    display: flex;
+    gap: var(--spacing-sm);
   }
 
   .input-section {

@@ -1,6 +1,8 @@
 <script lang="ts">
   // import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
+  import { formatNumber } from '$lib/utils/formatters';
 
   let input = $state('192.168.1.0/28');
   let maxDisplayLimit = $state(1000);
@@ -23,7 +25,7 @@
     };
   } | null>(null);
   let isGenerating = $state(false);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExample = $state<string | null>(null);
   let _userModified = $state(false);
 
@@ -163,7 +165,7 @@
 
           if (size > BigInt(ABSOLUTE_MAX_GENERATION)) {
             throw new Error(
-              `IPv6 /${prefixLength} would generate ${size.toLocaleString()} addresses. Maximum allowed: ${ABSOLUTE_MAX_GENERATION.toLocaleString()}`,
+              `IPv6 /${prefixLength} would generate ${formatNumber(Number(size))} addresses. Maximum allowed: ${formatNumber(ABSOLUTE_MAX_GENERATION)}`,
             );
           }
 
@@ -185,7 +187,7 @@
 
           if (size > ABSOLUTE_MAX_GENERATION) {
             throw new Error(
-              `/${prefixLength} would generate ${size.toLocaleString()} addresses. Maximum allowed: ${ABSOLUTE_MAX_GENERATION.toLocaleString()}`,
+              `/${prefixLength} would generate ${formatNumber(size)} addresses. Maximum allowed: ${formatNumber(ABSOLUTE_MAX_GENERATION)}`,
             );
           }
 
@@ -219,7 +221,7 @@
 
         if (count > ABSOLUTE_MAX_GENERATION) {
           throw new Error(
-            `Range would generate ${count.toLocaleString()} addresses. Maximum allowed: ${ABSOLUTE_MAX_GENERATION.toLocaleString()}`,
+            `Range would generate ${formatNumber(count)} addresses. Maximum allowed: ${formatNumber(ABSOLUTE_MAX_GENERATION)}`,
           );
         }
 
@@ -271,18 +273,6 @@
     _userModified = true;
     selectedExample = null;
     enumerateIPs();
-  }
-
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
   }
 
   async function exportToCSV() {
@@ -414,7 +404,9 @@
     <div class="safety-warning">
       <Icon name="alert-triangle" size="sm" />
       <div>
-        <strong>Safety:</strong> Max {ABSOLUTE_MAX_DISPLAY.toLocaleString()} displayed, {ABSOLUTE_MAX_GENERATION.toLocaleString()}
+        <strong>Safety:</strong> Max {formatNumber(ABSOLUTE_MAX_DISPLAY)} displayed, {formatNumber(
+          ABSOLUTE_MAX_GENERATION,
+        )}
         generated
       </div>
     </div>
@@ -453,21 +445,21 @@
               CSV
             </button>
             <button
-              class="copy-btn {copiedStates['all-addresses'] ? 'copied' : ''}"
-              onclick={() => copyToClipboard((result?.addresses || []).join('\n'), 'all-addresses')}
+              class="copy-btn {clipboard.isCopied('all-addresses') ? 'copied' : ''}"
+              onclick={() => clipboard.copy((result?.addresses || []).join('\n'), 'all-addresses')}
             >
-              <Icon name={copiedStates['all-addresses'] ? 'check' : 'copy'} size="sm" />
+              <Icon name={clipboard.isCopied('all-addresses') ? 'check' : 'copy'} size="sm" />
               Copy All
             </button>
           </div>
 
           <div class="summary-stats">
             <div class="stat">
-              <span class="stat-value">{result.totalCount.toLocaleString()}</span>
+              <span class="stat-value">{formatNumber(result.totalCount)}</span>
               <span class="stat-label">Total</span>
             </div>
             <div class="stat">
-              <span class="stat-value">{result.displayCount.toLocaleString()}</span>
+              <span class="stat-value">{formatNumber(result.displayCount)}</span>
               <span class="stat-label">Shown</span>
             </div>
             <div class="stat">
@@ -501,7 +493,7 @@
             </h3>
             {#if result.truncated}
               <span class="truncated-notice"
-                >Showing {result.displayCount.toLocaleString()} of {result.totalCount.toLocaleString()}</span
+                >Showing {formatNumber(result.displayCount)} of {formatNumber(result.totalCount)}</span
               >
             {/if}
           </div>
@@ -512,10 +504,10 @@
                 <span class="address-index">{index + 1}</span>
                 <code class="address-code">{address}</code>
                 <button
-                  class="copy-btn-small {copiedStates[address] ? 'copied' : ''}"
-                  onclick={() => copyToClipboard(address, address)}
+                  class="copy-btn-small {clipboard.isCopied(address) ? 'copied' : ''}"
+                  onclick={() => clipboard.copy(address, address)}
                 >
-                  <Icon name={copiedStates[address] ? 'check' : 'copy'} size="xs" />
+                  <Icon name={clipboard.isCopied(address) ? 'check' : 'copy'} size="xs" />
                 </button>
               </div>
             {/each}
@@ -669,7 +661,7 @@
 
         &::after {
           opacity: 1;
-          color: white;
+          color: var(--bg-secondary);
         }
       }
     }

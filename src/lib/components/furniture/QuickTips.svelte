@@ -3,6 +3,7 @@
   import { browser } from '$app/environment';
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
+  import { SHOW_TIPS_ON_HOMEPAGE } from '$lib/config/customizable-settings';
 
   interface Tip {
     icon: string;
@@ -39,6 +40,7 @@
   const TOOL_USAGE_KEY = 'networking-toolbox-tool-usage';
 
   function shouldShowTips(): boolean {
+    const defaultShow = SHOW_TIPS_ON_HOMEPAGE;
     if (!browser) return false;
 
     try {
@@ -53,10 +55,9 @@
         const visitCount = Object.keys(toolUsage).length;
         if (visitCount >= 3) return false;
       }
-
-      return true;
+      return defaultShow;
     } catch {
-      return true;
+      return defaultShow;
     }
   }
 

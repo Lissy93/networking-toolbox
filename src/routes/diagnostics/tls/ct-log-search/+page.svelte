@@ -1,5 +1,8 @@
 <script lang="ts">
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import { ctLogContent as content } from '$lib/content/ct-log-search';
   import '../../../../styles/diagnostics-pages.scss';
 
@@ -31,7 +34,7 @@
     timestamp: string;
   }
 
-  const examples = [
+  const examplesList = [
     { domain: 'as93.net', desc: 'Domain hosting multiple apps' },
     { domain: 'github.com', desc: 'Popular tech platform with modern certificate infrastructure' },
     { domain: 'google.com', desc: 'Shows historic DigiNotar breach certificate from 2011' },
@@ -39,6 +42,7 @@
     { domain: 'wikipedia.org', desc: 'Example of wildcard certificate usage' },
     { domain: 'twitter.com', desc: 'Shows certificate lifecycle and expiration tracking' },
   ];
+  const examples = useExamples(examplesList);
 
   const statsConfig = [
     {
@@ -87,28 +91,23 @@
   ];
 
   let domain = $state('');
-  let loading = $state(false);
-  let results = $state<CTLogResponse | null>(null);
-  let error = $state<string | null>(null);
-  let copiedState = $state(false);
+  const diagnosticState = useDiagnosticState<CTLogResponse>();
+  const clipboard = useClipboard();
   let expandedCert = $state<number | null>(null);
-  let selectedExample = $state<string | null>(null);
 
-  async function loadExample(exampleDomain: string) {
-    domain = exampleDomain;
-    selectedExample = exampleDomain;
+  async function loadExample(example: (typeof examplesList)[0], index: number) {
+    domain = example.domain;
+    examples.select(index);
     await searchCTLogs();
   }
 
   async function searchCTLogs() {
     if (!domain.trim()) {
-      error = 'Please enter a domain name';
+      diagnosticState.setError('Please enter a domain name');
       return;
     }
 
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/ct-log-search', {
@@ -122,30 +121,26 @@
         throw new Error(errorData.message || 'Search failed');
       }
 
-      results = await response.json();
+      diagnosticState.setResults(await response.json());
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : 'Unknown error occurred';
-    } finally {
-      loading = false;
+      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
     }
   }
 
   async function copyResults() {
-    if (!results) return;
+    if (!diagnosticState.results) return;
 
-    let text = `Certificate Transparency Log Search\nDomain: ${results.domain}\nGenerated at: ${results.timestamp}\n\n`;
-    text += `Total Certificates: ${results.totalCertificates}\n`;
-    text += `Valid Certificates: ${results.validCertificates}\n`;
-    text += `Expiring Soon (30 days): ${results.expiringSoon}\n`;
-    text += `Wildcard Certificates: ${results.wildcardCertificates}\n\n`;
-    text += `Discovered Hostnames (${results.discoveredHostnames.length}):\n`;
-    results.discoveredHostnames.forEach((h) => (text += `  - ${h}\n`));
+    let text = `Certificate Transparency Log Search\nDomain: ${diagnosticState.results.domain}\nGenerated at: ${diagnosticState.results.timestamp}\n\n`;
+    text += `Total Certificates: ${diagnosticState.results.totalCertificates}\n`;
+    text += `Valid Certificates: ${diagnosticState.results.validCertificates}\n`;
+    text += `Expiring Soon (30 days): ${diagnosticState.results.expiringSoon}\n`;
+    text += `Wildcard Certificates: ${diagnosticState.results.wildcardCertificates}\n\n`;
+    text += `Discovered Hostnames (${diagnosticState.results.discoveredHostnames.length}):\n`;
+    diagnosticState.results.discoveredHostnames.forEach((h) => (text += `  - ${h}\n`));
     text += `\nTop Issuers:\n`;
-    results.issuers.forEach((i) => (text += `  - ${i.name}: ${i.count} certificates\n`));
+    diagnosticState.results.issuers.forEach((i) => (text += `  - ${i.name}: ${i.count} certificates\n`));
 
-    await navigator.clipboard.writeText(text);
-    copiedState = true;
-    setTimeout(() => (copiedState = false), 1500);
+    clipboard.copy(text);
   }
 
   function toggleCert(id: number) {
@@ -186,41 +181,31 @@
           bind:value={domain}
           placeholder="example.com"
           onkeydown={(e) => e.key === 'Enter' && searchCTLogs()}
-          disabled={loading}
+          disabled={diagnosticState.loading}
         />
-        <button class="lookup-btn" onclick={searchCTLogs} disabled={loading}>
-          <Icon name={loading ? 'loader' : 'search'} size="sm" animate={loading ? 'spin' : undefined} />
-          {loading ? 'Searching...' : 'Search CT Logs'}
+        <button class="lookup-btn" onclick={searchCTLogs} disabled={diagnosticState.loading}>
+          <Icon
+            name={diagnosticState.loading ? 'loader' : 'search'}
+            size="sm"
+            animate={diagnosticState.loading ? 'spin' : undefined}
+          />
+          {diagnosticState.loading ? 'Searching...' : 'Search CT Logs'}
         </button>
       </div>
     </div>
   </div>
 
   <!-- Quick Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="sm" />
-        <h4>Quick Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example (example.domain)}
-          <button
-            class="example-card"
-            class:selected={selectedExample === example.domain}
-            onclick={() => loadExample(example.domain)}
-            type="button"
-          >
-            <h5>{example.domain}</h5>
-            <p>{example.desc}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    getLabel={(ex) => ex.domain}
+    getDescription={(ex) => ex.desc}
+  />
 
   <!-- Loading -->
-  {#if loading}
+  {#if diagnosticState.loading}
     <div class="card">
       <div class="card-content">
         <div class="loading-state">
@@ -234,26 +219,16 @@
     </div>
   {/if}
 
-  <!-- Error -->
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-message">
-          <Icon name="alert-circle" size="md" />
-          <span>{error}</span>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="CT Log Search Failed" error={diagnosticState.error} />
 
   <!-- Results -->
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>CT Log Results for {results.domain}</h3>
-        <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
-          <Icon name={copiedState ? 'check' : 'copy'} size="xs" />
-          {copiedState ? 'Copied!' : 'Copy Results'}
+        <h3>CT Log Results for {diagnosticState.results.domain}</h3>
+        <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
+          <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
+          {clipboard.isCopied() ? 'Copied!' : 'Copy Results'}
         </button>
       </div>
       <div class="card-content">
@@ -262,7 +237,7 @@
           <div class="status-item info">
             <Icon name="file" size="md" />
             <div>
-              <h4>{results.totalCertificates} Total Certificates</h4>
+              <h4>{diagnosticState.results.totalCertificates} Total Certificates</h4>
               <p>Found in Certificate Transparency logs</p>
             </div>
           </div>
@@ -278,8 +253,8 @@
               </h4>
               <div class="stat-value {stat.valueClass}">
                 {stat.isArray
-                  ? (results[stat.key as keyof CTLogResponse] as any[]).length
-                  : results[stat.key as keyof CTLogResponse]}
+                  ? (diagnosticState.results[stat.key as keyof CTLogResponse] as any[]).length
+                  : diagnosticState.results[stat.key as keyof CTLogResponse]}
               </div>
               <p class="stat-label">{stat.desc}</p>
             </div>
@@ -287,14 +262,14 @@
         </div>
 
         <!-- Discovered Hostnames -->
-        {#if results.discoveredHostnames.length > 0}
+        {#if diagnosticState.results.discoveredHostnames.length > 0}
           <div class="subsection">
             <h4>
               <Icon name="list" size="sm" />
-              Discovered Hostnames ({results.discoveredHostnames.length})
+              Discovered Hostnames ({diagnosticState.results.discoveredHostnames.length})
             </h4>
             <div class="hostname-list">
-              {#each results.discoveredHostnames.slice(0, 50) as hostname (hostname)}
+              {#each diagnosticState.results.discoveredHostnames.slice(0, 50) as hostname (hostname)}
                 <span class="hostname-tag {hostname.startsWith('*') ? 'wildcard' : ''}">
                   {#if hostname.startsWith('*')}
                     <Icon name="asterisk" size="xs" />
@@ -302,9 +277,9 @@
                   {hostname}
                 </span>
               {/each}
-              {#if results.discoveredHostnames.length > 50}
+              {#if diagnosticState.results.discoveredHostnames.length > 50}
                 <span class="hostname-tag muted">
-                  +{results.discoveredHostnames.length - 50} more
+                  +{diagnosticState.results.discoveredHostnames.length - 50} more
                 </span>
               {/if}
             </div>
@@ -312,14 +287,14 @@
         {/if}
 
         <!-- Top Issuers -->
-        {#if results.issuers.length > 0}
+        {#if diagnosticState.results.issuers.length > 0}
           <div class="subsection">
             <h4>
               <Icon name="building" size="sm" />
-              Certificate Issuers ({results.issuers.length})
+              Certificate Issuers ({diagnosticState.results.issuers.length})
             </h4>
             <div class="issuer-list">
-              {#each results.issuers.slice(0, 10) as issuer (issuer.name)}
+              {#each diagnosticState.results.issuers.slice(0, 10) as issuer (issuer.name)}
                 <div class="issuer-item">
                   <span class="issuer-name">{issuer.name}</span>
                   <span class="issuer-count">{issuer.count}</span>
@@ -333,10 +308,10 @@
         <div class="subsection">
           <h4>
             <Icon name="file" size="sm" />
-            Certificates ({results.certificates.length})
+            Certificates ({diagnosticState.results.certificates.length})
           </h4>
           <div class="cert-list">
-            {#each results.certificates.slice(0, 20) as cert (cert.id)}
+            {#each diagnosticState.results.certificates.slice(0, 20) as cert (cert.id)}
               <div class="cert-item">
                 <div
                   class="cert-header"
@@ -393,9 +368,9 @@
                 {/if}
               </div>
             {/each}
-            {#if results.certificates.length > 20}
+            {#if diagnosticState.results.certificates.length > 20}
               <div class="cert-item muted-text">
-                Showing first 20 of {results.certificates.length} certificates
+                Showing first 20 of {diagnosticState.results.certificates.length} certificates
               </div>
             {/if}
           </div>
@@ -462,14 +437,6 @@
 </div>
 
 <style lang="scss">
-  .error-message {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    color: var(--color-error);
-    font-weight: 500;
-  }
-
   .stat-value {
     font-size: 2rem;
     font-weight: 700;

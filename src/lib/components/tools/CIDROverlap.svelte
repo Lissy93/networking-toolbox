@@ -3,6 +3,8 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
+  import { formatNumber } from '$lib/utils/formatters';
 
   let setA = $state(`192.168.1.0/24
 10.0.0.0/16`);
@@ -11,7 +13,7 @@
   let mergeInputs = $state(true);
   let showOnlyBoolean = $state(false);
   let result = $state<OverlapResult | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExample = $state<string | null>(null);
   let userModified = $state(false);
 
@@ -49,17 +51,6 @@
     performOverlapCheck();
   }
 
-  /* Copy to clipboard */
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => (copiedStates[id] = false), 3000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
-
   /* Copy all results */
   function copyAllResults(format: 'text' | 'json') {
     if (!result) return;
@@ -87,7 +78,7 @@
       content = lines.join('\n');
     }
 
-    copyToClipboard(content, `all-${format}`);
+    clipboard.copy(content, `all-${format}`);
   }
 
   /* Clear inputs */
@@ -167,7 +158,7 @@
 
     const label = type === 'A' ? 'Set A' : type === 'B' ? 'Set B' : 'Intersection';
 
-    return `${label}\nRange: ${startIP} - ${endIP}\nSize: ${size.toLocaleString()}${range.cidr ? `\nCIDR: ${range.cidr}` : ''}`;
+    return `${label}\nRange: ${startIP} - ${endIP}\nSize: ${formatNumber(Number(size))}${range.cidr ? `\nCIDR: ${range.cidr}` : ''}`;
   }
 
   // Track user modifications
@@ -185,321 +176,314 @@
   });
 </script>
 
-<div class="card">
-  <header class="card-header">
-    <h2>CIDR Overlap Checker</h2>
-    <p>Determine if two sets of IP addresses, CIDR blocks, or ranges intersect and show the overlapping regions.</p>
-  </header>
-
-  <!-- Options -->
-  <div class="options-section">
-    <h3>Options</h3>
-    <div class="options-grid">
-      <label class="checkbox-label">
-        <input type="checkbox" bind:checked={mergeInputs} onchange={() => (userModified = true)} />
-        <span class="checkbox-text">
-          Merge overlapping inputs first
-          <Tooltip text="Combine overlapping ranges within each set before comparison">
-            <Icon name="help" size="sm" />
-          </Tooltip>
-        </span>
-      </label>
-      <label class="checkbox-label">
-        <input type="checkbox" bind:checked={showOnlyBoolean} onchange={() => (userModified = true)} />
-        <span class="checkbox-text">
-          Show only boolean result
-          <Tooltip text="Display just yes/no overlap instead of detailed intersection blocks">
-            <Icon name="help" size="sm" />
-          </Tooltip>
-        </span>
-      </label>
-    </div>
+<!-- Options -->
+<div class="options-section">
+  <h3>Options</h3>
+  <div class="options-grid">
+    <label class="checkbox-label">
+      <input type="checkbox" bind:checked={mergeInputs} onchange={() => (userModified = true)} />
+      <span class="checkbox-text">
+        Merge overlapping inputs first
+        <Tooltip text="Combine overlapping ranges within each set before comparison">
+          <Icon name="help" size="sm" />
+        </Tooltip>
+      </span>
+    </label>
+    <label class="checkbox-label">
+      <input type="checkbox" bind:checked={showOnlyBoolean} onchange={() => (userModified = true)} />
+      <span class="checkbox-text">
+        Show only boolean result
+        <Tooltip text="Display just yes/no overlap instead of detailed intersection blocks">
+          <Icon name="help" size="sm" />
+        </Tooltip>
+      </span>
+    </label>
   </div>
+</div>
 
-  <!-- Input Section -->
-  <div class="input-section">
-    <div class="input-grid">
-      <!-- Set A -->
-      <div class="input-group">
-        <h3>
-          Set A
-          <Tooltip text="First set of IP addresses, CIDR blocks, or ranges">
-            <Icon name="help" size="sm" />
-          </Tooltip>
-        </h3>
-        <div class="input-wrapper">
-          <textarea
-            bind:value={setA}
-            oninput={() => (userModified = true)}
-            placeholder="192.168.1.0/24&#10;10.0.0.0-10.0.0.100"
-            class="input-textarea set-a"
-            rows="6"
-          ></textarea>
-        </div>
-      </div>
-
-      <!-- Set B -->
-      <div class="input-group">
-        <h3>
-          Set B
-          <Tooltip text="Second set of IP addresses, CIDR blocks, or ranges">
-            <Icon name="help" size="sm" />
-          </Tooltip>
-        </h3>
-        <div class="input-wrapper">
-          <textarea
-            bind:value={setB}
-            oninput={() => (userModified = true)}
-            placeholder="192.168.1.128/25&#10;10.0.0.50-10.0.0.150"
-            class="input-textarea set-b"
-            rows="6"
-          ></textarea>
-        </div>
+<!-- Input Section -->
+<div class="input-section">
+  <div class="input-grid">
+    <!-- Set A -->
+    <div class="input-group">
+      <h3>
+        Set A
+        <Tooltip text="First set of IP addresses, CIDR blocks, or ranges">
+          <Icon name="help" size="sm" />
+        </Tooltip>
+      </h3>
+      <div class="input-wrapper">
+        <textarea
+          bind:value={setA}
+          oninput={() => (userModified = true)}
+          placeholder="192.168.1.0/24&#10;10.0.0.0-10.0.0.100"
+          class="input-textarea set-a"
+          rows="6"
+        ></textarea>
       </div>
     </div>
 
-    <div class="input-actions">
-      <button type="button" class="btn btn-secondary btn-sm" onclick={clearInputs}>
-        <Icon name="trash" size="sm" />
-        Clear All
-      </button>
-    </div>
-
-    <!-- Examples -->
-    <div class="examples-section">
-      <h4>Quick Examples</h4>
-      <div class="examples-grid">
-        {#each examples as example (example.label)}
-          <button
-            type="button"
-            class="example-btn"
-            class:selected={selectedExample === example.label}
-            onclick={() => setExample(example)}
-          >
-            {example.label}
-          </button>
-        {/each}
+    <!-- Set B -->
+    <div class="input-group">
+      <h3>
+        Set B
+        <Tooltip text="Second set of IP addresses, CIDR blocks, or ranges">
+          <Icon name="help" size="sm" />
+        </Tooltip>
+      </h3>
+      <div class="input-wrapper">
+        <textarea
+          bind:value={setB}
+          oninput={() => (userModified = true)}
+          placeholder="192.168.1.128/25&#10;10.0.0.50-10.0.0.150"
+          class="input-textarea set-b"
+          rows="6"
+        ></textarea>
       </div>
     </div>
   </div>
 
-  <!-- Results Section -->
-  {#if result}
-    <div class="results-section">
-      {#if result.errors.length > 0}
-        <div class="info-panel error">
-          <h3>Parse Errors</h3>
-          <ul class="error-list">
-            {#each result.errors as error (error)}
-              <li>{error}</li>
-            {/each}
-          </ul>
+  <div class="input-actions">
+    <button type="button" class="btn btn-secondary btn-sm" onclick={clearInputs}>
+      <Icon name="trash" size="sm" />
+      Clear All
+    </button>
+  </div>
+
+  <!-- Examples -->
+  <div class="examples-section">
+    <h4>Quick Examples</h4>
+    <div class="examples-grid">
+      {#each examples as example (example.label)}
+        <button
+          type="button"
+          class="example-btn"
+          class:selected={selectedExample === example.label}
+          onclick={() => setExample(example)}
+        >
+          {example.label}
+        </button>
+      {/each}
+    </div>
+  </div>
+</div>
+
+<!-- Results Section -->
+{#if result}
+  <div class="results-section">
+    {#if result.errors.length > 0}
+      <div class="info-panel error">
+        <h3>Parse Errors</h3>
+        <ul class="error-list">
+          {#each result.errors as error (error)}
+            <li>{error}</li>
+          {/each}
+        </ul>
+      </div>
+    {/if}
+
+    <!-- Overlap Status -->
+    <div class="status-section">
+      <div class="status-card {result.hasOverlap ? 'overlap' : 'no-overlap'}">
+        <div class="status-icon">
+          <Icon name={result.hasOverlap ? 'check-circle' : 'x-circle'} size="lg" />
+        </div>
+        <div class="status-content">
+          <h3>{result.hasOverlap ? 'Overlap Detected' : 'No Overlap'}</h3>
+          <p>
+            {result.hasOverlap
+              ? `Sets A and B have overlapping address ranges (${result.stats.overlapPercent}% of smaller set)`
+              : 'Sets A and B do not share any common address ranges'}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {#if !showOnlyBoolean && (result.ipv4.length > 0 || result.ipv6.length > 0)}
+      <!-- Statistics -->
+      <div class="stats-section">
+        <div class="summary-header">
+          <h3>Intersection Results (A ∩ B)</h3>
+          <div class="export-buttons">
+            <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              class:copied={clipboard.isCopied('all-text')}
+              onclick={() => copyAllResults('text')}
+            >
+              <Icon name={clipboard.isCopied('all-text') ? 'check' : 'copy'} size="sm" />
+              Text
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              class:copied={clipboard.isCopied('all-json')}
+              onclick={() => copyAllResults('json')}
+            >
+              <Icon name={clipboard.isCopied('all-json') ? 'check' : 'download'} size="sm" />
+              JSON
+            </button>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card set-a">
+            <span class="stat-label">Set A</span>
+            <span class="stat-value">{result.stats.setA.count} items</span>
+            <span class="stat-detail">{result.stats.setA.addresses} addresses</span>
+          </div>
+          <div class="stat-card set-b">
+            <span class="stat-label">Set B</span>
+            <span class="stat-value">{result.stats.setB.count} items</span>
+            <span class="stat-detail">{result.stats.setB.addresses} addresses</span>
+          </div>
+          <div class="stat-card intersection">
+            <span class="stat-label">Intersection</span>
+            <span class="stat-value">{result.stats.intersection.count} CIDRs</span>
+            <span class="stat-detail">{result.stats.intersection.addresses} addresses</span>
+          </div>
+          <div class="stat-card overlap-percent">
+            <span class="stat-label">Overlap</span>
+            <span class="stat-value">{result.stats.overlapPercent}%</span>
+            <span class="stat-detail">of smaller set</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visualization -->
+      {#if result.visualization.setA.length > 0 || result.visualization.setB.length > 0}
+        <div class="visualization-section">
+          <h4>Overlap Visualization</h4>
+          <div class="viz-legend">
+            <div class="legend-item">
+              <div class="legend-color set-a-color"></div>
+              <span>Set A</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color set-b-color"></div>
+              <span>Set B</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color intersection-color"></div>
+              <span>Intersection (A ∩ B)</span>
+            </div>
+          </div>
+
+          <div class="visualization-stack">
+            <!-- Set A Bar -->
+            <div class="viz-bar set-a-bar">
+              <div class="bar-label">Set A</div>
+              <div class="bar-segments">
+                {#each result.visualization.setA as range (`${range.start}-${range.end}`)}
+                  <div
+                    class="viz-segment set-a-segment"
+                    style="width: {getBarWidth(range)}%; left: {getBarOffset(range)}%"
+                    use:tooltip={{ text: getSegmentTooltip(range, 'A'), position: 'top' }}
+                  ></div>
+                {/each}
+              </div>
+            </div>
+
+            <!-- Set B Bar -->
+            <div class="viz-bar set-b-bar">
+              <div class="bar-label">Set B</div>
+              <div class="bar-segments">
+                {#each result.visualization.setB as range (`${range.start}-${range.end}`)}
+                  <div
+                    class="viz-segment set-b-segment"
+                    style="width: {getBarWidth(range)}%; left: {getBarOffset(range)}%"
+                    use:tooltip={{ text: getSegmentTooltip(range, 'B'), position: 'top' }}
+                  ></div>
+                {/each}
+              </div>
+            </div>
+
+            <!-- Intersection Highlights -->
+            <div class="viz-bar intersection-bar">
+              <div class="bar-label">A ∩ B</div>
+              <div class="bar-segments">
+                {#each result.visualization.intersection as range (`${range.start}-${range.end}`)}
+                  <div
+                    class="viz-segment intersection-segment"
+                    style="width: {getBarWidth(range)}%; left: {getBarOffset(range)}%"
+                    use:tooltip={{ text: getSegmentTooltip(range, 'intersection'), position: 'bottom' }}
+                  ></div>
+                {/each}
+              </div>
+            </div>
+          </div>
         </div>
       {/if}
 
-      <!-- Overlap Status -->
-      <div class="status-section">
-        <div class="status-card {result.hasOverlap ? 'overlap' : 'no-overlap'}">
-          <div class="status-icon">
-            <Icon name={result.hasOverlap ? 'check-circle' : 'x-circle'} size="lg" />
-          </div>
-          <div class="status-content">
-            <h3>{result.hasOverlap ? 'Overlap Detected' : 'No Overlap'}</h3>
-            <p>
-              {result.hasOverlap
-                ? `Sets A and B have overlapping address ranges (${result.stats.overlapPercent}% of smaller set)`
-                : 'Sets A and B do not share any common address ranges'}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {#if !showOnlyBoolean && (result.ipv4.length > 0 || result.ipv6.length > 0)}
-        <!-- Statistics -->
-        <div class="stats-section">
-          <div class="summary-header">
-            <h3>Intersection Results (A ∩ B)</h3>
-            <div class="export-buttons">
+      <!-- Results Grid -->
+      <div class="results-grid">
+        <!-- IPv4 Results -->
+        {#if result.ipv4.length > 0}
+          <div class="result-panel ipv4">
+            <div class="panel-header">
+              <h4>IPv4 Intersection ({result.ipv4.length})</h4>
               <button
                 type="button"
-                class="btn btn-primary btn-sm"
-                class:copied={copiedStates['all-text']}
-                onclick={() => copyAllResults('text')}
+                class="btn btn-icon"
+                class:copied={clipboard.isCopied('ipv4')}
+                onclick={() => clipboard.copy((result?.ipv4 || []).join('\n'), 'ipv4')}
               >
-                <Icon name={copiedStates['all-text'] ? 'check' : 'copy'} size="sm" />
-                Text
-              </button>
-              <button
-                type="button"
-                class="btn btn-secondary btn-sm"
-                class:copied={copiedStates['all-json']}
-                onclick={() => copyAllResults('json')}
-              >
-                <Icon name={copiedStates['all-json'] ? 'check' : 'download'} size="sm" />
-                JSON
+                <Icon name={clipboard.isCopied('ipv4') ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
-          </div>
-
-          <div class="stats-grid">
-            <div class="stat-card set-a">
-              <span class="stat-label">Set A</span>
-              <span class="stat-value">{result.stats.setA.count} items</span>
-              <span class="stat-detail">{result.stats.setA.addresses} addresses</span>
-            </div>
-            <div class="stat-card set-b">
-              <span class="stat-label">Set B</span>
-              <span class="stat-value">{result.stats.setB.count} items</span>
-              <span class="stat-detail">{result.stats.setB.addresses} addresses</span>
-            </div>
-            <div class="stat-card intersection">
-              <span class="stat-label">Intersection</span>
-              <span class="stat-value">{result.stats.intersection.count} CIDRs</span>
-              <span class="stat-detail">{result.stats.intersection.addresses} addresses</span>
-            </div>
-            <div class="stat-card overlap-percent">
-              <span class="stat-label">Overlap</span>
-              <span class="stat-value">{result.stats.overlapPercent}%</span>
-              <span class="stat-detail">of smaller set</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Visualization -->
-        {#if result.visualization.setA.length > 0 || result.visualization.setB.length > 0}
-          <div class="visualization-section">
-            <h4>Overlap Visualization</h4>
-            <div class="viz-legend">
-              <div class="legend-item">
-                <div class="legend-color set-a-color"></div>
-                <span>Set A</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color set-b-color"></div>
-                <span>Set B</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color intersection-color"></div>
-                <span>Intersection (A ∩ B)</span>
-              </div>
-            </div>
-
-            <div class="visualization-stack">
-              <!-- Set A Bar -->
-              <div class="viz-bar set-a-bar">
-                <div class="bar-label">Set A</div>
-                <div class="bar-segments">
-                  {#each result.visualization.setA as range (`${range.start}-${range.end}`)}
-                    <div
-                      class="viz-segment set-a-segment"
-                      style="width: {getBarWidth(range)}%; left: {getBarOffset(range)}%"
-                      use:tooltip={{ text: getSegmentTooltip(range, 'A'), position: 'top' }}
-                    ></div>
-                  {/each}
+            <div class="cidr-list">
+              {#each result.ipv4 as cidr (cidr)}
+                <div class="cidr-item">
+                  <code class="cidr-block">{cidr}</code>
+                  <button
+                    type="button"
+                    class="btn btn-icon btn-xs"
+                    class:copied={clipboard.isCopied(cidr)}
+                    onclick={() => clipboard.copy(cidr, cidr)}
+                  >
+                    <Icon name={clipboard.isCopied(cidr) ? 'check' : 'copy'} size="xs" />
+                  </button>
                 </div>
-              </div>
-
-              <!-- Set B Bar -->
-              <div class="viz-bar set-b-bar">
-                <div class="bar-label">Set B</div>
-                <div class="bar-segments">
-                  {#each result.visualization.setB as range (`${range.start}-${range.end}`)}
-                    <div
-                      class="viz-segment set-b-segment"
-                      style="width: {getBarWidth(range)}%; left: {getBarOffset(range)}%"
-                      use:tooltip={{ text: getSegmentTooltip(range, 'B'), position: 'top' }}
-                    ></div>
-                  {/each}
-                </div>
-              </div>
-
-              <!-- Intersection Highlights -->
-              <div class="viz-bar intersection-bar">
-                <div class="bar-label">A ∩ B</div>
-                <div class="bar-segments">
-                  {#each result.visualization.intersection as range (`${range.start}-${range.end}`)}
-                    <div
-                      class="viz-segment intersection-segment"
-                      style="width: {getBarWidth(range)}%; left: {getBarOffset(range)}%"
-                      use:tooltip={{ text: getSegmentTooltip(range, 'intersection'), position: 'bottom' }}
-                    ></div>
-                  {/each}
-                </div>
-              </div>
+              {/each}
             </div>
           </div>
         {/if}
 
-        <!-- Results Grid -->
-        <div class="results-grid">
-          <!-- IPv4 Results -->
-          {#if result.ipv4.length > 0}
-            <div class="result-panel ipv4">
-              <div class="panel-header">
-                <h4>IPv4 Intersection ({result.ipv4.length})</h4>
-                <button
-                  type="button"
-                  class="btn btn-icon"
-                  class:copied={copiedStates['ipv4']}
-                  onclick={() => copyToClipboard((result?.ipv4 || []).join('\n'), 'ipv4')}
-                >
-                  <Icon name={copiedStates['ipv4'] ? 'check' : 'copy'} size="sm" />
-                </button>
-              </div>
-              <div class="cidr-list">
-                {#each result.ipv4 as cidr (cidr)}
-                  <div class="cidr-item">
-                    <code class="cidr-block">{cidr}</code>
-                    <button
-                      type="button"
-                      class="btn btn-icon btn-xs"
-                      class:copied={copiedStates[cidr]}
-                      onclick={() => copyToClipboard(cidr, cidr)}
-                    >
-                      <Icon name={copiedStates[cidr] ? 'check' : 'copy'} size="xs" />
-                    </button>
-                  </div>
-                {/each}
-              </div>
+        <!-- IPv6 Results -->
+        {#if result.ipv6.length > 0}
+          <div class="result-panel ipv6">
+            <div class="panel-header">
+              <h4>IPv6 Intersection ({result.ipv6.length})</h4>
+              <button
+                type="button"
+                class="btn btn-icon"
+                class:copied={clipboard.isCopied('ipv6')}
+                onclick={() => clipboard.copy((result?.ipv6 || []).join('\n'), 'ipv6')}
+              >
+                <Icon name={clipboard.isCopied('ipv6') ? 'check' : 'copy'} size="sm" />
+              </button>
             </div>
-          {/if}
-
-          <!-- IPv6 Results -->
-          {#if result.ipv6.length > 0}
-            <div class="result-panel ipv6">
-              <div class="panel-header">
-                <h4>IPv6 Intersection ({result.ipv6.length})</h4>
-                <button
-                  type="button"
-                  class="btn btn-icon"
-                  class:copied={copiedStates['ipv6']}
-                  onclick={() => copyToClipboard((result?.ipv6 || []).join('\n'), 'ipv6')}
-                >
-                  <Icon name={copiedStates['ipv6'] ? 'check' : 'copy'} size="sm" />
-                </button>
-              </div>
-              <div class="cidr-list">
-                {#each result.ipv6 as cidr (cidr)}
-                  <div class="cidr-item">
-                    <code class="cidr-block">{cidr}</code>
-                    <button
-                      type="button"
-                      class="btn btn-icon btn-xs"
-                      class:copied={copiedStates[cidr]}
-                      onclick={() => copyToClipboard(cidr, cidr)}
-                    >
-                      <Icon name={copiedStates[cidr] ? 'check' : 'copy'} size="xs" />
-                    </button>
-                  </div>
-                {/each}
-              </div>
+            <div class="cidr-list">
+              {#each result.ipv6 as cidr (cidr)}
+                <div class="cidr-item">
+                  <code class="cidr-block">{cidr}</code>
+                  <button
+                    type="button"
+                    class="btn btn-icon btn-xs"
+                    class:copied={clipboard.isCopied(cidr)}
+                    onclick={() => clipboard.copy(cidr, cidr)}
+                  >
+                    <Icon name={clipboard.isCopied(cidr) ? 'check' : 'copy'} size="xs" />
+                  </button>
+                </div>
+              {/each}
             </div>
-          {/if}
-        </div>
-      {/if}
-    </div>
-  {/if}
-</div>
+          </div>
+        {/if}
+      </div>
+    {/if}
+  </div>
+{/if}
 
 <style lang="scss">
   /* Reusable tokens */
@@ -588,6 +572,7 @@
       height: 140px;
       font-family: var(--font-mono);
       font-size: var(--font-size-sm);
+      background: var(--bg-primary);
       resize: vertical;
 
       &.set-a {

@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
+  import { useClipboard } from '$lib/composables';
 
   let domain = $state('example.com');
   let port = $state(443);
@@ -15,7 +16,7 @@
 
   let showExamples = $state(false);
   let selectedExample = $state<string | null>(null);
-  let buttonStates = $state({} as Record<string, boolean>);
+  const clipboard = useClipboard();
 
   const usageDescriptions = {
     0: 'CA Constraint - Certificate must be issued by the CA represented in the TLSA record',
@@ -118,16 +119,8 @@
     };
   });
 
-  function showButtonSuccess(buttonId: string) {
-    buttonStates[buttonId] = true;
-    setTimeout(() => {
-      buttonStates[buttonId] = false;
-    }, 2000);
-  }
-
   function copyToClipboard(text: string, buttonId: string) {
-    navigator.clipboard.writeText(text);
-    showButtonSuccess(buttonId);
+    clipboard.copy(text, buttonId);
   }
 
   function exportAsZoneFile() {
@@ -143,7 +136,7 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showButtonSuccess('export-tlsa');
+    clipboard.copy('downloaded', 'export-tlsa');
   }
 
   async function generateHashFromInput() {
@@ -380,22 +373,22 @@
                 <button
                   type="button"
                   class="btn btn-primary"
-                  class:success={buttonStates['copy-tlsa']}
+                  class:success={clipboard.isCopied('copy-tlsa')}
                   onclick={() => copyToClipboard(dnsRecord, 'copy-tlsa')}
                   use:tooltip={'Copy TLSA record to clipboard'}
                 >
-                  <Icon name={buttonStates['copy-tlsa'] ? 'check' : 'copy'} size="sm" />
-                  {buttonStates['copy-tlsa'] ? 'Copied!' : 'Copy'}
+                  <Icon name={clipboard.isCopied('copy-tlsa') ? 'check' : 'copy'} size="sm" />
+                  {clipboard.isCopied('copy-tlsa') ? 'Copied!' : 'Copy'}
                 </button>
                 <button
                   type="button"
                   class="btn btn-success"
-                  class:success={buttonStates['export-tlsa']}
+                  class:success={clipboard.isCopied('export-tlsa')}
                   onclick={exportAsZoneFile}
                   use:tooltip={'Download as zone file'}
                 >
-                  <Icon name={buttonStates['export-tlsa'] ? 'check' : 'download'} size="sm" />
-                  {buttonStates['export-tlsa'] ? 'Downloaded!' : 'Export'}
+                  <Icon name={clipboard.isCopied('export-tlsa') ? 'check' : 'download'} size="sm" />
+                  {clipboard.isCopied('export-tlsa') ? 'Downloaded!' : 'Export'}
                 </button>
               </div>
             </div>
@@ -530,6 +523,7 @@
   }
 
   .card {
+    width: 100%;
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
     border-radius: var(--radius-lg);

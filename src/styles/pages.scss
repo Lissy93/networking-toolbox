@@ -1,4 +1,15 @@
 /* Page Layout Styles */
+.page-header-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--spacing-lg);
+  animation: fadeIn 0.3s ease-out;
+
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -123,5 +134,16 @@
       transform: scale(1.1);
       box-shadow: 0 4px 8px color-mix(in srgb, var(--color-warning), transparent 70%);
     }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
+  import { useClipboard } from '$lib/composables';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { formatNumber } from '$lib/utils/formatters';
   import '../../../styles/diagnostics-pages.scss';
   let pools = $state(`192.168.0.0/16
 10.0.0.0/20`);
@@ -50,7 +52,7 @@
       efficiency: number;
     };
   } | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let _selectedExample = $state<string | null>(null);
   let selectedExampleIndex = $state<number | null>(null);
   let _userModified = $state(false);
@@ -424,18 +426,6 @@
     performAllocation();
   }
 
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
-
   async function copyAllAllocations() {
     if (!result?.allocations) return;
 
@@ -443,7 +433,7 @@
     if (successful.length === 0) return;
 
     const text = successful.map((a) => `${a.cidr} - ${a.description}`).join('\n');
-    await copyToClipboard(text, 'all-allocations');
+    await clipboard.copy(text, 'all-allocations');
   }
 
   // Calculate on component load
@@ -559,11 +549,11 @@
             <h3 use:tooltip={'Summary of subnet allocation requests and pool utilization'}>Allocation Results</h3>
             {#if result.summary.successfulAllocations > 0}
               <button
-                class="copy-all-button {copiedStates['all-allocations'] ? 'copied' : ''}"
+                class="copy-all-button {clipboard.isCopied('all-allocations') ? 'copied' : ''}"
                 onclick={copyAllAllocations}
               >
-                <Icon name={copiedStates['all-allocations'] ? 'check' : 'copy'} size="sm" />
-                {copiedStates['all-allocations'] ? 'Copied!' : 'Copy All'}
+                <Icon name={clipboard.isCopied('all-allocations') ? 'check' : 'copy'} size="sm" />
+                {clipboard.isCopied('all-allocations') ? 'Copied!' : 'Copy All'}
               </button>
             {/if}
           </div>
@@ -604,19 +594,19 @@
             <div class="breakdown-item">
               <span class="breakdown-label">Total Pool Space:</span>
               <span class="breakdown-value">
-                {result.summary.totalPoolSpace.toLocaleString()} addresses
+                {formatNumber(result.summary.totalPoolSpace)} addresses
               </span>
             </div>
             <div class="breakdown-item">
               <span class="breakdown-label">Allocated:</span>
               <span class="breakdown-value allocated">
-                {result.summary.allocatedSpace.toLocaleString()} addresses
+                {formatNumber(result.summary.allocatedSpace)} addresses
               </span>
             </div>
             <div class="breakdown-item">
               <span class="breakdown-label">Remaining:</span>
               <span class="breakdown-value">
-                {(result.summary.totalPoolSpace - result.summary.allocatedSpace).toLocaleString()} addresses
+                {formatNumber(result.summary.totalPoolSpace - result.summary.allocatedSpace)} addresses
               </span>
             </div>
           </div>
@@ -650,14 +640,14 @@
                       <code class="result-cidr">{allocation.cidr}</code>
                       <span class="result-pool">in {allocation.pool}</span>
                       <span class="result-size">
-                        ({allocation.size.toLocaleString()} addresses)
+                        ({formatNumber(allocation.size)} addresses)
                       </span>
                     </div>
                     <button
-                      class="copy-button {copiedStates[`alloc-${allocation.cidr}`] ? 'copied' : ''}"
-                      onclick={() => copyToClipboard(allocation.cidr || '', `alloc-${allocation.cidr}`)}
+                      class="copy-button {clipboard.isCopied(`alloc-${allocation.cidr}`) ? 'copied' : ''}"
+                      onclick={() => clipboard.copy(allocation.cidr || '', `alloc-${allocation.cidr}`)}
                     >
-                      <Icon name={copiedStates[`alloc-${allocation.cidr}`] ? 'check' : 'copy'} size="xs" />
+                      <Icon name={clipboard.isCopied(`alloc-${allocation.cidr}`) ? 'check' : 'copy'} size="xs" />
                     </button>
                   </div>
                 {:else if allocation.reason}
@@ -719,7 +709,7 @@
                       {#each pool.remaining.slice(0, 5) as remaining (remaining.cidr)}
                         <div class="remaining-block">
                           <code class="remaining-size">
-                            {remaining.size.toLocaleString()} addresses
+                            {formatNumber(remaining.size)} addresses
                           </code>
                           <span class="remaining-range">
                             {ipToString(remaining.start)} - {ipToString(remaining.start + remaining.size - 1)}

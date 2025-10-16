@@ -1,11 +1,12 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
+  import { useClipboard } from '$lib/composables';
   import Icon from '$lib/components/global/Icon.svelte';
   import { normalizeLabel, type LabelAnalysis } from '$lib/utils/dns-validation';
 
   let input = $state('');
   let results = $state<LabelAnalysis[]>([]);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let activeExampleIndex = $state<number | null>(null);
 
   function normalizeInput() {
@@ -31,18 +32,6 @@
       }
     }
   });
-
-  async function copyToClipboard(text: string, key: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[key] = true;
-      setTimeout(() => {
-        copiedStates[key] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
 
   function loadExample(exampleValue: string, index: number) {
     input = exampleValue;
@@ -176,10 +165,10 @@ mixed-script-еxample.com"
               <span class="label-type">Original:</span>
               <code class="label-value">{result.original}</code>
               <button
-                class="copy-button {copiedStates[`orig-${index}`] ? 'copied' : ''}"
-                onclick={() => copyToClipboard(result.original, `orig-${index}`)}
+                class="copy-button {clipboard.isCopied(`orig-${index}`) ? 'copied' : ''}"
+                onclick={() => clipboard.copy(result.original, `orig-${index}`)}
               >
-                <Icon name={copiedStates[`orig-${index}`] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied(`orig-${index}`) ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
 
@@ -187,10 +176,10 @@ mixed-script-еxample.com"
               <span class="label-type">Normalized:</span>
               <code class="label-value normalized">{result.normalized}</code>
               <button
-                class="copy-button {copiedStates[`norm-${index}`] ? 'copied' : ''}"
-                onclick={() => copyToClipboard(result.normalized, `norm-${index}`)}
+                class="copy-button {clipboard.isCopied(`norm-${index}`) ? 'copied' : ''}"
+                onclick={() => clipboard.copy(result.normalized, `norm-${index}`)}
               >
-                <Icon name={copiedStates[`norm-${index}`] ? 'check' : 'copy'} size="sm" />
+                <Icon name={clipboard.isCopied(`norm-${index}`) ? 'check' : 'copy'} size="sm" />
               </button>
             </div>
 

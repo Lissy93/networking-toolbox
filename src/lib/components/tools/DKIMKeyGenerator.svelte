@@ -257,7 +257,7 @@
                   onclick={() => (showPrivateKey = !showPrivateKey)}
                   use:tooltip={showPrivateKey ? 'Hide private key' : 'Show private key'}
                 >
-                  <Icon name={showPrivateKey ? 'eye-off' : 'eye'} size="sm" />
+                  <Icon name={showPrivateKey ? 'hide' : 'eye'} size="sm" />
                   {showPrivateKey ? 'Hide' : 'Show'}
                 </button>
                 <button
@@ -281,7 +281,7 @@
               </div>
             {:else}
               <div class="key-hidden">
-                <Icon name="eye-off" size="sm" />
+                <Icon name="hide" size="sm" />
                 Private key hidden for security
               </div>
             {/if}

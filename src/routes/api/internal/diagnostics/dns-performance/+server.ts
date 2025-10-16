@@ -2,6 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { promises as dns } from 'node:dns';
 import type { MxRecord, SoaRecord } from 'node:dns';
+import { errorManager } from '$lib/utils/error-manager';
 
 interface DNSPerformanceRequest {
   domain: string;
@@ -303,7 +304,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     return json(response);
   } catch (err) {
-    console.error('DNS performance check error:', err);
+    errorManager.captureException(err, 'error', { component: 'DNS Performance API' });
     if (err && typeof err === 'object' && 'status' in err) {
       throw err;
     }

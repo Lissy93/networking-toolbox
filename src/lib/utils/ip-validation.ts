@@ -161,7 +161,7 @@ export function validateIPv4Detailed(ip: string): DetailedValidationResponse {
   if (a === 127) {
     details.addressType = 'Loopback';
     details.scope = 'Host';
-    details.info.push('Used for local loopback communications');
+    details.info.push('Loopback address (localhost)');
   } else if (a === 10) {
     details.addressType = 'Private (Class A)';
     details.scope = 'Private Network';
@@ -181,12 +181,12 @@ export function validateIPv4Detailed(ip: string): DetailedValidationResponse {
     details.addressType = 'Link-Local (APIPA)';
     details.scope = 'Link-Local';
     details.isReserved = true;
-    details.info.push('Automatic Private IP Addressing');
+    details.info.push('Link-local address (APIPA)');
   } else if (a >= 224 && a <= 239) {
     details.addressType = 'Multicast (Class D)';
     details.scope = 'Multicast';
     details.isReserved = true;
-    details.info.push('Used for multicast communications');
+    details.info.push('Multicast address');
   } else if (a >= 240) {
     details.addressType = 'Reserved (Class E)';
     details.scope = 'Reserved';
@@ -245,6 +245,33 @@ export function validateIPv6Detailed(ip: string): DetailedValidationResponse {
     return { isValid: false, errors, warnings, details };
   }
 
+  // Check for embedded IPv4 first
+  const ipv4Pattern = /(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
+  const ipv4Match = cleanIP.match(ipv4Pattern);
+
+  if (ipv4Match) {
+    // Validate the IPv4 part
+    const ipv4Part = ipv4Match[0];
+    const ipv4Result = validateIPv4Detailed(ipv4Part);
+
+    if (!ipv4Result.isValid) {
+      errors.push(`Invalid embedded IPv4 address: ${ipv4Result.errors.join(', ')}`);
+      return { isValid: false, errors, warnings, details };
+    }
+
+    details.hasEmbeddedIPv4 = true;
+    details.embeddedIPv4 = ipv4Part;
+    details.info.push(`Contains embedded IPv4 address: ${ipv4Part}`);
+
+    // Convert IPv4 to two IPv6 groups for validation
+    const [, a, b, c, d] = ipv4Match;
+    const group1 = ((parseInt(a) << 8) + parseInt(b)).toString(16).padStart(4, '0');
+    const group2 = ((parseInt(c) << 8) + parseInt(d)).toString(16).padStart(4, '0');
+
+    // Replace IPv4 with IPv6 groups for further processing
+    cleanIP = cleanIP.replace(ipv4Pattern, `${group1}:${group2}`);
+  }
+
   // Handle :: expansion
   let expandedIP = cleanIP;
   if (cleanIP.includes('::')) {
@@ -269,31 +296,6 @@ export function validateIPv6Detailed(ip: string): DetailedValidationResponse {
     const middleParts = Array(missingGroups).fill('0000');
     const allParts = [...leftParts, ...middleParts, ...rightParts];
     expandedIP = allParts.join(':');
-  }
-
-  // Check for embedded IPv4
-  const ipv4Pattern = /(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
-  const ipv4Match = expandedIP.match(ipv4Pattern);
-
-  if (ipv4Match) {
-    // Validate the IPv4 part
-    const ipv4Part = ipv4Match[0];
-    const ipv4Result = validateIPv4Detailed(ipv4Part);
-
-    if (!ipv4Result.isValid) {
-      errors.push(`Invalid embedded IPv4 address: ${ipv4Result.errors.join(', ')}`);
-      return { isValid: false, errors, warnings, details };
-    }
-
-    // Convert IPv4 to two IPv6 groups
-    const [, a, b, c, d] = ipv4Match;
-    const group1 = ((parseInt(a) << 8) + parseInt(b)).toString(16).padStart(4, '0');
-    const group2 = ((parseInt(c) << 8) + parseInt(d)).toString(16).padStart(4, '0');
-
-    expandedIP = expandedIP.replace(ipv4Pattern, `${group1}:${group2}`);
-    details.hasEmbeddedIPv4 = true;
-    details.embeddedIPv4 = ipv4Part;
-    details.info.push(`Contains embedded IPv4 address: ${ipv4Part}`);
   }
 
   // Split into groups and validate
@@ -336,7 +338,7 @@ export function validateIPv6Detailed(ip: string): DetailedValidationResponse {
   // Normalize the address
   const normalizedGroups = groups.map((group) => group.toLowerCase().padStart(4, '0'));
   const fullForm = normalizedGroups.join(':');
-  details.normalizedForm = fullForm;
+  details.normalizedForm = zoneId ? `${fullForm}%${zoneId}` : fullForm;
 
   // Analyze address type
   const firstGroup = normalizedGroups[0];
@@ -345,10 +347,12 @@ export function validateIPv6Detailed(ip: string): DetailedValidationResponse {
   if (fullForm === '0000:0000:0000:0000:0000:0000:0000:0001') {
     details.addressType = 'Loopback';
     details.scope = 'Host';
+    details.isReserved = true;
     details.info.push('IPv6 loopback address (::1)');
   } else if (fullForm === '0000:0000:0000:0000:0000:0000:0000:0000') {
     details.addressType = 'Unspecified';
     details.scope = 'Special Use';
+    details.isReserved = true;
     details.info.push('IPv6 unspecified address (::)');
   } else if (firstGroup === 'fe80') {
     details.addressType = 'Link-Local';
@@ -359,7 +363,7 @@ export function validateIPv6Detailed(ip: string): DetailedValidationResponse {
     details.scope = 'Site-Local';
     details.info.push('Deprecated site-local address');
     warnings.push('Site-local addresses are deprecated (RFC 3879)');
-  } else if (firstTwoGroups === 'fc00' || firstTwoGroups === 'fd00') {
+  } else if (firstGroup.startsWith('fc') || firstGroup.startsWith('fd')) {
     details.addressType = 'Unique Local';
     details.scope = 'Private Network';
     details.isPrivate = true;
@@ -402,6 +406,18 @@ export function validateIPv6Detailed(ip: string): DetailedValidationResponse {
  * Compresses an IPv6 address to its shortest form
  */
 export function compressIPv6(fullForm: string): string {
+  // If already compressed, return as-is
+  if (fullForm.includes('::')) {
+    // Just remove leading zeros from groups and return
+    return fullForm
+      .split(':')
+      .map((group) => {
+        if (group === '') return '';
+        return group.replace(/^0+/, '') || '0';
+      })
+      .join(':');
+  }
+
   // Find the longest sequence of consecutive zero groups
   const groups = fullForm.split(':');
   let bestStart = -1;
@@ -410,7 +426,7 @@ export function compressIPv6(fullForm: string): string {
   let currentLength = 0;
 
   for (let i = 0; i < groups.length; i++) {
-    if (groups[i] === '0000') {
+    if (groups[i] === '0000' || groups[i] === '0') {
       if (currentStart === -1) {
         currentStart = i;
         currentLength = 1;
@@ -538,7 +554,17 @@ export function normalizeIP(ip: string): string | null {
 export function compressIPv6Address(ip: string): string | null {
   const result = validateIP(ip);
   if (result?.type === 'ipv6' && result.details.normalizedForm) {
-    return compressIPv6(result.details.normalizedForm);
+    const normalizedForm = result.details.normalizedForm;
+
+    // Handle zone IDs
+    const zoneIdIndex = normalizedForm.indexOf('%');
+    if (zoneIdIndex !== -1) {
+      const addressPart = normalizedForm.substring(0, zoneIdIndex);
+      const zoneIdPart = normalizedForm.substring(zoneIdIndex);
+      return compressIPv6(addressPart) + zoneIdPart;
+    }
+
+    return compressIPv6(normalizedForm);
   }
   return null;
 }

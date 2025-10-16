@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useDiagnosticState, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let url = $state('https://example.com');
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
+  const diagnosticState = useDiagnosticState<any>();
+
+  const examplesList = [
     { url: 'https://github.com', description: 'Excellent security (Score: 91)' },
     { url: 'https://www.cloudflare.com', description: 'Strong security (Score: 90)' },
     { url: 'https://www.paypal.com', description: 'Good security (Score: 80)' },
@@ -19,6 +19,8 @@
     { url: 'https://www.linkedin.com', description: 'Large set (7 cookies, Score: 69)' },
     { url: 'https://domain-locker.com', description: 'No cookies found' },
   ];
+
+  const examples = useExamples(examplesList);
 
   const isInputValid = $derived(() => {
     const trimmedUrl = url.trim();
@@ -33,13 +35,11 @@
 
   async function checkCookieSecurity() {
     if (!isInputValid) {
-      error = 'Please enter a valid HTTP/HTTPS URL';
+      diagnosticState.setError('Please enter a valid HTTP/HTTPS URL');
       return;
     }
 
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/http', {
@@ -65,26 +65,20 @@
         throw new Error(errorMessage);
       }
 
-      results = data;
+      diagnosticState.setResults(data);
     } catch (err) {
       if (err instanceof Error) {
-        error = err.message;
+        diagnosticState.setError(err.message);
       } else {
-        error = 'An unexpected error occurred. Please try again.';
+        diagnosticState.setError('An unexpected error occurred. Please try again.');
       }
-    } finally {
-      loading = false;
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     url = example.url;
-    selectedExampleIndex = index;
+    examples.select(index);
     checkCookieSecurity();
-  }
-
-  function clearExampleSelection() {
-    selectedExampleIndex = null;
   }
 
   function getSecurityIcon(level: string): string {
@@ -131,27 +125,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, i (i)}
-          <button
-            class="example-card"
-            class:selected={selectedExampleIndex === i}
-            onclick={() => loadExample(example, i)}
-            use:tooltip={`Inspect cookies for ${example.url}`}
-          >
-            <h5>{example.url}</h5>
-            <p>{example.description}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="Cookie Security Examples"
+    getLabel={(ex) => ex.url}
+    getDescription={(ex) => ex.description}
+    getTooltip={(ex) => `Inspect cookies for ${ex.url}`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -167,12 +149,12 @@
             type="url"
             bind:value={url}
             placeholder="https://example.com"
-            disabled={loading}
-            onchange={() => clearExampleSelection()}
+            disabled={diagnosticState.loading}
+            onchange={() => examples.clear()}
             onkeydown={(e) => e.key === 'Enter' && checkCookieSecurity()}
           />
-          <button onclick={checkCookieSecurity} disabled={loading || !isInputValid} class="primary">
-            {#if loading}
+          <button onclick={checkCookieSecurity} disabled={diagnosticState.loading || !isInputValid} class="primary">
+            {#if diagnosticState.loading}
               <Icon name="loader" size="sm" animate="spin" />
               Analyzing...
             {:else}
@@ -185,21 +167,9 @@
     </div>
   </div>
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>Cookie Inspection Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="Cookie Inspection Failed" error={diagnosticState.error} />
 
-  {#if loading}
+  {#if diagnosticState.loading}
     <div class="card">
       <div class="card-content">
         <div class="loading-state">
@@ -213,7 +183,7 @@
     </div>
   {/if}
 
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header">
         <h3>Cookie Security Analysis</h3>
@@ -226,27 +196,32 @@
           </div>
           <div class="card-content">
             <div class="score-container">
-              <div class="score-circle" style="--score-color: {getSecurityGrade(results.securityScore).color}">
-                <div class="score-value">{getSecurityGrade(results.securityScore).grade}</div>
+              <div
+                class="score-circle"
+                style="--score-color: {getSecurityGrade(diagnosticState.results.securityScore).color}"
+              >
+                <div class="score-value">{getSecurityGrade(diagnosticState.results.securityScore).grade}</div>
                 <div class="score-label">
-                  {results.securityScore !== null ? `${results.securityScore}/100` : 'No cookies'}
+                  {diagnosticState.results.securityScore !== null
+                    ? `${diagnosticState.results.securityScore}/100`
+                    : 'No cookies'}
                 </div>
               </div>
               <div class="score-summary">
                 <h4>Overall Assessment</h4>
-                <p>{results.summary}</p>
+                <p>{diagnosticState.results.summary}</p>
                 <div class="score-stats">
                   <div class="stat">
                     <span class="stat-label">Total Cookies:</span>
-                    <span class="stat-value">{results.totalCookies}</span>
+                    <span class="stat-value">{diagnosticState.results.totalCookies}</span>
                   </div>
                   <div class="stat">
                     <span class="stat-label">Secure Cookies:</span>
-                    <span class="stat-value">{results.secureCookies}</span>
+                    <span class="stat-value">{diagnosticState.results.secureCookies}</span>
                   </div>
                   <div class="stat">
                     <span class="stat-label">HttpOnly Cookies:</span>
-                    <span class="stat-value">{results.httpOnlyCookies}</span>
+                    <span class="stat-value">{diagnosticState.results.httpOnlyCookies}</span>
                   </div>
                 </div>
               </div>
@@ -255,14 +230,14 @@
         </div>
 
         <!-- Cookie Details -->
-        {#if results.cookies && results.cookies.length > 0}
+        {#if diagnosticState.results.cookies && diagnosticState.results.cookies.length > 0}
           <div class="card cookies-section">
             <div class="card-header">
               <h3>Cookie Details</h3>
             </div>
             <div class="card-content">
               <div class="cookies-grid">
-                {#each results.cookies as cookie (cookie.id || cookie.name)}
+                {#each diagnosticState.results.cookies as cookie (cookie.id || cookie.name)}
                   <div
                     class="cookie-card"
                     class:secure={cookie.securityLevel === 'secure'}
@@ -370,14 +345,14 @@
         {/if}
 
         <!-- Security Recommendations -->
-        {#if results.recommendations && results.recommendations.length > 0}
+        {#if diagnosticState.results.recommendations && diagnosticState.results.recommendations.length > 0}
           <div class="card recommendations-section">
             <div class="card-header">
               <h3>Security Recommendations</h3>
             </div>
             <div class="card-content">
               <div class="recommendations-list">
-                {#each results.recommendations as recommendation, index (index)}
+                {#each diagnosticState.results.recommendations as recommendation, index (index)}
                   <div class="recommendation-item">
                     <Icon name="lightbulb" size="sm" />
                     <div class="recommendation-content">

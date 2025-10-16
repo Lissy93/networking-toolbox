@@ -1,6 +1,9 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
+import { storage } from '$lib/utils/localStorage';
+import { logger } from '$lib/utils/logger';
 import { DEFAULT_THEME } from '$lib/config/customizable-settings';
+import { themes } from '$lib/constants/theme-list';
 
 export type ThemeOption = string;
 
@@ -16,12 +19,14 @@ export interface Theme {
   };
 }
 
+export { themes };
+
 const STORAGE_KEY = 'theme';
 
 // Track loaded fonts to avoid duplicates
 const loadedFonts = new Set<string>();
 
-// Helper function to load custom fonts
+// Helper function to load custom fonts with Font Loading API tracking
 function loadCustomFont(fontConfig: { name: string; url: string; fallback?: string }) {
   if (!browser || loadedFonts.has(fontConfig.url)) return;
 
@@ -30,9 +35,65 @@ function loadCustomFont(fontConfig: { name: string; url: string; fallback?: stri
   link.href = fontConfig.url;
   link.crossOrigin = 'anonymous';
 
-  // Add fallback handling
+  // Add loading state class
+  document.documentElement.classList.add('fonts-loading');
+
+  // Error handling
   link.onerror = () => {
-    console.warn(`Failed to load font from ${fontConfig.url}`);
+    logger.warn(`Failed to load font from ${fontConfig.url}`, {
+      url: fontConfig.url,
+      font: fontConfig.name,
+      component: 'ThemeStore',
+    });
+    document.documentElement.classList.remove('fonts-loading');
+  };
+
+  // Success handling with Font Loading API
+  link.onload = () => {
+    // Wait for fonts to be ready using Font Loading API
+    if (document.fonts) {
+      document.fonts.ready
+        .then(() => {
+          // Extract font family names from the config
+          const fontFamily = fontConfig.name;
+
+          // Check if font is loaded (try both regular and bold weights)
+          const fontLoaded =
+            document.fonts.check(`1em "${fontFamily}"`) || document.fonts.check(`700 1em "${fontFamily}"`);
+
+          if (fontLoaded) {
+            document.documentElement.classList.remove('fonts-loading');
+            document.documentElement.classList.add('fonts-loaded');
+            logger.debug(`Font loaded successfully: ${fontFamily}`, {
+              font: fontFamily,
+              component: 'ThemeStore',
+            });
+          } else {
+            // Font stylesheet loaded but font not available yet
+            logger.debug(`Font stylesheet loaded, waiting for font: ${fontFamily}`, {
+              font: fontFamily,
+              component: 'ThemeStore',
+            });
+
+            // Set a timeout fallback (3 seconds)
+            setTimeout(() => {
+              document.documentElement.classList.remove('fonts-loading');
+            }, 3000);
+          }
+        })
+        .catch((err) => {
+          logger.warn('Font loading check failed', {
+            error: err,
+            font: fontConfig.name,
+            component: 'ThemeStore',
+          });
+          document.documentElement.classList.remove('fonts-loading');
+        });
+    } else {
+      // Fallback for browsers without Font Loading API
+      document.documentElement.classList.remove('fonts-loading');
+      document.documentElement.classList.add('fonts-loaded');
+    }
   };
 
   document.head.appendChild(link);
@@ -73,117 +134,27 @@ function applyThemeClasses(theme: ThemeOption) {
   }
 }
 
-// Available themes configuration
-export const themes: Theme[] = [
-  {
-    id: 'dark',
-    name: 'Dark',
-    available: true,
-  },
-  {
-    id: 'light',
-    name: 'Light',
-    available: true,
-    font: {
-      name: 'Inter',
-      url: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap',
-      fallback: 'sans-serif',
-    },
-  },
-  {
-    id: 'midnight',
-    name: 'Midnight',
-    available: true,
-    font: {
-      name: 'Montserrat',
-      url: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap',
-      fallback: 'sans-serif',
-    },
-  },
-  {
-    id: 'arctic',
-    name: 'Arctic',
-    available: true,
-    font: {
-      name: 'Raleway',
-      url: 'https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800&family=Source+Code+Pro:wght@400;500;600;700&display=swap',
-      fallback: 'sans-serif',
-    },
-  },
-  {
-    id: 'ocean',
-    name: 'Ocean',
-    available: true,
-    font: {
-      name: 'Inter',
-      url: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
-      fallback: 'sans-serif',
-    },
-  },
-  {
-    id: 'purple',
-    name: 'Purple',
-    available: true,
-    font: {
-      name: 'Poppins',
-      url: 'https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap',
-      fallback: 'sans',
-    },
-  },
-  {
-    id: 'cyberpunk',
-    name: 'Cyberpunk',
-    available: true,
-    font: {
-      name: 'Orbitron',
-      url: 'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap',
-      fallback: 'monospace',
-    },
-  },
-  {
-    id: 'terminal',
-    name: 'Terminal',
-    available: true,
-    font: {
-      name: 'JetBrains Mono',
-      url: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap',
-      fallback: 'monospace',
-    },
-  },
-  {
-    id: 'lightpurple',
-    name: 'Light Purple',
-    available: true,
-  },
-  {
-    id: 'muteddark',
-    name: 'Muted Dark',
-    available: true,
-    font: {
-      name: 'Source Code Pro',
-      url: 'https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&display=swap',
-      fallback: 'monospace',
-    },
-  },
-  {
-    id: 'solarized',
-    name: 'Solarized',
-    available: true,
-    font: {
-      name: 'Inconsolata',
-      url: 'https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;400;500;600;700&family=Lato:wght@300;400;700&display=swap',
-      fallback: 'monospace',
-    },
-  },
-];
-
-function isValidTheme(theme: string | null) {
-  if (!theme) return false;
+function isValidTheme(theme: unknown): theme is string {
+  if (typeof theme !== 'string' || !theme) return false;
   return themes.some((t) => t.id === theme && t.available);
 }
 
+function getSystemPreferredTheme(): ThemeOption {
+  if (!browser) return 'ocean';
+
+  // Check if user has a color scheme preference
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+
+  if (prefersLight) return 'light';
+  if (prefersDark) return 'dark';
+
+  // No preference or preference not supported
+  return 'ocean';
+}
+
 function createThemeStore() {
-  const defaultTheme = isValidTheme(DEFAULT_THEME) ? DEFAULT_THEME : 'dark';
+  const defaultTheme = isValidTheme(DEFAULT_THEME) ? DEFAULT_THEME : 'ocean';
   const { subscribe, set, update } = writable<ThemeOption>(defaultTheme);
 
   return {
@@ -192,8 +163,17 @@ function createThemeStore() {
     // Initialize theme from localStorage or default
     init: () => {
       if (browser) {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        const initialTheme = isValidTheme(saved) ? (saved as ThemeOption) : defaultTheme;
+        const savedTheme = localStorage.getItem(STORAGE_KEY);
+
+        let initialTheme: ThemeOption;
+
+        // If no saved theme, use system preference
+        if (!savedTheme) {
+          initialTheme = getSystemPreferredTheme();
+        } else {
+          // Use saved theme if valid
+          initialTheme = isValidTheme(savedTheme) ? savedTheme : getSystemPreferredTheme();
+        }
 
         set(initialTheme);
 
@@ -210,14 +190,14 @@ function createThemeStore() {
       // Only set if theme is available
       const themeConfig = themes.find((t) => t.id === theme);
       if (!themeConfig?.available) {
-        console.warn(`Theme "${theme}" is not available`);
+        logger.warn(`Theme "${theme}" is not available`, { theme, component: 'ThemeStore' });
         return;
       }
 
       set(theme);
 
       if (browser) {
-        localStorage.setItem(STORAGE_KEY, theme);
+        storage.setItem(STORAGE_KEY, theme, { serialize: false });
 
         // Apply theme classes to document
         applyThemeClasses(theme);
@@ -230,7 +210,7 @@ function createThemeStore() {
         const newTheme = currentTheme === 'light' ? 'dark' : 'light';
 
         if (browser) {
-          localStorage.setItem(STORAGE_KEY, newTheme);
+          storage.setItem(STORAGE_KEY, newTheme, { serialize: false });
 
           applyThemeClasses(newTheme);
         }

@@ -9,19 +9,32 @@
  */
 
 import { env } from '$env/dynamic/public';
+import { browser } from '$app/environment';
 import type { HomepageLayoutMode } from '$lib/stores/homepageLayout';
 import type { NavbarDisplayMode } from '$lib/stores/navbarDisplay';
 import type { ThemeOption } from '$lib/stores/theme';
 
-// Site Branding
-export const SITE_NAME = env.NTB_SITE_NAME;
-export const SITE_TITLE = env.NTB_SITE_TITLE;
-export const SITE_DESCRIPTION = env.NTB_SITE_DESCRIPTION;
+// Get user customization from localStorage (browser only)
+function getUserCustomization() {
+  if (!browser) return null;
+  try {
+    const stored = localStorage.getItem('user-site-customization');
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+}
+
+const userCustom = getUserCustomization();
+
+// Site Branding - prioritize user customization, then env vars
+export const SITE_TITLE = userCustom?.title || env.NTB_SITE_TITLE;
+export const SITE_DESCRIPTION = userCustom?.description || env.NTB_SITE_DESCRIPTION;
 
 /**
  * Logo/icon to display in the navbar, specified as a path to an image
  */
-export const SITE_ICON = env.NTB_SITE_ICON ?? '';
+export const SITE_ICON = userCustom?.iconUrl || env.NTB_SITE_ICON || '';
 
 /**
  * Default homepage layout
@@ -38,9 +51,9 @@ export const DEFAULT_NAVBAR_DISPLAY: NavbarDisplayMode = (env.NTB_NAVBAR_DISPLAY
 
 /**
  * Default theme
- * Options: 'dark', 'light', 'midnight', 'arctic', 'ocean', 'purple', 'cyberpunk', 'terminal', 'lightpurple', 'muteddark', 'solarized'
+ * Options: 'dark', 'light', 'midnight', 'arctic', 'ocean', 'purple', 'cyberpunk', 'terminal', 'lightpurple', 'muteddark', 'solarized', 'nord', 'gruvbox', 'tokyonight', 'catppuccin', 'everforest', 'sunset', 'dracula'
  */
-export const DEFAULT_THEME: ThemeOption = (env.NTB_DEFAULT_THEME as ThemeOption) ?? 'dark';
+export const DEFAULT_THEME: ThemeOption = (env.NTB_DEFAULT_THEME as ThemeOption) ?? 'ocean';
 
 /**
  * Default language
@@ -52,3 +65,5 @@ export const DEFAULT_LANGUAGE = env.NTB_DEFAULT_LANGUAGE ?? 'en';
  * Primary color (for default theme). Specified as a hex code.
  */
 export const PRIMARY_COLOR = env.NTB_PRIMARY_COLOR ?? '';
+
+export const SHOW_TIPS_ON_HOMEPAGE = !!env.NTB_SHOW_TIPS_ON_HOMEPAGE;

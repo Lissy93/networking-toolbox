@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useDiagnosticState, useExamples } from '$lib/composables';
+  import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
 
   let host = $state('');
   let port = $state<number | null>(null);
   let service = $state('custom');
-  let loading = $state(false);
-  let results = $state<any>(null);
-  let error = $state<string | null>(null);
-  let selectedExampleIndex = $state<number | null>(null);
+
+  const diagnosticState = useDiagnosticState<any>();
 
   const services = {
     custom: { port: null, description: 'Custom port' },
@@ -34,7 +34,7 @@
     vnc: { port: 5900, description: 'VNC Remote Desktop' },
   };
 
-  const examples = [
+  const examplesList = [
     { host: 'scanme.nmap.org', port: 22, service: 'ssh', description: 'Nmap SSH Test' },
     { host: 'test.rebex.net', port: 21, service: 'ftp', description: 'Rebex FTP Test' },
     { host: 'example.com', port: 80, service: 'http', description: 'Example.com HTTP' },
@@ -45,6 +45,8 @@
     { host: 'httpbin.org', port: 80, service: 'http', description: 'HTTPBin API' },
     { host: 'whois.verisign-grs.com', port: 43, service: 'whois', description: 'Verisign WHOIS' },
   ];
+
+  const examples = useExamples(examplesList);
 
   $effect(() => {
     if (service && service !== 'custom' && services[service as keyof typeof services]) {
@@ -64,13 +66,11 @@
 
   async function grabBanner() {
     if (!isInputValid) {
-      error = 'Please enter a valid host and port (1-65535)';
+      diagnosticState.setError('Please enter a valid host and port (1-65535)');
       return;
     }
 
-    loading = true;
-    error = null;
-    results = null;
+    diagnosticState.startOperation();
 
     try {
       const response = await fetch('/api/internal/diagnostics/tls', {
@@ -97,24 +97,18 @@
         throw new Error(errorMessage);
       }
 
-      results = data;
+      diagnosticState.setResults(data);
     } catch (err) {
-      error = err instanceof Error ? err.message : 'An unexpected error occurred';
-    } finally {
-      loading = false;
+      diagnosticState.setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     }
   }
 
-  function loadExample(example: (typeof examples)[0], index: number) {
+  function loadExample(example: (typeof examplesList)[0], index: number) {
     host = example.host;
     port = example.port;
     service = example.service;
-    selectedExampleIndex = index;
+    examples.select(index);
     grabBanner();
-  }
-
-  function clearExampleSelection() {
-    selectedExampleIndex = null;
   }
 
   function getProtocolIcon(protocol: string): string {
@@ -155,27 +149,15 @@
   </header>
 
   <!-- Examples -->
-  <div class="card examples-card">
-    <details class="examples-details">
-      <summary class="examples-summary">
-        <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
-      </summary>
-      <div class="examples-grid">
-        {#each examples as example, i (i)}
-          <button
-            class="example-card"
-            class:selected={selectedExampleIndex === i}
-            onclick={() => loadExample(example, i)}
-            use:tooltip={`Grab banner from ${example.host}:${example.port}`}
-          >
-            <h5>{example.description}</h5>
-            <p>{example.host}:{example.port}</p>
-          </button>
-        {/each}
-      </div>
-    </details>
-  </div>
+  <ExamplesCard
+    examples={examplesList}
+    selectedIndex={examples.selectedIndex}
+    onSelect={loadExample}
+    title="Quick Examples"
+    getLabel={(ex) => ex.description}
+    getDescription={(ex) => `${ex.host}:${ex.port}`}
+    getTooltip={(ex) => `Grab banner from ${ex.host}:${ex.port}`}
+  />
 
   <!-- Input Form -->
   <div class="card input-card">
@@ -186,7 +168,12 @@
       <div class="form-row">
         <div class="form-group">
           <label for="service">Service Type</label>
-          <select id="service" bind:value={service} disabled={loading} onchange={() => clearExampleSelection()}>
+          <select
+            id="service"
+            bind:value={service}
+            disabled={diagnosticState.loading}
+            onchange={() => examples.clear()}
+          >
             {#each Object.entries(services) as [key, svc] (key)}
               <option value={key}>{svc.description} {svc.port ? `(${svc.port})` : ''}</option>
             {/each}
@@ -202,8 +189,8 @@
             type="text"
             bind:value={host}
             placeholder="example.com or 192.168.1.1"
-            disabled={loading}
-            onchange={() => clearExampleSelection()}
+            disabled={diagnosticState.loading}
+            onchange={() => examples.clear()}
             onkeydown={(e) => e.key === 'Enter' && grabBanner()}
           />
         </div>
@@ -216,15 +203,15 @@
             min="1"
             max="65535"
             placeholder="1-65535"
-            disabled={loading}
-            onchange={() => clearExampleSelection()}
+            disabled={diagnosticState.loading}
+            onchange={() => examples.clear()}
             onkeydown={(e) => e.key === 'Enter' && grabBanner()}
           />
         </div>
       </div>
 
-      <button onclick={grabBanner} disabled={loading || !isInputValid} class="primary">
-        {#if loading}
+      <button onclick={grabBanner} disabled={diagnosticState.loading || !isInputValid} class="primary">
+        {#if diagnosticState.loading}
           <Icon name="loader" size="sm" animate="spin" />
           Connecting...
         {:else}
@@ -235,21 +222,9 @@
     </div>
   </div>
 
-  {#if error}
-    <div class="card error-card">
-      <div class="card-content">
-        <div class="error-content">
-          <Icon name="alert-triangle" size="md" />
-          <div>
-            <strong>Connection Failed</strong>
-            <p>{error}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+  <ErrorCard title="Connection Failed" error={diagnosticState.error} />
 
-  {#if loading}
+  {#if diagnosticState.loading}
     <div class="card">
       <div class="card-content">
         <div class="loading-state">
@@ -263,7 +238,7 @@
     </div>
   {/if}
 
-  {#if results}
+  {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header">
         <h3>Banner Information</h3>
@@ -278,22 +253,22 @@
             <div class="info-grid">
               <div class="info-item">
                 <span class="info-label">Host:</span>
-                <span class="info-value">{results.host}</span>
+                <span class="info-value">{diagnosticState.results.host}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Port:</span>
-                <span class="info-value">{results.port}</span>
+                <span class="info-value">{diagnosticState.results.port}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Protocol:</span>
                 <span class="info-value">
-                  <Icon name={getProtocolIcon(results.protocol)} size="xs" />
-                  {results.protocol || 'Unknown'}
+                  <Icon name={getProtocolIcon(diagnosticState.results.protocol)} size="xs" />
+                  {diagnosticState.results.protocol || 'Unknown'}
                 </span>
               </div>
               <div class="info-item">
                 <span class="info-label">Response Time:</span>
-                <span class="info-value">{results.responseTime}ms</span>
+                <span class="info-value">{diagnosticState.results.responseTime}ms</span>
               </div>
             </div>
           </div>
@@ -305,9 +280,9 @@
             <h3>Service Banner</h3>
           </div>
           <div class="card-content">
-            {#if results.banner}
+            {#if diagnosticState.results.banner}
               <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-              <pre class="banner-content">{@html formatBanner(results.banner)}</pre>
+              <pre class="banner-content">{@html formatBanner(diagnosticState.results.banner)}</pre>
             {:else}
               <div class="no-banner">
                 <Icon name="file-x" size="lg" />
@@ -319,47 +294,47 @@
         </div>
 
         <!-- Service Analysis -->
-        {#if results.analysis && (results.analysis.software || results.analysis.version || results.analysis.os || (results.analysis.security && results.analysis.security.length > 0))}
+        {#if diagnosticState.results.analysis && (diagnosticState.results.analysis.software || diagnosticState.results.analysis.version || diagnosticState.results.analysis.os || (diagnosticState.results.analysis.security && diagnosticState.results.analysis.security.length > 0))}
           <div class="card analysis-section">
             <div class="card-header">
               <h3>Service Analysis</h3>
             </div>
             <div class="card-content">
               <div class="analysis-grid">
-                {#if results.analysis.software}
+                {#if diagnosticState.results.analysis.software}
                   <div class="analysis-item">
                     <Icon name="package" size="sm" />
                     <div>
                       <h4>Software</h4>
-                      <p>{results.analysis.software}</p>
+                      <p>{diagnosticState.results.analysis.software}</p>
                     </div>
                   </div>
                 {/if}
-                {#if results.analysis.version}
+                {#if diagnosticState.results.analysis.version}
                   <div class="analysis-item">
                     <Icon name="tag" size="sm" />
                     <div>
                       <h4>Version</h4>
-                      <p>{results.analysis.version}</p>
+                      <p>{diagnosticState.results.analysis.version}</p>
                     </div>
                   </div>
                 {/if}
-                {#if results.analysis.os}
+                {#if diagnosticState.results.analysis.os}
                   <div class="analysis-item">
                     <Icon name="monitor" size="sm" />
                     <div>
                       <h4>Operating System</h4>
-                      <p>{results.analysis.os}</p>
+                      <p>{diagnosticState.results.analysis.os}</p>
                     </div>
                   </div>
                 {/if}
-                {#if results.analysis.security && results.analysis.security.length > 0}
+                {#if diagnosticState.results.analysis.security && diagnosticState.results.analysis.security.length > 0}
                   <div class="analysis-item full-width">
                     <Icon name="shield" size="sm" />
                     <div>
                       <h4>Security Notes</h4>
                       <ul>
-                        {#each results.analysis.security as note, i (i)}
+                        {#each diagnosticState.results.analysis.security as note, i (i)}
                           <li>{note}</li>
                         {/each}
                       </ul>
@@ -372,7 +347,7 @@
         {/if}
 
         <!-- TLS Info (if applicable) -->
-        {#if results.tls}
+        {#if diagnosticState.results.tls}
           <div class="card tls-section">
             <div class="card-header">
               <h3>TLS Information</h3>
@@ -381,16 +356,16 @@
               <div class="tls-info">
                 <div class="tls-item">
                   <span class="tls-label">Protocol:</span>
-                  <span class="tls-value">{results.tls.protocol}</span>
+                  <span class="tls-value">{diagnosticState.results.tls.protocol}</span>
                 </div>
                 <div class="tls-item">
                   <span class="tls-label">Cipher:</span>
-                  <span class="tls-value">{results.tls.cipher}</span>
+                  <span class="tls-value">{diagnosticState.results.tls.cipher}</span>
                 </div>
-                {#if results.tls.certificate}
+                {#if diagnosticState.results.tls.certificate}
                   <div class="tls-item">
                     <span class="tls-label">Certificate CN:</span>
-                    <span class="tls-value">{results.tls.certificate.cn}</span>
+                    <span class="tls-value">{diagnosticState.results.tls.certificate.cn}</span>
                   </div>
                 {/if}
               </div>

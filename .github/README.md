@@ -111,12 +111,23 @@ If you're new to GitHub or open source, take a look at [git-in.to](https://git-i
 ---
 
 ### Features
-100+ networking and sysadmin tools, zero third-party dependencies, works ofline.
 
+<h3 align="center">Make it your own</h3>
+<p align="center"><i>Custom layouts, theming, bookmarking, multi-language support and more</i></p>
 <p align="center">
-   <img width="2761" height="1229" alt="networking-toolbox" src="https://github.com/user-attachments/assets/2a128ee2-9bcb-49f0-be41-f69a3b8f2474" />
-  <br>
-  <sup><i>We've got 100+ tools, covering all aspects of network engineering</i></sup>
+<img width="800" src="https://storage.googleapis.com/as93-screenshots/networking-toolbox/light-dark-mode-single.png" />
+</p>
+
+<h3 align="center">Works anywhere</h3>
+<p align="center"><i>Offline-capable, mobile optimized, zero third-party dependencies</i></p>
+<p align="center">
+<img width="800" src="https://storage.googleapis.com/as93-screenshots/networking-toolbox/mobile-views.png" />
+</p>
+
+<h3 align="center">100s of tools</h3>
+<p align="center"><i>Everything you need for converting, calculating, diagnosing and verifying server configs</i></p>
+<p align="center">
+<img width="800" src="https://github.com/user-attachments/assets/2dfe66b7-2325-4b41-b116-32eab74d3cf6" />
 </p>
 
 ---

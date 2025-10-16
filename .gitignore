@@ -25,6 +25,10 @@ Thumbs.db
 /test-results
 e2e-results.xml
 
+# Other generated results
+codeql-db/
+*.sarif
+
 # AI Crap
 .claude/
 .playwright-mcp/

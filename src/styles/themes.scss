@@ -1,0 +1,838 @@
+.theme-ocean,
+html[data-theme='ocean'] {
+  --color-primary: #70edb7;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 70%, white 30%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 70%, black 30%);
+  --bg-primary: #131c2b;
+  --bg-secondary: #212c3d;
+  --bg-tertiary: #151e2f;
+  --text-secondary: #a0a7b0;
+  --surface-hover: #2b384b;
+  --border-primary: #30405b;
+  --font-heading: 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+.theme-purple,
+html[data-theme='purple'] {
+  --color-primary: #cca6ff;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 70%, white 30%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 70%, black 30%);
+  --bg-primary: #13182b;
+  --bg-secondary: #101b31;
+  --bg-tertiary: #222e45;
+  --text-secondary: #a0a7b0;
+  --surface-hover: #2b384b;
+  --border-primary: #30405b;
+  --font-body: 'Poppins', sans-serif;
+  --font-heading: 'Lora', 'Poppins', sans-serif;
+}
+
+/* Light theme */
+.theme-lightpurple,
+html[data-theme='lightpurple'] {
+  /* Background colors */
+  --bg-primary: #f4f2fa;
+  --bg-secondary: #fff; /* cards */
+  --bg-tertiary: #f6f2fc; /* subtle panels / code blocks */
+
+  /* Text colors (AA on light backgrounds) */
+  --text-primary: #0b1220; /* ~19:1 on white */
+  --text-secondary: #364152; /* ~15:1 on white */
+  --text-tertiary: #6b7280; /* ~12:1 on white */
+
+  /* Primary brand (use *-dark for filled buttons) */
+  --color-primary: #af55fc;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 85%, white 15%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 85%, black 15%);
+
+  /* Action colors (chosen so white label text is AA) */
+  --color-success: #15803d; /* white text ≥ 13:1 */
+  --color-success-light: #40dc6c;
+  --color-warning: #a16207; /* white text ≥ 7:1 */
+  --color-warning-light: #bcbc1c;
+  --color-error: #b91c1c; /* white text ≥ 6.5:1 */
+  --color-error-light: #ff6e6e;
+  --color-info: #0369a1; /* white text ≥ 10.6:1 */
+  --color-info-light: #2cb5b5;
+
+  --color-purple: #7c3aed; /* works on white with white text in fills */
+  --color-pink: #db2777;
+
+  /* Border & surface */
+  --border-primary: #e5e7eb; /* default hairline */
+  --border-secondary: #d1d5db; /* dividers on white */
+  --surface-hover: #f6f2f9; /* interactive hover */
+  --surface-active: #e9eef5; /* pressed/selected */
+
+  /* Shadows (softer for light UI) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.16);
+}
+
+/* Cyberpunk Theme - Enhanced neon tech aesthetic with CRT effects */
+.theme-cyberpunk,
+html[data-theme='cyberpunk'] {
+  --bg-primary: #0a0614;
+  --bg-secondary: #110a1f;
+  --bg-tertiary: #1a0f2e;
+
+  --text-primary: #f0e6ff;
+  --text-secondary: #b8a6d9;
+  --text-tertiary: #8b7ba3;
+
+  /* Primary - Hot pink neon */
+  --color-primary: #e4ff00;
+  --color-primary-hover: #eaff2f;
+  --color-primary-dark: #b7cc00;
+
+  /* Action colors - Enhanced neon palette */
+  --color-success: #39ff14;
+  --color-success-light: #7fff44;
+  --color-warning: #ffdd00;
+  --color-warning-light: #ffee55;
+  --color-error: #ff0066;
+  --color-error-light: #ff3388;
+  --color-info: #00ddff;
+  --color-info-light: #44eeff;
+
+  --color-purple: #cc00ff;
+  --color-pink: #ff0099;
+
+  /* Borders & surfaces - Enhanced neon glow */
+  --border-primary: #004d66;
+  --border-secondary: #002233;
+  --surface-hover: #001122;
+  --surface-active: #003344;
+
+  /* Shadows with enhanced neon glow effects */
+  --shadow-sm: 0 0 4px rgba(0, 255, 204, 0.2);
+  --shadow-md: 0 0 8px rgba(0, 255, 204, 0.3);
+  --shadow-lg: 0 0 16px rgba(0, 255, 204, 0.4);
+
+  /* Fonts */
+  --font-heading: 'Orbitron', monospace;
+  --font-body: 'Share Tech Mono', monospace;
+  --font-mono: 'Share Tech Mono', monospace;
+
+  h2 {
+    color: #fd3d90 !important;
+  }
+
+  /* CRT Screen effect with moving scanlines */
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 200vh;
+    pointer-events: none;
+    z-index: 9999;
+    background: linear-gradient(
+      180deg,
+      rgba(68, 239, 255, 0.1),
+      transparent 49%,
+      rgb(253, 61, 144, 0.08) 50%,
+      transparent
+    );
+    background-size: 4px 4px;
+    animation: crt-scanlines 8s linear infinite;
+  }
+
+  /* CRT Screen curvature effect on body */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9998;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.2) 100%);
+  }
+
+  /* Glitch effect for links */
+  a {
+    transition: all 0.3s ease;
+
+    &:hover {
+      animation: cyberpunk-glitch 0.3s ease-in-out;
+      text-shadow:
+        -1px 0 #ff006f,
+        1px 0 #00ffcc;
+    }
+
+    &:hover::before {
+      content: attr(href);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: #ff006f;
+      background: transparent;
+      clip: rect(0, 0, 0, 0);
+      animation: cyberpunk-glitch-overlay 0.3s ease-in-out;
+    }
+
+    &:hover::after {
+      content: attr(href);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: #00ffcc;
+      background: transparent;
+      clip: rect(0, 0, 0, 0);
+      animation: cyberpunk-glitch-overlay-2 0.3s ease-in-out;
+    }
+  }
+}
+
+/* Cyberpunk animations */
+@keyframes crt-scanlines {
+  0% {
+    transform: translateY(-5vh);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes crt-flicker {
+  0% {
+    opacity: 1;
+  }
+  98% {
+    opacity: 0.85;
+  }
+  99% {
+    opacity: 0.99;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes cyberpunk-glitch {
+  0%,
+  100% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+}
+
+@keyframes cyberpunk-glitch-overlay {
+  0% {
+    clip: rect(42px, 9999px, 44px, 0);
+  }
+  25% {
+    clip: rect(12px, 9999px, 59px, 0);
+  }
+  50% {
+    clip: rect(78px, 9999px, 23px, 0);
+  }
+  75% {
+    clip: rect(34px, 9999px, 67px, 0);
+  }
+  100% {
+    clip: rect(91px, 9999px, 18px, 0);
+  }
+}
+
+@keyframes cyberpunk-glitch-overlay-2 {
+  0% {
+    clip: rect(65px, 9999px, 23px, 0);
+  }
+  25% {
+    clip: rect(34px, 9999px, 89px, 0);
+  }
+  50% {
+    clip: rect(12px, 9999px, 56px, 0);
+  }
+  75% {
+    clip: rect(78px, 9999px, 34px, 0);
+  }
+  100% {
+    clip: rect(23px, 9999px, 67px, 0);
+  }
+}
+
+/* Midnight Theme - Sophisticated deep blues and purples */
+.theme-midnight,
+html[data-theme='midnight'] {
+  /* Backgrounds - Deep midnight blues */
+  --bg-primary: #0a0e27;
+  --bg-secondary: #0f1538;
+  --bg-tertiary: #141c4c;
+
+  /* Text - Cool silver tones */
+  --text-primary: #e8eaf6;
+  --text-secondary: #9fa8da;
+  --text-tertiary: #7986cb;
+
+  /* Primary - Royal blue */
+  --color-primary: #5e72e4;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 70%, white 30%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 70%, black 30%);
+
+  /* Action colors - Sophisticated palette */
+  --color-success: #56f1c7;
+  --color-success-light: #7fffd4;
+  --color-warning: #ffd93d;
+  --color-warning-light: #ffe566;
+  --color-error: #ff5252;
+  --color-error-light: #ff7979;
+  --color-info: #82b1ff;
+  --color-info-light: #a3c3ff;
+
+  --color-purple: #9c88ff;
+  --color-pink: #f8b5ce;
+
+  /* Borders & surfaces - Deep space */
+  --border-primary: #2a3f7d;
+  --border-secondary: #1e2c5f;
+  --surface-hover: #1a2555;
+  --surface-active: #243270;
+
+  /* Shadows - Deep and mysterious */
+  --shadow-sm: 0 2px 8px rgba(94, 114, 228, 0.1);
+  --shadow-md: 0 8px 20px rgba(94, 114, 228, 0.15);
+  --shadow-lg: 0 16px 40px rgba(94, 114, 228, 0.2);
+
+  /* Fonts */
+  --font-heading: 'Montserrat', sans-serif;
+  --font-body: 'IBM Plex Mono', monospace;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+/* Arctic Theme - Cool, crisp, and minimal */
+.theme-arctic,
+html[data-theme='arctic'] {
+  /* Backgrounds - Cool whites and light blues */
+  --bg-primary: #f5f5f5;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e3f2fd;
+
+  /* Text - Deep slate for contrast */
+  --text-primary: #263238;
+  --text-secondary: #546e7a;
+  --text-tertiary: #78909c;
+
+  /* Primary - Ice blue */
+  --color-primary: #00acc1;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 85%, white 15%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 85%, black 15%);
+
+  /* Action colors - Cool and crisp */
+  --color-success: #00897b;
+  --color-success-light: #26a69a;
+  --color-warning: #ffb300;
+  --color-warning-light: #ffc947;
+  --color-error: #e53935;
+  --color-error-light: #ef5350;
+  --color-info: #039be5;
+  --color-info-light: #29b6f6;
+
+  --color-purple: #7e57c2;
+  --color-pink: #ec407a;
+
+  /* Borders & surfaces - Clean and minimal */
+  --border-primary: #cfd8dc;
+  --border-secondary: #b0bec5;
+  --surface-hover: #eceff1;
+  --surface-active: #cfd8dc;
+
+  /* Shadows - Light and airy */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.12);
+
+  /* Fonts */
+  --font-heading: 'Raleway', sans-serif;
+  --font-body: 'Raleway', sans-serif;
+  --font-mono: 'Source Code Pro', monospace;
+}
+
+/* Terminal Theme - Classic green-on-black terminal aesthetic */
+.theme-terminal,
+html[data-theme='terminal'] {
+  /* Backgrounds - Pure blacks */
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0a;
+  --bg-tertiary: #1c1d1c96;
+
+  /* Text - Classic terminal green */
+  --text-primary: #edf6ed;
+  --text-secondary: #c7ffc7;
+  --text-tertiary: #0b820b;
+
+  /* Primary - Bright green */
+  --color-primary: #00ff00;
+  --color-primary-hover: #66ff66;
+  --color-primary-dark: #00cc00;
+
+  /* Action colors - Retro terminal colors */
+  --color-success: #00ff00;
+  --color-success-light: #66ff66;
+  --color-warning: #ffff00;
+  --color-warning-light: #ffff66;
+  --color-error: #ff0000;
+  --color-error-light: #ff6666;
+  --color-info: #00ffff;
+  --color-info-light: #66ffff;
+
+  --color-purple: #ff00ff;
+  --color-pink: #ff00aa;
+
+  /* Borders & surfaces - Subtle terminal feel */
+  --border-primary: #00ff0024;
+  --border-secondary: #009900;
+  --surface-hover: #001100;
+  --surface-active: #002200;
+
+  --radius-sm: 0;
+  --radius-md: 1px;
+  --radius-lg: 2px;
+
+  --spacing-2xs: 0.125rem;
+  --spacing-xs: 0.125rem;
+  --spacing-sm: 0.25rem;
+  --spacing-md: 0.5rem;
+  --spacing-lg: 0.75rem;
+  --spacing-xl: 1rem;
+  --spacing-2xl: 1.5rem;
+
+  /* Shadows - CRT monitor glow */
+  --shadow-sm: 0 0 2px rgba(0, 255, 0, 0.5);
+  --shadow-md: 0 0 8px rgba(0, 255, 0, 0.3);
+  --shadow-lg: 0 0 20px rgba(0, 255, 0, 0.2);
+
+  /* Fonts */
+  --font-heading: 'JetBrains Mono', monospace;
+  --font-body: 'JetBrains Mono', monospace;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* One Dark Theme - VS Code's beloved dark theme */
+.theme-muteddark,
+html[data-theme='muteddark'] {
+  --bg-primary: #282c34;
+  --bg-secondary: #21252b;
+  --bg-tertiary: #2c313a;
+
+  --text-primary: #abb2bf;
+  --text-secondary: #a2abc9;
+  --text-tertiary: #5c6370;
+
+  --color-primary: #e8ef61;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 70%, white 30%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 70%, black 30%);
+
+  --color-success: #98c379;
+  --color-warning: #e5c07b;
+  --color-error: #e06c75;
+  --color-info: #61afef;
+
+  --color-purple: #c678dd;
+  --color-pink: #e06c75;
+
+  --border-primary: #3e4451;
+  --surface-hover: #2c313a;
+  --surface-active: #3e4451;
+
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+
+  --font-heading: 'Open Sans', sans-serif;
+  --font-body: 'Source Code Pro', monospace;
+  --font-mono: 'Source Code Pro', monospace;
+}
+
+/* Solarized Theme - The scientifically designed color scheme */
+.theme-solarized,
+html[data-theme='solarized'] {
+  --bg-primary: #002b36;
+  --bg-secondary: #073642;
+  --bg-tertiary: #033947;
+
+  --text-primary: #839496;
+  --text-secondary: #93a1a1;
+  --text-tertiary: #657b83;
+
+  --color-primary: #268bd2;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 70%, white 30%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 70%, black 30%);
+
+  --color-success: #859900;
+  --color-warning: #b58900;
+  --color-error: #dc322f;
+  --color-info: #268bd2;
+
+  --color-purple: #6c71c4;
+  --color-pink: #d33682;
+
+  --border-primary: #586e75;
+  --surface-hover: #073642;
+  --surface-active: #586e75;
+
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
+
+  --font-heading: 'Lato', sans-serif;
+  --font-body: 'Inconsolata', monospace;
+  --font-mono: 'Inconsolata', monospace;
+}
+
+/* Nord Theme - Professional, cool, and muted */
+.theme-nord,
+html[data-theme='nord'] {
+  /* Backgrounds - Polar Night */
+  --bg-primary: #2e3440;
+  --bg-secondary: #3b4252;
+  --bg-tertiary: #434c5e;
+
+  /* Text - Snow Storm */
+  --text-primary: #eceff4;
+  --text-secondary: #d8dee9;
+  --text-tertiary: #e5e9f0;
+
+  /* Primary - Frost Blue */
+  --color-primary: #88c0d0;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 70%, white 30%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 70%, black 30%);
+
+  /* Action colors - Aurora */
+  --color-success: #a3be8c;
+  --color-success-light: #b8d1a8;
+  --color-warning: #ebcb8b;
+  --color-warning-light: #f0d9a7;
+  --color-error: #bf616a;
+  --color-error-light: #d08770;
+  --color-info: #81a1c1;
+  --color-info-light: #88c0d0;
+
+  --color-purple: #b48ead;
+  --color-pink: #bf616a;
+
+  /* Borders & surfaces */
+  --border-primary: #4c566a;
+  --border-secondary: #434c5e;
+  --surface-hover: #313746;
+  --surface-active: #4c566a;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
+
+  /* Fonts */
+  --font-heading: 'IBM Plex Sans', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+/* Gruvbox Theme - Warm, retro, and earthy */
+.theme-gruvbox,
+html[data-theme='gruvbox'] {
+  /* Backgrounds - Dark Brown */
+  --bg-primary: #282828;
+  --bg-secondary: #3c3836;
+  --bg-tertiary: #504945;
+
+  /* Text - Light Cream */
+  --text-primary: #ebdbb2;
+  --text-secondary: #d5c4a1;
+  --text-tertiary: #bdae93;
+
+  /* Primary - Bright Yellow */
+  --color-primary: #fabd2f;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 70%, white 30%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 70%, black 30%);
+
+  /* Action colors - Retro palette */
+  --color-success: #b8bb26;
+  --color-success-light: #98971a;
+  --color-warning: #fabd2f;
+  --color-warning-light: #d79921;
+  --color-error: #fb4934;
+  --color-error-light: #cc241d;
+  --color-info: #83a598;
+  --color-info-light: #458588;
+
+  --color-purple: #d3869b;
+  --color-pink: #fb4934;
+
+  /* Borders & surfaces */
+  --border-primary: #665c54;
+  --border-secondary: #504945;
+  --surface-hover: #3c3836;
+  --surface-active: #504945;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+
+  /* Fonts */
+  --font-heading: 'Ubuntu', sans-serif;
+  --font-body: 'Ubuntu Mono', monospace;
+  --font-mono: 'Ubuntu Mono', monospace;
+}
+
+/* Tokyo Night Theme - Deep blue, modern, popular */
+.theme-tokyonight,
+html[data-theme='tokyonight'] {
+  /* Backgrounds - Storm Night */
+  --bg-primary: #1a1b26;
+  --bg-secondary: #24283b;
+  --bg-tertiary: #353b56;
+
+  /* Text - Cool White */
+  --text-primary: #c0caf5;
+  --text-secondary: #a9b1d6;
+  --text-tertiary: #9aa5ce;
+
+  /* Primary - Bright Blue */
+  --color-primary: #7aa2f7;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 70%, white 30%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 70%, black 30%);
+
+  /* Action colors - Night palette */
+  --color-success: #9ece6a;
+  --color-success-light: #73daca;
+  --color-warning: #e0af68;
+  --color-warning-light: #ff9e64;
+  --color-error: #f7768e;
+  --color-error-light: #db4b4b;
+  --color-info: #7dcfff;
+  --color-info-light: #b4f9f8;
+
+  --color-purple: #bb9af7;
+  --color-pink: #f7768e;
+
+  /* Borders & surfaces */
+  --border-primary: #565f89;
+  --border-secondary: #414868;
+  --surface-hover: #292e42;
+  --surface-active: #3b4261;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  /* Fonts */
+  --font-heading: 'Fira Sans', sans-serif;
+  --font-body: 'Fira Code', monospace;
+  --font-mono: 'Fira Code', monospace;
+}
+
+/* Catppuccin Mocha Theme - Pastel dark, soothing */
+.theme-catppuccin,
+html[data-theme='catppuccin'] {
+  /* Backgrounds - Dark Mocha */
+  --bg-primary: #1e1e2e;
+  --bg-secondary: #181825;
+  --bg-tertiary: #313244;
+
+  /* Text - Light Latte */
+  --text-primary: #cdd6f4;
+  --text-secondary: #bac2de;
+  --text-tertiary: #a6adc8;
+
+  /* Primary - Lavender */
+  --color-primary: #b2a5ff;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 70%, white 30%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 70%, black 30%);
+
+  /* Action colors - Pastel palette */
+  --color-success: #a6e3a1;
+  --color-success-light: #94e2d5;
+  --color-warning: #f9e2af;
+  --color-warning-light: #fab387;
+  --color-error: #f38ba8;
+  --color-error-light: #eba0ac;
+  --color-info: #89dceb;
+  --color-info-light: #89b4fa;
+
+  --color-purple: #cba6f7;
+  --color-pink: #f5c2e7;
+
+  /* Borders & surfaces */
+  --border-primary: #45475a;
+  --border-secondary: #313244;
+  --surface-hover: #313244;
+  --surface-active: #45475a;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
+
+  /* Fonts */
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Everforest Theme - Green, natural, easy on eyes */
+.theme-everforest,
+html[data-theme='everforest'] {
+  /* Backgrounds - Forest Floor */
+  --bg-primary: #2d353b;
+  --bg-secondary: #343f44;
+  --bg-tertiary: #3d484d;
+
+  /* Text - Cream */
+  --text-primary: #d3c6aa;
+  --text-secondary: #baa89f;
+  --text-tertiary: #859289;
+
+  /* Primary - Forest Green */
+  --color-primary: #a7c080;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 70%, white 30%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 70%, black 30%);
+
+  /* Action colors - Natural palette */
+  --color-success: #a7c080;
+  --color-success-light: #83c092;
+  --color-warning: #dbbc7f;
+  --color-warning-light: #e69875;
+  --color-error: #e67e80;
+  --color-error-light: #e67e80;
+  --color-info: #7fbbb3;
+  --color-info-light: #a7c080;
+
+  --color-purple: #d699b6;
+  --color-pink: #e67e80;
+
+  /* Borders & surfaces */
+  --border-primary: #4f5b58;
+  --border-secondary: #3d484d;
+  --surface-hover: #3d484d;
+  --surface-active: #4f5b58;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
+
+  /* Fonts */
+  --font-heading: 'Nunito', sans-serif;
+  --font-body: 'Nunito', sans-serif;
+  --font-mono: 'Source Code Pro', monospace;
+}
+
+/* Sunset Theme - Warm oranges and coral, light theme */
+.theme-sunset,
+html[data-theme='sunset'] {
+  /* Backgrounds - Warm peach and cream */
+  --bg-primary: #edecea;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #fff4eb;
+
+  /* Text - Deep warm grays */
+  --text-primary: #2a1810;
+  --text-secondary: #5c4a42;
+  --text-tertiary: #8c7165;
+
+  /* Primary - Sunset coral */
+  --color-primary: #ff6b35;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 85%, white 15%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 85%, black 15%);
+
+  /* Action colors - Warm sunset palette */
+  --color-success: #0e9f6e;
+  --color-success-light: #31c48d;
+  --color-warning: #ff9500;
+  --color-warning-light: #ffae42;
+  --color-error: #e02424;
+  --color-error-light: #f05252;
+  --color-info: #3f83f8;
+  --color-info-light: #76a9fa;
+
+  --color-purple: #9061f9;
+  --color-pink: #ff5a8d;
+
+  /* Borders & surfaces - Soft warm tones */
+  --border-primary: #fcd9c8;
+  --border-secondary: #f9cbb5;
+  --surface-hover: #ffeee0;
+  --surface-active: #ffe4d1;
+
+  /* Shadows - Warm soft shadows */
+  --shadow-sm: 0 1px 3px rgba(255, 107, 53, 0.08);
+  --shadow-md: 0 4px 12px rgba(255, 107, 53, 0.1);
+  --shadow-lg: 0 12px 28px rgba(255, 107, 53, 0.15);
+
+  /* Fonts */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Dracula Theme - Purple dark, vampire aesthetic */
+.theme-dracula,
+html[data-theme='dracula'] {
+  /* Backgrounds - Deep purple blacks */
+  --bg-primary: #282a36;
+  --bg-secondary: #21222c;
+  --bg-tertiary: #343746;
+
+  /* Text - Light purple gray */
+  --text-primary: #f8f8f2;
+  --text-secondary: #e0e0e0;
+  --text-tertiary: #bfbfbf;
+
+  /* Primary - Dracula pink */
+  --color-primary: #ff79c6;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 70%, white 30%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 70%, black 30%);
+
+  /* Action colors - Vibrant Dracula palette */
+  --color-success: #50fa7b;
+  --color-success-light: #7dfb9b;
+  --color-warning: #f1fa8c;
+  --color-warning-light: #f5fba9;
+  --color-error: #ff5555;
+  --color-error-light: #ff7979;
+  --color-info: #8be9fd;
+  --color-info-light: #a9f0fd;
+
+  --color-purple: #bd93f9;
+  --color-pink: #ff79c6;
+
+  /* Borders & surfaces */
+  --border-primary: #44475a;
+  --border-secondary: #6272a4;
+  --surface-hover: #343746;
+  --surface-active: #44475a;
+
+  /* Shadows - Purple tinted shadows */
+  --shadow-sm: 0 2px 4px rgba(189, 147, 249, 0.15);
+  --shadow-md: 0 4px 8px rgba(189, 147, 249, 0.2);
+  --shadow-lg: 0 8px 16px rgba(189, 147, 249, 0.25);
+
+  /* Fonts */
+  --font-heading: 'JetBrains Mono', monospace;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+}

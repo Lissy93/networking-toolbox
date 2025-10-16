@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { useClipboard } from '$lib/composables';
 
   let input = $state('2001:0000:4136:e378:8000:63bf:3fff:fdd2');
   let result = $state<{
@@ -23,7 +24,7 @@
       explanation: string[];
     };
   } | null>(null);
-  let copiedStates = $state<Record<string, boolean>>({});
+  const clipboard = useClipboard();
   let selectedExample = $state<string | null>(null);
   let _userModified = $state(false);
 
@@ -257,18 +258,6 @@
     parseTeredo();
   }
 
-  async function copyToClipboard(text: string, id: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      copiedStates[id] = true;
-      setTimeout(() => {
-        copiedStates[id] = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  }
-
   // Parse on component load
   parseTeredo();
 </script>
@@ -417,10 +406,10 @@
               <div class="component-content">
                 <code class="component-value">{result.components.serverIPv4}</code>
                 <button
-                  class="copy-button {copiedStates['server'] ? 'copied' : ''}"
-                  onclick={() => result && copyToClipboard(result.components.serverIPv4, 'server')}
+                  class="copy-button {clipboard.isCopied('server') ? 'copied' : ''}"
+                  onclick={() => result && clipboard.copy(result.components.serverIPv4, 'server')}
                 >
-                  <Icon name={copiedStates['server'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('server') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
               <div class="component-description">The Teredo relay server handling this tunnel</div>
@@ -434,10 +423,10 @@
               <div class="component-content">
                 <code class="component-value">{result.components.clientIPv4}</code>
                 <button
-                  class="copy-button {copiedStates['client'] ? 'copied' : ''}"
-                  onclick={() => result && copyToClipboard(result.components.clientIPv4, 'client')}
+                  class="copy-button {clipboard.isCopied('client') ? 'copied' : ''}"
+                  onclick={() => result && clipboard.copy(result.components.clientIPv4, 'client')}
                 >
-                  <Icon name={copiedStates['client'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('client') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
               <div class="component-description">The client's external IPv4 address (XOR decoded)</div>
@@ -451,10 +440,10 @@
               <div class="component-content">
                 <code class="component-value">{result.components.clientPort}</code>
                 <button
-                  class="copy-button {copiedStates['port'] ? 'copied' : ''}"
-                  onclick={() => result && copyToClipboard(result.components.clientPort.toString(), 'port')}
+                  class="copy-button {clipboard.isCopied('port') ? 'copied' : ''}"
+                  onclick={() => result && clipboard.copy(result.components.clientPort.toString(), 'port')}
                 >
-                  <Icon name={copiedStates['port'] ? 'check' : 'copy'} size="sm" />
+                  <Icon name={clipboard.isCopied('port') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
               <div class="component-description">The client's external port (XOR decoded with FFFF)</div>

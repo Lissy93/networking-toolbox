@@ -2,4 +2,4 @@
   import AuthorSection from '$lib/components/page-specific/about/AuthorSection.svelte';
 </script>
 
-<AuthorSection />
+<AuthorSection longMode={true} />

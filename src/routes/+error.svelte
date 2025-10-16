@@ -1,11 +1,27 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
+  import { dev } from '$app/environment';
   import { site } from '$lib/constants/site';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { errorManager } from '$lib/utils/error-manager';
 
-  $: status = $page.status ?? 500;
-  $: message = $page.error?.message ?? 'An unexpected error occurred';
+  // Defensive: Wrap everything in try-catch to prevent error page from crashing
+  let status = 500;
+  let message = 'An unexpected error occurred';
+  let errorId: string | undefined;
+
+  $: {
+    try {
+      status = $page.status ?? 500;
+      message = $page.error?.message ?? 'An unexpected error occurred';
+      errorId = ($page.error as any)?.errorId;
+    } catch (err) {
+      // Failsafe: if even reading page store fails, use defaults
+      console.error('Error in error page:', err);
+    }
+  }
 
   const errorTypes = {
     404: {
@@ -35,12 +51,38 @@
   $: errorInfo = errorTypes[status as keyof typeof errorTypes] || errorTypes.default;
 
   function goHome() {
-    goto('/');
+    try {
+      goto('/');
+    } catch {
+      // Failsafe: if navigation fails, try direct navigation
+      window.location.href = '/';
+    }
   }
 
   function refresh() {
-    location.reload();
+    try {
+      location.reload();
+    } catch (err) {
+      // Failsafe
+      console.error('Refresh failed:', err);
+    }
   }
+
+  // Report error to error manager on mount (client-side only)
+  onMount(() => {
+    try {
+      if ($page.error && status >= 500) {
+        errorManager.captureException($page.error, 'error', {
+          url: $page.url?.pathname,
+          status,
+          component: 'ErrorPage',
+        });
+      }
+    } catch (err) {
+      // Never let error reporting crash the error page
+      console.error('Failed to report error:', err);
+    }
+  });
 </script>
 
 <svelte:head>
@@ -56,10 +98,20 @@
       <h2 class="error-title">{errorInfo.title}</h2>
       <p class="error-description">{errorInfo.description}</p>
 
-      {#if message && !errorInfo.title.includes(message)}
+      {#if (message && !errorInfo.title.includes(message)) || errorId || dev}
         <details class="error-technical">
           <summary>Technical Details</summary>
-          <code class="error-message">{message}</code>
+          <div class="error-message">
+            {#if message && !errorInfo.title.includes(message)}
+              <div><strong>Message:</strong> {message}</div>
+            {/if}
+            {#if errorId}
+              <div><strong>Error ID:</strong> <code>{errorId}</code></div>
+            {/if}
+            {#if dev}
+              <div class="dev-note">Development mode: Full error details are logged to console</div>
+            {/if}
+          </div>
         </details>
       {/if}
     </div>
@@ -146,11 +198,29 @@
       background: var(--bg-tertiary);
       padding: var(--spacing-sm);
       border-radius: var(--radius-sm);
-      font-family: 'Courier New', monospace;
       font-size: var(--font-size-sm);
-      color: var(--color-error);
       word-break: break-word;
-      white-space: pre-wrap;
+      text-align: left;
+
+      div {
+        padding: var(--spacing-2xs) 0;
+        color: var(--text-secondary);
+
+        code {
+          font-family: 'Courier New', monospace;
+          background: var(--bg-secondary);
+          padding: 2px 6px;
+          border-radius: var(--radius-xs);
+          color: var(--color-error);
+        }
+      }
+
+      .dev-note {
+        margin-top: var(--spacing-xs);
+        color: var(--text-tertiary);
+        font-style: italic;
+        font-size: var(--font-size-xs);
+      }
     }
   }
 

@@ -2,10 +2,11 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { parseZoneFile, generateZoneStats, type ZoneStats } from '$lib/utils/zone-parser.js';
+  import { useClipboard } from '$lib/composables';
 
   let zoneInput = $state('');
   let results = $state<ZoneStats | null>(null);
-  let copiedState = $state(false);
+  const clipboard = useClipboard();
   let activeExampleIndex = $state<number | null>(null);
 
   const examples = [
@@ -128,22 +129,6 @@ sydney	IN	A	203.0.113.202`,
     } catch (error) {
       console.error('Failed to analyze zone:', error);
       results = null;
-    }
-  }
-
-  async function copyStats() {
-    if (!results) return;
-
-    const statsText = formatStatsForCopy(results);
-
-    try {
-      await navigator.clipboard.writeText(statsText);
-      copiedState = true;
-      setTimeout(() => {
-        copiedState = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy: ', err);
     }
   }
 
@@ -296,9 +281,12 @@ www	IN	A	192.0.2.1"
     <section class="results-section">
       <div class="results-header">
         <h3>Zone Analysis Report</h3>
-        <button class="copy-button {copiedState ? 'copied' : ''}" onclick={copyStats}>
-          <Icon name={copiedState ? 'check' : 'copy'} size="sm" />
-          {copiedState ? 'Copied!' : 'Copy Report'}
+        <button
+          class="copy-button {clipboard.isCopied() ? 'copied' : ''}"
+          onclick={() => results && clipboard.copy(formatStatsForCopy(results))}
+        >
+          <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="sm" />
+          {clipboard.isCopied() ? 'Copied!' : 'Copy Report'}
         </button>
       </div>
 

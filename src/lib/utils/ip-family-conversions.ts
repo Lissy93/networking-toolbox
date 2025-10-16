@@ -225,10 +225,10 @@ export function getIPv6Info(ipv6: string): IPv6Info {
   } else if (cleanIp.startsWith('fe80:')) {
     info.types.push('Link-local');
     info.description = 'Link-local IPv6 address for communication within a single network segment';
-  } else if (cleanIp.startsWith('fc00:') || cleanIp.startsWith('fd00:')) {
+  } else if (cleanIp.startsWith('fc') || cleanIp.startsWith('fd')) {
     info.types.push('Unique Local');
     info.description = 'Unique local IPv6 address (equivalent to private IPv4 addresses)';
-  } else if (cleanIp.startsWith('ff00:')) {
+  } else if (cleanIp.startsWith('ff')) {
     info.types.push('Multicast');
     info.description = 'IPv6 multicast address for one-to-many communication';
   } else {

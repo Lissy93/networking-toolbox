@@ -3,6 +3,7 @@
   import { page } from '$app/stores';
   import '../styles/base.scss';
   import '../styles/variables.scss';
+  import '../styles/themes.scss';
   import '../styles/components.scss';
   import '../styles/ref-pages.scss';
   import '../styles/diagnostics-pages.scss';
@@ -16,6 +17,9 @@
   import { toolUsage } from '$lib/stores/toolUsage';
   import { accessibility } from '$lib/stores/accessibility';
   import { theme } from '$lib/stores/theme';
+  import { customCss } from '$lib/stores/customCss';
+  import { siteCustomization } from '$lib/stores/siteCustomization';
+  import { primaryColor } from '$lib/stores/primaryColor';
   import { ALL_PAGES } from '$lib/constants/nav';
   import { initializeOfflineSupport } from '$lib/stores/offline';
   import { bookmarks } from '$lib/stores/bookmarks';
@@ -30,6 +34,7 @@
   let accessibilitySettings = $state(accessibility); // Accessibility settings store
   let currentTheme = $state(theme); // Theme store
   let currentBookmarks = $state(bookmarks); // Bookmarks store
+  let currentCustomCss = $state(customCss); // Custom CSS store
 
   // Get page-specific metadata or fallback to site defaults
   const seoData = $derived.by(() => {
@@ -110,10 +115,23 @@
     toolUsage.init();
     accessibility.init();
     bookmarks.init();
+    customCss.init();
+    siteCustomization.init();
+    primaryColor.init();
     initializeOfflineSupport();
 
     // Add global keyboard shortcuts
     window.addEventListener('keydown', handleGlobalKeydown);
+
+    // Console message
+    console.log(
+      `\n%c🧰 Networking Toolbox` +
+        '%c\nLicensed under MIT, © Alicia Sykes 2025.\nhttps://github.com/lissy93/networking-toolbox\n',
+      'color:#e3ed70; background:#21262d; font-size:1.6rem; padding:0.15rem 0.25rem; ' +
+        'margin: 1rem auto 0.5rem auto; font-family: Helvetica; border: 2px solid #e3ed70; ' +
+        'border-radius: 4px;font-weight: bold; text-shadow: 1px 1px 4px #000;',
+      'color: #e3ed70; font-size:0.8rem; font-family: Helvetica; margin: 0;',
+    );
 
     return () => {
       window.removeEventListener('keydown', handleGlobalKeydown);
@@ -152,6 +170,38 @@
     setTimeout(() => {
       faviconTrigger++;
     }, 50);
+  });
+
+  // Apply custom CSS to page
+  $effect(() => {
+    if (typeof document === 'undefined') return;
+
+    const customCssValue = $currentCustomCss;
+    let styleEl = document.getElementById('user-custom-css') as HTMLStyleElement | null;
+
+    if (customCssValue && customCssValue.trim()) {
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'user-custom-css';
+        document.head.appendChild(styleEl);
+      }
+      styleEl.textContent = customCssValue;
+    } else {
+      if (styleEl) {
+        styleEl.remove();
+      }
+    }
+  });
+
+  // Apply custom primary color
+  $effect(() => {
+    if (typeof document === 'undefined') return;
+    const color = $primaryColor;
+    if (color && color.trim()) {
+      document.documentElement.style.setProperty('--color-primary', color);
+    } else {
+      document.documentElement.style.removeProperty('--color-primary');
+    }
   });
 
   /* Uses the server-generated breadcrumb data, to build a JSON-LD breadcrumb object */
