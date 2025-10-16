@@ -480,7 +480,7 @@
                 class="btn btn-secondary btn-xs"
                 onclick={() => (showVisualization = !showVisualization)}
               >
-                <Icon name="eye-off" size="sm" />
+                <Icon name="hide" size="sm" />
                 Hide
               </button>
             </div>

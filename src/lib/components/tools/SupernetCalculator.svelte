@@ -8,6 +8,7 @@
   } from '$lib/utils/supernet-calculations.js';
   import IPInput from './IPInput.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import { tooltip } from '$lib/actions/tooltip.js';
   import { useClipboard } from '$lib/composables';
   import { formatNumber } from '$lib/utils/formatters';
@@ -164,14 +165,11 @@
   });
 </script>
 
-<div class="card supernet-calc-car">
-  <header class="card-header">
-    <h2>Supernet Calculator</h2>
-    <p>
-      Aggregate multiple networks into a single supernet for route summarization and efficient routing table management.
-    </p>
-  </header>
-
+<ToolContentContainer
+  title="Supernet Calculator"
+  description="Aggregate multiple networks into a single supernet for route summarization and efficient routing table management."
+  contentClass="supernet-calc-car"
+>
   <!-- Quick Examples -->
   <div class="card examples-card">
     <details class="examples-details">
@@ -530,7 +528,7 @@
       {/if}
     </div>
   {/if}
-</div>
+</ToolContentContainer>
 
 <style>
   .supernet-calc-car .btn {

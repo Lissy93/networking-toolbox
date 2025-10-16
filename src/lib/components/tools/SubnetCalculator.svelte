@@ -6,9 +6,24 @@
   import NetworkVisualizer from '$lib/components/tools/NetworkVisualizer.svelte';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import SvgIcon from '$lib/components/global/SvgIcon.svelte';
+  import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import { tooltip } from '$lib/actions/tooltip.js';
   import { useClipboard } from '$lib/composables';
+  import { goto } from '$app/navigation';
   import type { SubnetInfo } from '$lib/types/ip.js';
+
+  const versionOptions = [
+    { value: 'ipv4' as const, label: 'IPv4' },
+    { value: 'ipv6' as const, label: 'IPv6' },
+  ];
+
+  let selectedVersion = $state<'ipv4' | 'ipv6'>('ipv4');
+
+  function handleVersionChange(version: 'ipv4' | 'ipv6') {
+    if (version === 'ipv6') {
+      goto('/subnetting/ipv6-subnet-calculator');
+    }
+  }
 
   let cidrInput = $state('192.168.1.0/24');
   let subnetInfo: SubnetInfo | null = $state(null);
@@ -38,12 +53,13 @@
   const clipboard = useClipboard();
 </script>
 
-<div class="card">
-  <header class="card-header">
-    <h2>Subnet Calculator</h2>
-    <p>Calculate network, broadcast, and host information for any subnet.</p>
-  </header>
-
+<ToolContentContainer
+  title="Subnet Calculator"
+  description="Calculate network, broadcast, and host information for any subnet."
+  navOptions={versionOptions}
+  bind:selectedNav={selectedVersion}
+  onNavChange={handleVersionChange}
+>
   <!-- Input -->
   <div class="form-group">
     <CIDRInput bind:value={cidrInput} label="Network Address (CIDR)" placeholder="192.168.1.0/24" />
@@ -251,7 +267,7 @@
       </ul>
     </div>
   </section>
-</div>
+</ToolContentContainer>
 
 <style lang="scss">
   .explainer-section {
@@ -281,6 +297,10 @@
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
     }
+  }
+
+  .value-copy {
+    flex: none;
   }
 
   .explainer-card {

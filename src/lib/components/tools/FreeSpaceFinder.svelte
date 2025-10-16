@@ -311,50 +311,6 @@
           </div>
         </div>
 
-        {#if result.availableBlocks.length > 0}
-          <div class="free-blocks-grid">
-            {#each result.availableBlocks as block, index (index)}
-              {@const blockAddresses = (() => {
-                const match = block.match(/\/(\d+)$/);
-                if (!match) return 0;
-                const prefixLength = parseInt(match[1]);
-                const version = block.includes(':') ? 6 : 4;
-                const totalBits = version === 4 ? 32 : 128;
-                return Math.pow(2, totalBits - prefixLength);
-              })()}
-              <div class="free-block-card">
-                <div class="block-header">
-                  <code class="block-cidr">{block}</code>
-                  <button
-                    class="copy-button {clipboard.isCopied(`block-${index}`) ? 'copied' : ''}"
-                    onclick={() => clipboard.copy(block, `block-${index}`)}
-                    aria-label="Copy CIDR block"
-                  >
-                    <Icon name={clipboard.isCopied(`block-${index}`) ? 'check' : 'copy'} size="xs" />
-                  </button>
-                </div>
-                <div class="block-info">
-                  <span class="address-count">
-                    {formatNumber(blockAddresses)} addresses
-                  </span>
-                  {#if targetPrefix && blockAddresses >= Math.pow(2, 32 - targetPrefix)}
-                    <span class="can-fit">
-                      <Icon name="check-circle" size="xs" />
-                      Can fit /{targetPrefix}
-                    </span>
-                  {/if}
-                </div>
-              </div>
-            {/each}
-          </div>
-        {:else}
-          <div class="no-gaps">
-            <Icon name="alert-circle" />
-            <h4>No Available Space</h4>
-            <p>All address space in the pools is allocated or there are no pools defined.</p>
-          </div>
-        {/if}
-
         <!-- Address Space Visualization -->
         {#if result.availableBlocks.length > 0 && result.visualization}
           <div class="visualization-section">
@@ -426,6 +382,49 @@
                 >
               </div>
             </div>
+          </div>
+        {/if}
+        {#if result.availableBlocks.length > 0}
+          <div class="free-blocks-grid">
+            {#each result.availableBlocks as block, index (index)}
+              {@const blockAddresses = (() => {
+                const match = block.match(/\/(\d+)$/);
+                if (!match) return 0;
+                const prefixLength = parseInt(match[1]);
+                const version = block.includes(':') ? 6 : 4;
+                const totalBits = version === 4 ? 32 : 128;
+                return Math.pow(2, totalBits - prefixLength);
+              })()}
+              <div class="free-block-card">
+                <div class="block-header">
+                  <code class="block-cidr">{block}</code>
+                  <button
+                    class="copy-button {clipboard.isCopied(`block-${index}`) ? 'copied' : ''}"
+                    onclick={() => clipboard.copy(block, `block-${index}`)}
+                    aria-label="Copy CIDR block"
+                  >
+                    <Icon name={clipboard.isCopied(`block-${index}`) ? 'check' : 'copy'} size="xs" />
+                  </button>
+                </div>
+                <div class="block-info">
+                  <span class="address-count">
+                    {formatNumber(blockAddresses)} addresses
+                  </span>
+                  {#if targetPrefix && blockAddresses >= Math.pow(2, 32 - targetPrefix)}
+                    <span class="can-fit">
+                      <Icon name="check-circle" size="xs" />
+                      Can fit /{targetPrefix}
+                    </span>
+                  {/if}
+                </div>
+              </div>
+            {/each}
+          </div>
+        {:else}
+          <div class="no-gaps">
+            <Icon name="alert-circle" />
+            <h4>No Available Space</h4>
+            <p>All address space in the pools is allocated or there are no pools defined.</p>
           </div>
         {/if}
       {:else}
@@ -507,7 +506,7 @@
     gap: var(--spacing-md);
 
     h3 {
-      color: var(--color-success-light);
+      color: var(--color-primary);
       margin: 0;
     }
   }
@@ -560,7 +559,7 @@
     font-family: var(--font-mono);
     font-size: var(--font-size-md);
     font-weight: 600;
-    color: var(--color-success-light);
+    color: var(--color-success);
     background-color: var(--bg-tertiary);
     padding: var(--spacing-xs);
     border-radius: var(--radius-sm);
@@ -656,7 +655,7 @@
     border-radius: var(--radius-lg);
 
     h4 {
-      color: var(--color-info-light);
+      color: var(--text-primary);
       margin-bottom: var(--spacing-md);
       text-align: center;
     }

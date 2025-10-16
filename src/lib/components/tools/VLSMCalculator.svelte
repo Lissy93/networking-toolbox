@@ -10,6 +10,7 @@
   import IPInput from './IPInput.svelte';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import { useClipboard } from '$lib/composables';
   import { tooltip } from '$lib/actions/tooltip.js';
   import { SvelteSet } from 'svelte/reactivity';
@@ -135,12 +136,10 @@
   });
 </script>
 
-<div class="card">
-  <header class="card-header">
-    <h2>VLSM Calculator</h2>
-    <p>Design efficient subnets with Variable Length Subnet Masking for optimal address space utilization.</p>
-  </header>
-
+<ToolContentContainer
+  title="VLSM Calculator"
+  description="Design efficient subnets with Variable Length Subnet Masking for optimal address space utilization."
+>
   <!-- Network Configuration -->
   <div class="network-config">
     <h3>Network Configuration</h3>
@@ -414,7 +413,7 @@
       {/if}
     </div>
   {/if}
-</div>
+</ToolContentContainer>
 
 <style>
   .btn {

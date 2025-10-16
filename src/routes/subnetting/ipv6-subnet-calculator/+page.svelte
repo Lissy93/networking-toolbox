@@ -1,8 +1,8 @@
 <script lang="ts">
   import IPv6SubnetCalculator from '$lib/components/tools/IPv6SubnetCalculator.svelte';
+  import Icon from '$lib/components/global/Icon.svelte';
 
   import '$lib/../styles/pages.scss';
-  import Icon from '$lib/components/global/Icon.svelte';
 </script>
 
 <div class="page-container">

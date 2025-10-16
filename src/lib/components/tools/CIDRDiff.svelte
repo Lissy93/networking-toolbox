@@ -190,327 +190,311 @@
   });
 </script>
 
-<div class="card">
-  <header class="card-header">
-    <h2>CIDR Difference Calculator</h2>
-    <p>
-      Compute A - B where A and B are sets of IP addresses, CIDR blocks, or ranges. Shows minimal non-overlapping
-      results.
-    </p>
-  </header>
-
-  <!-- Alignment Mode -->
-  <div class="mode-section">
-    <h3>Alignment Mode</h3>
-    <div class="tabs-container">
-      <div class="tabs">
-        {#each alignmentModes as mode (mode.value)}
-          <button
-            type="button"
-            class="tab"
-            class:active={alignment === mode.value}
-            onclick={() => (alignment = mode.value)}
-            use:tooltip={{ text: mode.description, position: 'top' }}
-          >
-            {mode.label}
-          </button>
-        {/each}
-      </div>
-
-      {#if alignment === 'constrained'}
-        <div class="constraint-input">
-          <label
-            for="constrained-prefix"
-            use:tooltip={{ text: 'Force alignment to this prefix boundary', position: 'top' }}
-          >
-            Constrained prefix length
-          </label>
-          <input
-            id="constrained-prefix"
-            type="number"
-            bind:value={constrainedPrefix}
-            oninput={() => (userModified = true)}
-            min="8"
-            max="30"
-            class="input-field constraint-field"
-          />
-        </div>
-      {/if}
+<!-- Alignment Mode -->
+<div class="mode-section">
+  <h3>Alignment Mode</h3>
+  <div class="tabs-container">
+    <div class="tabs">
+      {#each alignmentModes as mode (mode.value)}
+        <button
+          type="button"
+          class="tab"
+          class:active={alignment === mode.value}
+          onclick={() => (alignment = mode.value)}
+          use:tooltip={{ text: mode.description, position: 'top' }}
+        >
+          {mode.label}
+        </button>
+      {/each}
     </div>
+
+    {#if alignment === 'constrained'}
+      <div class="constraint-input">
+        <label
+          for="constrained-prefix"
+          use:tooltip={{ text: 'Force alignment to this prefix boundary', position: 'top' }}
+        >
+          Constrained prefix length
+        </label>
+        <input
+          id="constrained-prefix"
+          type="number"
+          bind:value={constrainedPrefix}
+          oninput={() => (userModified = true)}
+          min="8"
+          max="30"
+          class="input-field constraint-field"
+        />
+      </div>
+    {/if}
   </div>
+</div>
 
-  <!-- Input Section -->
-  <div class="input-section">
-    <div class="input-grid">
-      <!-- Set A -->
-      <div class="input-group">
-        <h3 use:tooltip={{ text: 'The base set of IP addresses, CIDR blocks, or ranges', position: 'top' }}>
-          Set A (Base)
-        </h3>
-        <div class="input-wrapper">
-          <textarea
-            bind:value={setA}
-            oninput={() => (userModified = true)}
-            placeholder="192.168.1.0/24&#10;10.0.0.0-10.0.0.100"
-            class="input-textarea set-a"
-            rows="6"
-          ></textarea>
-        </div>
-      </div>
-
-      <!-- Set B -->
-      <div class="input-group">
-        <h3 use:tooltip={{ text: 'The set to subtract from Set A (can be empty)', position: 'top' }}>
-          Set B (Subtract)
-        </h3>
-        <div class="input-wrapper">
-          <textarea
-            bind:value={setB}
-            oninput={() => (userModified = true)}
-            placeholder="192.168.1.128/25&#10;10.0.0.50-10.0.0.75"
-            class="input-textarea set-b"
-            rows="6"
-          ></textarea>
-        </div>
+<!-- Input Section -->
+<div class="input-section">
+  <div class="input-grid">
+    <!-- Set A -->
+    <div class="input-group">
+      <h3 use:tooltip={{ text: 'The base set of IP addresses, CIDR blocks, or ranges', position: 'top' }}>
+        Set A (Base)
+      </h3>
+      <div class="input-wrapper">
+        <textarea
+          bind:value={setA}
+          oninput={() => (userModified = true)}
+          placeholder="192.168.1.0/24&#10;10.0.0.0-10.0.0.100"
+          class="input-textarea set-a"
+          rows="6"
+        ></textarea>
       </div>
     </div>
 
-    <div class="input-actions">
-      <button
-        type="button"
-        class="btn btn-secondary btn-sm"
-        onclick={clearInputs}
-        use:tooltip={{ text: 'Clear both input sets', position: 'top' }}
-      >
-        <Icon name="trash" size="sm" />
-      </button>
-    </div>
-
-    <!-- Examples -->
-    <div class="examples-section">
-      <h4>
-        Quick Examples
-        <Tooltip text="Click any example to load it into the input fields">
-          <Icon name="help" size="sm" />
-        </Tooltip>
-      </h4>
-      <div class="examples-grid">
-        {#each examples as example (example.label)}
-          <button
-            type="button"
-            class="example-btn"
-            class:selected={selectedExample === example.label}
-            onclick={() => setExample(example)}
-          >
-            {example.label}
-          </button>
-        {/each}
+    <!-- Set B -->
+    <div class="input-group">
+      <h3 use:tooltip={{ text: 'The set to subtract from Set A (can be empty)', position: 'top' }}>Set B (Subtract)</h3>
+      <div class="input-wrapper">
+        <textarea
+          bind:value={setB}
+          oninput={() => (userModified = true)}
+          placeholder="192.168.1.128/25&#10;10.0.0.50-10.0.0.75"
+          class="input-textarea set-b"
+          rows="6"
+        ></textarea>
       </div>
     </div>
   </div>
 
-  <!-- Results Section -->
-  {#if result}
-    <div class="results-section">
-      {#if result.errors.length > 0}
-        <div class="info-panel error">
-          <h3>Parse Errors</h3>
-          <ul class="error-list">
-            {#each result.errors as error (error)}
-              <li>{error}</li>
-            {/each}
-          </ul>
-        </div>
-      {/if}
+  <div class="input-actions">
+    <button
+      type="button"
+      class="btn btn-secondary btn-sm"
+      onclick={clearInputs}
+      use:tooltip={{ text: 'Clear both input sets', position: 'top' }}
+    >
+      <Icon name="trash" size="sm" />
+    </button>
+  </div>
 
-      {#if result.ipv4.length > 0 || result.ipv6.length > 0}
-        <!-- Statistics -->
-        <div class="stats-section">
-          <div class="summary-header">
-            <h3>Difference Results (A - B)</h3>
-            <div class="export-buttons">
-              <button
-                type="button"
-                class="btn btn-primary btn-sm"
-                class:copied={clipboard.isCopied('all-text')}
-                onclick={() => copyAllResults('text')}
-              >
-                <Icon name={clipboard.isCopied('all-text') ? 'check' : 'copy'} size="sm" />
-                Text
-              </button>
-              <button
-                type="button"
-                class="btn btn-secondary btn-sm"
-                class:copied={clipboard.isCopied('all-json')}
-                onclick={() => copyAllResults('json')}
-              >
-                <Icon name={clipboard.isCopied('all-json') ? 'check' : 'download'} size="sm" />
-                JSON
-              </button>
-            </div>
-          </div>
+  <!-- Examples -->
+  <div class="examples-section">
+    <h4>
+      Quick Examples
+      <Tooltip text="Click any example to load it into the input fields">
+        <Icon name="help" size="sm" />
+      </Tooltip>
+    </h4>
+    <div class="examples-grid">
+      {#each examples as example (example.label)}
+        <button
+          type="button"
+          class="example-btn"
+          class:selected={selectedExample === example.label}
+          onclick={() => setExample(example)}
+        >
+          {example.label}
+        </button>
+      {/each}
+    </div>
+  </div>
+</div>
 
-          <div class="stats-grid">
-            <div class="stat-card input-a">
-              <span class="stat-label">Set A (Input)</span>
-              <span class="stat-value">{result.stats.inputA.count} items</span>
-              <span class="stat-detail">{result.stats.inputA.addresses} addresses</span>
-            </div>
-            <div class="stat-card input-b">
-              <span class="stat-label">Set B (Subtract)</span>
-              <span class="stat-value">{result.stats.inputB.count} items</span>
-              <span class="stat-detail">{result.stats.inputB.addresses} addresses</span>
-            </div>
-            <div class="stat-card result">
-              <span class="stat-label">Result (A - B)</span>
-              <span class="stat-value">{result.stats.output.count} CIDRs</span>
-              <span class="stat-detail">{result.stats.output.addresses} addresses</span>
-            </div>
-            <div
-              class="stat-card efficiency"
-              data-efficiency={result.stats.efficiency >= 80
-                ? 'high'
-                : result.stats.efficiency >= 50
-                  ? 'medium'
-                  : 'low'}
+<!-- Results Section -->
+{#if result}
+  <div class="results-section">
+    {#if result.errors.length > 0}
+      <div class="info-panel error">
+        <h3>Parse Errors</h3>
+        <ul class="error-list">
+          {#each result.errors as error (error)}
+            <li>{error}</li>
+          {/each}
+        </ul>
+      </div>
+    {/if}
+
+    {#if result.ipv4.length > 0 || result.ipv6.length > 0}
+      <!-- Statistics -->
+      <div class="stats-section">
+        <div class="summary-header">
+          <h3>Difference Results (A - B)</h3>
+          <div class="export-buttons">
+            <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              class:copied={clipboard.isCopied('all-text')}
+              onclick={() => copyAllResults('text')}
             >
-              <span class="stat-label">Efficiency</span>
-              <span class="stat-value">{result.stats.efficiency}%</span>
-              <span class="stat-detail">{result.stats.removed.addresses} removed</span>
-            </div>
+              <Icon name={clipboard.isCopied('all-text') ? 'check' : 'copy'} size="sm" />
+              Text
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              class:copied={clipboard.isCopied('all-json')}
+              onclick={() => copyAllResults('json')}
+            >
+              <Icon name={clipboard.isCopied('all-json') ? 'check' : 'download'} size="sm" />
+              JSON
+            </button>
           </div>
         </div>
 
-        <!-- Visualization -->
-        {#if result.visualization.setA.length > 0}
-          <div class="visualization-section">
-            <h4>
-              Set Operation Visualization
-              <Tooltip text="Visual representation showing the relationship between sets A, B, and the result">
-                <Icon name="help" size="sm" />
-              </Tooltip>
-            </h4>
-            <div class="viz-legend">
-              <div class="legend-item">
-                <div class="legend-color set-a-color"></div>
-                <span>Set A (Base)</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color set-b-color"></div>
-                <span>Set B (Subtract)</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color result-color"></div>
-                <span>Result (A - B)</span>
-              </div>
+        <div class="stats-grid">
+          <div class="stat-card input-a">
+            <span class="stat-label">Set A (Input)</span>
+            <span class="stat-value">{result.stats.inputA.count} items</span>
+            <span class="stat-detail">{result.stats.inputA.addresses} addresses</span>
+          </div>
+          <div class="stat-card input-b">
+            <span class="stat-label">Set B (Subtract)</span>
+            <span class="stat-value">{result.stats.inputB.count} items</span>
+            <span class="stat-detail">{result.stats.inputB.addresses} addresses</span>
+          </div>
+          <div class="stat-card result">
+            <span class="stat-label">Result (A - B)</span>
+            <span class="stat-value">{result.stats.output.count} CIDRs</span>
+            <span class="stat-detail">{result.stats.output.addresses} addresses</span>
+          </div>
+          <div
+            class="stat-card efficiency"
+            data-efficiency={result.stats.efficiency >= 80 ? 'high' : result.stats.efficiency >= 50 ? 'medium' : 'low'}
+          >
+            <span class="stat-label">Efficiency</span>
+            <span class="stat-value">{result.stats.efficiency}%</span>
+            <span class="stat-detail">{result.stats.removed.addresses} removed</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visualization -->
+      {#if result.visualization.setA.length > 0}
+        <div class="visualization-section">
+          <h4>
+            Set Operation Visualization
+            <Tooltip text="Visual representation showing the relationship between sets A, B, and the result">
+              <Icon name="help" size="sm" />
+            </Tooltip>
+          </h4>
+          <div class="viz-legend">
+            <div class="legend-item">
+              <div class="legend-color set-a-color"></div>
+              <span>Set A (Base)</span>
             </div>
+            <div class="legend-item">
+              <div class="legend-color set-b-color"></div>
+              <span>Set B (Subtract)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color result-color"></div>
+              <span>Result (A - B)</span>
+            </div>
+          </div>
 
-            <div class="visualization-bar">
-              <!-- Set A (background) -->
-              {#each result.visualization.setA as range (`${range.start}-${range.end}`)}
-                <div
-                  class="viz-segment set-a-segment"
-                  style="width: {getBarWidth(range)}%; left: {getBarOffset(range)}%"
-                  use:tooltip={{ text: getSegmentTooltip(range, 'A'), position: 'top' }}
-                ></div>
-              {/each}
+          <div class="visualization-bar">
+            <!-- Set A (background) -->
+            {#each result.visualization.setA as range (`${range.start}-${range.end}`)}
+              <div
+                class="viz-segment set-a-segment"
+                style="width: {getBarWidth(range)}%; left: {getBarOffset(range)}%"
+                use:tooltip={{ text: getSegmentTooltip(range, 'A'), position: 'top' }}
+              ></div>
+            {/each}
 
-              <!-- Set B (overlay) -->
-              {#each result.visualization.setB as range (`${range.start}-${range.end}`)}
-                <div
-                  class="viz-segment set-b-segment"
-                  style="width: {getBarWidth(range)}%; left: {getBarOffset(range)}%"
-                  use:tooltip={{ text: getSegmentTooltip(range, 'B'), position: 'top' }}
-                ></div>
-              {/each}
+            <!-- Set B (overlay) -->
+            {#each result.visualization.setB as range (`${range.start}-${range.end}`)}
+              <div
+                class="viz-segment set-b-segment"
+                style="width: {getBarWidth(range)}%; left: {getBarOffset(range)}%"
+                use:tooltip={{ text: getSegmentTooltip(range, 'B'), position: 'top' }}
+              ></div>
+            {/each}
 
-              <!-- Result (final) -->
-              {#each result.visualization.result as range (`${range.start}-${range.end}`)}
-                <div
-                  class="viz-segment result-segment"
-                  style="width: {getBarWidth(range)}%; left: {getBarOffset(range)}%"
-                  use:tooltip={{ text: getSegmentTooltip(range, 'result'), position: 'bottom' }}
-                ></div>
+            <!-- Result (final) -->
+            {#each result.visualization.result as range (`${range.start}-${range.end}`)}
+              <div
+                class="viz-segment result-segment"
+                style="width: {getBarWidth(range)}%; left: {getBarOffset(range)}%"
+                use:tooltip={{ text: getSegmentTooltip(range, 'result'), position: 'bottom' }}
+              ></div>
+            {/each}
+          </div>
+        </div>
+      {/if}
+
+      <!-- Results Grid -->
+      <div class="results-grid">
+        <!-- IPv4 Results -->
+        {#if result.ipv4.length > 0}
+          <div class="result-panel ipv4">
+            <div class="panel-header">
+              <h4>IPv4 Results ({result.ipv4.length})</h4>
+              <button
+                type="button"
+                class="btn btn-icon"
+                class:copied={clipboard.isCopied('ipv4')}
+                onclick={() => clipboard.copy((result?.ipv4 || []).join('\n'), 'ipv4')}
+              >
+                <Icon name={clipboard.isCopied('ipv4') ? 'check' : 'copy'} size="sm" />
+              </button>
+            </div>
+            <div class="cidr-list">
+              {#each result.ipv4 as cidr (cidr)}
+                <div class="cidr-item">
+                  <code class="cidr-block">{cidr}</code>
+                  <button
+                    type="button"
+                    class="btn btn-icon btn-xs"
+                    class:copied={clipboard.isCopied(cidr)}
+                    onclick={() => clipboard.copy(cidr, cidr)}
+                  >
+                    <Icon name={clipboard.isCopied(cidr) ? 'check' : 'copy'} size="xs" />
+                  </button>
+                </div>
               {/each}
             </div>
           </div>
         {/if}
 
-        <!-- Results Grid -->
-        <div class="results-grid">
-          <!-- IPv4 Results -->
-          {#if result.ipv4.length > 0}
-            <div class="result-panel ipv4">
-              <div class="panel-header">
-                <h4>IPv4 Results ({result.ipv4.length})</h4>
-                <button
-                  type="button"
-                  class="btn btn-icon"
-                  class:copied={clipboard.isCopied('ipv4')}
-                  onclick={() => clipboard.copy((result?.ipv4 || []).join('\n'), 'ipv4')}
-                >
-                  <Icon name={clipboard.isCopied('ipv4') ? 'check' : 'copy'} size="sm" />
-                </button>
-              </div>
-              <div class="cidr-list">
-                {#each result.ipv4 as cidr (cidr)}
-                  <div class="cidr-item">
-                    <code class="cidr-block">{cidr}</code>
-                    <button
-                      type="button"
-                      class="btn btn-icon btn-xs"
-                      class:copied={clipboard.isCopied(cidr)}
-                      onclick={() => clipboard.copy(cidr, cidr)}
-                    >
-                      <Icon name={clipboard.isCopied(cidr) ? 'check' : 'copy'} size="xs" />
-                    </button>
-                  </div>
-                {/each}
-              </div>
+        <!-- IPv6 Results -->
+        {#if result.ipv6.length > 0}
+          <div class="result-panel ipv6">
+            <div class="panel-header">
+              <h4>IPv6 Results ({result.ipv6.length})</h4>
+              <button
+                type="button"
+                class="btn btn-icon"
+                class:copied={clipboard.isCopied('ipv6')}
+                onclick={() => clipboard.copy((result?.ipv6 || []).join('\n'), 'ipv6')}
+              >
+                <Icon name={clipboard.isCopied('ipv6') ? 'check' : 'copy'} size="sm" />
+              </button>
             </div>
-          {/if}
-
-          <!-- IPv6 Results -->
-          {#if result.ipv6.length > 0}
-            <div class="result-panel ipv6">
-              <div class="panel-header">
-                <h4>IPv6 Results ({result.ipv6.length})</h4>
-                <button
-                  type="button"
-                  class="btn btn-icon"
-                  class:copied={clipboard.isCopied('ipv6')}
-                  onclick={() => clipboard.copy((result?.ipv6 || []).join('\n'), 'ipv6')}
-                >
-                  <Icon name={clipboard.isCopied('ipv6') ? 'check' : 'copy'} size="sm" />
-                </button>
-              </div>
-              <div class="cidr-list">
-                {#each result.ipv6 as cidr (cidr)}
-                  <div class="cidr-item">
-                    <code class="cidr-block">{cidr}</code>
-                    <button
-                      type="button"
-                      class="btn btn-icon btn-xs"
-                      class:copied={clipboard.isCopied(cidr)}
-                      onclick={() => clipboard.copy(cidr, cidr)}
-                    >
-                      <Icon name={clipboard.isCopied(cidr) ? 'check' : 'copy'} size="xs" />
-                    </button>
-                  </div>
-                {/each}
-              </div>
+            <div class="cidr-list">
+              {#each result.ipv6 as cidr (cidr)}
+                <div class="cidr-item">
+                  <code class="cidr-block">{cidr}</code>
+                  <button
+                    type="button"
+                    class="btn btn-icon btn-xs"
+                    class:copied={clipboard.isCopied(cidr)}
+                    onclick={() => clipboard.copy(cidr, cidr)}
+                  >
+                    <Icon name={clipboard.isCopied(cidr) ? 'check' : 'copy'} size="xs" />
+                  </button>
+                </div>
+              {/each}
             </div>
-          {/if}
-        </div>
-      {:else}
-        <div class="info-panel info">
-          <h3>No Results</h3>
-          <p>The difference A - B resulted in an empty set. Set B completely contains or covers Set A.</p>
-        </div>
-      {/if}
-    </div>
-  {/if}
-</div>
+          </div>
+        {/if}
+      </div>
+    {:else}
+      <div class="info-panel info">
+        <h3>No Results</h3>
+        <p>The difference A - B resulted in an empty set. Set B completely contains or covers Set A.</p>
+      </div>
+    {/if}
+  </div>
+{/if}
 
 <style lang="scss">
   /* Reusable tokens */
@@ -620,6 +604,7 @@
       font-family: var(--font-mono);
       font-size: var(--font-size-sm);
       resize: vertical;
+      background: var(--bg-primary);
       border-left: 4px solid var(--color-primary);
     }
 

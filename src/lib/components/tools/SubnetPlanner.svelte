@@ -3,6 +3,7 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import _Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import { useClipboard } from '$lib/composables';
   import { formatNumber } from '$lib/utils/formatters';
 
@@ -210,12 +211,10 @@
   });
 </script>
 
-<div class="card">
-  <header class="card-header">
-    <h2>Subnet Planner (VLSM)</h2>
-    <p>Design Variable Length Subnet Mask (VLSM) allocations with drag-and-drop reordering and space optimization.</p>
-  </header>
-
+<ToolContentContainer
+  title="Subnet Planner (VLSM)"
+  description="Design Variable Length Subnet Mask (VLSM) allocations with drag-and-drop reordering and space optimization."
+>
   <!-- Strategy Selection -->
   <div class="strategy-section">
     <h3>Allocation Strategy</h3>
@@ -447,7 +446,7 @@
                 class="btn btn-secondary btn-xs"
                 onclick={() => (showVisualization = !showVisualization)}
               >
-                <Icon name="eye-off" size="xs" />
+                <Icon name="hide" size="xs" />
                 Hide
               </button>
             </div>
@@ -574,7 +573,7 @@
       {/if}
     </div>
   {/if}
-</div>
+</ToolContentContainer>
 
 <style lang="scss">
   /* Reusable tokens */
@@ -627,7 +626,6 @@
     .options {
       .checkbox-label {
         display: flex;
-        align-items: flex-start;
         gap: var(--spacing-sm);
         cursor: pointer;
 
@@ -1153,7 +1151,7 @@
   }
 
   /* Responsive */
-  @media (max-width: 768px) {
+  @media (max-width: 600px) {
     .requests-header {
       flex-direction: column;
       gap: var(--spacing-sm);
@@ -1162,7 +1160,11 @@
 
     .request-item {
       flex-direction: column;
+      align-items: flex-start;
       gap: var(--spacing-sm);
+      .drag-handle {
+        display: none;
+      }
 
       .request-fields {
         width: 100%;

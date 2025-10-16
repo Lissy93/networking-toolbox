@@ -323,7 +323,7 @@
     gap: var(--spacing-md);
 
     h3 {
-      color: var(--color-success-light);
+      color: var(--color-primary);
       margin: 0;
     }
   }
@@ -545,5 +545,10 @@
     .results-summary {
       justify-content: center;
     }
+  }
+
+  input,
+  textarea {
+    background: var(--bg-primary);
   }
 </style>

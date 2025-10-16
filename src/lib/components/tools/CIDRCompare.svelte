@@ -839,4 +839,8 @@
       align-items: stretch;
     }
   }
+
+  textarea {
+    background: var(--bg-primary);
+  }
 </style>

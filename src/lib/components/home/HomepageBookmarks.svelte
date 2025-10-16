@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import ToolsGrid from '$lib/components/global/ToolsGrid.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import SegmentedControl from '$lib/components/global/SegmentedControl.svelte';
   import { bookmarks } from '$lib/stores/bookmarks';
   import { frequentlyUsedTools, recentlyUsedTools } from '$lib/stores/toolUsage';
 
@@ -11,6 +12,12 @@
 
   type ViewMode = 'bookmarks' | 'most-used' | 'recent';
   let activeView = $state<ViewMode>('bookmarks');
+
+  const viewOptions = [
+    { value: 'bookmarks' as const, label: 'Bookmarks', icon: 'bookmarks' },
+    { value: 'most-used' as const, label: 'Most Used', icon: 'frequently-used' },
+    { value: 'recent' as const, label: 'Recent', icon: 'clock' },
+  ];
 
   const bookmarkCount = $derived($bookmarks.length);
   const mostUsedCount = $derived($frequentlyUsedTools.length);
@@ -84,35 +91,7 @@
         {/if}
       </div>
 
-      <div class="view-toggle">
-        <button
-          class="toggle-btn"
-          class:active={activeView === 'bookmarks'}
-          onclick={() => (activeView = 'bookmarks')}
-          aria-pressed={activeView === 'bookmarks'}
-        >
-          <Icon name="bookmarks" size="sm" />
-          <span>Bookmarks</span>
-        </button>
-        <button
-          class="toggle-btn"
-          class:active={activeView === 'most-used'}
-          onclick={() => (activeView = 'most-used')}
-          aria-pressed={activeView === 'most-used'}
-        >
-          <Icon name="frequently-used" size="sm" />
-          <span>Most Used</span>
-        </button>
-        <button
-          class="toggle-btn"
-          class:active={activeView === 'recent'}
-          onclick={() => (activeView = 'recent')}
-          aria-pressed={activeView === 'recent'}
-        >
-          <Icon name="clock" size="sm" />
-          <span>Recent</span>
-        </button>
-      </div>
+      <SegmentedControl options={viewOptions} bind:value={activeView} onchange={(value) => (activeView = value)} />
     </div>
 
     <div class="bookmarks-grid">
@@ -193,60 +172,6 @@
     @media (max-width: 768px) {
       flex-direction: column;
       align-items: flex-start;
-    }
-  }
-
-  .view-toggle {
-    display: flex;
-    gap: var(--spacing-xs);
-    background: var(--bg-secondary);
-    padding: var(--spacing-xs);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-primary);
-
-    .toggle-btn {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-xs);
-      padding: var(--spacing-xs) var(--spacing-sm);
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: var(--font-size-sm);
-      border: none;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: all var(--transition-fast);
-      white-space: nowrap;
-
-      :global(svg) {
-        color: var(--text-secondary);
-        transition: color var(--transition-fast);
-      }
-
-      &:hover {
-        background: var(--bg-tertiary);
-        color: var(--text-primary);
-
-        :global(svg) {
-          color: var(--text-primary);
-        }
-      }
-
-      &.active {
-        background: var(--color-primary);
-        color: var(--bg-primary);
-
-        :global(svg) {
-          color: var(--bg-primary);
-        }
-      }
-
-      @media (max-width: 640px) {
-        span {
-          display: none;
-        }
-        padding: var(--spacing-xs);
-      }
     }
   }
 

@@ -7,7 +7,22 @@
   } from '$lib/utils/ipv6-subnet-calculations.js';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import { useClipboard } from '$lib/composables';
+  import { goto } from '$app/navigation';
+
+  const versionOptions = [
+    { value: 'ipv4' as const, label: 'IPv4' },
+    { value: 'ipv6' as const, label: 'IPv6' },
+  ];
+
+  let selectedVersion = $state<'ipv4' | 'ipv6'>('ipv6');
+
+  function handleVersionChange(version: 'ipv4' | 'ipv6') {
+    if (version === 'ipv4') {
+      goto('/subnetting/ipv4-subnet-calculator');
+    }
+  }
 
   let networkAddress = $state('2001:db8::/64');
   let prefixLength = $state(64);
@@ -88,12 +103,14 @@
   // activePreset is now derived automatically
 </script>
 
-<div class="card ipv6-calc-card">
-  <header class="card-header">
-    <h2>IPv6 Subnet Calculator</h2>
-    <p>Calculate IPv6 subnet information with 128-bit addressing and modern network prefix notation.</p>
-  </header>
-
+<ToolContentContainer
+  title="IPv6 Subnet Calculator"
+  description="Calculate IPv6 subnet information with 128-bit addressing and modern network prefix notation."
+  navOptions={versionOptions}
+  bind:selectedNav={selectedVersion}
+  onNavChange={handleVersionChange}
+  contentClass="ipv6-calc-card"
+>
   <!-- Input Section -->
   <div class="input-section">
     <h3>Network Configuration</h3>
@@ -414,13 +431,13 @@
       </div>
     </div>
   {/if}
-</div>
+</ToolContentContainer>
 
 <style>
-  .ipv6-calc-card .btn :global(.icon) {
-    width: 1rem;
-    height: 1rem;
+  .btn {
     vertical-align: middle;
+    display: flex;
+    gap: var(--spacing-sm);
   }
 
   .input-section {
