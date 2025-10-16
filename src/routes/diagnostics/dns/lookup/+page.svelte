@@ -2,7 +2,7 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { validateDNSLookupInput, formatDNSError } from '$lib/utils/dns-validation.js';
-  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import { useDiagnosticState, useClipboard, useExamples, useSimpleValidation } from '$lib/composables';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ActionButton from '$lib/components/common/ActionButton.svelte';
   import ResultsCard from '$lib/components/common/ResultsCard.svelte';
@@ -20,9 +20,9 @@
   const clipboard = useClipboard();
 
   // Reactive validation state
-  const isInputValid = $derived(() => {
-    const validation = validateDNSLookupInput(domainName, useCustomResolver, customResolver);
-    return validation.isValid;
+  const validation = useSimpleValidation(() => {
+    const validationResult = validateDNSLookupInput(domainName, useCustomResolver, customResolver);
+    return validationResult.isValid;
   });
 
   const recordTypes = [
@@ -244,7 +244,7 @@
       <div class="action-section">
         <ActionButton
           loading={diagnosticState.loading}
-          disabled={!isInputValid}
+          disabled={!validation.isValid}
           icon="search"
           loadingText="Performing Lookup..."
           onclick={performLookup}

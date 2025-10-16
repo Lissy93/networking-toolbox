@@ -10,6 +10,7 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip.js';
   import { useClipboard } from '$lib/composables';
+  import { formatNumber } from '$lib/utils/formatters';
 
   let networks = $state<NetworkInput[]>([]);
   let supernetResult = $state<SupernetResult | null>(null);
@@ -323,7 +324,7 @@
               <span class="summary-label" use:tooltip={'Total number of host addresses available in the supernet'}
                 >Total Hosts</span
               >
-              <span class="summary-value">{supernetResult.supernet.totalHosts.toLocaleString()}</span>
+              <span class="summary-value">{formatNumber(supernetResult.supernet.totalHosts)}</span>
             </div>
           </div>
         </div>
@@ -513,7 +514,7 @@
                   <h5>Supernet</h5>
                   <div class="supernet-bar">
                     <span class="supernet-label">{supernetResult.supernet.network}/{supernetResult.supernet.cidr}</span>
-                    <span class="supernet-hosts">{supernetResult.supernet.totalHosts.toLocaleString()} hosts</span>
+                    <span class="supernet-hosts">{formatNumber(supernetResult.supernet.totalHosts)} hosts</span>
                   </div>
                 </div>
               </div>

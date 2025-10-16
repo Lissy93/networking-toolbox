@@ -2,11 +2,12 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { parseDNSKEYRecord, calculateKeyTag, validateDNSKEY, DNSSEC_ALGORITHMS } from '$lib/utils/dnssec';
+  import { useClipboard } from '$lib/composables';
 
   let dnskeyInput = $state('example.org. 3600 IN DNSKEY 257 3 8 AwEAAag');
   let activeExampleIndex = $state<number | null>(null);
   let isActiveExample = $state(true);
-  let copiedState = $state(false);
+  const clipboard = useClipboard();
 
   const examples = [
     {
@@ -68,20 +69,6 @@
       isActiveExample = false;
     }
     activeExampleIndex = null;
-  }
-
-  async function copyKeyTag() {
-    if (result && !result.error && result.keyTag !== undefined) {
-      try {
-        await navigator.clipboard.writeText(result.keyTag.toString());
-        copiedState = true;
-        setTimeout(() => {
-          copiedState = false;
-        }, 2000);
-      } catch (err) {
-        console.error('Failed to copy key tag:', err);
-      }
-    }
   }
 </script>
 
@@ -156,8 +143,12 @@
       <div class="card results-card">
         <div class="results-header">
           <h3>Key Tag Calculation</h3>
-          <button class="copy-button {copiedState ? 'copied' : ''}" onclick={copyKeyTag}>
-            <Icon name={copiedState ? 'check' : 'copy'} size="sm" />
+          <button
+            class="copy-button {clipboard.isCopied() ? 'copied' : ''}"
+            onclick={() =>
+              result && !result.error && result.keyTag !== undefined && clipboard.copy(result.keyTag.toString())}
+          >
+            <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="sm" />
             Copy Key Tag
           </button>
         </div>

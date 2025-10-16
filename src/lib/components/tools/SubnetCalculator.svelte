@@ -1,6 +1,7 @@
 <script lang="ts">
   import { calculateSubnet } from '$lib/utils/ip-calculations.js';
   import { validateCIDR } from '$lib/utils/ip-validation.js';
+  import { formatNumber } from '$lib/utils/formatters.js';
   import CIDRInput from '$lib/components/tools/CIDRInput.svelte';
   import NetworkVisualizer from '$lib/components/tools/NetworkVisualizer.svelte';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
@@ -33,13 +34,6 @@
       subnetInfo = null;
     }
   });
-
-  /**
-   * Format large numbers
-   */
-  function formatNumber(num: number): string {
-    return num.toLocaleString();
-  }
 
   const clipboard = useClipboard();
 </script>

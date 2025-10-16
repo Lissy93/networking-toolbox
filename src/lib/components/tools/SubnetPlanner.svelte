@@ -4,6 +4,7 @@
   import _Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
+  import { formatNumber } from '$lib/utils/formatters';
 
   let parentCIDR = $state('192.168.1.0/24');
   let strategy = $state<'preserve-order' | 'fit-best'>('fit-best');
@@ -193,10 +194,10 @@
     type: 'allocated' | 'leftover',
   ): string {
     if (type === 'allocated' && item.name) {
-      const size = item.start && item.end ? (item.end - item.start + 1n).toLocaleString() : 'Unknown';
+      const size = item.start && item.end ? formatNumber(Number(item.end - item.start + 1n)) : 'Unknown';
       return `${item.name}\n${item.cidr}\nSize: ${size} addresses`;
     } else {
-      const size = item.start && item.end ? (item.end - item.start + 1n).toLocaleString() : 'Unknown';
+      const size = item.start && item.end ? formatNumber(Number(item.end - item.start + 1n)) : 'Unknown';
       return `Leftover Space\n${item.cidr}\nSize: ${size} addresses`;
     }
   }

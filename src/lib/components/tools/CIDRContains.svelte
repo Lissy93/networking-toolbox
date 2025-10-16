@@ -4,6 +4,7 @@
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
+  import { formatNumber } from '$lib/utils/formatters';
 
   let setA = $state(`192.168.0.0/16
 10.0.0.0/8`);
@@ -151,7 +152,7 @@
     const size = range.end - range.start + 1n;
     const label = type === 'candidate' ? 'Candidate' : type === 'container' ? 'Container' : 'Gap';
 
-    return `${label}${range.label ? ` (${range.label})` : ''}\nSize: ${size.toLocaleString()}${range.cidr ? `\nCIDR: ${range.cidr}` : ''}`;
+    return `${label}${range.label ? ` (${range.label})` : ''}\nSize: ${formatNumber(Number(size))}${range.cidr ? `\nCIDR: ${range.cidr}` : ''}`;
   }
 
   // Reactive computation

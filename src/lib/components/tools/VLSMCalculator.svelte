@@ -13,6 +13,7 @@
   import { useClipboard } from '$lib/composables';
   import { tooltip } from '$lib/actions/tooltip.js';
   import { SvelteSet } from 'svelte/reactivity';
+  import { formatNumber } from '$lib/utils/formatters';
 
   let networkIP = $state('192.168.1.0');
   let cidr = $state(24);
@@ -233,15 +234,15 @@
             </div>
             <div class="stat-item">
               <span class="stat-label">Hosts Requested</span>
-              <span class="stat-value">{vlsmResult.totalHostsRequested.toLocaleString()}</span>
+              <span class="stat-value">{formatNumber(vlsmResult.totalHostsRequested)}</span>
             </div>
             <div class="stat-item">
               <span class="stat-label">Hosts Provided</span>
-              <span class="stat-value">{vlsmResult.totalHostsProvided.toLocaleString()}</span>
+              <span class="stat-value">{formatNumber(vlsmResult.totalHostsProvided)}</span>
             </div>
             <div class="stat-item">
               <span class="stat-label">Wasted Hosts</span>
-              <span class="stat-value danger">{vlsmResult.totalWastedHosts.toLocaleString()}</span>
+              <span class="stat-value danger">{formatNumber(vlsmResult.totalWastedHosts)}</span>
             </div>
             <div class="stat-item">
               <span class="stat-label">Efficiency</span>
@@ -254,7 +255,7 @@
             </div>
             <div class="stat-item">
               <span class="stat-label">Remaining Addresses</span>
-              <span class="stat-value">{vlsmResult.remainingAddresses.toLocaleString()}</span>
+              <span class="stat-value">{formatNumber(vlsmResult.remainingAddresses)}</span>
             </div>
           </div>
         </div>

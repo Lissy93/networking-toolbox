@@ -2,6 +2,7 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import { useClipboard } from '$lib/composables';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { formatNumber } from '$lib/utils/formatters';
   import '../../../styles/diagnostics-pages.scss';
   let pools = $state(`192.168.0.0/16
 10.0.0.0/20`);
@@ -593,19 +594,19 @@
             <div class="breakdown-item">
               <span class="breakdown-label">Total Pool Space:</span>
               <span class="breakdown-value">
-                {result.summary.totalPoolSpace.toLocaleString()} addresses
+                {formatNumber(result.summary.totalPoolSpace)} addresses
               </span>
             </div>
             <div class="breakdown-item">
               <span class="breakdown-label">Allocated:</span>
               <span class="breakdown-value allocated">
-                {result.summary.allocatedSpace.toLocaleString()} addresses
+                {formatNumber(result.summary.allocatedSpace)} addresses
               </span>
             </div>
             <div class="breakdown-item">
               <span class="breakdown-label">Remaining:</span>
               <span class="breakdown-value">
-                {(result.summary.totalPoolSpace - result.summary.allocatedSpace).toLocaleString()} addresses
+                {formatNumber(result.summary.totalPoolSpace - result.summary.allocatedSpace)} addresses
               </span>
             </div>
           </div>
@@ -639,7 +640,7 @@
                       <code class="result-cidr">{allocation.cidr}</code>
                       <span class="result-pool">in {allocation.pool}</span>
                       <span class="result-size">
-                        ({allocation.size.toLocaleString()} addresses)
+                        ({formatNumber(allocation.size)} addresses)
                       </span>
                     </div>
                     <button
@@ -708,7 +709,7 @@
                       {#each pool.remaining.slice(0, 5) as remaining (remaining.cidr)}
                         <div class="remaining-block">
                           <code class="remaining-size">
-                            {remaining.size.toLocaleString()} addresses
+                            {formatNumber(remaining.size)} addresses
                           </code>
                           <span class="remaining-range">
                             {ipToString(remaining.start)} - {ipToString(remaining.start + remaining.size - 1)}

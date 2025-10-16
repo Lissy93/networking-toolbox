@@ -3,6 +3,7 @@
   import { calculateIPDistances, type DistanceResult } from '$lib/utils/ip-distance.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
+  import { formatNumber } from '$lib/utils/formatters';
   import '../../../styles/diagnostics-pages.scss';
 
   let inputText = $state('192.168.1.1 -> 192.168.1.100\n10.0.0.1 -> 10.0.0.255\n2001:db8::1 -> 2001:db8::ffff');
@@ -440,9 +441,11 @@
                             {/each}
                             {#if calculation.distanceNumber > BigInt(calculation.intermediateAddresses.length + 2)}
                               <span class="more-indicator">
-                                ... and {(
-                                  calculation.distanceNumber - BigInt(calculation.intermediateAddresses.length + 2)
-                                ).toLocaleString()} more
+                                ... and {formatNumber(
+                                  Number(
+                                    calculation.distanceNumber - BigInt(calculation.intermediateAddresses.length + 2),
+                                  ),
+                                )} more
                               </span>
                             {/if}
                           </div>

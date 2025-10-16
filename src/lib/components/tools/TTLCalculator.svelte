@@ -2,6 +2,8 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { humanizeTTL, calculateCacheExpiry, type TTLInfo } from '$lib/utils/dns-validation.js';
+  import { useClipboard } from '$lib/composables';
+  import { formatNumber } from '$lib/utils/formatters';
 
   let ttlInput = $state('3600');
   let customDate = $state('');
@@ -16,7 +18,7 @@
     customDateValid: boolean;
   } | null>(null);
 
-  let copiedState = $state(false);
+  const clipboard = useClipboard();
 
   const commonTTLs = [
     { seconds: 60, label: '1 minute', description: 'Very short - high DNS load' },
@@ -125,18 +127,6 @@
       return diffHours > 0 ? `in ${diffHours} hours` : `${Math.abs(diffHours)} hours ago`;
     } else {
       return diffDays > 0 ? `in ${diffDays} days` : `${Math.abs(diffDays)} days ago`;
-    }
-  }
-
-  async function copyTTL() {
-    try {
-      await navigator.clipboard.writeText(ttlInput);
-      copiedState = true;
-      setTimeout(() => {
-        copiedState = false;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy: ', err);
     }
   }
 
@@ -268,8 +258,8 @@
     <div class="card results-card">
       <div class="results-header">
         <h3>TTL Analysis</h3>
-        <button class="copy-button {copiedState ? 'copied' : ''}" onclick={copyTTL}>
-          <Icon name={copiedState ? 'check' : 'copy'} size="sm" />
+        <button class="copy-button {clipboard.isCopied() ? 'copied' : ''}" onclick={() => clipboard.copy(ttlInput)}>
+          <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="sm" />
           Copy TTL
         </button>
       </div>
@@ -282,7 +272,7 @@
             <span class="ttl-category {results.ttlInfo.category}">{results.ttlInfo.category.replace('-', ' ')}</span>
           </div>
           <div class="ttl-seconds-display">
-            <span class="seconds-value">{results.ttlInfo.seconds.toLocaleString()}</span>
+            <span class="seconds-value">{formatNumber(results.ttlInfo.seconds)}</span>
             <span class="seconds-label">seconds</span>
           </div>
         </div>

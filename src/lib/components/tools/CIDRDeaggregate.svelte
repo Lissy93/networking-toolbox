@@ -3,6 +3,7 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
   import { cidrDeaggregate, getSubnetSize, type DeaggregateResult } from '$lib/utils/cidr-deaggregate.js';
+  import { formatNumber } from '$lib/utils/formatters';
   import '../../../styles/diagnostics-pages.scss';
 
   let input = $state(`192.168.0.0/22
@@ -157,7 +158,7 @@
         <div class="prefix-info">
           {#if targetPrefix}
             {@const addresses = getSubnetSize(targetPrefix)}
-            Each /{targetPrefix} subnet = {addresses.toLocaleString()} addresses
+            Each /{targetPrefix} subnet = {formatNumber(addresses)} addresses
           {/if}
         </div>
       </div>
@@ -178,7 +179,7 @@
               </span>
               <span class="metric">
                 <Icon name="database" size="sm" />
-                {result.totalAddresses.toLocaleString()} addresses
+                {formatNumber(result.totalAddresses)} addresses
               </span>
             </div>
             {#if result.subnets.length > 0}
@@ -198,13 +199,13 @@
           <div class="summary-item">
             <span class="summary-label" use:tooltip={'Original networks, ranges, and addresses provided'}>Input:</span>
             <span class="summary-value">
-              {result.inputSummary.totalInputs} items, {result.inputSummary.totalInputAddresses.toLocaleString()} addresses
+              {result.inputSummary.totalInputs} items, {formatNumber(result.inputSummary.totalInputAddresses)} addresses
             </span>
           </div>
           <div class="summary-item">
             <span class="summary-label" use:tooltip={'Uniform subnets generated from input'}>Output:</span>
             <span class="summary-value">
-              {result.totalSubnets} /{targetPrefix} subnets, {result.totalAddresses.toLocaleString()} addresses
+              {result.totalSubnets} /{targetPrefix} subnets, {formatNumber(result.totalAddresses)} addresses
             </span>
           </div>
           {#if result.totalAddresses !== result.inputSummary.totalInputAddresses}
@@ -213,9 +214,9 @@
                 >Note:</span
               >
               <span class="summary-value address-diff">
-                {result.totalAddresses > result.inputSummary.totalInputAddresses ? 'Expanded' : 'Reduced'} by {Math.abs(
-                  result.totalAddresses - result.inputSummary.totalInputAddresses,
-                ).toLocaleString()} addresses (due to alignment to /{targetPrefix} boundaries)
+                {result.totalAddresses > result.inputSummary.totalInputAddresses ? 'Expanded' : 'Reduced'} by {formatNumber(
+                  Math.abs(result.totalAddresses - result.inputSummary.totalInputAddresses),
+                )} addresses (due to alignment to /{targetPrefix} boundaries)
               </span>
             </div>
           {/if}
@@ -238,7 +239,7 @@
                 </div>
                 <div class="subnet-info">
                   <span class="address-count">
-                    {subnetSize.toLocaleString()} addresses
+                    {formatNumber(subnetSize)} addresses
                   </span>
                   {#if subnetSize >= 256}
                     <span class="subnet-size">

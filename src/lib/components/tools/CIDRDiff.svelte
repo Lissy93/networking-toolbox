@@ -4,6 +4,7 @@
   import { useClipboard } from '$lib/composables';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { formatNumber } from '$lib/utils/formatters';
 
   let setA = $state(`192.168.1.0/24
 192.168.2.0/24`);
@@ -171,7 +172,7 @@
         : 'IPv6';
     const size = range.end - range.start + 1n;
 
-    return `Set ${type}\nRange: ${startIP} - ${endIP}\nSize: ${size.toLocaleString()}${range.cidr ? `\nCIDR: ${range.cidr}` : ''}`;
+    return `Set ${type}\nRange: ${startIP} - ${endIP}\nSize: ${formatNumber(Number(size))}${range.cidr ? `\nCIDR: ${range.cidr}` : ''}`;
   }
 
   // Track user modifications

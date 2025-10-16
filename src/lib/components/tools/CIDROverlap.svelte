@@ -4,6 +4,7 @@
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
+  import { formatNumber } from '$lib/utils/formatters';
 
   let setA = $state(`192.168.1.0/24
 10.0.0.0/16`);
@@ -157,7 +158,7 @@
 
     const label = type === 'A' ? 'Set A' : type === 'B' ? 'Set B' : 'Intersection';
 
-    return `${label}\nRange: ${startIP} - ${endIP}\nSize: ${size.toLocaleString()}${range.cidr ? `\nCIDR: ${range.cidr}` : ''}`;
+    return `${label}\nRange: ${startIP} - ${endIP}\nSize: ${formatNumber(Number(size))}${range.cidr ? `\nCIDR: ${range.cidr}` : ''}`;
   }
 
   // Track user modifications

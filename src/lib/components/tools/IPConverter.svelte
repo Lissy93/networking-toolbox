@@ -230,22 +230,7 @@
                 onclick={() => clipboard.copy(formats.binary, 'binary')}
                 aria-label="Copy binary format to clipboard"
               >
-                {#if clipboard.isCopied('binary')}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                {:else}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                    <path
-                      d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
-                    />
-                  </svg>
-                {/if}
+                <Icon name={clipboard.isCopied('binary') ? 'check' : 'copy'} size="sm" />
               </button>
             </Tooltip>
           </div>
@@ -276,22 +261,7 @@
                 onclick={() => clipboard.copy(formats.decimal, 'decimal')}
                 aria-label="Copy decimal format to clipboard"
               >
-                {#if clipboard.isCopied('decimal')}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                {:else}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                    <path
-                      d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
-                    />
-                  </svg>
-                {/if}
+                <Icon name={clipboard.isCopied('decimal') ? 'check' : 'copy'} size="sm" />
               </button>
             </Tooltip>
           </div>
@@ -322,22 +292,7 @@
                 onclick={() => clipboard.copy(formats.hex, 'hex')}
                 aria-label="Copy hexadecimal format to clipboard"
               >
-                {#if clipboard.isCopied('hex')}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                {:else}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                    <path
-                      d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
-                    />
-                  </svg>
-                {/if}
+                <Icon name={clipboard.isCopied('hex') ? 'check' : 'copy'} size="sm" />
               </button>
             </Tooltip>
           </div>
@@ -365,22 +320,7 @@
                 onclick={() => clipboard.copy(formats.octal, 'octal')}
                 aria-label="Copy octal format to clipboard"
               >
-                {#if clipboard.isCopied('octal')}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fill-rule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                {:else}
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                    <path
-                      d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
-                    />
-                  </svg>
-                {/if}
+                <Icon name={clipboard.isCopied('octal') ? 'check' : 'copy'} size="sm" />
               </button>
             </Tooltip>
           </div>

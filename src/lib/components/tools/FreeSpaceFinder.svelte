@@ -3,6 +3,7 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
+  import { formatNumber } from '$lib/utils/formatters';
   import '../../../styles/diagnostics-pages.scss';
 
   let pools = $state(`192.168.0.0/16
@@ -305,7 +306,7 @@
             </span>
             <span class="metric">
               <Icon name="network" size="sm" />
-              {result.totalAddresses.toLocaleString()} addresses
+              {formatNumber(result.totalAddresses)} addresses
             </span>
           </div>
         </div>
@@ -334,7 +335,7 @@
                 </div>
                 <div class="block-info">
                   <span class="address-count">
-                    {blockAddresses.toLocaleString()} addresses
+                    {formatNumber(blockAddresses)} addresses
                   </span>
                   {#if targetPrefix && blockAddresses >= Math.pow(2, 32 - targetPrefix)}
                     <span class="can-fit">

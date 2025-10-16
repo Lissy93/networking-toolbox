@@ -9,6 +9,7 @@
   import _Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
+  import { formatNumber } from '$lib/utils/formatters';
 
   let pools = $state(`192.168.0.0/16
 10.0.0.0/8`);
@@ -176,7 +177,7 @@
       candidate: 'Candidate',
     };
 
-    const size = range.start && range.end ? (range.end - range.start + 1n).toLocaleString() : 'Unknown';
+    const size = range.start && range.end ? formatNumber(Number(range.end - range.start + 1n)) : 'Unknown';
     return `${labels[type]}\n${range.cidr}\nSize: ${size} addresses`;
   }
 

@@ -2,7 +2,8 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { formatDNSError } from '$lib/utils/dns-validation.js';
-  import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
+  import { formatBytes, getStatusClass } from '$lib/utils/formatters.js';
+  import { useDiagnosticState, useClipboard, useExamples, useSimpleValidation } from '$lib/composables';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ActionButton from '$lib/components/common/ActionButton.svelte';
   import ResultsCard from '$lib/components/common/ResultsCard.svelte';
@@ -30,7 +31,7 @@
   const examples = useExamples(examplesList);
 
   // Reactive validation
-  const isInputValid = $derived(() => {
+  const validation = useSimpleValidation(() => {
     const trimmedUrl = url.trim();
     if (!trimmedUrl) return false;
     try {
@@ -136,21 +137,6 @@
 
     await clipboard.copy(text);
   }
-
-  function formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
-  }
-
-  function getStatusClass(status: number): string {
-    if (status >= 200 && status < 300) return 'success';
-    if (status >= 300 && status < 400) return 'warning';
-    if (status >= 400) return 'error';
-    return '';
-  }
 </script>
 
 <div class="card">
@@ -188,13 +174,13 @@
               type="url"
               bind:value={url}
               placeholder="https://example.com"
-              class:invalid={url && !isInputValid()}
+              class:invalid={url && !validation.isValid}
               onchange={() => {
                 examples.clear();
-                if (isInputValid()) checkHeaders();
+                if (validation.isValid) checkHeaders();
               }}
             />
-            {#if url && !isInputValid()}
+            {#if url && !validation.isValid}
               <span class="error-text">Invalid URL format</span>
             {/if}
           </label>
@@ -208,7 +194,7 @@
               bind:value={method}
               onchange={() => {
                 examples.clear();
-                if (isInputValid()) checkHeaders();
+                if (validation.isValid) checkHeaders();
               }}
             >
               {#each methods as methodOption (methodOption)}
@@ -229,7 +215,7 @@
             rows="3"
             onchange={() => {
               examples.clear();
-              if (isInputValid()) checkHeaders();
+              if (validation.isValid) checkHeaders();
             }}
           ></textarea>
         </label>
@@ -238,7 +224,7 @@
       <div class="action-section">
         <ActionButton
           loading={diagnosticState.loading}
-          disabled={!isInputValid}
+          disabled={!validation.isValid}
           icon="globe"
           loadingText="Analyzing Headers..."
           onclick={checkHeaders}

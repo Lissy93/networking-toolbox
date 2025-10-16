@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { SubnetInfo } from '$lib/types/ip.js';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
+  import { formatNumber } from '$lib/utils/formatters';
 
   interface Props {
     subnetInfo: SubnetInfo;
@@ -65,7 +66,7 @@
       <div class="range-header">
         <span class="range-label">Address Range</span>
         <span class="range-count">
-          {subnetInfo.hostCount.toLocaleString()} total addresses
+          {formatNumber(subnetInfo.hostCount)} total addresses
         </span>
       </div>
 
@@ -102,7 +103,7 @@
         </div>
         <div class="legend-item">
           <div class="legend-color usable"></div>
-          <span>Usable Hosts ({subnetInfo.usableHosts.toLocaleString()})</span>
+          <span>Usable Hosts ({formatNumber(subnetInfo.usableHosts)})</span>
         </div>
         {#if subnetInfo.hostCount > 1}
           <div class="legend-item">

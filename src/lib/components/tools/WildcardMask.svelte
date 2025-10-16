@@ -4,6 +4,7 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import '../../../styles/diagnostics-pages.scss';
   import { useClipboard } from '$lib/composables';
+  import { formatNumber } from '$lib/utils/formatters';
 
   let inputText = $state('192.168.1.0/24\n10.0.0.0 255.255.255.0\n172.16.0.0 0.0.255.255');
   let result = $state<WildcardResult | null>(null);
@@ -399,7 +400,7 @@
                             use:tooltip={'Total assignable host addresses (excluding network and broadcast)'}
                             >Usable Hosts:</span
                           >
-                          <span class="info-value">{conversion.usableHosts.toLocaleString()}</span>
+                          <span class="info-value">{formatNumber(conversion.usableHosts)}</span>
                         </div>
                       </div>
                     </div>

@@ -2,6 +2,7 @@
   // import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
+  import { formatNumber } from '$lib/utils/formatters';
 
   let input = $state('192.168.1.0/28');
   let maxDisplayLimit = $state(1000);
@@ -164,7 +165,7 @@
 
           if (size > BigInt(ABSOLUTE_MAX_GENERATION)) {
             throw new Error(
-              `IPv6 /${prefixLength} would generate ${size.toLocaleString()} addresses. Maximum allowed: ${ABSOLUTE_MAX_GENERATION.toLocaleString()}`,
+              `IPv6 /${prefixLength} would generate ${formatNumber(Number(size))} addresses. Maximum allowed: ${formatNumber(ABSOLUTE_MAX_GENERATION)}`,
             );
           }
 
@@ -186,7 +187,7 @@
 
           if (size > ABSOLUTE_MAX_GENERATION) {
             throw new Error(
-              `/${prefixLength} would generate ${size.toLocaleString()} addresses. Maximum allowed: ${ABSOLUTE_MAX_GENERATION.toLocaleString()}`,
+              `/${prefixLength} would generate ${formatNumber(size)} addresses. Maximum allowed: ${formatNumber(ABSOLUTE_MAX_GENERATION)}`,
             );
           }
 
@@ -220,7 +221,7 @@
 
         if (count > ABSOLUTE_MAX_GENERATION) {
           throw new Error(
-            `Range would generate ${count.toLocaleString()} addresses. Maximum allowed: ${ABSOLUTE_MAX_GENERATION.toLocaleString()}`,
+            `Range would generate ${formatNumber(count)} addresses. Maximum allowed: ${formatNumber(ABSOLUTE_MAX_GENERATION)}`,
           );
         }
 
@@ -403,7 +404,9 @@
     <div class="safety-warning">
       <Icon name="alert-triangle" size="sm" />
       <div>
-        <strong>Safety:</strong> Max {ABSOLUTE_MAX_DISPLAY.toLocaleString()} displayed, {ABSOLUTE_MAX_GENERATION.toLocaleString()}
+        <strong>Safety:</strong> Max {formatNumber(ABSOLUTE_MAX_DISPLAY)} displayed, {formatNumber(
+          ABSOLUTE_MAX_GENERATION,
+        )}
         generated
       </div>
     </div>
@@ -452,11 +455,11 @@
 
           <div class="summary-stats">
             <div class="stat">
-              <span class="stat-value">{result.totalCount.toLocaleString()}</span>
+              <span class="stat-value">{formatNumber(result.totalCount)}</span>
               <span class="stat-label">Total</span>
             </div>
             <div class="stat">
-              <span class="stat-value">{result.displayCount.toLocaleString()}</span>
+              <span class="stat-value">{formatNumber(result.displayCount)}</span>
               <span class="stat-label">Shown</span>
             </div>
             <div class="stat">
@@ -490,7 +493,7 @@
             </h3>
             {#if result.truncated}
               <span class="truncated-notice"
-                >Showing {result.displayCount.toLocaleString()} of {result.totalCount.toLocaleString()}</span
+                >Showing {formatNumber(result.displayCount)} of {formatNumber(result.totalCount)}</span
               >
             {/if}
           </div>
