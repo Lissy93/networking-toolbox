@@ -9,12 +9,13 @@ vi.mock('$app/environment', () => ({
 
 // Mock customizable settings
 vi.mock('$lib/config/customizable-settings', () => ({
-  DEFAULT_THEME: 'dark',
+  DEFAULT_THEME: 'ocean',
 }));
 
 describe('theme store', () => {
   let mockLocalStorage: Record<string, string> = {};
   let documentHeadAppendChildSpy: any;
+  let mockMatchMedia: any;
 
   beforeEach(() => {
     // Reset localStorage mock
@@ -34,6 +35,15 @@ describe('theme store', () => {
       length: Object.keys(mockLocalStorage).length,
       key: (index: number) => Object.keys(mockLocalStorage)[index] || null,
     } as Storage;
+
+    // Mock matchMedia for prefers-color-scheme
+    mockMatchMedia = vi.fn((query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    global.window.matchMedia = mockMatchMedia;
 
     // Mock document element for theme classes
     global.document = {
@@ -84,10 +94,10 @@ describe('theme store', () => {
     expect(ids).toContain('arctic');
   });
 
-  it('initializes with default theme', async () => {
+  it('initializes with default theme when not in browser', async () => {
     const { theme } = await import('../../../../src/lib/stores/theme');
     const value = get(theme);
-    expect(value).toBe('dark');
+    expect(value).toBe('ocean');
   });
 
   it('init sets theme from localStorage if valid', async () => {
@@ -99,13 +109,61 @@ describe('theme store', () => {
     expect(get(theme)).toBe('light');
   });
 
-  it('init falls back to default if localStorage theme is invalid', async () => {
+  it('init falls back to system preference if localStorage theme is invalid', async () => {
     mockLocalStorage['theme'] = 'invalid-theme';
+    mockMatchMedia.mockImplementation((query: string) => ({
+      matches: query === '(prefers-color-scheme: dark)',
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
     const { theme } = await import('../../../../src/lib/stores/theme');
 
     const initialTheme = theme.init();
     expect(initialTheme).toBe('dark');
     expect(get(theme)).toBe('dark');
+  });
+
+  it('init uses system preference (light) when no saved theme', async () => {
+    mockMatchMedia.mockImplementation((query: string) => ({
+      matches: query === '(prefers-color-scheme: light)',
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    const { theme } = await import('../../../../src/lib/stores/theme');
+
+    const initialTheme = theme.init();
+    expect(initialTheme).toBe('light');
+    expect(get(theme)).toBe('light');
+  });
+
+  it('init uses system preference (dark) when no saved theme', async () => {
+    mockMatchMedia.mockImplementation((query: string) => ({
+      matches: query === '(prefers-color-scheme: dark)',
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    const { theme } = await import('../../../../src/lib/stores/theme');
+
+    const initialTheme = theme.init();
+    expect(initialTheme).toBe('dark');
+    expect(get(theme)).toBe('dark');
+  });
+
+  it('init uses ocean when no saved theme and no system preference', async () => {
+    mockMatchMedia.mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    const { theme } = await import('../../../../src/lib/stores/theme');
+
+    const initialTheme = theme.init();
+    expect(initialTheme).toBe('ocean');
+    expect(get(theme)).toBe('ocean');
   });
 
   it('setTheme updates store and localStorage', async () => {

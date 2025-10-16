@@ -139,8 +139,22 @@ function isValidTheme(theme: unknown): theme is string {
   return themes.some((t) => t.id === theme && t.available);
 }
 
+function getSystemPreferredTheme(): ThemeOption {
+  if (!browser) return 'ocean';
+
+  // Check if user has a color scheme preference
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+
+  if (prefersLight) return 'light';
+  if (prefersDark) return 'dark';
+
+  // No preference or preference not supported
+  return 'ocean';
+}
+
 function createThemeStore() {
-  const defaultTheme = isValidTheme(DEFAULT_THEME) ? DEFAULT_THEME : 'dark';
+  const defaultTheme = isValidTheme(DEFAULT_THEME) ? DEFAULT_THEME : 'ocean';
   const { subscribe, set, update } = writable<ThemeOption>(defaultTheme);
 
   return {
@@ -149,12 +163,17 @@ function createThemeStore() {
     // Initialize theme from localStorage or default
     init: () => {
       if (browser) {
-        const saved = storage.getItem(STORAGE_KEY, {
-          defaultValue: defaultTheme,
-          validate: isValidTheme,
-          serialize: false,
-        });
-        const initialTheme = saved as ThemeOption;
+        const savedTheme = localStorage.getItem(STORAGE_KEY);
+
+        let initialTheme: ThemeOption;
+
+        // If no saved theme, use system preference
+        if (!savedTheme) {
+          initialTheme = getSystemPreferredTheme();
+        } else {
+          // Use saved theme if valid
+          initialTheme = isValidTheme(savedTheme) ? savedTheme : getSystemPreferredTheme();
+        }
 
         set(initialTheme);
 
