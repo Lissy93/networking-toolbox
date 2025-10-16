@@ -368,6 +368,10 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
 </div>
 
 <style lang="scss">
+  .card {
+    width: 100%;
+  }
+
   .input-card {
     margin-bottom: var(--spacing-lg);
     background: var(--bg-tertiary);

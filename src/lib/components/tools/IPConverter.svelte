@@ -561,15 +561,15 @@
     transition: all var(--transition-fast);
   }
 
-  .copy-btn svg {
-    width: 1rem;
-    height: 1rem;
-  }
-
   .copy-btn:hover {
     background-color: var(--surface-hover);
     color: var(--text-primary);
     border-color: var(--color-primary);
+  }
+
+  .copy-btn.copied {
+    color: var(--color-success);
+    background-color: rgba(35, 134, 54, 0.1);
   }
 
   .format-field.error {

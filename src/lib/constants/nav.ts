@@ -2155,26 +2155,37 @@ export const aboutPages: NavItem[] = [
   {
     href: makePath('/about/api'),
     label: 'API Usage',
+    icon: 'cli',
     description: 'Using our free public REST API for network calculations and IP tools',
     keywords: ['api', 'networking', 'ipv4', 'ipv6', 'network', 'tools', 'dns', 'cidr', 'subnet'],
   },
   {
     href: makePath('/about/attributions'),
     label: 'Attributions',
+    icon: 'clap',
     description: 'Shout outs to sponsors, contributors and other authors who made Networking Toolbox possible',
     keywords: ['attributions', 'credits', 'thanks', 'sponsors', 'contributors', 'libraries'],
   },
   {
     href: makePath('/about/author'),
     label: 'Author',
+    icon: 'dead-bot',
     description: 'About Alicia Sykes, and how and why she built Networking Toolbox',
     keywords: ['author', 'about', 'bio', 'Alicia Sykes', 'github'],
   },
   {
     href: makePath('/about/building'),
     label: 'Building',
+    icon: 'hammer',
     description: 'Build Networking Toolbox from source, self-host, edit, or contribute to the project',
     keywords: ['building', 'sveltekit', 'github', 'npm', 'svelte', 'typescript', 'developing documentation'],
+  },
+  {
+    href: makePath('/about/support'),
+    label: 'Support',
+    icon: 'headset',
+    description: 'Get support, dedicated hosting, enterprise SSO, SLA or custom feature/tool development',
+    keywords: ['support', 'enterprise', 'sso', 'sla', 'custom', 'development', 'hosting', 'contact'],
   },
   {
     href: makePath('/about/legal/license'),
@@ -2209,6 +2220,7 @@ export const aboutPages: NavItem[] = [
   {
     href: makePath('/about/self-hosting'),
     label: 'Self-Hosting',
+    icon: 'docker',
     description: 'Guide to self-hosting Networking Toolbox on your own server or infrastructure',
     keywords: ['self-hosting', 'deployment', 'docker', 'portainer', 'vercel', 'node', 'nginx'],
   },
@@ -2255,7 +2267,6 @@ export const legalPages: NavItem[] = [
 
 export const footerLinks: NavItem[] = [
   { href: makePath('/about'), label: 'About' },
-  { href: makePath('/about/legal'), label: 'Legal' },
   { href: site.repo, label: 'GitHub' },
   { href: author.sponsor, label: 'Sponsor' },
   { href: author.portfolio, label: 'More Apps →' },

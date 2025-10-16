@@ -341,6 +341,7 @@
   }
 
   .card {
+    width: 100%;
     background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
     border-radius: var(--radius-lg);

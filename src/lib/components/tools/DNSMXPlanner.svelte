@@ -393,6 +393,11 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
+
+    input[type='text'],
+    input[type='number'] {
+      background: var(--bg-primary);
+    }
   }
 
   .domain-config {
@@ -731,7 +736,7 @@
     .table-header {
       display: grid;
       grid-template-columns: 1.5fr 1fr 1fr 1fr 2fr 1fr;
-      background: var(--bg-secondary);
+      background: var(--bg-primary);
       font-weight: 600;
       font-size: var(--font-size-sm);
 

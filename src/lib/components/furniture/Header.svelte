@@ -47,7 +47,7 @@
             aria-label="Keyboard shortcuts"
             use:tooltip={`Shortcuts (${formatShortcut('^/')})`}
           >
-            <Icon name="info" size="sm" />
+            <Icon name="cli" size="sm" />
           </button>
 
           <SettingsMenu />

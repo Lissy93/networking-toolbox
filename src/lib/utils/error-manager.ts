@@ -135,9 +135,12 @@ class ErrorManager {
   private processError(error: SerializedError): string | null {
     const hash = this.hashError(error);
 
-    // Check for duplicates
+    // Check for duplicates. And only log in non-test environments
     if (this.isDuplicate(hash)) {
-      logger.debug(`Duplicate error suppressed: ${error.name}`);
+      const isTest = typeof process !== 'undefined' && (process.env.NODE_ENV === 'test' || process.env.VITEST);
+      if (!isTest) {
+        logger.debug(`Duplicate error suppressed: ${error.name}`);
+      }
       return null;
     }
 

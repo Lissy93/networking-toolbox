@@ -740,3 +740,99 @@ html[data-theme='everforest'] {
   --font-body: 'Nunito', sans-serif;
   --font-mono: 'Source Code Pro', monospace;
 }
+
+/* Sunset Theme - Warm oranges and coral, light theme */
+.theme-sunset,
+html[data-theme='sunset'] {
+  /* Backgrounds - Warm peach and cream */
+  --bg-primary: #edecea;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #fff4eb;
+
+  /* Text - Deep warm grays */
+  --text-primary: #2a1810;
+  --text-secondary: #5c4a42;
+  --text-tertiary: #8c7165;
+
+  /* Primary - Sunset coral */
+  --color-primary: #ff6b35;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 85%, white 15%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 85%, black 15%);
+
+  /* Action colors - Warm sunset palette */
+  --color-success: #0e9f6e;
+  --color-success-light: #31c48d;
+  --color-warning: #ff9500;
+  --color-warning-light: #ffae42;
+  --color-error: #e02424;
+  --color-error-light: #f05252;
+  --color-info: #3f83f8;
+  --color-info-light: #76a9fa;
+
+  --color-purple: #9061f9;
+  --color-pink: #ff5a8d;
+
+  /* Borders & surfaces - Soft warm tones */
+  --border-primary: #fcd9c8;
+  --border-secondary: #f9cbb5;
+  --surface-hover: #ffeee0;
+  --surface-active: #ffe4d1;
+
+  /* Shadows - Warm soft shadows */
+  --shadow-sm: 0 1px 3px rgba(255, 107, 53, 0.08);
+  --shadow-md: 0 4px 12px rgba(255, 107, 53, 0.1);
+  --shadow-lg: 0 12px 28px rgba(255, 107, 53, 0.15);
+
+  /* Fonts */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Dracula Theme - Purple dark, vampire aesthetic */
+.theme-dracula,
+html[data-theme='dracula'] {
+  /* Backgrounds - Deep purple blacks */
+  --bg-primary: #282a36;
+  --bg-secondary: #21222c;
+  --bg-tertiary: #343746;
+
+  /* Text - Light purple gray */
+  --text-primary: #f8f8f2;
+  --text-secondary: #e0e0e0;
+  --text-tertiary: #bfbfbf;
+
+  /* Primary - Dracula pink */
+  --color-primary: #ff79c6;
+  --color-primary-hover: color-mix(in srgb, var(--color-primary) 70%, white 30%);
+  --color-primary-dark: color-mix(in srgb, var(--color-primary) 70%, black 30%);
+
+  /* Action colors - Vibrant Dracula palette */
+  --color-success: #50fa7b;
+  --color-success-light: #7dfb9b;
+  --color-warning: #f1fa8c;
+  --color-warning-light: #f5fba9;
+  --color-error: #ff5555;
+  --color-error-light: #ff7979;
+  --color-info: #8be9fd;
+  --color-info-light: #a9f0fd;
+
+  --color-purple: #bd93f9;
+  --color-pink: #ff79c6;
+
+  /* Borders & surfaces */
+  --border-primary: #44475a;
+  --border-secondary: #6272a4;
+  --surface-hover: #343746;
+  --surface-active: #44475a;
+
+  /* Shadows - Purple tinted shadows */
+  --shadow-sm: 0 2px 4px rgba(189, 147, 249, 0.15);
+  --shadow-md: 0 4px 8px rgba(189, 147, 249, 0.2);
+  --shadow-lg: 0 8px 16px rgba(189, 147, 249, 0.25);
+
+  /* Fonts */
+  --font-heading: 'JetBrains Mono', monospace;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+}

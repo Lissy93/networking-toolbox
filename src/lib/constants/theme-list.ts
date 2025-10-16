@@ -119,6 +119,22 @@ const fonts = {
     url: getFontUrl('Nunito', `${primaryCdn}Nunito:wght@400;500;600;700&display=swap&subset=latin`),
     fallback: 'sans-serif',
   },
+  PlayfairDisplay: {
+    name: 'Playfair Display',
+    url: getFontUrl(
+      'Playfair Display',
+      `${primaryCdn}Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap&subset=latin`,
+    ),
+    fallback: 'serif',
+  },
+  DraculaFonts: {
+    name: 'JetBrains Mono',
+    url: getFontUrl(
+      'JetBrains Mono',
+      `${primaryCdn}JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500;600&display=swap&subset=latin`,
+    ),
+    fallback: 'sans-serif',
+  },
 };
 
 const makePreviewGradient = (colors: string[], angle = 135, splitPercent = 50) =>
@@ -240,5 +256,19 @@ export const themes: Theme[] = [
     available: true,
     preview: makePreviewGradient(['#2d353b', '#a7c080']),
     font: fonts.Nunito,
+  },
+  {
+    id: 'sunset',
+    name: 'Sunset',
+    available: true,
+    preview: makePreviewGradient(['#fef6f0', '#ff6b35']),
+    font: fonts.PlayfairDisplay,
+  },
+  {
+    id: 'dracula',
+    name: 'Dracula',
+    available: true,
+    preview: makePreviewGradient(['#282a36', '#ff79c6']),
+    font: fonts.DraculaFonts,
   },
 ];

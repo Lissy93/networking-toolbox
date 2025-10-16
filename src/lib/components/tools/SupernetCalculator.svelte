@@ -531,14 +531,6 @@
 </ToolContentContainer>
 
 <style>
-  .supernet-calc-car .btn {
-    :global(.icon) {
-      width: 1.2rem;
-      height: 1.2rem;
-      vertical-align: middle;
-    }
-  }
-
   .examples-card {
     margin-bottom: var(--spacing-lg);
   }

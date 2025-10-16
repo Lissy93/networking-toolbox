@@ -507,6 +507,10 @@
 </div>
 
 <style lang="scss">
+  .card {
+    width: 100%;
+  }
+
   .domain-section,
   .sshfp-parameters-section,
   .input-data-section {
