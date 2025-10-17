@@ -15,7 +15,7 @@
 ### Deploying
 
 #### Option 1 - Docker
-Run `docker run -p 8080:80 lissy93/networking-toolbox`<br>
+Run `docker run -p 3000:80 lissy93/networking-toolbox`<br>
 Or, use our example [`docker-compose.yml`](https://github.com/Lissy93/networking-toolbox/blob/main/docker-compose.yml)
 
 #### Option 2 - Cloud
