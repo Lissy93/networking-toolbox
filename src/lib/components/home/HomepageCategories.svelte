@@ -37,13 +37,14 @@
       '/ip-address-convertor': 'hash',
       '/dns': 'server',
       '/diagnostics': 'activity',
+      '/dhcp': 'wifi',
       '/reference': 'book-open',
     };
     return iconMap[path] || 'folder';
   }
 
   // Define desired category order using paths (more maintainable than indexes)
-  const categoryOrder = ['/diagnostics', '/subnetting', '/dns', '/cidr', '/reference'];
+  const categoryOrder = ['/diagnostics', '/subnetting', '/dns', '/cidr', '/dhcp', '/reference'];
 
   // Memoized categories - computed once at module scope (static data)
   const categories: CategorySection[] = categoryOrder
@@ -457,6 +458,10 @@
 
   .category-diagnostics {
     grid-row: span 2;
+  }
+
+  .category-reference {
+    grid-column: 1 / -1;
   }
 
   // Full width sections
