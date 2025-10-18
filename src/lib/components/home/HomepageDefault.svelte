@@ -210,11 +210,8 @@
     justify-content: center;
     gap: var(--spacing-sm);
     margin-bottom: var(--spacing-lg);
-
-    @media (max-width: 640px) {
-      flex-direction: column;
-      align-items: stretch;
-      gap: var(--spacing-xs);
+    @media (max-width: 400px) {
+      display: none;
     }
   }
 

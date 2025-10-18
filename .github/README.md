@@ -15,7 +15,7 @@
 ### Deploying
 
 #### Option 1 - Docker
-Run `docker run -p 8080:80 lissy93/networking-toolbox`<br>
+Run `docker run -p 8080:3000 lissy93/networking-toolbox`<br>
 Or, use our example [`docker-compose.yml`](https://github.com/Lissy93/networking-toolbox/blob/main/docker-compose.yml)
 
 #### Option 2 - Cloud
@@ -43,7 +43,7 @@ And upload the contents of `./build` to any web server, CDN or static host.
 #### Option 6 - Source: Docker
 Follow the dev steps below.
 Then run `docker build -t networking-toolbox .` to build the image.<br>
-You can then start the container with `docker run -p 8080:80 networking-toolbox`.
+You can then start the container with `docker run -p 8080:3000 networking-toolbox`.
 
 #### Option 7 - Source: Other Platforms
 You can build the app from source for a variety of platforms. This is done via SvelteKit adapters.<br>
