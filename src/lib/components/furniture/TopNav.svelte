@@ -40,7 +40,7 @@
 
             secondaryDropdownPositions = {
               ...secondaryDropdownPositions,
-              [title]: spaceOnRight < 330 ? 'left' : 'right'
+              [title]: spaceOnRight < 330 ? 'left' : 'right',
             };
           });
         });
