@@ -370,11 +370,8 @@
     justify-content: center;
     gap: var(--spacing-sm);
     margin-bottom: var(--spacing-sm);
-
-    @media (max-width: 480px) {
-      flex-direction: column;
-      align-items: stretch;
-      gap: var(--spacing-xs);
+    @media (max-width: 400px) {
+      display: none;
     }
   }
 
