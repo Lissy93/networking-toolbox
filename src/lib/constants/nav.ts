@@ -862,6 +862,32 @@ export const SUB_NAV: Record<string, (NavItem | NavGroup)[]> = {
         'scopes',
       ],
     },
+    {
+      href: makePath('/dhcp/kea-isc-snippets'),
+      label: 'Kea/ISC Snippets Generator',
+      description:
+        'Generate complete subnet configurations for ISC dhcpd and Kea DHCP servers with pools, options, and reservations',
+      icon: 'code-file',
+      keywords: [
+        'dhcp',
+        'isc',
+        'kea',
+        'snippets',
+        'generator',
+        'subnet',
+        'configuration',
+        'dhcpd.conf',
+        'pools',
+        'options',
+        'reservations',
+        'static',
+        'lease',
+        'classes',
+        'json',
+        'dhcp4',
+        'dhcp6',
+      ],
+    },
   ],
   '/dns': [
     {

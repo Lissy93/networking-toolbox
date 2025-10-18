@@ -13,7 +13,7 @@
   <h3>Option #1 - Docker</h3>
   <p>With Docker installed, just run the following command:</p>
   <div class="code">
-    <code>docker run -p 8080:300080 lissy93/networking-toolbox</code>
+    <code>docker run -p 8080:3000 lissy93/networking-toolbox</code>
   </div>
   <p>
     You can also checkout our
