@@ -4,7 +4,7 @@ Hey! Thanks for wanting to contribute to Networking Toolbox 🎉
 
 ## Getting Started
 
-Checkout the [README](README.md) for setup instructions, it's all very standard (clone, cd, npm install, npm run dev).
+Checkout the [README](https://github.com/Lissy93/networking-toolbox?tab=readme-ov-file#developing) for setup instructions, it's all very standard (clone, cd, npm install, npm run dev).
 
 ## Code Style
 
