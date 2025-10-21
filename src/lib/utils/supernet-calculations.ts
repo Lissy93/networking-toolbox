@@ -152,7 +152,7 @@ function findSupernet(networks: NetworkInput[]): { network: string; cidr: number
 
   // Find the smallest CIDR that can contain all networks
   let supernetCidr = 32;
-  for (let cidr = 1; cidr <= 30; cidr++) {
+  for (let cidr = 30; cidr >= 1; cidr--) {
     const mask = 0xffffffff << (32 - cidr);
     const supernetStart = minAddress & (mask >>> 0);
     const supernetEnd = supernetStart + Math.pow(2, 32 - cidr) - 1;
