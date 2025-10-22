@@ -204,7 +204,7 @@ docker build -t networking-toolbox .
 docker run -p 3000:3000 networking-toolbox
 
 # Or with environment variables
-docker run -p 8080:8080 -e PORT=8080 networking-toolbox
+docker run -p 8080:3000 -e PORT=8080 networking-toolbox
 ```
 
 #### Docker Compose

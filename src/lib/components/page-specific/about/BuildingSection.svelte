@@ -41,7 +41,7 @@
     <li>
       <strong>Option #3 - Docker:</strong><br />
       Build the Docker image, with <code>docker build -t networking-toolbox .</code>
-      then run <code>docker run -p 8080:8080 networking-toolbox</code>
+      then run <code>docker run -p 8080:3000 networking-toolbox</code>
     </li>
   </ul> -->
 

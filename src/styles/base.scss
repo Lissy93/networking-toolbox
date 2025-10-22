@@ -184,6 +184,9 @@ pre {
   display: flex;
   align-items: center;
   justify-content: center;
+  .icon {
+    display: flex;
+  }
 }
 
 .logo-icon svg {

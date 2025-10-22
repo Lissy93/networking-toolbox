@@ -7,7 +7,8 @@ export const site = {
   longDescription:
     'Comprehensive IP address calculator with subnet calculations, CIDR conversion, IP format conversion, and network reference tools.',
   heroDescription: SITE_DESCRIPTION || 'Your companion for all-things networking',
-  keywords: 'IP calculator, subnet calculator, CIDR converter, network tools, IP tools, networking',
+  keywords:
+    'IP calculator, subnet calculator, CIDR converter, DHCP tools, network tools, DNS tools, networking utilities',
   url: 'https://networking-toolbox.as93.net',
   image: 'https://networkingtoolbox.net/banner.png',
   repo: 'https://github.com/lissy93/networking-toolbox',

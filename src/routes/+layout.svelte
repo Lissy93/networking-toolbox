@@ -11,7 +11,7 @@
   import '../styles/a11y.scss';
 
   import favicon from '$lib/assets/favicon.svg';
-  import { getPageDetails, getPageDetailsWithIcon } from '$lib/constants/nav';
+  import { getPageDetails, getPageDetailsWithIcon } from '$lib/utils/nav-helpers';
   import { generateFaviconDataUri } from '$lib/utils/favicon';
   import { site, author } from '$lib/constants/site';
   import { toolUsage } from '$lib/stores/toolUsage';

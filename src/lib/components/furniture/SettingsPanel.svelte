@@ -566,6 +566,10 @@
           grid-column: span 2;
         }
 
+        .theme-option {
+          flex-direction: column;
+        }
+
         @media (max-width: 768px) {
           &.theme-section,
           &.accessibility-section,
@@ -622,7 +626,7 @@
 
   .theme-option {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     gap: var(--spacing-xs);
     padding: var(--spacing-sm);

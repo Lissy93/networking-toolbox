@@ -84,7 +84,7 @@ jobs:
             **Docker:**
             ```bash
             docker pull lissy93/networking-toolbox:${{ steps.version.outputs.version }}
-            docker run -d -p 8080:80 lissy93/networking-toolbox:${{ steps.version.outputs.version }}
+            docker run -d -p 8080:3000 lissy93/networking-toolbox:${{ steps.version.outputs.version }}
             ```
 
             **From Source:**

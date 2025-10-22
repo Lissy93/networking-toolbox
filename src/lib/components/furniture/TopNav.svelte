@@ -1,31 +1,43 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import {
-    TOP_NAV,
-    SUB_NAV,
-    isActive,
-    type NavItem,
-    type NavGroup,
-    isGroupWithActiveItem,
-    isGroupWithActiveSubDropdown,
-  } from '$lib/constants/nav';
+  import { TOP_NAV, SUB_NAV, type NavItem, type NavGroup } from '$lib/constants/nav';
+  import { isActive, isGroupWithActiveItem, isGroupWithActiveSubDropdown } from '$lib/utils/nav-helpers';
   import Icon from '$lib/components/global/Icon.svelte';
   import { navbarDisplay } from '$lib/stores/navbarDisplay';
   import { bookmarks } from '$lib/stores/bookmarks';
   import { frequentlyUsedTools, toolUsage } from '$lib/stores/toolUsage';
   import { onMount } from 'svelte';
 
-  $: currentPath = $page.url?.pathname ?? '/';
+  const currentPath = $derived($page.url?.pathname ?? '/');
 
-  let activeDropdown: string | null = null;
-  let activeSubDropdown: string | null = null;
+  let activeDropdown = $state<string | null>(null);
+  let activeSubDropdown = $state<string | null>(null);
   let timeoutId: number | null = null;
   let subTimeoutId: number | null = null;
+  let secondaryDropdownPositions = $state<Record<string, 'left' | 'right'>>({});
 
   function showDropdown(href: string) {
     if (timeoutId) clearTimeout(timeoutId);
     timeoutId = window.setTimeout(() => {
       activeDropdown = href;
+
+      // Calculate secondary dropdown positions when primary opens
+      if (hasSubPages(href)) {
+        requestAnimationFrame(() => {
+          document.querySelectorAll('.nav-group.has-secondary').forEach((group) => {
+            const title = group.querySelector('.group-title-text')?.textContent?.trim();
+            if (!title) return;
+
+            const rect = group.getBoundingClientRect();
+            const spaceOnRight = window.innerWidth - rect.right - 20;
+
+            secondaryDropdownPositions = {
+              ...secondaryDropdownPositions,
+              [title]: spaceOnRight < 330 ? 'left' : 'right',
+            };
+          });
+        });
+      }
     }, 800);
   }
 
@@ -81,10 +93,10 @@
   }
 
   // Check if current mode has dropdowns (only default mode has dropdowns)
-  $: hasDropdowns = $navbarDisplay === 'default';
+  const hasDropdowns = $derived($navbarDisplay === 'default');
 
   // Reactive navigation items based on current display mode and store changes
-  $: navigationItems = (() => {
+  const navigationItems = $derived.by(() => {
     let items: NavItem[];
 
     switch ($navbarDisplay) {
@@ -121,7 +133,7 @@
         // Keep default navigation items in their original order
         return TOP_NAV.filter((item) => item.label);
     }
-  })();
+  });
 
   onMount(() => {
     navbarDisplay.init();
@@ -136,8 +148,8 @@
       class="nav-item"
       class:has-dropdown={hasSubPages(item.href)}
       role="presentation"
-      on:mouseenter={() => showDropdown(item.href)}
-      on:mouseleave={hideDropdown}
+      onmouseenter={() => showDropdown(item.href)}
+      onmouseleave={hideDropdown}
     >
       <a
         href={item.href}
@@ -167,8 +179,8 @@
           class="dropdown-container"
           role="menu"
           tabindex="-1"
-          on:mouseenter={keepDropdown}
-          on:mouseleave={hideDropdown}
+          onmouseenter={keepDropdown}
+          onmouseleave={hideDropdown}
         >
           <div class="primary-dropdown">
             <div class="primary-content">
@@ -197,13 +209,24 @@
                     class:has-secondary={subItem.items.length > 0}
                     role="menuitem"
                     tabindex="0"
-                    on:mouseenter={() => showSubDropdown(subItem.title)}
-                    on:mouseleave={hideSubDropdown}
+                    onmouseenter={() => showSubDropdown(subItem.title)}
+                    onmouseleave={hideSubDropdown}
                   >
                     <div class="group-title">
-                      {subItem.title}
-                      {#if subItem.items.length > 0}
-                        <svg class="secondary-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      {#if subItem.items.length > 0 && secondaryDropdownPositions[subItem.title] === 'left'}
+                        <svg class="secondary-icon left" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                          <path
+                            d="M7.5 3L4.5 6L7.5 9"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
+                        </svg>
+                      {/if}
+                      <span class="group-title-text">{subItem.title}</span>
+                      {#if subItem.items.length > 0 && secondaryDropdownPositions[subItem.title] !== 'left'}
+                        <svg class="secondary-icon right" width="12" height="12" viewBox="0 0 12 12" fill="none">
                           <path
                             d="M4.5 3L7.5 6L4.5 9"
                             stroke="currentColor"
@@ -225,10 +248,11 @@
             {#if 'title' in subItem && activeSubDropdown === subItem.title && subItem.items.length > 0}
               <div
                 class="secondary-dropdown"
+                class:align-left={secondaryDropdownPositions[subItem.title] === 'left'}
                 role="menu"
                 tabindex="-1"
-                on:mouseenter={keepSubDropdown}
-                on:mouseleave={hideSubDropdown}
+                onmouseenter={keepSubDropdown}
+                onmouseleave={hideSubDropdown}
               >
                 <div class="secondary-content">
                   {#each subItem.items.filter((i) => i.label) as groupItem (groupItem.href)}
@@ -498,17 +522,34 @@
     padding: 0.25rem 0.5rem 0.5rem;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: var(--spacing-xs);
+  }
+
+  .group-title-text {
+    flex: 1;
+    text-align: left;
   }
 
   .secondary-icon {
     transition: transform 0.2s ease;
     opacity: 0.7;
+    flex-shrink: 0;
+
+    &.left {
+      order: -1; // Place before the title
+    }
   }
 
   .has-secondary:hover .secondary-icon {
-    transform: translateX(0.125rem);
     opacity: 1;
+
+    &.right {
+      transform: translateX(0.125rem);
+    }
+
+    &.left {
+      transform: translateX(-0.125rem);
+    }
   }
 
   .secondary-dropdown {
@@ -530,16 +571,26 @@
     scrollbar-width: thin;
     scrollbar-color: color-mix(in srgb, var(--color-primary), transparent 10%) transparent;
 
-    // Smart positioning: try right first, auto-fallback to left
+    // Default: open to the right
     left: calc(100% + 0.5rem);
     transform-origin: left center;
 
-    // Auto-position to left when overflowing viewport
-    @media (max-width: 1200px) {
+    // When not enough space, open to the left
+    &.align-left {
       right: calc(100% + 0.5rem);
       left: auto;
       transform-origin: right center;
       animation: secondary-enter-left 0.15s ease-out;
+    }
+
+    // Auto-position to left when overflowing viewport (fallback for older behavior)
+    @media (max-width: 1200px) {
+      &:not(.align-left) {
+        right: calc(100% + 0.5rem);
+        left: auto;
+        transform-origin: right center;
+        animation: secondary-enter-left 0.15s ease-out;
+      }
     }
   }
 

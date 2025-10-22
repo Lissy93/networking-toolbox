@@ -1,15 +1,17 @@
 import { describe, it, expect } from 'vitest';
-import { 
-  TOP_NAV, 
-  SUB_NAV, 
-  ALL_PAGES, 
+import {
+  TOP_NAV,
+  SUB_NAV,
+  ALL_PAGES,
   footerLinks,
-  isActive,
-  findSectionKey,
-  getPageDetails,
   type NavItem,
   type NavGroup
 } from '../../../../src/lib/constants/nav';
+import {
+  isActive,
+  findSectionKey,
+  getPageDetails
+} from '../../../../src/lib/utils/nav-helpers';
 
 describe('nav.ts', () => {
   describe('navigation structure', () => {
@@ -168,7 +170,7 @@ describe('nav.ts', () => {
         expect(details?.title).toBe('IPv4 Subnet Calculator');
         expect(details?.description).toContain('Calculate subnet masks');
         expect(details?.keywords).toBeInstanceOf(Array);
-        expect(details?.keywords).toContain('subnet');
+        expect(details?.keywords).toContain('ipv4 subnet');
       });
 
       it('returns null for non-existent pages', () => {

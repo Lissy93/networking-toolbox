@@ -25,6 +25,7 @@ jobs:
     env:
       NODE_OPTIONS: "--max_old_space_size=8192"
       ENABLE_CODECOV: ${{ secrets.CODECOV_TOKEN != '' }}
+      ENABLE_CODACY: ${{ secrets.CODACY_TOKEN != '' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -83,6 +84,15 @@ jobs:
           flags: unittests
           name: networking-toolbox
           fail_ci_if_error: false
+        continue-on-error: true
+
+      - name: Upload coverage to Codacy
+        if: ${{ !cancelled() && env.ENABLE_CODACY == 'true' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || env.IS_PR == 'true') }}
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_TOKEN }}
+        run: |
+          # Fetch Codacy Coverage Reporter and upload lcov
+          curl -Ls https://coverage.codacy.com/get.sh | bash -s -- report -l javascript -r coverage/lcov.info
         continue-on-error: true
 
       - name: Upload coverage artifact
