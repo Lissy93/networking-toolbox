@@ -324,7 +324,7 @@ IPv4 addresses have 2^32 possible values. Our CIDR calculation tests verify oper
 
 Large test suites require careful memory management:
 
-- **Node memory limits** - Tests use `NODE_OPTIONS="--max_old_space_size=8192"`
+
 - **Browser cleanup** - E2e tests properly close browser contexts
 - **Test isolation** - Each test runs in a clean environment
 

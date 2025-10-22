@@ -1,14 +1,19 @@
 # API Documentation
 
-We also got us a REST API.
+We also got us a REST API!
 
 It does all the same network calculations and IP address operations as the frontend tools and uses the same logic, but just in a machine-readable way.
+
+You can get the OpenAPI spec from our [swagger.yml](https://github.com/Lissy93/networking-toolbox/blob/main/swagger.yaml), or view the [API Docs](https://networkingtoolbox.net/api-docs.html) on our public instance.
 
 ## Base URL
 
 ```
-https://networking-toolbox.as93.net
+https://networkingtoolbox.net
 ```
+
+> [!NOTE]
+> The base URL shown above is for the public instance. If you're self-hosting, replace this with your own deployment URL (e.g., `http://localhost:5173` for local development or your custom domain).
 
 The API follows standard HTTP conventions.
 And all endpoints accept JSON payloads and return JSON responses.
@@ -434,7 +439,7 @@ Calculate required reverse DNS zones for CIDR blocks.
 ### Calculate subnet for a /27 network
 
 ```bash
-curl -X POST https://networking-toolbox.as93.net/api/subnetting/ipv4-subnet-calculator \
+curl -X POST https://networkingtoolbox.net/api/subnetting/ipv4-subnet-calculator \
   -H "Content-Type: application/json" \
   -d '{"cidr": "10.0.0.0/27"}'
 ```
@@ -442,7 +447,7 @@ curl -X POST https://networking-toolbox.as93.net/api/subnetting/ipv4-subnet-calc
 ### Split a /22 into /24 subnets
 
 ```bash
-curl -X POST https://networking-toolbox.as93.net/api/cidr/split \
+curl -X POST https://networkingtoolbox.net/api/cidr/split \
   -H "Content-Type: application/json" \
   -d '{"cidr": "172.16.0.0/22", "targetPrefix": 24}'
 ```
@@ -450,7 +455,7 @@ curl -X POST https://networking-toolbox.as93.net/api/cidr/split \
 ### Generate PTR records for a subnet
 
 ```bash
-curl -X POST https://networking-toolbox.as93.net/api/dns/ptr-generator \
+curl -X POST https://networkingtoolbox.net/api/dns/ptr-generator \
   -H "Content-Type: application/json" \
   -d '{"cidr": "203.0.113.0/29", "template": "host-{index}.example.org"}'
 ```
@@ -465,12 +470,6 @@ The API returns appropriate HTTP status codes:
 - `500` - Internal server error
 
 Most validation errors return `200` with `success: false` in the response body rather than HTTP error codes. This design choice makes client integration simpler[^1].
-
-## Performance Notes
-
-- CIDR splitting operations with large ranges may take longer
-- IPv6 PTR generation is limited to /120-/128 prefixes
-- DNS reverse zone calculations are optimized for common subnet sizes
 
 ## OpenAPI Specification
 
