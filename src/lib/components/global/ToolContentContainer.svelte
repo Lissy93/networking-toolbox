@@ -82,7 +82,7 @@
   <header class="card-header">
     <div class="header-content">
       <div class="title-row">
-        <h2>{title}</h2>
+        <h1>{title}</h1>
         {#if currentTool}
           <button
             class="bookmark-btn"
@@ -139,9 +139,10 @@
     gap: var(--spacing-sm);
     position: relative;
 
-    h2 {
+    h1 {
       margin: 0;
       flex: 1;
+      font-size: var(--font-size-2xl);
     }
   }
 

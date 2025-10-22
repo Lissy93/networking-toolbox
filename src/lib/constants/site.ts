@@ -9,7 +9,7 @@ export const site = {
   heroDescription: SITE_DESCRIPTION || 'Your companion for all-things networking',
   keywords:
     'IP calculator, subnet calculator, CIDR converter, DHCP tools, network tools, DNS tools, networking utilities',
-  url: 'https://networking-toolbox.as93.net',
+  url: 'https://networkingtoolbox.net',
   image: 'https://networkingtoolbox.net/banner.png',
   repo: 'https://github.com/lissy93/networking-toolbox',
   mirror: 'https://codeberg.org/alicia/networking-toolbox',
