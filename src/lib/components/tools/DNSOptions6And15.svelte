@@ -12,6 +12,7 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables/useClipboard.svelte';
+  import { tooltip } from '$lib/actions/tooltip';
 
   const clipboard = useClipboard();
 
@@ -36,10 +37,43 @@
     { value: 'decode', label: 'Decode Options' },
   ];
 
+  const decodeExamples = [
+    {
+      label: 'Google DNS (Option 6)',
+      hexValue: '08080808 08080404',
+      description: '8.8.8.8, 8.8.4.4',
+      option: 'option6' as DecodeOption,
+    },
+    {
+      label: 'Cloudflare DNS (Option 6)',
+      hexValue: '01010101 01000001',
+      description: '1.1.1.1, 1.0.0.1',
+      option: 'option6' as DecodeOption,
+    },
+    {
+      label: 'example.com (Option 15)',
+      hexValue: '6578616d706c6503636f6d00',
+      description: 'example.com domain',
+      option: 'option15' as DecodeOption,
+    },
+    {
+      label: 'local.domain (Option 15)',
+      hexValue: '056c6f63616c06646f6d61696e00',
+      description: 'local.domain',
+      option: 'option15' as DecodeOption,
+    },
+  ];
+
   function loadExample(example: (typeof DNS_EXAMPLES)[0]) {
     activeTab = 'build';
     dnsServers = [...example.dnsServers];
     domainName = example.domainName;
+  }
+
+  function loadDecodeExample(example: (typeof decodeExamples)[0]) {
+    activeTab = 'decode';
+    decodeOption = example.option;
+    hexInput = example.hexValue;
   }
 
   function addDNSServer() {
@@ -123,14 +157,14 @@
   {navOptions}
   bind:selectedNav={activeTab}
 >
-  <ExamplesCard
-    examples={DNS_EXAMPLES}
-    onSelect={loadExample}
-    getLabel={(ex) => ex.label}
-    getDescription={(ex) => ex.description}
-  />
-
   {#if activeTab === 'build'}
+    <ExamplesCard
+      examples={DNS_EXAMPLES}
+      onSelect={loadExample}
+      getLabel={(ex) => ex.label}
+      getDescription={(ex) => ex.description}
+    />
+
     <div class="card input-card">
       <h3>DNS Configuration</h3>
 
@@ -187,10 +221,11 @@
                 <code class="code-value">{buildResult.option6.hexEncoded}</code>
                 <button
                   class="btn-copy"
-                  onclick={() => clipboard.copy(buildResult!.option6!.hexEncoded)}
+                  class:copied={clipboard.isCopied('option6-hex')}
+                  onclick={() => clipboard.copy(buildResult!.option6!.hexEncoded, 'option6-hex')}
                   aria-label="Copy hex"
                 >
-                  Copy
+                  {clipboard.isCopied('option6-hex') ? 'Copied' : 'Copy'}
                 </button>
               </div>
 
@@ -199,10 +234,11 @@
                 <code class="code-value">{buildResult.option6.wireFormat}</code>
                 <button
                   class="btn-copy"
-                  onclick={() => clipboard.copy(buildResult!.option6!.wireFormat)}
+                  class:copied={clipboard.isCopied('option6-wire')}
+                  onclick={() => clipboard.copy(buildResult!.option6!.wireFormat, 'option6-wire')}
                   aria-label="Copy wire format"
                 >
-                  Copy
+                  {clipboard.isCopied('option6-wire') ? 'Copied' : 'Copy'}
                 </button>
               </div>
 
@@ -228,10 +264,11 @@
                 <code class="code-value">{buildResult.option15.hexEncoded}</code>
                 <button
                   class="btn-copy"
-                  onclick={() => clipboard.copy(buildResult!.option15!.hexEncoded)}
+                  class:copied={clipboard.isCopied('option15-hex')}
+                  onclick={() => clipboard.copy(buildResult!.option15!.hexEncoded, 'option15-hex')}
                   aria-label="Copy hex"
                 >
-                  Copy
+                  {clipboard.isCopied('option15-hex') ? 'Copied' : 'Copy'}
                 </button>
               </div>
 
@@ -240,10 +277,11 @@
                 <code class="code-value">{buildResult.option15.wireFormat}</code>
                 <button
                   class="btn-copy"
-                  onclick={() => clipboard.copy(buildResult!.option15!.wireFormat)}
+                  class:copied={clipboard.isCopied('option15-wire')}
+                  onclick={() => clipboard.copy(buildResult!.option15!.wireFormat, 'option15-wire')}
                   aria-label="Copy wire format"
                 >
-                  Copy
+                  {clipboard.isCopied('option15-wire') ? 'Copied' : 'Copy'}
                 </button>
               </div>
 
@@ -258,44 +296,79 @@
         <div class="config-section">
           <h4>Configuration Examples</h4>
 
-          <div class="config-example">
-            <h5>ISC DHCPd</h5>
-            <pre><code>{buildResult.configExamples.iscDhcpd}</code></pre>
-            <button class="btn-copy" onclick={() => clipboard.copy(buildResult!.configExamples.iscDhcpd)}>
-              Copy
-            </button>
+          <div class="output-group">
+            <div class="output-header">
+              <h5>ISC DHCPd</h5>
+              <button
+                class="btn-copy"
+                class:copied={clipboard.isCopied('isc')}
+                onclick={() => clipboard.copy(buildResult!.configExamples.iscDhcpd, 'isc')}
+              >
+                {clipboard.isCopied('isc') ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+            <pre class="code-block"><code>{buildResult.configExamples.iscDhcpd}</code></pre>
           </div>
 
-          <div class="config-example">
-            <h5>Kea DHCPv4</h5>
-            <pre><code>{buildResult.configExamples.keaDhcp4}</code></pre>
-            <button class="btn-copy" onclick={() => clipboard.copy(buildResult!.configExamples.keaDhcp4)}>
-              Copy
-            </button>
+          <div class="output-group">
+            <div class="output-header">
+              <h5>Kea DHCPv4</h5>
+              <button
+                class="btn-copy"
+                class:copied={clipboard.isCopied('kea')}
+                onclick={() => clipboard.copy(buildResult!.configExamples.keaDhcp4, 'kea')}
+              >
+                {clipboard.isCopied('kea') ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+            <pre class="code-block"><code>{buildResult.configExamples.keaDhcp4}</code></pre>
           </div>
 
-          <div class="config-example">
-            <h5>dnsmasq</h5>
-            <pre><code>{buildResult.configExamples.dnsmasq}</code></pre>
-            <button class="btn-copy" onclick={() => clipboard.copy(buildResult!.configExamples.dnsmasq)}> Copy </button>
+          <div class="output-group">
+            <div class="output-header">
+              <h5>dnsmasq</h5>
+              <button
+                class="btn-copy"
+                class:copied={clipboard.isCopied('dnsmasq')}
+                onclick={() => clipboard.copy(buildResult!.configExamples.dnsmasq, 'dnsmasq')}
+              >
+                {clipboard.isCopied('dnsmasq') ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+            <pre class="code-block"><code>{buildResult.configExamples.dnsmasq}</code></pre>
           </div>
         </div>
       </div>
     {/if}
   {:else}
+    <ExamplesCard
+      examples={decodeExamples}
+      onSelect={loadDecodeExample}
+      getLabel={(ex) => ex.label}
+      getDescription={(ex) => ex.description}
+    />
+
     <div class="card input-card">
       <h3>Decode DNS Options</h3>
 
       <fieldset class="form-group">
         <legend>Option to Decode</legend>
         <div class="option-select">
-          <label class="radio-label">
+          <label
+            class="radio-label"
+            class:selected={decodeOption === 'option6'}
+            use:tooltip={{ text: 'Decode Option 6 to extract DNS server addresses from hex' }}
+          >
             <input type="radio" bind:group={decodeOption} value="option6" />
-            Option 6 - DNS Servers
+            <span class="radio-text">Option 6 - DNS Servers</span>
           </label>
-          <label class="radio-label">
+          <label
+            class="radio-label"
+            class:selected={decodeOption === 'option15'}
+            use:tooltip={{ text: 'Decode Option 15 to extract domain name from hex' }}
+          >
             <input type="radio" bind:group={decodeOption} value="option15" />
-            Option 15 - Domain Name
+            <span class="radio-text">Option 15 - Domain Name</span>
           </label>
         </div>
       </fieldset>
@@ -456,35 +529,56 @@
   }
 
   .option-select {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: var(--spacing-sm);
+
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+    }
   }
 
   .radio-label {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    padding: var(--spacing-sm);
-    background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-primary);
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s;
+    position: relative;
 
     &:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-secondary);
+    }
+
+    &.selected {
       background: var(--bg-secondary);
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary), transparent 90%);
     }
 
     input[type='radio'] {
-      cursor: pointer;
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    .radio-text {
+      font-weight: 500;
+      color: var(--text-primary);
     }
   }
 
   .btn {
     padding: var(--spacing-sm) var(--spacing-md);
     background: var(--color-primary);
-    color: var(--text-inverse);
+    color: var(--bg-primary);
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -503,6 +597,7 @@
 
     &.btn-danger {
       background: var(--color-error);
+      color: var(--bg-primary);
     }
 
     &.btn-sm {
@@ -537,8 +632,10 @@
   }
 
   .result-card {
+    background: var(--bg-tertiary);
+
     h3 {
-      color: var(--color-success);
+      color: var(--text-primary);
     }
   }
 
@@ -565,7 +662,7 @@
     gap: var(--spacing-sm);
     align-items: center;
     padding: var(--spacing-sm);
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border-radius: var(--radius-md);
 
     .label {
@@ -593,7 +690,7 @@
   .server-badge {
     padding: var(--spacing-xs) var(--spacing-sm);
     background: var(--color-primary);
-    color: var(--text-inverse);
+    color: var(--bg-primary);
     border-radius: var(--radius-sm);
     font-family: var(--font-mono);
     font-size: var(--font-size-sm);
@@ -605,38 +702,65 @@
     border-top: 1px solid var(--border-primary);
   }
 
-  .config-example {
-    position: relative;
+  .output-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
     margin-bottom: var(--spacing-md);
 
-    pre {
-      margin: 0;
-      padding: var(--spacing-md);
-      background: var(--bg-primary);
-      border: 1px solid var(--border-primary);
-      border-radius: var(--radius-md);
-      overflow-x: auto;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 
-      code {
-        font-family: var(--font-mono);
-        font-size: var(--font-size-sm);
-        color: var(--text-primary);
-      }
+  .output-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    h5 {
+      margin: 0;
+    }
+  }
+
+  .code-block {
+    margin: 0;
+    padding: var(--spacing-md);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    white-space: pre;
+    word-break: normal;
+
+    code {
+      font-family: var(--font-mono);
+      font-size: var(--font-size-sm);
+      color: var(--text-primary);
+      background: var(--bg-primary);
     }
   }
 
   .btn-copy {
     padding: var(--spacing-xs) var(--spacing-sm);
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-primary);
+    background: transparent;
+    border: 1px solid var(--border-secondary);
     border-radius: var(--radius-sm);
-    color: var(--text-primary);
+    color: var(--text-secondary);
     font-size: var(--font-size-sm);
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s;
 
     &:hover {
-      background: var(--bg-secondary);
+      background: var(--surface-hover);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    &.copied {
+      background: color-mix(in srgb, var(--color-success), transparent 90%);
+      border-color: var(--color-success);
+      color: var(--color-success);
     }
   }
 </style>

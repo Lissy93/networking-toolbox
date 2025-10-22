@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { SUB_NAV, findSectionKey, isActive } from '$lib/constants/nav';
+  import { SUB_NAV } from '$lib/constants/nav';
+  import { findSectionKey, isActive } from '$lib/utils/nav-helpers';
 
   $: currentPath = $page.url?.pathname ?? '/';
   $: sectionKey = findSectionKey(currentPath); // e.g. '/reference' or '/cidr'

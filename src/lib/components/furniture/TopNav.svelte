@@ -1,14 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import {
-    TOP_NAV,
-    SUB_NAV,
-    isActive,
-    type NavItem,
-    type NavGroup,
-    isGroupWithActiveItem,
-    isGroupWithActiveSubDropdown,
-  } from '$lib/constants/nav';
+  import { TOP_NAV, SUB_NAV, type NavItem, type NavGroup } from '$lib/constants/nav';
+  import { isActive, isGroupWithActiveItem, isGroupWithActiveSubDropdown } from '$lib/utils/nav-helpers';
   import Icon from '$lib/components/global/Icon.svelte';
   import { navbarDisplay } from '$lib/stores/navbarDisplay';
   import { bookmarks } from '$lib/stores/bookmarks';

@@ -198,14 +198,26 @@
         <div class="result-item">
           <span class="label">Full Hex:</span>
           <code class="code-value">{result.fullHex}</code>
-          <button class="btn-copy" onclick={() => clipboard.copy(result!.fullHex)} aria-label="Copy hex"> Copy </button>
+          <button
+            class="btn-copy"
+            class:copied={clipboard.isCopied('full-hex')}
+            onclick={() => clipboard.copy(result!.fullHex, 'full-hex')}
+            aria-label="Copy hex"
+          >
+            {clipboard.isCopied('full-hex') ? 'Copied' : 'Copy'}
+          </button>
         </div>
 
         <div class="result-item">
           <span class="label">Wire Format:</span>
           <code class="code-value">{result.fullWireFormat}</code>
-          <button class="btn-copy" onclick={() => clipboard.copy(result!.fullWireFormat)} aria-label="Copy wire format">
-            Copy
+          <button
+            class="btn-copy"
+            class:copied={clipboard.isCopied('full-wire')}
+            onclick={() => clipboard.copy(result!.fullWireFormat, 'full-wire')}
+            aria-label="Copy wire format"
+          >
+            {clipboard.isCopied('full-wire') ? 'Copied' : 'Copy'}
           </button>
         </div>
 
@@ -237,10 +249,11 @@
                 <code class="code-small">{prefix.wireFormat}</code>
                 <button
                   class="btn-copy btn-copy-sm"
-                  onclick={() => clipboard.copy(prefix.wireFormat.replace(/\s/g, ''))}
+                  class:copied={clipboard.isCopied(`prefix-wire-${i}`)}
+                  onclick={() => clipboard.copy(prefix.wireFormat.replace(/\s/g, ''), `prefix-wire-${i}`)}
                   aria-label="Copy prefix wire format"
                 >
-                  Copy
+                  {clipboard.isCopied(`prefix-wire-${i}`) ? 'Copied' : 'Copy'}
                 </button>
               </div>
             </div>
@@ -251,10 +264,18 @@
       <div class="config-section">
         <h4>Configuration Example</h4>
 
-        <div class="config-example">
-          <h5>Kea DHCPv6</h5>
-          <pre><code>{result.examples.keaDhcp6}</code></pre>
-          <button class="btn-copy" onclick={() => clipboard.copy(result!.examples.keaDhcp6!)}> Copy </button>
+        <div class="output-group">
+          <div class="output-header">
+            <h5>Kea DHCPv6</h5>
+            <button
+              class="btn-copy"
+              class:copied={clipboard.isCopied('kea-config')}
+              onclick={() => clipboard.copy(result!.examples.keaDhcp6!, 'kea-config')}
+            >
+              {clipboard.isCopied('kea-config') ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+          <pre class="code-block"><code>{result.examples.keaDhcp6}</code></pre>
         </div>
       </div>
     </div>
@@ -357,7 +378,7 @@
   .btn {
     padding: var(--spacing-sm) var(--spacing-md);
     background: var(--color-primary);
-    color: var(--text-inverse);
+    color: var(--bg-primary);
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -376,6 +397,7 @@
 
     &.btn-danger {
       background: var(--color-error);
+      color: var(--bg-primary);
     }
 
     &.btn-sm {
@@ -405,8 +427,10 @@
   }
 
   .result-card {
+    background: var(--bg-tertiary);
+
     h3 {
-      color: var(--color-success);
+      color: var(--text-primary);
     }
   }
 
@@ -421,7 +445,7 @@
     gap: var(--spacing-sm);
     align-items: center;
     padding: var(--spacing-sm);
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border-radius: var(--radius-md);
 
     .label {
@@ -446,7 +470,7 @@
   }
 
   .prefix-card {
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-primary);
     border-radius: var(--radius-md);
     padding: var(--spacing-md);
@@ -465,7 +489,7 @@
         min-width: 28px;
         height: 28px;
         background: var(--color-primary);
-        color: var(--text-inverse);
+        color: var(--bg-primary);
         border-radius: var(--radius-sm);
         font-weight: 600;
         font-size: var(--font-size-sm);
@@ -512,38 +536,65 @@
     border-top: 1px solid var(--border-primary);
   }
 
-  .config-example {
-    position: relative;
+  .output-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
     margin-bottom: var(--spacing-md);
 
-    pre {
-      margin: 0;
-      padding: var(--spacing-md);
-      background: var(--bg-primary);
-      border: 1px solid var(--border-primary);
-      border-radius: var(--radius-md);
-      overflow-x: auto;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 
-      code {
-        font-family: var(--font-mono);
-        font-size: var(--font-size-sm);
-        color: var(--text-primary);
-      }
+  .output-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    h5 {
+      margin: 0;
+    }
+  }
+
+  .code-block {
+    margin: 0;
+    padding: var(--spacing-md);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    white-space: pre;
+    word-break: normal;
+
+    code {
+      font-family: var(--font-mono);
+      font-size: var(--font-size-sm);
+      color: var(--text-primary);
+      background: var(--bg-primary);
     }
   }
 
   .btn-copy {
     padding: var(--spacing-xs) var(--spacing-sm);
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-primary);
+    background: transparent;
+    border: 1px solid var(--border-secondary);
     border-radius: var(--radius-sm);
-    color: var(--text-primary);
+    color: var(--text-secondary);
     font-size: var(--font-size-sm);
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s;
 
     &:hover {
-      background: var(--bg-secondary);
+      background: var(--surface-hover);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    &.copied {
+      background: color-mix(in srgb, var(--color-success), transparent 90%);
+      border-color: var(--color-success);
+      color: var(--color-success);
     }
 
     &.btn-copy-sm {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getPageDetails } from '$lib/constants/nav';
+  import { getPageDetails } from '$lib/utils/nav-helpers';
   import DNSTXTEscape from '$lib/components/tools/DNSTXTEscape.svelte';
   import '../../../../styles/pages.scss';
 

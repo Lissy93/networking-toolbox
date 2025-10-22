@@ -39,6 +39,13 @@
     description: `${preset.description} • ${preset.infinite ? 'Infinite' : formatTime(preset.seconds)}`,
   }));
 
+  const decodeExamples = [
+    { label: '1 Hour', hexValue: '00000e10', description: '3,600 seconds (0x00000e10)' },
+    { label: '24 Hours', hexValue: '00015180', description: '86,400 seconds (0x00015180)' },
+    { label: '7 Days', hexValue: '00093a80', description: '604,800 seconds (0x00093a80)' },
+    { label: 'Infinite', hexValue: 'ffffffff', description: 'Infinite lease (0xffffffff)' },
+  ];
+
   function loadPreset(preset: (typeof LEASE_TIME_PRESETS)[0]) {
     activeTab = 'build';
     if (preset.infinite) {
@@ -48,6 +55,11 @@
       infinite = false;
       leaseSeconds = preset.seconds;
     }
+  }
+
+  function loadDecodeExample(example: (typeof decodeExamples)[0]) {
+    activeTab = 'decode';
+    hexInput = example.hexValue;
   }
 
   // Build mode effect
@@ -105,9 +117,14 @@
   {navOptions}
   bind:selectedNav={activeTab}
 >
-  <ExamplesCard {examples} onSelect={loadPreset} getLabel={(ex) => ex.label} getDescription={(ex) => ex.description} />
-
   {#if activeTab === 'build'}
+    <ExamplesCard
+      {examples}
+      onSelect={loadPreset}
+      getLabel={(ex) => ex.label}
+      getDescription={(ex) => ex.description}
+    />
+
     <div class="card input-card">
       <h3>Lease Time Configuration</h3>
 
@@ -163,8 +180,13 @@
           <div class="result-item">
             <span class="label">Hex Encoded:</span>
             <code class="code-value">{buildResult.hexEncoded}</code>
-            <button class="btn-copy" onclick={() => clipboard.copy(buildResult!.hexEncoded)} aria-label="Copy hex">
-              Copy
+            <button
+              class="btn-copy"
+              class:copied={clipboard.isCopied('build-hex')}
+              onclick={() => clipboard.copy(buildResult!.hexEncoded, 'build-hex')}
+              aria-label="Copy hex"
+            >
+              {clipboard.isCopied('build-hex') ? 'Copied' : 'Copy'}
             </button>
           </div>
 
@@ -173,10 +195,11 @@
             <code class="code-value">{buildResult.wireFormat}</code>
             <button
               class="btn-copy"
-              onclick={() => clipboard.copy(buildResult!.wireFormat)}
+              class:copied={clipboard.isCopied('build-wire')}
+              onclick={() => clipboard.copy(buildResult!.wireFormat, 'build-wire')}
               aria-label="Copy wire format"
             >
-              Copy
+              {clipboard.isCopied('build-wire') ? 'Copied' : 'Copy'}
             </button>
           </div>
 
@@ -201,31 +224,58 @@
         <div class="config-section">
           <h4>Configuration Examples</h4>
 
-          <div class="config-example">
-            <h5>ISC DHCPd</h5>
-            <pre><code>{buildResult.configExamples.iscDhcpd}</code></pre>
-            <button class="btn-copy" onclick={() => clipboard.copy(buildResult!.configExamples.iscDhcpd)}>
-              Copy
-            </button>
+          <div class="output-group">
+            <div class="output-header">
+              <h5>ISC DHCPd</h5>
+              <button
+                class="btn-copy"
+                class:copied={clipboard.isCopied('build-isc')}
+                onclick={() => clipboard.copy(buildResult!.configExamples.iscDhcpd, 'build-isc')}
+              >
+                {clipboard.isCopied('build-isc') ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+            <pre class="code-block"><code>{buildResult.configExamples.iscDhcpd}</code></pre>
           </div>
 
-          <div class="config-example">
-            <h5>Kea DHCPv4</h5>
-            <pre><code>{buildResult.configExamples.keaDhcp4}</code></pre>
-            <button class="btn-copy" onclick={() => clipboard.copy(buildResult!.configExamples.keaDhcp4)}>
-              Copy
-            </button>
+          <div class="output-group">
+            <div class="output-header">
+              <h5>Kea DHCPv4</h5>
+              <button
+                class="btn-copy"
+                class:copied={clipboard.isCopied('build-kea')}
+                onclick={() => clipboard.copy(buildResult!.configExamples.keaDhcp4, 'build-kea')}
+              >
+                {clipboard.isCopied('build-kea') ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+            <pre class="code-block"><code>{buildResult.configExamples.keaDhcp4}</code></pre>
           </div>
 
-          <div class="config-example">
-            <h5>dnsmasq</h5>
-            <pre><code>{buildResult.configExamples.dnsmasq}</code></pre>
-            <button class="btn-copy" onclick={() => clipboard.copy(buildResult!.configExamples.dnsmasq)}> Copy </button>
+          <div class="output-group">
+            <div class="output-header">
+              <h5>dnsmasq</h5>
+              <button
+                class="btn-copy"
+                class:copied={clipboard.isCopied('build-dnsmasq')}
+                onclick={() => clipboard.copy(buildResult!.configExamples.dnsmasq, 'build-dnsmasq')}
+              >
+                {clipboard.isCopied('build-dnsmasq') ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+            <pre class="code-block"><code>{buildResult.configExamples.dnsmasq}</code></pre>
           </div>
         </div>
       </div>
     {/if}
   {:else}
+    <ExamplesCard
+      examples={decodeExamples}
+      onSelect={loadDecodeExample}
+      getLabel={(ex) => ex.label}
+      getDescription={(ex) => ex.description}
+    />
+
     <div class="card input-card">
       <h3>Decode Option 51</h3>
 
@@ -286,28 +336,46 @@
         <div class="config-section">
           <h4>Configuration Examples</h4>
 
-          <div class="config-example">
-            <h5>ISC DHCPd</h5>
-            <pre><code>{decodeResult.configExamples.iscDhcpd}</code></pre>
-            <button class="btn-copy" onclick={() => clipboard.copy(decodeResult!.configExamples.iscDhcpd)}>
-              Copy
-            </button>
+          <div class="output-group">
+            <div class="output-header">
+              <h5>ISC DHCPd</h5>
+              <button
+                class="btn-copy"
+                class:copied={clipboard.isCopied('decode-isc')}
+                onclick={() => clipboard.copy(decodeResult!.configExamples.iscDhcpd, 'decode-isc')}
+              >
+                {clipboard.isCopied('decode-isc') ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+            <pre class="code-block"><code>{decodeResult.configExamples.iscDhcpd}</code></pre>
           </div>
 
-          <div class="config-example">
-            <h5>Kea DHCPv4</h5>
-            <pre><code>{decodeResult.configExamples.keaDhcp4}</code></pre>
-            <button class="btn-copy" onclick={() => clipboard.copy(decodeResult!.configExamples.keaDhcp4)}>
-              Copy
-            </button>
+          <div class="output-group">
+            <div class="output-header">
+              <h5>Kea DHCPv4</h5>
+              <button
+                class="btn-copy"
+                class:copied={clipboard.isCopied('decode-kea')}
+                onclick={() => clipboard.copy(decodeResult!.configExamples.keaDhcp4, 'decode-kea')}
+              >
+                {clipboard.isCopied('decode-kea') ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+            <pre class="code-block"><code>{decodeResult.configExamples.keaDhcp4}</code></pre>
           </div>
 
-          <div class="config-example">
-            <h5>dnsmasq</h5>
-            <pre><code>{decodeResult.configExamples.dnsmasq}</code></pre>
-            <button class="btn-copy" onclick={() => clipboard.copy(decodeResult!.configExamples.dnsmasq)}>
-              Copy
-            </button>
+          <div class="output-group">
+            <div class="output-header">
+              <h5>dnsmasq</h5>
+              <button
+                class="btn-copy"
+                class:copied={clipboard.isCopied('decode-dnsmasq')}
+                onclick={() => clipboard.copy(decodeResult!.configExamples.dnsmasq, 'decode-dnsmasq')}
+              >
+                {clipboard.isCopied('decode-dnsmasq') ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+            <pre class="code-block"><code>{decodeResult.configExamples.dnsmasq}</code></pre>
           </div>
         </div>
       </div>
@@ -363,16 +431,15 @@
       font-size: var(--font-size-sm);
       color: var(--text-tertiary);
     }
-  }
-
-  .checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    cursor: pointer;
-
-    input[type='checkbox'] {
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
       cursor: pointer;
+
+      input[type='checkbox'] {
+        cursor: pointer;
+      }
     }
   }
 
@@ -459,8 +526,10 @@
   }
 
   .result-card {
+    background: var(--bg-tertiary);
+
     h3 {
-      color: var(--color-success);
+      color: var(--text-primary);
     }
   }
 
@@ -475,7 +544,7 @@
     gap: var(--spacing-sm);
     align-items: center;
     padding: var(--spacing-sm);
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border-radius: var(--radius-md);
 
     .label {
@@ -490,6 +559,7 @@
       font-family: var(--font-mono);
       color: var(--text-primary);
       word-break: break-all;
+      background: var(--bg-primary);
     }
 
     .value.highlight {
@@ -506,7 +576,7 @@
       .badge {
         padding: var(--spacing-xs) var(--spacing-md);
         background: var(--color-info);
-        color: var(--text-inverse);
+        color: var(--bg-primary);
         border-radius: var(--radius-sm);
         font-weight: 600;
       }
@@ -519,38 +589,65 @@
     border-top: 1px solid var(--border-primary);
   }
 
-  .config-example {
-    position: relative;
+  .output-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
     margin-bottom: var(--spacing-md);
 
-    pre {
-      margin: 0;
-      padding: var(--spacing-md);
-      background: var(--bg-primary);
-      border: 1px solid var(--border-primary);
-      border-radius: var(--radius-md);
-      overflow-x: auto;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 
-      code {
-        font-family: var(--font-mono);
-        font-size: var(--font-size-sm);
-        color: var(--text-primary);
-      }
+  .output-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    h5 {
+      margin: 0;
+    }
+  }
+
+  .code-block {
+    margin: 0;
+    padding: var(--spacing-md);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    white-space: pre;
+    word-break: normal;
+
+    code {
+      font-family: var(--font-mono);
+      font-size: var(--font-size-sm);
+      color: var(--text-primary);
+      background: var(--bg-primary);
     }
   }
 
   .btn-copy {
     padding: var(--spacing-xs) var(--spacing-sm);
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-primary);
+    background: transparent;
+    border: 1px solid var(--border-secondary);
     border-radius: var(--radius-sm);
-    color: var(--text-primary);
+    color: var(--text-secondary);
     font-size: var(--font-size-sm);
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s;
 
     &:hover {
-      background: var(--bg-secondary);
+      background: var(--surface-hover);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    &.copied {
+      background: color-mix(in srgb, var(--color-success), transparent 90%);
+      border-color: var(--color-success);
+      color: var(--color-success);
     }
   }
 </style>
