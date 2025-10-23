@@ -9,7 +9,7 @@
   import { ALL_PAGES, type NavItem } from '$lib/constants/nav';
 
   // Defensive helper to safely read values
-  const safely = <T>(fn: () => T, fallback: T): T => {
+  const safely = <T,>(fn: () => T, fallback: T): T => {
     try {
       return fn();
     } catch (err) {
@@ -19,7 +19,9 @@
   };
 
   let status = $derived(safely(() => $page.status ?? 500, 500));
-  let message = $derived(safely(() => $page.error?.message ?? 'An unexpected error occurred', 'An unexpected error occurred'));
+  let message = $derived(
+    safely(() => $page.error?.message ?? 'An unexpected error occurred', 'An unexpected error occurred'),
+  );
   let errorId = $derived(safely(() => ($page.error as any)?.errorId, undefined));
 
   let suggestions = $state<NavItem[]>([]);
@@ -29,7 +31,10 @@
     try {
       if (!path || path === '/') return [];
 
-      const query = path.toLowerCase().replace(/^\/|\/$/g, '').replace(/[_-]/g, ' ');
+      const query = path
+        .toLowerCase()
+        .replace(/^\/|\/$/g, '')
+        .replace(/[_-]/g, ' ');
       const tokens = query.split(/[/\s]+/).filter((t) => t.length > 1);
       if (tokens.length === 0) return [];
 
@@ -52,7 +57,10 @@
 
         // Acronym match
         if (tokens.length === 1) {
-          const acronym = label.split(/\s+/).map((w) => w[0]).join('');
+          const acronym = label
+            .split(/\s+/)
+            .map((w) => w[0])
+            .join('');
           if (acronym === tokens[0]) score += 200;
         }
 
@@ -186,7 +194,6 @@
           {/each}
         </div>
       </div>
-
     {:else}
       <div class="error-suggestions">
         <h3>What can you do?</h3>

@@ -9,6 +9,7 @@
   import { customCss } from '$lib/stores/customCss';
   import { siteCustomization } from '$lib/stores/siteCustomization';
   import { primaryColor } from '$lib/stores/primaryColor';
+  import { fontScale, fontScaleOptions, type FontScaleLevel } from '$lib/stores/fontScale';
   import { storage } from '$lib/utils/localStorage';
 
   interface Props {
@@ -30,6 +31,7 @@
   let currentNavbarDisplay = $state(navbarDisplay);
   let currentHomepageLayout = $state(homepageLayout);
   let currentCustomCss = $state(customCss);
+  let currentFontScale = $state(fontScale);
 
   // Form inputs
   let cssInput = $state('');
@@ -120,6 +122,8 @@
       navbarDisplay.setMode((e.currentTarget as HTMLSelectElement).value as NavbarDisplayMode),
     homepageChange: (e: Event) =>
       homepageLayout.setMode((e.currentTarget as HTMLSelectElement).value as HomepageLayoutMode),
+    fontScaleChange: (e: Event) =>
+      fontScale.setLevel(parseInt((e.currentTarget as HTMLInputElement).value, 10) as FontScaleLevel),
     linkClick: () => onClose?.(),
 
     applyCustomCss: () => {
@@ -271,6 +275,29 @@
       </button>
     {/if}
   </div>
+
+  {#if standalone}
+    <div class="settings-section font-size-section">
+      <h3>Font Scale</h3>
+      <div class="font-scale-slider">
+        <input
+          type="range"
+          min="0"
+          max="4"
+          step="1"
+          value={$currentFontScale}
+          oninput={handlers.fontScaleChange}
+          aria-label="Font scale"
+          class="slider"
+        />
+        <div class="slider-labels">
+          {#each fontScaleOptions as option (option.level)}
+            <span class="slider-label" class:active={$currentFontScale === option.level}>{option.label}</span>
+          {/each}
+        </div>
+      </div>
+    </div>
+  {/if}
 
   <!-- Language Selection -->
   <div class="settings-section language-section">
@@ -548,6 +575,9 @@
         margin: 0;
 
         &.theme-section {
+          grid-row: span 3;
+        }
+        &.language-section {
           grid-row: span 2;
         }
         &.accessibility-section {
@@ -639,19 +669,7 @@
     color: var(--text-secondary);
 
     &:hover:not(.disabled) {
-      background: var(--surface-hover);
       border-color: var(--border-secondary);
-    }
-
-    &.active {
-      background: color-mix(in srgb, var(--color-primary), transparent 90%);
-      border-color: var(--color-primary);
-      color: var(--text-primary);
-    }
-
-    &.disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
     }
   }
 
@@ -662,23 +680,104 @@
     border: 1px solid var(--border-secondary);
   }
 
+  .font-scale-slider {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+
+    .slider {
+      width: 100%;
+      height: 0.375rem;
+      background: linear-gradient(to right, var(--bg-tertiary) 0%, var(--border-primary) 50%, var(--bg-tertiary) 100%);
+      border-radius: var(--radius-sm);
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+      position: relative;
+
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 1.25rem;
+        height: 1.25rem;
+        background: var(--color-primary);
+        border: 2px solid var(--bg-secondary);
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all var(--transition-normal);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+        &:hover {
+          transform: scale(1.1);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      &::-moz-range-thumb {
+        width: 1.25rem;
+        height: 1.25rem;
+        background: var(--color-primary);
+        border: 2px solid var(--bg-secondary);
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all var(--transition-normal);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+        &:hover {
+          transform: scale(1.1);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      &:focus {
+        &::-webkit-slider-thumb {
+          outline: 2px solid var(--color-primary);
+          outline-offset: 2px;
+        }
+        &::-moz-range-thumb {
+          outline: 2px solid var(--color-primary);
+          outline-offset: 2px;
+        }
+      }
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--font-size-sm);
+      color: var(--text-tertiary);
+      margin-top: var(--spacing-xs);
+
+      .slider-label {
+        flex: 1;
+        text-align: center;
+        transition: all var(--transition-fast);
+        font-size: var(--font-size-xs);
+
+        &.active {
+          color: var(--color-primary);
+          font-weight: 500;
+        }
+
+        &:first-child {
+          text-align: left;
+        }
+        &:last-child {
+          text-align: right;
+        }
+      }
+    }
+  }
+
   .language-dropdown {
     gap: var(--spacing-xs);
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
   }
 
-  .language-option {
-    padding: var(--spacing-sm);
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-sm);
-    text-align: left;
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-
+  .language-option,
+  .theme-option {
     &:hover:not(.disabled) {
       background: var(--surface-hover);
       color: var(--text-primary);
@@ -694,6 +793,18 @@
       opacity: 0.6;
       cursor: not-allowed;
     }
+  }
+
+  .language-option {
+    padding: var(--spacing-sm);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-sm);
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
   }
 
   .navbar-select-wrapper {
@@ -857,11 +968,11 @@
     overflow: hidden;
   }
 
-  .show-more-btn {
+  .show-more-btn,
+  .custom-color-toggle {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    width: 100%;
     padding: var(--spacing-sm);
     background: transparent;
     border: 1px solid var(--border-primary);
@@ -870,14 +981,18 @@
     font-size: var(--font-size-xs);
     cursor: pointer;
     transition: all var(--transition-normal);
-    margin-top: var(--spacing-sm);
-    justify-content: center;
 
     &:hover {
       background: var(--surface-hover);
       color: var(--text-primary);
       border-color: var(--border-secondary);
     }
+  }
+
+  .show-more-btn {
+    width: 100%;
+    margin-top: var(--spacing-sm);
+    justify-content: center;
 
     &[aria-expanded='true'] {
       color: var(--color-primary);
@@ -1006,24 +1121,9 @@
 
     .custom-color-toggle {
       flex: 1;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      gap: var(--spacing-xs);
       padding: var(--spacing-sm) var(--spacing-md);
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-primary);
-      border-radius: var(--radius-sm);
-      color: var(--text-secondary);
       font-size: var(--font-size-sm);
-      cursor: pointer;
-      transition: all var(--transition-normal);
-
-      &:hover {
-        background: var(--surface-hover);
-        color: var(--text-primary);
-        border-color: var(--border-secondary);
-      }
     }
 
     .custom-color-inputs {

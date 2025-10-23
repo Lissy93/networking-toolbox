@@ -20,6 +20,7 @@
   import { customCss } from '$lib/stores/customCss';
   import { siteCustomization } from '$lib/stores/siteCustomization';
   import { primaryColor } from '$lib/stores/primaryColor';
+  import { fontScale } from '$lib/stores/fontScale';
   import { ALL_PAGES } from '$lib/constants/nav';
   import { initializeOfflineSupport } from '$lib/stores/offline';
   import { bookmarks } from '$lib/stores/bookmarks';
@@ -137,6 +138,7 @@
     customCss.init();
     siteCustomization.init();
     primaryColor.init();
+    fontScale.init();
     initializeOfflineSupport();
 
     // Add global keyboard shortcuts

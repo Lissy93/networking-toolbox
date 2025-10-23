@@ -66,4 +66,10 @@ export const DEFAULT_LANGUAGE = env.NTB_DEFAULT_LANGUAGE ?? 'en';
  */
 export const PRIMARY_COLOR = env.NTB_PRIMARY_COLOR ?? '';
 
+/**
+ * Default font scale level
+ * Options: 0 (Very Small), 1 (Small), 2 (Normal), 3 (Large), 4 (Very Large)
+ */
+export const DEFAULT_FONT_SCALE = parseInt(env.NTB_FONT_SCALE ?? '2', 10);
+
 export const SHOW_TIPS_ON_HOMEPAGE = !!env.NTB_SHOW_TIPS_ON_HOMEPAGE;
