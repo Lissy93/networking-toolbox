@@ -106,7 +106,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
+  margin: var(--spacing-lg) 0 var(--spacing-md) 0;
   svg {
     color: var(--color-primary);
   }

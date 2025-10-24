@@ -24,14 +24,15 @@
 <!-- Links #1: Live Demo, DockerHub, CodeBerg Mirror, Sponsor, More Apps -->
 <section class="contents">
   <div>
-    <h3>On this page</h3>
+    <h3>About</h3>
     <ul>
-      <li><a href="#api">API</a></li>
-      <li><a href="#self-hosting">Self-Hosting</a></li>
-      <li><a href="#building">Developing</a></li>
-      <li><a href="#author">Author</a></li>
-      <li><a href="#more-apps">Attributions</a></li>
-      <li><a href="#license">License</a></li>
+      <li><a href="/about/api">API</a></li>
+      <li><a href="/about/deploying">Self-Hosting</a></li>
+      <li><a href="/about/building">Developing</a></li>
+      <li><a href="/about/support">Get Support</a></li>
+      <li><a href="/about/attributions">Attributions</a></li>
+      <li><a href="/about/author">About Author</a></li>
+      <li><a href="/about/legal/license">License</a></li>
     </ul>
   </div>
   <div>

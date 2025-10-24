@@ -3,7 +3,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '$lib/config/customizable-settings'
 export const site = {
   name: SITE_TITLE || 'Networking Toolbox',
   title: SITE_TITLE || 'Networking Toolbox',
-  description: 'A free set of online tools to help with IP addressing and subnetting.',
+  description: SITE_DESCRIPTION || 'A free set of online tools to help with IP addressing and subnetting.',
   longDescription:
     'Comprehensive IP address calculator with subnet calculations, CIDR conversion, IP format conversion, and network reference tools.',
   heroDescription: SITE_DESCRIPTION || 'Your companion for all-things networking',

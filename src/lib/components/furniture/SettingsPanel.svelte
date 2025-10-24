@@ -11,6 +11,8 @@
   import { primaryColor } from '$lib/stores/primaryColor';
   import { fontScale, fontScaleOptions, type FontScaleLevel } from '$lib/stores/fontScale';
   import { storage } from '$lib/utils/localStorage';
+  import * as config from '$lib/config/customizable-settings';
+  import SegmentedControl from '$lib/components/global/SegmentedControl.svelte';
 
   interface Props {
     standalone?: boolean;
@@ -46,9 +48,12 @@
   let siteCustomizationErrors = $state<string[]>([]);
   let lastStoreValue = $state('');
   let lastColorStoreValue = $state('');
+  let envVarsCopied = $state(false);
+  let envFormat = $state<'env' | 'docker'>('env');
+  let showExportSettings = $state(false);
 
   // Constants
-  const PRIMARY_A11Y_OPTIONS = ['reduce-motion'];
+  const PRIMARY_A11Y_OPTIONS: string[] = [];
   const COLOR_PALETTE = [
     '#1a75ff',
     '#7711ff',
@@ -78,6 +83,9 @@
   const primaryOptions = $derived(
     $accessibilitySettings.options.filter((opt) => PRIMARY_A11Y_OPTIONS.includes(opt.id)),
   );
+  // const primaryOptions = $derived(
+  //   $accessibilitySettings.options.filter((opt) => PRIMARY_A11Y_OPTIONS.includes(opt.id)),
+  // );
   const additionalOptions = $derived(
     $accessibilitySettings.options.filter((opt) => !PRIMARY_A11Y_OPTIONS.includes(opt.id)),
   );
@@ -174,7 +182,44 @@
         window.location.reload();
       }
     },
+
+    copyEnvVars: async () => {
+      try {
+        await navigator.clipboard.writeText(envVarsString);
+        envVarsCopied = true;
+        setTimeout(() => (envVarsCopied = false), 2000);
+      } catch {
+        const textArea = document.createElement('textarea');
+        textArea.value = envVarsString;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        envVarsCopied = true;
+        setTimeout(() => (envVarsCopied = false), 2000);
+      }
+    },
   };
+
+  // Live-updating env vars string - reacts to store changes
+  const envVarsString = $derived.by(() => {
+    // Trigger reactivity on store changes
+    void $currentTheme;
+    void $currentFontScale;
+    void $currentHomepageLayout;
+    void $currentNavbarDisplay;
+    void $primaryColor;
+    void $siteCustomization;
+
+    const envVars = config.getUserSettingsList();
+
+    if (envFormat === 'docker') {
+      const filtered = envVars.filter(({ value }) => value !== '');
+      return 'environment:\n' + filtered.map(({ name, value }) => `  - ${name}=${value}`).join('\n');
+    }
+
+    return envVars.map(({ name, value }) => `${name}='${value}'`).join('\n');
+  });
 </script>
 
 {#snippet validationMessages(errors: string[], warnings: string[])}
@@ -515,6 +560,55 @@
     </div>
   {/if}
 
+  <!-- Docs for saving settings -->
+  {#if standalone}
+    <div class="settings-section saving-section">
+      <h3>Syncing Settings and Backup/Restore</h3>
+      <p class="line-1">
+        Your settings are saved in your browser's local storage, and so they will be retained even after you quit the
+        app.
+      </p>
+      <p>
+        Since we don't require login/signup to use the app, there is currently no way to automatically sync your
+        settings across devices. But if you're self-hosting Networking Toolbox, you can apply settings in your config,
+        by including the following environment variables. This way, you're settings will be applied to all users across
+        all devices.
+      </p>
+      <button
+        class="show-more-btn"
+        onclick={() => (showExportSettings = !showExportSettings)}
+        aria-expanded={showExportSettings}
+      >
+        <Icon name={showExportSettings ? 'chevron-up' : 'chevron-down'} size="sm" />
+        <span>Export Settings</span>
+      </button>
+      {#if showExportSettings}
+        <div class="env-vars-section" transition:slide={{ duration: 300 }}>
+          <div class="env-header">
+            <h4>Environment Variables</h4>
+            <SegmentedControl
+              options={[
+                { value: 'env', label: '.env' },
+                { value: 'docker', label: 'docker-compose' },
+              ]}
+              bind:value={envFormat}
+            />
+          </div>
+          <p class="section-description">
+            Current environment variable values. Copy and paste into your config file for self-hosted instances.
+          </p>
+
+          <pre class="env-block"><code>{envVarsString}</code></pre>
+
+          <button class="action-btn apply" onclick={handlers.copyEnvVars}>
+            <Icon name={envVarsCopied ? 'check' : 'copy'} size="sm" />
+            {envVarsCopied ? 'Copied!' : 'Copy to Clipboard'}
+          </button>
+        </div>
+      {/if}
+    </div>
+  {/if}
+
   <!-- Navigation Links (only in dropdown mode) -->
   {#if !standalone}
     <div class="settings-section settings-links">
@@ -595,6 +689,14 @@
         &.info-more-section {
           grid-column: span 2;
         }
+        &.saving-section {
+          grid-column: 1/-1;
+          .line-1 {
+            color: var(--text-tertiary);
+            font-size: var(--font-size-md);
+            font-style: italic;
+          }
+        }
 
         .theme-option {
           flex-direction: column;
@@ -609,6 +711,17 @@
           &.custom-css-section {
             grid-row: span 1;
             grid-column: span 1;
+          }
+        }
+        @media (max-width: 990px) {
+          &.site-branding-section {
+            grid-column: span 1;
+          }
+          &.delete-section {
+            grid-column: 1 / -1;
+          }
+          &.info-more-section {
+            grid-column: 1 / -1;
           }
         }
       }
@@ -990,8 +1103,8 @@
   }
 
   .show-more-btn {
-    width: 100%;
-    margin-top: var(--spacing-sm);
+    max-width: 16rem;
+    margin: var(--spacing-sm) auto;
     justify-content: center;
 
     &[aria-expanded='true'] {
@@ -1187,6 +1300,8 @@
       background: var(--color-primary);
       color: var(--bg-primary);
       border-color: var(--color-primary);
+      float: right;
+      width: fit-content !important;
 
       &:hover {
         background: color-mix(in srgb, var(--color-primary), black 10%);
@@ -1354,6 +1469,62 @@
       &:active {
         transform: translateY(0);
         box-shadow: none;
+      }
+    }
+  }
+
+  .saving-section {
+    .show-more-btn {
+      margin-top: var(--spacing-md);
+    }
+
+    .env-vars-section {
+      margin-top: var(--spacing-md);
+      padding-top: var(--spacing-md);
+      border-top: 1px solid var(--border-primary);
+
+      .env-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-sm);
+
+        h4 {
+          margin: 0;
+          font-size: var(--font-size-md);
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+      }
+
+      .section-description {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+        margin: 0 0 var(--spacing-md) 0;
+      }
+
+      .env-block {
+        width: 100%;
+        padding: var(--spacing-md);
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--spacing-md);
+        overflow-x: auto;
+
+        code {
+          font-family: 'Courier New', monospace;
+          font-size: var(--font-size-sm);
+          color: var(--text-primary);
+          line-height: 1.6;
+          white-space: pre;
+          padding: 0;
+        }
+      }
+
+      .action-btn {
+        width: 100%;
+        justify-content: center;
       }
     }
   }

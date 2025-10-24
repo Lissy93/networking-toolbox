@@ -102,3 +102,48 @@ export const BLOCK_PRIVATE_DNS_IPS = env.NTB_BLOCK_PRIVATE_DNS_IPS !== 'false'; 
 export const ALLOWED_DNS_SERVERS = env.NTB_ALLOWED_DNS_SERVERS
   ? env.NTB_ALLOWED_DNS_SERVERS.split(',').map((ip) => ip.trim())
   : DEFAULT_TRUSTED_DNS_SERVERS;
+
+/**
+ * Get user settings list with values prioritized as:
+ * 1. User-set value from localStorage
+ * 2. Environment variable value
+ * 3. Empty string
+ */
+export function getUserSettingsList(): Array<{ name: string; value: string }> {
+  if (!browser) return [];
+
+  const getLocalStorageValue = (key: string): string | null => {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  };
+
+  const getUserCustomValue = (key: keyof typeof userCustom): string => {
+    return userCustom?.[key] || '';
+  };
+
+  // Read actual user preferences from localStorage
+  const userTheme = getLocalStorageValue('theme');
+  const userFontScale = getLocalStorageValue('font-scale');
+  const userHomepageLayout = getLocalStorageValue('homepage-layout');
+  const userNavbarDisplay = getLocalStorageValue('navbar-display');
+  const userPrimaryColor = getLocalStorageValue('user-primary-color');
+
+  return [
+    { name: 'NTB_SITE_TITLE', value: getUserCustomValue('title') || env.NTB_SITE_TITLE || '' },
+    { name: 'NTB_SITE_DESCRIPTION', value: getUserCustomValue('description') || env.NTB_SITE_DESCRIPTION || '' },
+    { name: 'NTB_SITE_ICON', value: getUserCustomValue('iconUrl') || env.NTB_SITE_ICON || '' },
+    { name: 'NTB_HOMEPAGE_LAYOUT', value: userHomepageLayout || env.NTB_HOMEPAGE_LAYOUT || '' },
+    { name: 'NTB_NAVBAR_DISPLAY', value: userNavbarDisplay || env.NTB_NAVBAR_DISPLAY || '' },
+    { name: 'NTB_DEFAULT_THEME', value: userTheme || env.NTB_DEFAULT_THEME || '' },
+    { name: 'NTB_DEFAULT_LANGUAGE', value: env.NTB_DEFAULT_LANGUAGE || '' },
+    { name: 'NTB_PRIMARY_COLOR', value: userPrimaryColor || env.NTB_PRIMARY_COLOR || '' },
+    { name: 'NTB_FONT_SCALE', value: userFontScale || env.NTB_FONT_SCALE || '' },
+    { name: 'NTB_SHOW_TIPS_ON_HOMEPAGE', value: env.NTB_SHOW_TIPS_ON_HOMEPAGE || '' },
+    { name: 'NTB_ALLOW_CUSTOM_DNS', value: env.NTB_ALLOW_CUSTOM_DNS || '' },
+    { name: 'NTB_BLOCK_PRIVATE_DNS_IPS', value: env.NTB_BLOCK_PRIVATE_DNS_IPS || '' },
+    { name: 'NTB_ALLOWED_DNS_SERVERS', value: env.NTB_ALLOWED_DNS_SERVERS || '' },
+  ];
+}

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { site } from '$lib/constants/site';
-  import { SITE_ICON } from '$lib/config/customizable-settings';
+  import { SITE_ICON, SITE_DESCRIPTION } from '$lib/config/customizable-settings';
   import Icon from '$lib/components/global/Icon.svelte';
   import GlobalSearch from '$lib/components/global/GlobalSearch.svelte';
   import BurgerMenu from '$lib/components/furniture/BurgerMenu.svelte';
@@ -31,7 +31,7 @@
         </div>
         <div>
           <h1><a href="/">{site.title}</a></h1>
-          <p class="subtitle">The sysadmin's Swiss Army knife</p>
+          <p class="subtitle">{SITE_DESCRIPTION || "The sysadmin's Swiss Army knife"}</p>
         </div>
       </div>
 
