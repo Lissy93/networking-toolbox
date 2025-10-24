@@ -3,6 +3,12 @@ import { promises as dns } from 'node:dns';
 import type { RequestHandler } from './$types';
 import { errorManager } from '$lib/utils/error-manager';
 import { logger } from '$lib/utils/logger';
+import { validateDNSServer } from '$lib/utils/ip-security';
+import {
+  ALLOW_CUSTOM_DNS_SERVERS,
+  ALLOWED_DNS_SERVERS,
+  BLOCK_PRIVATE_DNS_IPS,
+} from '$lib/config/customizable-settings';
 
 type Action =
   | 'lookup'
@@ -69,6 +75,29 @@ const DNS_SERVERS = {
 
 function getDNSServerForResolver(resolver: string): string {
   return (DNS_SERVERS as Record<string, string>)[resolver] || DNS_SERVERS.cloudflare;
+}
+
+/**
+ * Validate a custom DNS server IP for security
+ * @throws Error if validation fails
+ */
+function validateCustomDNSServer(serverIP: string): void {
+  // If custom DNS servers are allowed without restriction, skip validation
+  if (ALLOW_CUSTOM_DNS_SERVERS && !BLOCK_PRIVATE_DNS_IPS) {
+    return;
+  }
+
+  // Validate the DNS server IP
+  const validation = validateDNSServer(serverIP, ALLOWED_DNS_SERVERS, BLOCK_PRIVATE_DNS_IPS);
+
+  if (!validation.valid) {
+    throw error(
+      403,
+      validation.error ||
+        'Custom DNS server not allowed. For security reasons, only trusted public DNS servers are permitted. ' +
+          'You can edit this with the ALLOW_CUSTOM_DNS_SERVERS and ALLOWED_DNS_SERVERS environmental variables.',
+    );
+  }
 }
 
 interface LookupReq extends BaseReq {
@@ -233,6 +262,8 @@ async function performNativeDNSLookup(
 
   try {
     if (customServer) {
+      // Validate custom DNS server for security (prevent SSRF attacks)
+      validateCustomDNSServer(customServer);
       dns.setServers([customServer]);
     }
 
@@ -363,6 +394,11 @@ async function performNativeDNSLookup(
     return result;
   } catch (err: unknown) {
     clearTimeout(timeoutId);
+
+    // If this is a SvelteKit HttpError (e.g., from validation), rethrow it without wrapping
+    if (err && typeof err === 'object' && 'status' in err) {
+      throw err;
+    }
 
     // Provide better error messages
     if ((err as Error).message === 'DNS timeout') {

@@ -13,6 +13,7 @@ import { browser } from '$app/environment';
 import type { HomepageLayoutMode } from '$lib/stores/homepageLayout';
 import type { NavbarDisplayMode } from '$lib/stores/navbarDisplay';
 import type { ThemeOption } from '$lib/stores/theme';
+import { DEFAULT_TRUSTED_DNS_SERVERS } from '$lib/utils/ip-security';
 
 // Get user customization from localStorage (browser only)
 function getUserCustomization() {
@@ -73,3 +74,31 @@ export const PRIMARY_COLOR = env.NTB_PRIMARY_COLOR ?? '';
 export const DEFAULT_FONT_SCALE = parseInt(env.NTB_FONT_SCALE ?? '2', 10);
 
 export const SHOW_TIPS_ON_HOMEPAGE = !!env.NTB_SHOW_TIPS_ON_HOMEPAGE;
+
+/**
+ * DNS Security Settings
+ * These settings protect against SSRF attacks by validating custom DNS server IPs
+ */
+
+/**
+ * Allow custom DNS servers
+ * When false, only servers from ALLOWED_DNS_SERVERS can be used
+ * Default: false (for security)
+ */
+export const ALLOW_CUSTOM_DNS_SERVERS = env.NTB_ALLOW_CUSTOM_DNS === 'true';
+
+/**
+ * Block private IP addresses for DNS servers
+ * When true, prevents using private/internal IPs as DNS resolvers
+ * Default: true (for security - prevents SSRF attacks)
+ */
+export const BLOCK_PRIVATE_DNS_IPS = env.NTB_BLOCK_PRIVATE_DNS_IPS !== 'false'; // Default true
+
+/**
+ * Allowed DNS servers (comma-separated list of IPs)
+ * When ALLOW_CUSTOM_DNS_SERVERS is false, only these IPs can be used
+ * Default: Comprehensive list of trusted public DNS providers
+ */
+export const ALLOWED_DNS_SERVERS = env.NTB_ALLOWED_DNS_SERVERS
+  ? env.NTB_ALLOWED_DNS_SERVERS.split(',').map((ip) => ip.trim())
+  : DEFAULT_TRUSTED_DNS_SERVERS;

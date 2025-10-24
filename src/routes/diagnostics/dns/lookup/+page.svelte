@@ -50,6 +50,8 @@
     { domain: 'google.com', type: 'MX', description: 'Mail server records' },
     { domain: 'cloudflare.com', type: 'AAAA', description: 'IPv6 addresses' },
     { domain: '_dmarc.github.com', type: 'TXT', description: 'DMARC policy record' },
+    { domain: 'microsoft.com', type: 'TXT', description: 'Multiple TXT records (SPF, verification)' },
+    { domain: 'netflix.com', type: 'NS', description: 'Name server records' },
   ];
 
   const examples = useExamples(examplesList);
@@ -82,37 +84,46 @@
       if (!response.ok) {
         const errorText = await response.text();
 
+        // Try to parse JSON response
+        let responseData = null;
         try {
-          const responseData = JSON.parse(errorText);
-
-          // Handle 404 as "no records found" (warning, not error)
-          if (response.status === 404 && responseData.noRecords) {
-            diagnosticState.setResults({
-              noRecords: true,
-              message: responseData.message,
-              name: responseData.name,
-              type: responseData.type,
-              resolver: useCustomResolver && customResolver ? customResolver.trim() : resolver,
-            });
-            return; // Don't throw error, just set results
-          }
-
-          // Handle other structured errors
-          if (responseData.error) {
-            throw new Error(responseData.error);
-          }
-
-          // Use API message if available
-          if (responseData.message) {
-            throw new Error(responseData.message);
-          }
+          responseData = JSON.parse(errorText);
         } catch {
-          // If not JSON, use status-based message
-          if (response.status === 400) {
-            throw new Error('Invalid request. Please check your input values.');
-          } else if (response.status === 500) {
-            throw new Error('DNS lookup service temporarily unavailable. Please try again.');
-          }
+          // JSON parsing failed, will use status-based fallback
+        }
+
+        // Handle 404 as "no records found" (warning, not error)
+        if (response.status === 404 && responseData?.noRecords) {
+          diagnosticState.setResults({
+            noRecords: true,
+            message: responseData.message,
+            name: responseData.name,
+            type: responseData.type,
+            resolver: useCustomResolver && customResolver ? customResolver.trim() : resolver,
+          });
+          return; // Don't throw error, just set results
+        }
+
+        // Helper to check if error message is helpful
+        const isUnhelpfulError = (msg: string) => {
+          return !msg || msg.includes('undefined') || msg === 'null' || msg.trim().length === 0;
+        };
+
+        // Use API error message if available and helpful
+        if (responseData?.error && !isUnhelpfulError(responseData.error)) {
+          throw new Error(responseData.error);
+        }
+
+        // Use API message if available and helpful
+        if (responseData?.message && !isUnhelpfulError(responseData.message)) {
+          throw new Error(responseData.message);
+        }
+
+        // Fallback to status-based messages
+        if (response.status === 400) {
+          throw new Error('Invalid request. Please check your input values.');
+        } else if (response.status === 500 || response.status === 403) {
+          throw new Error('DNS lookup service temporarily unavailable. Please try again.');
         }
 
         throw new Error(`Lookup failed (${response.status})`);
