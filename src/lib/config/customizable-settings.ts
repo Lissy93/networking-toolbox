@@ -76,6 +76,13 @@ export const DEFAULT_FONT_SCALE = parseInt(env.NTB_FONT_SCALE ?? '2', 10);
 export const SHOW_TIPS_ON_HOMEPAGE = !!env.NTB_SHOW_TIPS_ON_HOMEPAGE;
 
 /**
+ * Disable settings page and settings menu
+ * When true, hides the settings button and locks the settings page
+ * Default: false
+ */
+export const DISABLE_SETTINGS = env.NTB_DISABLE_SETTINGS === 'true';
+
+/**
  * DNS Security Settings
  * These settings protect against SSRF attacks by validating custom DNS server IPs
  */
@@ -142,6 +149,7 @@ export function getUserSettingsList(): Array<{ name: string; value: string }> {
     { name: 'NTB_PRIMARY_COLOR', value: userPrimaryColor || env.NTB_PRIMARY_COLOR || '' },
     { name: 'NTB_FONT_SCALE', value: userFontScale || env.NTB_FONT_SCALE || '' },
     { name: 'NTB_SHOW_TIPS_ON_HOMEPAGE', value: env.NTB_SHOW_TIPS_ON_HOMEPAGE || '' },
+    { name: 'NTB_DISABLE_SETTINGS', value: env.NTB_DISABLE_SETTINGS || '' },
     { name: 'NTB_ALLOW_CUSTOM_DNS', value: env.NTB_ALLOW_CUSTOM_DNS || '' },
     { name: 'NTB_BLOCK_PRIVATE_DNS_IPS', value: env.NTB_BLOCK_PRIVATE_DNS_IPS || '' },
     { name: 'NTB_ALLOWED_DNS_SERVERS', value: env.NTB_ALLOWED_DNS_SERVERS || '' },

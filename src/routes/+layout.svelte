@@ -402,6 +402,10 @@
 
   <!-- Plausible Analytics -->
   <script defer data-domain="networking-toolbox.as93.net" src="https://no-track.as93.net/js/script.js"></script>
+
+  <!-- Custom Styles for Self-Hosted Instances -->
+  <!-- This loads last to ensure custom styles can override defaults -->
+  <link rel="stylesheet" href="/custom-styles.css" />
 </svelte:head>
 
 <!-- Skip Links for Accessibility -->

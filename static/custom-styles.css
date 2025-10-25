@@ -1,0 +1,20 @@
+/**
+ * Custom Styles for Self-Hosted Instances
+ *
+ * This file can be used to apply custom CSS to your self-hosted Networking Toolbox.
+ *
+ * To use this file:
+ * 1. Add your custom CSS rules below
+ * 2. Mount this file as a volume in your Docker container
+ *
+ * Docker Compose example:
+ *   volumes:
+ *     - ./custom-styles.css:/app/static/custom-styles.css:ro
+ *
+ * Docker Run example:
+ *   docker run -v $(pwd)/custom-styles.css:/app/static/custom-styles.css:ro ...
+ *
+ * Your custom styles will automatically override the default styles.
+ */
+
+/* Add your custom CSS here */

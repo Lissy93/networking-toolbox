@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
   import { browser } from '$app/environment';
@@ -45,6 +46,11 @@
     isOpen = false;
   }
 
+  // Handle double-click to navigate to settings page
+  function handleDoubleClick() {
+    goto('/settings');
+  }
+
   onMount(() => {
     document.addEventListener('click', handleClickOutside);
     document.addEventListener('keydown', handleKeydown);
@@ -69,6 +75,7 @@
     bind:this={triggerRef}
     class="action-button settings-trigger"
     onclick={() => (isOpen = !isOpen)}
+    ondblclick={handleDoubleClick}
     aria-label="Open Settings"
     aria-expanded={isOpen}
     aria-haspopup="menu"

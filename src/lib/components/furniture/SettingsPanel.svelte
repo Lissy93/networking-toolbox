@@ -51,6 +51,7 @@
   let envVarsCopied = $state(false);
   let envFormat = $state<'env' | 'docker'>('env');
   let showExportSettings = $state(false);
+  let showExportStyles = $state(false);
 
   // Constants
   const PRIMARY_A11Y_OPTIONS: string[] = [];
@@ -606,6 +607,65 @@
           </button>
         </div>
       {/if}
+
+      <button
+        class="show-more-btn"
+        onclick={() => (showExportStyles = !showExportStyles)}
+        aria-expanded={showExportStyles}
+      >
+        <Icon name={showExportStyles ? 'chevron-up' : 'chevron-down'} size="sm" />
+        <span>Export Styles</span>
+      </button>
+      {#if showExportStyles}
+        <div class="env-vars-section" transition:slide={{ duration: 300 }}>
+          <div class="env-header">
+            <h4>Custom CSS</h4>
+          </div>
+          <p class="section-description">Apply your custom CSS to your self-hosted instance by mounting a CSS file.</p>
+
+          <div class="code-block-section">
+            <p class="code-label">1. Create a file named <code>custom-styles.css</code></p>
+
+            <p class="code-label">2. Paste the following content:</p>
+            <pre class="code-block"><code
+                >{$currentCustomCss ||
+                  '/* No custom CSS saved yet */\n/* Add your custom styles in the Custom CSS section above */'}</code
+              ></pre>
+
+            <p class="code-label">3. Mount the file to your Docker container:</p>
+
+            <div class="mount-options">
+              <p class="mount-option-label"><strong>Option A:</strong> Docker Compose</p>
+              <pre class="code-block"><code
+                  >services:
+  networking-toolbox:
+    volumes:
+      - ./custom-styles.css:/app/static/custom-styles.css:ro</code
+                ></pre>
+
+              <p class="mount-option-label"><strong>Option B:</strong> Docker Run</p>
+              <pre class="code-block"><code
+                  >docker run -v $(pwd)/custom-styles.css:/app/static/custom-styles.css:ro ...</code
+                ></pre>
+
+              <p class="mount-option-label"><strong>Option C:</strong> Edit file directly in container</p>
+              <pre class="code-block"><code
+                  >docker exec -it &lt;container-name&gt; sh -c 'cat &gt; /app/static/custom-styles.css &lt;&lt; "EOF"
+{$currentCustomCss || '/* Your custom CSS here */'}
+EOF'</code
+                ></pre>
+            </div>
+
+            <div class="info-message">
+              <Icon name="info" size="sm" />
+              <p>
+                <strong>Note:</strong> For Options A &amp; B, create the <code>custom-styles.css</code> file before starting
+                your container. Docker cannot mount individual files that don't exist yet.
+              </p>
+            </div>
+          </div>
+        </div>
+      {/if}
     </div>
   {/if}
 
@@ -1103,8 +1163,9 @@
   }
 
   .show-more-btn {
-    max-width: 16rem;
-    margin: var(--spacing-sm) auto;
+    margin-top: var(--spacing-md);
+    width: 12rem;
+    display: flex;
     justify-content: center;
 
     &[aria-expanded='true'] {
@@ -1525,6 +1586,108 @@
       .action-btn {
         width: 100%;
         justify-content: center;
+      }
+
+      .code-block-section {
+        margin-top: var(--spacing-md);
+
+        .code-label {
+          font-size: var(--font-size-sm);
+          font-weight: 500;
+          color: var(--text-primary);
+          margin: var(--spacing-md) 0 var(--spacing-xs) 0;
+
+          &:first-child {
+            margin-top: 0;
+          }
+
+          code {
+            background: var(--bg-tertiary);
+            padding: 0.125rem 0.375rem;
+            border-radius: var(--radius-xs);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+          }
+        }
+
+        .mount-options {
+          margin-top: var(--spacing-sm);
+          padding-left: var(--spacing-md);
+          border-left: 2px solid var(--border-primary);
+
+          .mount-option-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            margin: var(--spacing-md) 0 var(--spacing-xs) 0;
+
+            &:first-child {
+              margin-top: 0;
+            }
+
+            strong {
+              color: var(--text-primary);
+              font-weight: 600;
+            }
+          }
+        }
+
+        .code-block {
+          width: 100%;
+          padding: var(--spacing-md);
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-primary);
+          border-radius: var(--radius-sm);
+          margin-bottom: var(--spacing-sm);
+          overflow-x: auto;
+
+          code {
+            font-family: 'Courier New', monospace;
+            font-size: var(--font-size-sm);
+            color: var(--text-primary);
+            line-height: 1.6;
+            white-space: pre;
+            padding: 0;
+          }
+        }
+
+        .info-message {
+          display: flex;
+          gap: var(--spacing-sm);
+          padding: var(--spacing-md);
+          background: linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--color-info), transparent 90%),
+            color-mix(in srgb, var(--color-info), transparent 95%)
+          );
+          border: 1px solid color-mix(in srgb, var(--color-info), transparent 70%);
+          border-radius: var(--radius-sm);
+          margin-top: var(--spacing-md);
+
+          :global(svg) {
+            flex-shrink: 0;
+            color: var(--color-info);
+            margin-top: 0.125rem;
+          }
+
+          p {
+            margin: 0;
+            font-size: var(--font-size-sm);
+            color: var(--text-primary);
+            line-height: 1.5;
+
+            strong {
+              font-weight: 600;
+            }
+
+            code {
+              background: var(--bg-tertiary);
+              padding: 0.125rem 0.375rem;
+              border-radius: var(--radius-xs);
+              font-family: 'Courier New', monospace;
+              font-size: 0.9em;
+            }
+          }
+        }
       }
     }
   }
