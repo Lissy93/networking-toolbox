@@ -1163,10 +1163,10 @@ EOF'</code
   }
 
   .show-more-btn {
-    margin-top: var(--spacing-md);
-    width: 12rem;
+    min-width: 14rem;
     display: flex;
     justify-content: center;
+    margin: var(--spacing-md) auto 0 auto;
 
     &[aria-expanded='true'] {
       color: var(--color-primary);

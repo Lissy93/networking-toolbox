@@ -3,8 +3,9 @@
   import { goto } from '$app/navigation';
   import { browser } from '$app/environment';
   import Icon from './Icon.svelte';
-  import { ALL_PAGES } from '$lib/constants/nav';
+  import { ALL_PAGES, STANDALONE_PAGES } from '$lib/constants/nav';
   import type { NavItem } from '$lib/constants/nav';
+  import { site } from '$lib/constants/site';
   import { bookmarks } from '$lib/stores/bookmarks';
   import { frequentlyUsedTools, toolUsage } from '$lib/stores/toolUsage';
   import { tooltip } from '$lib/actions/tooltip';
@@ -15,6 +16,19 @@
   }
 
   let { embedded = false }: Props = $props();
+
+  // Site Links for quick access
+  const SITE_LINKS: NavItem[] = [
+    STANDALONE_PAGES.find((p) => p.href === '/settings') || {
+      href: '/settings',
+      label: 'Settings',
+      icon: 'settings2',
+    },
+    { href: '/about', label: 'About', icon: 'info' },
+    { href: '/sitemap', label: 'Sitemap', icon: 'map' },
+    { href: '/about/legal', label: 'Legal', icon: 'certificate' },
+    { href: site.repo, label: 'GitHub', icon: 'github' },
+  ];
 
   // Create reactive state using individual variables
   let isOpen = $state(false);
@@ -441,6 +455,30 @@
         </div>
       </div>
     {/if}
+
+    <div class="site-links-section">
+      <div class="site-links-header">
+        <Icon name="link" size="xs" />
+        <span>Site Links</span>
+      </div>
+      <div class="site-links-list">
+        {#each SITE_LINKS as link (link.href)}
+          <button
+            class="site-link-item"
+            onclick={() => {
+              goto(link.href);
+              if (!embedded) close();
+            }}
+            tabindex="0"
+          >
+            <div class="site-link-icon">
+              <Icon name={link.icon || 'link'} size="xs" />
+            </div>
+            <span class="site-link-label">{link.label}</span>
+          </button>
+        {/each}
+      </div>
+    </div>
   {/if}
 {/snippet}
 
@@ -762,9 +800,10 @@
     }
   }
 
-  // Shared styles for quick access sections (bookmarks & frequently used)
+  // Shared styles for quick access sections (bookmarks & frequently used & site links)
   .bookmarks-section,
-  .frequently-used-section {
+  .frequently-used-section,
+  .site-links-section {
     padding: var(--spacing-md) var(--spacing-lg);
     border-top: 1px solid var(--border-secondary);
 
@@ -774,7 +813,8 @@
   }
 
   .bookmarks-header,
-  .frequently-used-header {
+  .frequently-used-header,
+  .site-links-header {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
@@ -787,14 +827,16 @@
   }
 
   .bookmarks-list,
-  .frequently-used-list {
+  .frequently-used-list,
+  .site-links-list {
     display: flex;
     flex-wrap: wrap;
     gap: var(--spacing-xs);
   }
 
   .bookmark-item,
-  .frequently-used-item {
+  .frequently-used-item,
+  .site-link-item {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
@@ -821,7 +863,8 @@
   }
 
   .bookmark-icon,
-  .frequently-used-icon {
+  .frequently-used-icon,
+  .site-link-icon {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -835,7 +878,8 @@
   }
 
   .bookmark-label,
-  .frequently-used-label {
+  .frequently-used-label,
+  .site-link-label {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -849,6 +893,10 @@
 
   .frequently-used-header :global(svg) {
     color: var(--color-info);
+  }
+
+  .site-links-header :global(svg) {
+    color: var(--color-success);
   }
 
   .bookmark-item {
@@ -865,12 +913,23 @@
     }
   }
 
+  .site-link-item {
+    &:hover,
+    &:focus {
+      border-color: var(--color-success);
+    }
+  }
+
   .bookmark-icon {
     background: var(--color-primary);
   }
 
   .frequently-used-icon {
     background: var(--color-info);
+  }
+
+  .site-link-icon {
+    background: var(--color-success);
   }
 
   @keyframes fadeIn {
@@ -922,7 +981,8 @@
 
     .search-help,
     .bookmarks-section,
-    .frequently-used-section {
+    .frequently-used-section,
+    .site-links-section {
       background: var(--bg-secondary);
     }
   }
