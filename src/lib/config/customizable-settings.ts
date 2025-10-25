@@ -13,6 +13,7 @@ import { browser } from '$app/environment';
 import type { HomepageLayoutMode } from '$lib/stores/homepageLayout';
 import type { NavbarDisplayMode } from '$lib/stores/navbarDisplay';
 import type { ThemeOption } from '$lib/stores/theme';
+import { DEFAULT_TRUSTED_DNS_SERVERS } from '$lib/utils/ip-security';
 
 // Get user customization from localStorage (browser only)
 function getUserCustomization() {
@@ -66,4 +67,91 @@ export const DEFAULT_LANGUAGE = env.NTB_DEFAULT_LANGUAGE ?? 'en';
  */
 export const PRIMARY_COLOR = env.NTB_PRIMARY_COLOR ?? '';
 
+/**
+ * Default font scale level
+ * Options: 0 (Very Small), 1 (Small), 2 (Normal), 3 (Large), 4 (Very Large)
+ */
+export const DEFAULT_FONT_SCALE = parseInt(env.NTB_FONT_SCALE ?? '2', 10);
+
 export const SHOW_TIPS_ON_HOMEPAGE = !!env.NTB_SHOW_TIPS_ON_HOMEPAGE;
+
+/**
+ * Disable settings page and settings menu
+ * When true, hides the settings button and locks the settings page
+ * Default: false
+ */
+export const DISABLE_SETTINGS = env.NTB_DISABLE_SETTINGS === 'true';
+
+/**
+ * DNS Security Settings
+ * These settings protect against SSRF attacks by validating custom DNS server IPs
+ */
+
+/**
+ * Allow custom DNS servers
+ * When false, only servers from ALLOWED_DNS_SERVERS can be used
+ * Default: false (for security)
+ */
+export const ALLOW_CUSTOM_DNS_SERVERS = env.NTB_ALLOW_CUSTOM_DNS === 'true';
+
+/**
+ * Block private IP addresses for DNS servers
+ * When true, prevents using private/internal IPs as DNS resolvers
+ * Default: true (for security - prevents SSRF attacks)
+ */
+export const BLOCK_PRIVATE_DNS_IPS = env.NTB_BLOCK_PRIVATE_DNS_IPS !== 'false'; // Default true
+
+/**
+ * Allowed DNS servers (comma-separated list of IPs)
+ * When ALLOW_CUSTOM_DNS_SERVERS is false, only these IPs can be used
+ * Default: Comprehensive list of trusted public DNS providers
+ */
+export const ALLOWED_DNS_SERVERS = env.NTB_ALLOWED_DNS_SERVERS
+  ? env.NTB_ALLOWED_DNS_SERVERS.split(',').map((ip) => ip.trim())
+  : DEFAULT_TRUSTED_DNS_SERVERS;
+
+/**
+ * Get user settings list with values prioritized as:
+ * 1. User-set value from localStorage
+ * 2. Environment variable value
+ * 3. Empty string
+ */
+export function getUserSettingsList(): Array<{ name: string; value: string }> {
+  if (!browser) return [];
+
+  const getLocalStorageValue = (key: string): string | null => {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  };
+
+  const getUserCustomValue = (key: keyof typeof userCustom): string => {
+    return userCustom?.[key] || '';
+  };
+
+  // Read actual user preferences from localStorage
+  const userTheme = getLocalStorageValue('theme');
+  const userFontScale = getLocalStorageValue('font-scale');
+  const userHomepageLayout = getLocalStorageValue('homepage-layout');
+  const userNavbarDisplay = getLocalStorageValue('navbar-display');
+  const userPrimaryColor = getLocalStorageValue('user-primary-color');
+
+  return [
+    { name: 'NTB_SITE_TITLE', value: getUserCustomValue('title') || env.NTB_SITE_TITLE || '' },
+    { name: 'NTB_SITE_DESCRIPTION', value: getUserCustomValue('description') || env.NTB_SITE_DESCRIPTION || '' },
+    { name: 'NTB_SITE_ICON', value: getUserCustomValue('iconUrl') || env.NTB_SITE_ICON || '' },
+    { name: 'NTB_HOMEPAGE_LAYOUT', value: userHomepageLayout || env.NTB_HOMEPAGE_LAYOUT || '' },
+    { name: 'NTB_NAVBAR_DISPLAY', value: userNavbarDisplay || env.NTB_NAVBAR_DISPLAY || '' },
+    { name: 'NTB_DEFAULT_THEME', value: userTheme || env.NTB_DEFAULT_THEME || '' },
+    { name: 'NTB_DEFAULT_LANGUAGE', value: env.NTB_DEFAULT_LANGUAGE || '' },
+    { name: 'NTB_PRIMARY_COLOR', value: userPrimaryColor || env.NTB_PRIMARY_COLOR || '' },
+    { name: 'NTB_FONT_SCALE', value: userFontScale || env.NTB_FONT_SCALE || '' },
+    { name: 'NTB_SHOW_TIPS_ON_HOMEPAGE', value: env.NTB_SHOW_TIPS_ON_HOMEPAGE || '' },
+    { name: 'NTB_DISABLE_SETTINGS', value: env.NTB_DISABLE_SETTINGS || '' },
+    { name: 'NTB_ALLOW_CUSTOM_DNS', value: env.NTB_ALLOW_CUSTOM_DNS || '' },
+    { name: 'NTB_BLOCK_PRIVATE_DNS_IPS', value: env.NTB_BLOCK_PRIVATE_DNS_IPS || '' },
+    { name: 'NTB_ALLOWED_DNS_SERVERS', value: env.NTB_ALLOWED_DNS_SERVERS || '' },
+  ];
+}

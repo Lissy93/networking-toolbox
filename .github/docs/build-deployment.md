@@ -1,114 +1,45 @@
 # Build & Deployment Guide
 
-This guide covers building and deploying the networking toolbox across different platforms and environments. The app uses an intelligent adapter selection system to automatically configure builds for various deployment targets.
+This guide covers building and deploying the networking toolbox across different platforms and environments.
 
-## Build System Overview
+The app uses an intelligent adapter selection system to automatically configure and optimize the build for various platforms and deployment targets. This can be overridden, by setting the `DEPLOY_ENV` environmental variable to a specific target. Supported options are: `vercel`, `netlify`, `node`, `docker`, `static` or `auto` (default).
 
-The application uses SvelteKit with Vite for building and bundling. The build system automatically detects the deployment environment and selects the appropriate adapter.
+#### Option 1 - Docker
+Run `docker run -p 3000:3000 lissy93/networking-toolbox`<br>
+Or, use our example [`docker-compose.yml`](https://github.com/Lissy93/networking-toolbox/blob/main/docker-compose.yml)
 
-### Supported Deployment Targets
+#### Option 2 - Cloud
+Fork the repo, and import into Vercel, Netlify or any static hosting provider of your choice.
 
-| Platform | Adapter | Auto-Detection | Manual Override |
-|----------|---------|---------------|-----------------|
-| **Vercel** | `@sveltejs/adapter-vercel` | `VERCEL` env var | `DEPLOY_ENV=vercel` |
-| **Netlify** | `@sveltejs/adapter-netlify` | `NETLIFY` env var | `DEPLOY_ENV=netlify` |
-| **Node.js** | `@sveltejs/adapter-node` | `PORT` or `HOST` env vars | `DEPLOY_ENV=node` |
-| **Docker** | `@sveltejs/adapter-node` | Container detection | `DEPLOY_ENV=docker` |
-| **Static** | `@sveltejs/adapter-static` | CI with `BUILD_STATIC=true` | `DEPLOY_ENV=static` |
-| **Auto** | `@sveltejs/adapter-auto` | Fallback | `DEPLOY_ENV=auto` |
+#### Option 3 - Source: Node
+Follow the dev steps below.
+Then run `npm run build:node` to compile output.<br>
+You can then start the server with `node build`.
 
-## Build Commands
+#### Option 4 - GitHub Pages
+Fork the repo.<br>
+Head to the Actions tab, find the "Deploy to GitHub Pages" workflow, and trigger it.<br>
+Then go to Settings > Pages > Source and select the `gh-pages` branch.<br>
+Visit `https://<your-username>.github.io/networking-toolbox/` to see your deployed app.
 
-### Development
+#### Option 5 - Source: Static
+Follow the dev steps below.
+Then run `npm run build:static` to compile output.<br>
+And upload the contents of `./build` to any web server, CDN or static host.
 
-```bash
-# Start development server
-npm run dev
+#### Option 6 - Source: Docker
+Follow the dev steps below.
+Then run `docker build -t networking-toolbox .` to build the image.<br>
+You can then start the container with `docker run -p 3000:3000 networking-toolbox`.
 
-# Development with network access
-npm run dev -- --host
+#### Option 7 - Source: Other Platforms
+You can build the app from source for a variety of platforms. This is done via SvelteKit adapters.<br>
+First, follow the dev steps below.
+Then, simply set the `DEPLOY_ENV` environmental variable, to one of `vercel`, `node`, `docker`, `netlify`, `static` or just `auto`, and build the app<br>
+For example: `DEPLOY_ENV='node' npm run build`
 
-# Development on custom port
-npm run dev -- --port 3000
-```
 
-### Production Builds
-
-```bash
-# Standard build (auto-detects deployment target)
-npm run build
-
-# Specific deployment targets
-DEPLOY_ENV=node npm run build      # Node.js server
-DEPLOY_ENV=static npm run build    # Static site
-DEPLOY_ENV=vercel npm run build    # Vercel platform
-DEPLOY_ENV=netlify npm run build   # Netlify platform
-
-# Preview production build
-npm run preview
-```
-
-### Quality Checks
-
-```bash
-# Run all quality checks
-npm run check          # TypeScript & Svelte check
-npm run lint           # ESLint
-npm run format         # Prettier
-npm run test           # Unit tests
-npm run test:e2e       # End-to-end tests
-
-# Build verification
-npm run build-check    # Build without minification for debugging
-```
-
-## Configuration Files
-
-### SvelteKit Configuration
-
-The [`svelte.config.js`](https://github.com/Lissy93/networking-toolbox/blob/main/svelte.config.js) file handles intelligent adapter selection:
-
-```javascript
-function getAdapter() {
-  // Manual override via DEPLOY_ENV
-  const deployEnv = process.env.DEPLOY_ENV?.toLowerCase();
-  if (deployEnv) {
-    switch (deployEnv) {
-      case 'vercel': return adapterVercel();
-      case 'node': case 'docker': return adapterNode();
-      case 'netlify': return adapterNetlify();
-      case 'static': return adapterStatic({ fallback: '404.html' });
-      default: return adapterAuto();
-    }
-  }
-
-  // Auto-detection logic
-  const isVercel = !!(process.env.VERCEL || process.env.VERCEL_ENV);
-  const isNetlify = !!(process.env.NETLIFY || process.env.NETLIFY_SITE_ID);
-  // ... additional detection logic
-
-  return adapterAuto(); // Fallback
-}
-```
-
-### Base Path Support
-
-The app supports deployment on subpaths:
-
-```javascript
-// svelte.config.js
-kit: {
-  paths: {
-    base: process.env.BASE_URL || process.env.BASE_PATH || '',
-  }
-}
-```
-
-Deploy on subpath using:
-
-```bash
-BASE_PATH=/networking-tools npm run build
-```
+---
 
 ### Environment Variables
 
@@ -119,6 +50,7 @@ BASE_PATH=/networking-tools npm run build
 | `NODE_ENV` | Environment mode | `development`, `production` |
 | `PORT` | Server port (Node.js) | `3000`, `8080` |
 | `HOST` | Server host (Node.js) | `0.0.0.0`, `localhost` |
+| `NTB_[...]` | App-specific configs | See [App Customization](https://github.com/Lissy93/networking-toolbox/edit/main/.github/docs/app-customization.md) docs |
 
 ## Deployment Guides
 
@@ -158,95 +90,9 @@ Build settings for Netlify:
 - **Publish directory**: `build`
 - **Functions directory**: `netlify/functions` (auto-generated)
 
-### Node.js Server Deployment
 
-Build for Node.js server deployment:
 
-```bash
-# Build with Node adapter
-DEPLOY_ENV=node npm run build
-
-# Start production server
-node build
-
-# Or with environment variables
-PORT=3000 HOST=0.0.0.0 node build
-```
-
-The Node adapter creates:
-- **`build/index.js`** - Server entry point
-- **`build/handler.js`** - Request handler
-- **Static assets** in build directory
-
-### Docker Deployment
-
-The [`Dockerfile`](https://github.com/Lissy93/networking-toolbox/blob/main/Dockerfile) uses a multi-stage build for optimized containers:
-
-```dockerfile
-# Multi-stage build process
-FROM node:22-alpine AS deps
-# Install production dependencies
-
-FROM node:22-alpine AS builder
-# Build application
-
-FROM node:22-alpine AS runner
-# Runtime container with minimal footprint
-```
-
-#### Docker Build & Run
-
-```bash
-# Build image
-docker build -t networking-toolbox .
-
-# Run container
-docker run -p 3000:3000 networking-toolbox
-
-# Or with environment variables
-docker run -p 8080:3000 -e PORT=8080 networking-toolbox
-```
-
-#### Docker Compose
-
-```yaml
-# docker-compose.yml
-version: '3.8'
-services:
-  app:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-```
-
-### Static Site Deployment
-
-Generate a static site for hosting on CDNs:
-
-```bash
-# Build static site
-DEPLOY_ENV=static npm run build
-
-# Output goes to 'build' directory
-# Deploy build/ to any static host
-```
-
-Static deployment options:
-- **GitHub Pages** - Commit build directory to gh-pages branch
-- **CloudFlare Pages** - Connect repository for auto-deployment
-- **AWS S3** - Upload build directory to S3 bucket
-- **CDN** - Serve build directory from any CDN
-
-### Self-Hosting
+### Self-Hosting Options
 
 For self-hosting on your own infrastructure:
 
@@ -308,14 +154,14 @@ The build process includes several optimizations:
 ```bash
 # Production build with optimizations
 npm run build
-
-# Generated optimizations include:
-# - Code splitting by route
-# - Asset minification and compression
-# - Tree shaking of unused code
-# - CSS purging and optimization
-# - Image optimization
 ```
+
+Generated optimizations include:
+- Code splitting by route
+- Asset minification and compression
+- Tree shaking of unused code
+- CSS purging and optimization
+- Image optimization
 
 ### Bundle Analysis
 
@@ -335,29 +181,14 @@ npx vite-bundle-analyzer build
 ### Service Worker
 
 The app includes a service worker for offline functionality:
-
-```typescript
-// Service worker automatically:
-// - Caches static assets
-// - Implements offline-first strategy
-// - Updates cache on new deployments
-// - Provides offline page fallbacks
-```
+- Caches static assets
+- Implements offline-first strategy
+- Updates cache on new deployments
+- Provides offline page fallbacks
 
 ## Health Checks
 
 The application includes health check endpoints:
-
-### Basic Health Check
-
-```typescript
-// src/routes/health/+server.ts
-export async function GET() {
-  return new Response('OK', { status: 200 });
-}
-```
-
-### Detailed Health Check
 
 ```bash
 # Check application health
@@ -430,42 +261,6 @@ NODE_ENV=production node --inspect build
 docker stats <container-id>
 ```
 
-## CI/CD Integration
-
-### GitHub Actions
-
-```yaml
-# .github/workflows/deploy.yml
-name: Deploy
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - run: npm ci
-      - run: npm run build
-      - run: npm test
-
-      # Deploy to your preferred platform
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.ORG_ID }}
-          vercel-project-id: ${{ secrets.PROJECT_ID }}
-```
-
-The build system handles over 100 tool pages efficiently through code splitting and intelligent caching strategies. Each tool is built as a separate chunk, allowing for optimal loading performance.
-
 ## Security Considerations
 
 ### Production Hardening
@@ -484,9 +279,5 @@ VERCEL_TOKEN=<token>
 NETLIFY_AUTH_TOKEN=<token>
 DATABASE_URL=<connection-string>
 
-# Use environment-specific .env files
-# .env.production (never commit)
-# .env.local (gitignored)
+# Use environment-specific .env files, and never commit to git
 ```
-
-This comprehensive build system ensures the networking toolbox can be deployed reliably across any platform while maintaining optimal performance and security.

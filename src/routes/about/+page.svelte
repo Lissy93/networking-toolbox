@@ -12,15 +12,6 @@
   import LicenseSection from '$lib/components/page-specific/about/LicenseSection.svelte';
 </script>
 
-<svelte:head>
-  <title>About | Networking Toolbox</title>
-  <meta name="description" content={site.description} />
-  <meta name="keywords" content={site.keywords} />
-  <meta property="og:title" content={site.title} />
-  <meta property="og:description" content={site.description} />
-  <meta property="og:url" content="{site.url}/about" />
-</svelte:head>
-
 <!-- Section 0: Hero -->
 <div class="hero">
   <h2>About {site.title}</h2>
@@ -33,14 +24,15 @@
 <!-- Links #1: Live Demo, DockerHub, CodeBerg Mirror, Sponsor, More Apps -->
 <section class="contents">
   <div>
-    <h3>On this page</h3>
+    <h3>About</h3>
     <ul>
-      <li><a href="#api">API</a></li>
-      <li><a href="#self-hosting">Self-Hosting</a></li>
-      <li><a href="#building">Developing</a></li>
-      <li><a href="#author">Author</a></li>
-      <li><a href="#more-apps">Attributions</a></li>
-      <li><a href="#license">License</a></li>
+      <li><a href="/about/api">API</a></li>
+      <li><a href="/about/deploying">Self-Hosting</a></li>
+      <li><a href="/about/building">Developing</a></li>
+      <li><a href="/about/support">Get Support</a></li>
+      <li><a href="/about/attributions">Attributions</a></li>
+      <li><a href="/about/author">About Author</a></li>
+      <li><a href="/about/legal/license">License</a></li>
     </ul>
   </div>
   <div>

@@ -6,22 +6,84 @@
   import { site } from '$lib/constants/site';
   import Icon from '$lib/components/global/Icon.svelte';
   import { errorManager } from '$lib/utils/error-manager';
+  import { ALL_PAGES, type NavItem } from '$lib/constants/nav';
 
-  // Defensive: Wrap everything in try-catch to prevent error page from crashing
-  let status = 500;
-  let message = 'An unexpected error occurred';
-  let errorId: string | undefined;
-
-  $: {
+  // Defensive helper to safely read values
+  const safely = <T,>(fn: () => T, fallback: T): T => {
     try {
-      status = $page.status ?? 500;
-      message = $page.error?.message ?? 'An unexpected error occurred';
-      errorId = ($page.error as any)?.errorId;
+      return fn();
     } catch (err) {
-      // Failsafe: if even reading page store fails, use defaults
-      console.error('Error in error page:', err);
+      console.error('Error page read failed:', err);
+      return fallback;
+    }
+  };
+
+  let status = $derived(safely(() => $page.status ?? 500, 500));
+  let message = $derived(
+    safely(() => $page.error?.message ?? 'An unexpected error occurred', 'An unexpected error occurred'),
+  );
+  let errorId = $derived(safely(() => ($page.error as any)?.errorId, undefined));
+
+  let suggestions = $state<NavItem[]>([]);
+
+  // Find smart suggestions based on the 404 URL (defensive - never crash)
+  function findSuggestions(path: string): NavItem[] {
+    try {
+      if (!path || path === '/') return [];
+
+      const query = path
+        .toLowerCase()
+        .replace(/^\/|\/$/g, '')
+        .replace(/[_-]/g, ' ');
+      const tokens = query.split(/[/\s]+/).filter((t) => t.length > 1);
+      if (tokens.length === 0) return [];
+
+      return ALL_PAGES.map((p) => {
+        let score = 0;
+        const label = p.label.toLowerCase();
+        const hrefLower = p.href.toLowerCase();
+        const searchText = `${label} ${p.description || ''} ${p.keywords?.join(' ') || ''} ${p.href}`.toLowerCase();
+
+        // Direct path match
+        if (hrefLower === path.toLowerCase()) score += 1000;
+        else if (hrefLower.includes(query.replace(/\s/g, '-'))) score += 500;
+
+        // Token matching
+        tokens.forEach((token) => {
+          if (label.includes(token)) score += 100;
+          if (searchText.includes(token)) score += 50;
+          if (p.keywords?.some((k) => k.toLowerCase().includes(token))) score += 75;
+        });
+
+        // Acronym match
+        if (tokens.length === 1) {
+          const acronym = label
+            .split(/\s+/)
+            .map((w) => w[0])
+            .join('');
+          if (acronym === tokens[0]) score += 200;
+        }
+
+        return { ...p, score };
+      })
+        .filter((p) => p.score > 40)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 6);
+    } catch (err) {
+      console.error('Failed to generate suggestions:', err);
+      return [];
     }
   }
+
+  $effect(() => {
+    try {
+      if (status === 404) {
+        suggestions = findSuggestions($page.url?.pathname ?? '');
+      }
+    } catch {
+      suggestions = [];
+    }
+  });
 
   const errorTypes = {
     404: {
@@ -48,25 +110,22 @@
     },
   };
 
-  $: errorInfo = errorTypes[status as keyof typeof errorTypes] || errorTypes.default;
+  let errorInfo = $derived(errorTypes[status as keyof typeof errorTypes] || errorTypes.default);
 
-  function goHome() {
+  const goHome = () => {
     try {
       goto('/');
     } catch {
-      // Failsafe: if navigation fails, try direct navigation
       window.location.href = '/';
     }
-  }
-
-  function refresh() {
+  };
+  const refresh = () => {
     try {
       location.reload();
-    } catch (err) {
-      // Failsafe
-      console.error('Refresh failed:', err);
+    } catch {
+      /* Silently fail */
     }
-  }
+  };
 
   // Report error to error manager on mount (client-side only)
   onMount(() => {
@@ -116,20 +175,42 @@
       {/if}
     </div>
 
-    <div class="error-suggestions">
-      <h3>What can you do?</h3>
-      <ul>
-        {#each errorInfo.suggestions as suggestion, index (index)}
-          <li>{suggestion}</li>
-        {/each}
-      </ul>
-    </div>
+    {#if suggestions.length > 0 && status === 404}
+      <div class="suggested-tools">
+        <h3>Did you mean?</h3>
+        <div class="tools-grid">
+          {#each suggestions as tool (tool.href)}
+            <a href={tool.href} class="tool-card">
+              {#if tool.icon}
+                <Icon name={tool.icon} size="md" />
+              {/if}
+              <div class="tool-info">
+                <h4>{tool.label}</h4>
+                {#if tool.description}
+                  <p>{tool.description}</p>
+                {/if}
+              </div>
+            </a>
+          {/each}
+        </div>
+      </div>
+    {:else}
+      <div class="error-suggestions">
+        <h3>What can you do?</h3>
+        <ul>
+          {#each errorInfo.suggestions as suggestion, index (index)}
+            <li>{suggestion}</li>
+          {/each}
+        </ul>
+      </div>
+    {/if}
+
     <div class="error-actions">
-      <button class="btn btn-primary" on:click={goHome}>
+      <button class="btn btn-primary" onclick={goHome}>
         <Icon name="arrow-left" size="sm" />
         Go Home
       </button>
-      <button class="btn btn-secondary" on:click={refresh}>
+      <button class="btn btn-secondary" onclick={refresh}>
         <Icon name="rotate" size="sm" />
         Refresh
       </button>
@@ -248,6 +329,58 @@
           color: var(--color-primary);
           position: absolute;
           left: 0;
+        }
+      }
+    }
+  }
+
+  .suggested-tools {
+    text-align: left;
+
+    h3 {
+      color: var(--text-primary);
+      margin: 0 0 var(--spacing-md) 0;
+      font-size: var(--font-size-md);
+    }
+
+    .tools-grid {
+      display: grid;
+      gap: var(--spacing-sm);
+      grid-template-columns: repeat(auto-fill, minmax(333px, 1fr));
+
+      .tool-card {
+        display: flex;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm);
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        transition: all var(--transition-fast);
+        color: var(--color-primary);
+        background: var(--bg-tertiary);
+
+        &:hover {
+          background: var(--surface-hover);
+          border-color: var(--color-primary);
+          transform: scale(1.02);
+        }
+
+        .tool-info {
+          flex: 1;
+
+          h4 {
+            margin: 0 0 var(--spacing-2xs) 0;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            color: var(--text-primary);
+          }
+
+          p {
+            margin: 0;
+            font-size: var(--font-size-xs);
+            color: var(--text-secondary);
+            line-height: 1.4;
+          }
         }
       }
     }

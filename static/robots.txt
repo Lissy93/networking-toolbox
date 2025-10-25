@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://networking-toolbox.as93.net/sitemap.xml
+Sitemap: https://networkingtoolbox.net/sitemap.xml

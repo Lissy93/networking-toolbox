@@ -20,6 +20,7 @@
   import { customCss } from '$lib/stores/customCss';
   import { siteCustomization } from '$lib/stores/siteCustomization';
   import { primaryColor } from '$lib/stores/primaryColor';
+  import { fontScale } from '$lib/stores/fontScale';
   import { ALL_PAGES } from '$lib/constants/nav';
   import { initializeOfflineSupport } from '$lib/stores/offline';
   import { bookmarks } from '$lib/stores/bookmarks';
@@ -47,6 +48,25 @@
       keywords: pageDetails?.keywords?.length ? pageDetails.keywords.join(', ') : site.keywords,
       url: `${site.url}${currentPath}`,
       image: site.image,
+    };
+  });
+
+  // Calculate prev/next pages for sequential navigation
+  const sequentialNav = $derived.by(() => {
+    const currentPath = $page.url?.pathname ?? '/';
+    const currentIndex = ALL_PAGES.findIndex((page) => page.href === currentPath);
+
+    // Not a tool page or not found in ALL_PAGES
+    if (currentIndex === -1) {
+      return { prev: null, next: null };
+    }
+
+    const prevPage = currentIndex > 0 ? ALL_PAGES[currentIndex - 1] : null;
+    const nextPage = currentIndex < ALL_PAGES.length - 1 ? ALL_PAGES[currentIndex + 1] : null;
+
+    return {
+      prev: prevPage ? `${site.url}${prevPage.href}` : null,
+      next: nextPage ? `${site.url}${nextPage.href}` : null,
     };
   });
 
@@ -118,6 +138,7 @@
     customCss.init();
     siteCustomization.init();
     primaryColor.init();
+    fontScale.init();
     initializeOfflineSupport();
 
     // Add global keyboard shortcuts
@@ -233,31 +254,49 @@
   <meta name="author" content={author.name} />
   <link rel="canonical" href={seoData.url} />
 
+  <!-- Sequential Navigation (for tool pages) -->
+  {#if sequentialNav.prev}
+    <link rel="prev" href={sequentialNav.prev} />
+  {/if}
+  {#if sequentialNav.next}
+    <link rel="next" href={sequentialNav.next} />
+  {/if}
+
   <!-- Open Graph Tags -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content={seoData.title} />
   <meta property="og:description" content={seoData.description} />
   <meta property="og:url" content={seoData.url} />
   <meta property="og:image" content={seoData.image} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="675" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:alt" content="Networking Toolbox - Comprehensive IP and network tools" />
   <meta property="og:site_name" content={site.name} />
+  <meta property="og:locale" content="en_US" />
 
   <!-- Twitter Card Tags -->
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@lissy_sykes" />
+  <meta name="twitter:creator" content="@lissy_sykes" />
   <meta name="twitter:title" content={seoData.title} />
   <meta name="twitter:description" content={seoData.description} />
   <meta name="twitter:image" content={seoData.image} />
+  <meta name="twitter:image:alt" content="Networking Toolbox - Comprehensive IP and network tools" />
 
   <!-- Additional Meta Tags -->
   <meta name="robots" content="index, follow" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta name="generator" content="SvelteKit" />
 
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="IP Calculator" />
-  <meta name="application-name" content="IP Calculator" />
+  <meta name="apple-mobile-web-app-title" content={site.name} />
+  <meta name="application-name" content={site.name} />
   <meta name="msapplication-TileColor" content="#2563eb" />
   <meta name="theme-color" content="#2563eb" />
 
@@ -265,8 +304,108 @@
   <!-- eslint-disable-next-line svelte/no-at-html-tags -->
   {@html jsonLdTag(data.breadcrumbJsonLd)}
 
+  <!-- WebSite Schema (Homepage only) -->
+  {#if $page.url.pathname === '/'}
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+    {@html jsonLdTag({
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: site.name,
+      description: site.description,
+      url: site.url,
+      inLanguage: 'en-US',
+      copyrightYear: '2025',
+      copyrightHolder: {
+        '@type': 'Person',
+        name: author.name,
+        url: author.url,
+      },
+      creator: {
+        '@type': 'Person',
+        name: author.name,
+        url: author.url,
+      },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: {
+          '@type': 'EntryPoint',
+          urlTemplate: `${site.url}/?search={search_term_string}`,
+        },
+        'query-input': 'required name=search_term_string',
+      },
+    })}
+
+    <!-- SoftwareApplication Schema (Homepage only) -->
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+    {@html jsonLdTag({
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: site.name,
+      description: site.longDescription,
+      url: site.url,
+      applicationCategory: 'DeveloperApplication',
+      operatingSystem: 'Any',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+      },
+      author: {
+        '@type': 'Person',
+        name: author.name,
+        url: author.url,
+      },
+      softwareVersion: '3.0',
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: '5',
+        ratingCount: '1',
+      },
+      featureList: [
+        'IPv4 and IPv6 subnet calculator',
+        'CIDR notation converter',
+        'IP address format conversion',
+        'Network diagnostics tools',
+        'DNS record generators',
+        'DHCP configuration builder',
+        'Offline-first PWA',
+      ],
+    })}
+
+    <!-- Organization Schema (Homepage only) -->
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+    {@html jsonLdTag({
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: site.name,
+      url: site.url,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${site.url}/icon.png`,
+        width: '1024',
+        height: '1024',
+      },
+      description: site.longDescription,
+      founder: {
+        '@type': 'Person',
+        name: author.name,
+        url: author.url,
+      },
+      sameAs: [site.repo, site.mirror, site.docker, author.githubUrl, author.portfolio],
+      contactPoint: {
+        '@type': 'ContactPoint',
+        contactType: 'Developer',
+        url: site.repo,
+      },
+    })}
+  {/if}
+
   <!-- Plausible Analytics -->
   <script defer data-domain="networking-toolbox.as93.net" src="https://no-track.as93.net/js/script.js"></script>
+
+  <!-- Custom Styles for Self-Hosted Instances -->
+  <!-- This loads last to ensure custom styles can override defaults -->
+  <link rel="stylesheet" href="/custom-styles.css" />
 </svelte:head>
 
 <!-- Skip Links for Accessibility -->

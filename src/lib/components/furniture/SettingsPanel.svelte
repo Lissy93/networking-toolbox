@@ -9,7 +9,10 @@
   import { customCss } from '$lib/stores/customCss';
   import { siteCustomization } from '$lib/stores/siteCustomization';
   import { primaryColor } from '$lib/stores/primaryColor';
+  import { fontScale, fontScaleOptions, type FontScaleLevel } from '$lib/stores/fontScale';
   import { storage } from '$lib/utils/localStorage';
+  import * as config from '$lib/config/customizable-settings';
+  import SegmentedControl from '$lib/components/global/SegmentedControl.svelte';
 
   interface Props {
     standalone?: boolean;
@@ -30,6 +33,7 @@
   let currentNavbarDisplay = $state(navbarDisplay);
   let currentHomepageLayout = $state(homepageLayout);
   let currentCustomCss = $state(customCss);
+  let currentFontScale = $state(fontScale);
 
   // Form inputs
   let cssInput = $state('');
@@ -44,9 +48,13 @@
   let siteCustomizationErrors = $state<string[]>([]);
   let lastStoreValue = $state('');
   let lastColorStoreValue = $state('');
+  let envVarsCopied = $state(false);
+  let envFormat = $state<'env' | 'docker'>('env');
+  let showExportSettings = $state(false);
+  let showExportStyles = $state(false);
 
   // Constants
-  const PRIMARY_A11Y_OPTIONS = ['reduce-motion'];
+  const PRIMARY_A11Y_OPTIONS: string[] = [];
   const COLOR_PALETTE = [
     '#1a75ff',
     '#7711ff',
@@ -76,6 +84,9 @@
   const primaryOptions = $derived(
     $accessibilitySettings.options.filter((opt) => PRIMARY_A11Y_OPTIONS.includes(opt.id)),
   );
+  // const primaryOptions = $derived(
+  //   $accessibilitySettings.options.filter((opt) => PRIMARY_A11Y_OPTIONS.includes(opt.id)),
+  // );
   const additionalOptions = $derived(
     $accessibilitySettings.options.filter((opt) => !PRIMARY_A11Y_OPTIONS.includes(opt.id)),
   );
@@ -120,6 +131,8 @@
       navbarDisplay.setMode((e.currentTarget as HTMLSelectElement).value as NavbarDisplayMode),
     homepageChange: (e: Event) =>
       homepageLayout.setMode((e.currentTarget as HTMLSelectElement).value as HomepageLayoutMode),
+    fontScaleChange: (e: Event) =>
+      fontScale.setLevel(parseInt((e.currentTarget as HTMLInputElement).value, 10) as FontScaleLevel),
     linkClick: () => onClose?.(),
 
     applyCustomCss: () => {
@@ -170,7 +183,44 @@
         window.location.reload();
       }
     },
+
+    copyEnvVars: async () => {
+      try {
+        await navigator.clipboard.writeText(envVarsString);
+        envVarsCopied = true;
+        setTimeout(() => (envVarsCopied = false), 2000);
+      } catch {
+        const textArea = document.createElement('textarea');
+        textArea.value = envVarsString;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        envVarsCopied = true;
+        setTimeout(() => (envVarsCopied = false), 2000);
+      }
+    },
   };
+
+  // Live-updating env vars string - reacts to store changes
+  const envVarsString = $derived.by(() => {
+    // Trigger reactivity on store changes
+    void $currentTheme;
+    void $currentFontScale;
+    void $currentHomepageLayout;
+    void $currentNavbarDisplay;
+    void $primaryColor;
+    void $siteCustomization;
+
+    const envVars = config.getUserSettingsList();
+
+    if (envFormat === 'docker') {
+      const filtered = envVars.filter(({ value }) => value !== '');
+      return 'environment:\n' + filtered.map(({ name, value }) => `  - ${name}=${value}`).join('\n');
+    }
+
+    return envVars.map(({ name, value }) => `${name}='${value}'`).join('\n');
+  });
 </script>
 
 {#snippet validationMessages(errors: string[], warnings: string[])}
@@ -271,6 +321,29 @@
       </button>
     {/if}
   </div>
+
+  {#if standalone}
+    <div class="settings-section font-size-section">
+      <h3>Font Scale</h3>
+      <div class="font-scale-slider">
+        <input
+          type="range"
+          min="0"
+          max="4"
+          step="1"
+          value={$currentFontScale}
+          oninput={handlers.fontScaleChange}
+          aria-label="Font scale"
+          class="slider"
+        />
+        <div class="slider-labels">
+          {#each fontScaleOptions as option (option.level)}
+            <span class="slider-label" class:active={$currentFontScale === option.level}>{option.label}</span>
+          {/each}
+        </div>
+      </div>
+    </div>
+  {/if}
 
   <!-- Language Selection -->
   <div class="settings-section language-section">
@@ -488,6 +561,114 @@
     </div>
   {/if}
 
+  <!-- Docs for saving settings -->
+  {#if standalone}
+    <div class="settings-section saving-section">
+      <h3>Syncing Settings and Backup/Restore</h3>
+      <p class="line-1">
+        Your settings are saved in your browser's local storage, and so they will be retained even after you quit the
+        app.
+      </p>
+      <p>
+        Since we don't require login/signup to use the app, there is currently no way to automatically sync your
+        settings across devices. But if you're self-hosting Networking Toolbox, you can apply settings in your config,
+        by including the following environment variables. This way, you're settings will be applied to all users across
+        all devices.
+      </p>
+      <button
+        class="show-more-btn"
+        onclick={() => (showExportSettings = !showExportSettings)}
+        aria-expanded={showExportSettings}
+      >
+        <Icon name={showExportSettings ? 'chevron-up' : 'chevron-down'} size="sm" />
+        <span>Export Settings</span>
+      </button>
+      {#if showExportSettings}
+        <div class="env-vars-section" transition:slide={{ duration: 300 }}>
+          <div class="env-header">
+            <h4>Environment Variables</h4>
+            <SegmentedControl
+              options={[
+                { value: 'env', label: '.env' },
+                { value: 'docker', label: 'docker-compose' },
+              ]}
+              bind:value={envFormat}
+            />
+          </div>
+          <p class="section-description">
+            Current environment variable values. Copy and paste into your config file for self-hosted instances.
+          </p>
+
+          <pre class="env-block"><code>{envVarsString}</code></pre>
+
+          <button class="action-btn apply" onclick={handlers.copyEnvVars}>
+            <Icon name={envVarsCopied ? 'check' : 'copy'} size="sm" />
+            {envVarsCopied ? 'Copied!' : 'Copy to Clipboard'}
+          </button>
+        </div>
+      {/if}
+
+      <button
+        class="show-more-btn"
+        onclick={() => (showExportStyles = !showExportStyles)}
+        aria-expanded={showExportStyles}
+      >
+        <Icon name={showExportStyles ? 'chevron-up' : 'chevron-down'} size="sm" />
+        <span>Export Styles</span>
+      </button>
+      {#if showExportStyles}
+        <div class="env-vars-section" transition:slide={{ duration: 300 }}>
+          <div class="env-header">
+            <h4>Custom CSS</h4>
+          </div>
+          <p class="section-description">Apply your custom CSS to your self-hosted instance by mounting a CSS file.</p>
+
+          <div class="code-block-section">
+            <p class="code-label">1. Create a file named <code>custom-styles.css</code></p>
+
+            <p class="code-label">2. Paste the following content:</p>
+            <pre class="code-block"><code
+                >{$currentCustomCss ||
+                  '/* No custom CSS saved yet */\n/* Add your custom styles in the Custom CSS section above */'}</code
+              ></pre>
+
+            <p class="code-label">3. Mount the file to your Docker container:</p>
+
+            <div class="mount-options">
+              <p class="mount-option-label"><strong>Option A:</strong> Docker Compose</p>
+              <pre class="code-block"><code
+                  >services:
+  networking-toolbox:
+    volumes:
+      - ./custom-styles.css:/app/static/custom-styles.css:ro</code
+                ></pre>
+
+              <p class="mount-option-label"><strong>Option B:</strong> Docker Run</p>
+              <pre class="code-block"><code
+                  >docker run -v $(pwd)/custom-styles.css:/app/static/custom-styles.css:ro ...</code
+                ></pre>
+
+              <p class="mount-option-label"><strong>Option C:</strong> Edit file directly in container</p>
+              <pre class="code-block"><code
+                  >docker exec -it &lt;container-name&gt; sh -c 'cat &gt; /app/static/custom-styles.css &lt;&lt; "EOF"
+{$currentCustomCss || '/* Your custom CSS here */'}
+EOF'</code
+                ></pre>
+            </div>
+
+            <div class="info-message">
+              <Icon name="info" size="sm" />
+              <p>
+                <strong>Note:</strong> For Options A &amp; B, create the <code>custom-styles.css</code> file before starting
+                your container. Docker cannot mount individual files that don't exist yet.
+              </p>
+            </div>
+          </div>
+        </div>
+      {/if}
+    </div>
+  {/if}
+
   <!-- Navigation Links (only in dropdown mode) -->
   {#if !standalone}
     <div class="settings-section settings-links">
@@ -548,6 +729,9 @@
         margin: 0;
 
         &.theme-section {
+          grid-row: span 3;
+        }
+        &.language-section {
           grid-row: span 2;
         }
         &.accessibility-section {
@@ -565,6 +749,14 @@
         &.info-more-section {
           grid-column: span 2;
         }
+        &.saving-section {
+          grid-column: 1/-1;
+          .line-1 {
+            color: var(--text-tertiary);
+            font-size: var(--font-size-md);
+            font-style: italic;
+          }
+        }
 
         .theme-option {
           flex-direction: column;
@@ -579,6 +771,17 @@
           &.custom-css-section {
             grid-row: span 1;
             grid-column: span 1;
+          }
+        }
+        @media (max-width: 990px) {
+          &.site-branding-section {
+            grid-column: span 1;
+          }
+          &.delete-section {
+            grid-column: 1 / -1;
+          }
+          &.info-more-section {
+            grid-column: 1 / -1;
           }
         }
       }
@@ -639,19 +842,7 @@
     color: var(--text-secondary);
 
     &:hover:not(.disabled) {
-      background: var(--surface-hover);
       border-color: var(--border-secondary);
-    }
-
-    &.active {
-      background: color-mix(in srgb, var(--color-primary), transparent 90%);
-      border-color: var(--color-primary);
-      color: var(--text-primary);
-    }
-
-    &.disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
     }
   }
 
@@ -662,23 +853,104 @@
     border: 1px solid var(--border-secondary);
   }
 
+  .font-scale-slider {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+
+    .slider {
+      width: 100%;
+      height: 0.375rem;
+      background: linear-gradient(to right, var(--bg-tertiary) 0%, var(--border-primary) 50%, var(--bg-tertiary) 100%);
+      border-radius: var(--radius-sm);
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+      position: relative;
+
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 1.25rem;
+        height: 1.25rem;
+        background: var(--color-primary);
+        border: 2px solid var(--bg-secondary);
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all var(--transition-normal);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+        &:hover {
+          transform: scale(1.1);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      &::-moz-range-thumb {
+        width: 1.25rem;
+        height: 1.25rem;
+        background: var(--color-primary);
+        border: 2px solid var(--bg-secondary);
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all var(--transition-normal);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+        &:hover {
+          transform: scale(1.1);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      &:focus {
+        &::-webkit-slider-thumb {
+          outline: 2px solid var(--color-primary);
+          outline-offset: 2px;
+        }
+        &::-moz-range-thumb {
+          outline: 2px solid var(--color-primary);
+          outline-offset: 2px;
+        }
+      }
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--font-size-sm);
+      color: var(--text-tertiary);
+      margin-top: var(--spacing-xs);
+
+      .slider-label {
+        flex: 1;
+        text-align: center;
+        transition: all var(--transition-fast);
+        font-size: var(--font-size-xs);
+
+        &.active {
+          color: var(--color-primary);
+          font-weight: 500;
+        }
+
+        &:first-child {
+          text-align: left;
+        }
+        &:last-child {
+          text-align: right;
+        }
+      }
+    }
+  }
+
   .language-dropdown {
     gap: var(--spacing-xs);
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
   }
 
-  .language-option {
-    padding: var(--spacing-sm);
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-primary);
-    border-radius: var(--radius-sm);
-    text-align: left;
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-
+  .language-option,
+  .theme-option {
     &:hover:not(.disabled) {
       background: var(--surface-hover);
       color: var(--text-primary);
@@ -694,6 +966,18 @@
       opacity: 0.6;
       cursor: not-allowed;
     }
+  }
+
+  .language-option {
+    padding: var(--spacing-sm);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-sm);
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
   }
 
   .navbar-select-wrapper {
@@ -857,11 +1141,11 @@
     overflow: hidden;
   }
 
-  .show-more-btn {
+  .show-more-btn,
+  .custom-color-toggle {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    width: 100%;
     padding: var(--spacing-sm);
     background: transparent;
     border: 1px solid var(--border-primary);
@@ -870,14 +1154,19 @@
     font-size: var(--font-size-xs);
     cursor: pointer;
     transition: all var(--transition-normal);
-    margin-top: var(--spacing-sm);
-    justify-content: center;
 
     &:hover {
       background: var(--surface-hover);
       color: var(--text-primary);
       border-color: var(--border-secondary);
     }
+  }
+
+  .show-more-btn {
+    min-width: 14rem;
+    display: flex;
+    justify-content: center;
+    margin: var(--spacing-md) auto 0 auto;
 
     &[aria-expanded='true'] {
       color: var(--color-primary);
@@ -1006,24 +1295,9 @@
 
     .custom-color-toggle {
       flex: 1;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      gap: var(--spacing-xs);
       padding: var(--spacing-sm) var(--spacing-md);
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-primary);
-      border-radius: var(--radius-sm);
-      color: var(--text-secondary);
       font-size: var(--font-size-sm);
-      cursor: pointer;
-      transition: all var(--transition-normal);
-
-      &:hover {
-        background: var(--surface-hover);
-        color: var(--text-primary);
-        border-color: var(--border-secondary);
-      }
     }
 
     .custom-color-inputs {
@@ -1087,6 +1361,8 @@
       background: var(--color-primary);
       color: var(--bg-primary);
       border-color: var(--color-primary);
+      float: right;
+      width: fit-content !important;
 
       &:hover {
         background: color-mix(in srgb, var(--color-primary), black 10%);
@@ -1254,6 +1530,164 @@
       &:active {
         transform: translateY(0);
         box-shadow: none;
+      }
+    }
+  }
+
+  .saving-section {
+    .show-more-btn {
+      margin-top: var(--spacing-md);
+    }
+
+    .env-vars-section {
+      margin-top: var(--spacing-md);
+      padding-top: var(--spacing-md);
+      border-top: 1px solid var(--border-primary);
+
+      .env-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-sm);
+
+        h4 {
+          margin: 0;
+          font-size: var(--font-size-md);
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+      }
+
+      .section-description {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+        margin: 0 0 var(--spacing-md) 0;
+      }
+
+      .env-block {
+        width: 100%;
+        padding: var(--spacing-md);
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-primary);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--spacing-md);
+        overflow-x: auto;
+
+        code {
+          font-family: 'Courier New', monospace;
+          font-size: var(--font-size-sm);
+          color: var(--text-primary);
+          line-height: 1.6;
+          white-space: pre;
+          padding: 0;
+        }
+      }
+
+      .action-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .code-block-section {
+        margin-top: var(--spacing-md);
+
+        .code-label {
+          font-size: var(--font-size-sm);
+          font-weight: 500;
+          color: var(--text-primary);
+          margin: var(--spacing-md) 0 var(--spacing-xs) 0;
+
+          &:first-child {
+            margin-top: 0;
+          }
+
+          code {
+            background: var(--bg-tertiary);
+            padding: 0.125rem 0.375rem;
+            border-radius: var(--radius-xs);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+          }
+        }
+
+        .mount-options {
+          margin-top: var(--spacing-sm);
+          padding-left: var(--spacing-md);
+          border-left: 2px solid var(--border-primary);
+
+          .mount-option-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            margin: var(--spacing-md) 0 var(--spacing-xs) 0;
+
+            &:first-child {
+              margin-top: 0;
+            }
+
+            strong {
+              color: var(--text-primary);
+              font-weight: 600;
+            }
+          }
+        }
+
+        .code-block {
+          width: 100%;
+          padding: var(--spacing-md);
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-primary);
+          border-radius: var(--radius-sm);
+          margin-bottom: var(--spacing-sm);
+          overflow-x: auto;
+
+          code {
+            font-family: 'Courier New', monospace;
+            font-size: var(--font-size-sm);
+            color: var(--text-primary);
+            line-height: 1.6;
+            white-space: pre;
+            padding: 0;
+          }
+        }
+
+        .info-message {
+          display: flex;
+          gap: var(--spacing-sm);
+          padding: var(--spacing-md);
+          background: linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--color-info), transparent 90%),
+            color-mix(in srgb, var(--color-info), transparent 95%)
+          );
+          border: 1px solid color-mix(in srgb, var(--color-info), transparent 70%);
+          border-radius: var(--radius-sm);
+          margin-top: var(--spacing-md);
+
+          :global(svg) {
+            flex-shrink: 0;
+            color: var(--color-info);
+            margin-top: 0.125rem;
+          }
+
+          p {
+            margin: 0;
+            font-size: var(--font-size-sm);
+            color: var(--text-primary);
+            line-height: 1.5;
+
+            strong {
+              font-weight: 600;
+            }
+
+            code {
+              background: var(--bg-tertiary);
+              padding: 0.125rem 0.375rem;
+              border-radius: var(--radius-xs);
+              font-family: 'Courier New', monospace;
+              font-size: 0.9em;
+            }
+          }
+        }
       }
     }
   }
