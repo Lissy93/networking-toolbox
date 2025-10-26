@@ -2,6 +2,7 @@
   import { ALL_PAGES, type NavItem } from '$lib/constants/nav';
   import Icon from '$lib/components/global/Icon.svelte';
   import { debounce } from '$lib/utils/debounce';
+  import { t } from '$lib/stores/language';
 
   let {
     filteredTools = $bindable(),
@@ -143,12 +144,12 @@
       <input
         bind:this={searchInput}
         type="text"
-        placeholder="Search tools and reference..."
+        placeholder={$t('furniture.search.placeholder')}
         class="search-input"
         value={searchQuery}
         oninput={handleSearch}
       />
-      <button class="close-search-button" onclick={clearSearch} aria-label="Close search">
+      <button class="close-search-button" onclick={clearSearch} aria-label={$t('furniture.search.close')}>
         <Icon name="x" size="sm" />
       </button>
     </div>
@@ -160,7 +161,7 @@
           Start typing to search {ALL_PAGES.length} tools
         </span>
       {:else if filteredTools.length === 0}
-        <span class="no-results">No results found</span>
+        <span class="no-results">{$t('furniture.search.no_results')}</span>
       {:else}
         <span class="results-count">
           Showing {filteredTools.length} of {ALL_PAGES.length} tools

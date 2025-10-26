@@ -8,6 +8,7 @@
   import { theme } from '$lib/stores/theme';
   import { navbarDisplay } from '$lib/stores/navbarDisplay';
   import { homepageLayout } from '$lib/stores/homepageLayout';
+  import { t } from '$lib/stores/language';
   import SettingsPanel from '$lib/components/furniture/SettingsPanel.svelte';
 
   let isOpen = $state(false);
@@ -76,7 +77,7 @@
     class="action-button settings-trigger"
     onclick={() => (isOpen = !isOpen)}
     ondblclick={handleDoubleClick}
-    aria-label="Open Settings"
+    aria-label={$t('furniture.settings_menu.open')}
     aria-expanded={isOpen}
     aria-haspopup="menu"
     use:tooltip={`Settings (${shortcutKey}+,)`}

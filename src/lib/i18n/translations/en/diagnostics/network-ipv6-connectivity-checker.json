@@ -1,0 +1,27 @@
+{
+  "title": "IPv6 Connectivity Checker",
+  "description": "Test IPv6 connectivity to a host and verify dual-stack support",
+
+  "form": {
+    "title": "IPv6 Connectivity Test",
+    "hostname": {
+      "label": "Hostname",
+      "placeholder": "example.com"
+    },
+    "check": "Check IPv6 Connectivity",
+    "checking": "Checking...",
+    "error": "Please enter a hostname"
+  },
+
+  "results": {
+    "title": "IPv6 Connectivity Results",
+    "ipv6_supported": "IPv6 Supported",
+    "ipv6_not_supported": "IPv6 Not Supported",
+    "ipv4_supported": "IPv4 Supported",
+    "dual_stack": "Dual Stack",
+    "ipv6_addresses": "IPv6 Addresses",
+    "ipv4_addresses": "IPv4 Addresses",
+    "reachable": "Reachable",
+    "not_reachable": "Not Reachable"
+  }
+}

@@ -300,7 +300,7 @@
   <!-- Theme Selection -->
   <div class="settings-section theme-section">
     <h3>{$t('settings.theme.title')}</h3>
-    <div class="theme-options" role="radiogroup" aria-label="Theme selection">
+    <div class="theme-options" role="radiogroup" aria-label={$t('furniture.settings_panel.aria.theme_selection')}>
       <!-- Primary themes (always visible - first 6) -->
       {#each themes.slice(0, 6) as themeOption (themeOption.id)}
         {@render themeButton(themeOption)}
@@ -336,7 +336,7 @@
           step="1"
           value={$currentFontScale}
           oninput={handlers.fontScaleChange}
-          aria-label="Font scale"
+          aria-label={$t('furniture.settings_panel.aria.font_scale')}
           class="slider"
         />
         <div class="slider-labels">
@@ -441,7 +441,7 @@
           id="site-title"
           type="text"
           bind:value={siteTitleInput}
-          placeholder="Networking Toolbox"
+          placeholder={$t('furniture.settings_panel.placeholders.site_title')}
           maxlength="100"
         />
       </div>
@@ -451,7 +451,7 @@
           id="site-description"
           type="text"
           bind:value={siteDescriptionInput}
-          placeholder="Your companion for all-things networking"
+          placeholder={$t('furniture.settings_panel.placeholders.site_description')}
           maxlength="300"
         />
       </div>
@@ -461,7 +461,7 @@
           id="site-icon-url"
           type="text"
           bind:value={siteIconUrlInput}
-          placeholder="/favicon.svg or https://example.com/icon.png"
+          placeholder={$t('furniture.settings_panel.placeholders.site_icon')}
         />
       </div>
 
@@ -481,7 +481,7 @@
             class:active={primaryColorInput === color}
             style="background-color: {color};"
             onclick={() => (primaryColorInput = color)}
-            aria-label="Select color {color}"
+            aria-label={$t('furniture.settings_panel.aria.select_color', { color })}
           ></button>
         {/each}
       </div>
@@ -500,12 +500,18 @@
       {#if showCustomColorInput}
         <div class="custom-color-inputs" transition:slide={{ duration: 200 }}>
           <div class="color-picker-wrapper">
-            <label for="color-picker">Color Picker</label>
+            <label for="color-picker">{$t('furniture.settings_panel.color_picker.title')}</label>
             <input id="color-picker" type="color" bind:value={primaryColorInput} />
           </div>
           <div class="form-field">
             <label for="custom-hex">Hex Code</label>
-            <input id="custom-hex" type="text" bind:value={primaryColorInput} placeholder="#2563eb" maxlength="7" />
+            <input
+              id="custom-hex"
+              type="text"
+              bind:value={primaryColorInput}
+              placeholder={$t('furniture.settings_panel.placeholders.hex_color')}
+              maxlength="7"
+            />
           </div>
         </div>
       {/if}
@@ -519,7 +525,7 @@
       <textarea
         bind:value={cssInput}
         class="css-editor"
-        placeholder="/* Enter your custom CSS here */"
+        placeholder={$t('furniture.settings_panel.placeholders.custom_css')}
         spellcheck="false"
         rows="5"
       ></textarea>
@@ -535,7 +541,7 @@
 
   {#if standalone}
     <div class="settings-section info-more-section">
-      <h3>Not found what you were looking for?</h3>
+      <h3>{$t('furniture.settings_panel.not_found.title')}</h3>
       <p class="line-1">Good news! The code is open source and easy to work with.</p>
       <p>
         Simply <a href="https://github.com/Lissy93/networking-toolbox/fork">fork the repo</a>, follow our
@@ -582,12 +588,12 @@
         aria-expanded={showExportSettings}
       >
         <Icon name={showExportSettings ? 'chevron-up' : 'chevron-down'} size="sm" />
-        <span>Export Settings</span>
+        <span>{$t('furniture.settings_panel.export.settings')}</span>
       </button>
       {#if showExportSettings}
         <div class="env-vars-section" transition:slide={{ duration: 300 }}>
           <div class="env-header">
-            <h4>Environment Variables</h4>
+            <h4>{$t('furniture.settings_panel.export.env_vars_title')}</h4>
             <SegmentedControl
               options={[
                 { value: 'env', label: '.env' },
@@ -604,7 +610,9 @@
 
           <button class="action-btn apply" onclick={handlers.copyEnvVars}>
             <Icon name={envVarsCopied ? 'check' : 'copy'} size="sm" />
-            {envVarsCopied ? 'Copied!' : 'Copy to Clipboard'}
+            {envVarsCopied
+              ? $t('furniture.settings_panel.export.copied')
+              : $t('furniture.settings_panel.export.copy_clipboard')}
           </button>
         </div>
       {/if}
@@ -615,14 +623,14 @@
         aria-expanded={showExportStyles}
       >
         <Icon name={showExportStyles ? 'chevron-up' : 'chevron-down'} size="sm" />
-        <span>Export Styles</span>
+        <span>{$t('furniture.settings_panel.export.styles')}</span>
       </button>
       {#if showExportStyles}
         <div class="env-vars-section" transition:slide={{ duration: 300 }}>
           <div class="env-header">
-            <h4>Custom CSS</h4>
+            <h4>{$t('furniture.settings_panel.export.custom_css_title')}</h4>
           </div>
-          <p class="section-description">Apply your custom CSS to your self-hosted instance by mounting a CSS file.</p>
+          <p class="section-description">{$t('furniture.settings_panel.export.custom_css_description')}</p>
 
           <div class="code-block-section">
             <p class="code-label">1. Create a file named <code>custom-styles.css</code></p>

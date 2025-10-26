@@ -1,0 +1,27 @@
+{
+  "title": "DNSSEC Validation Chain",
+  "description": "Trace and validate the DNSSEC chain of trust for a domain",
+
+  "form": {
+    "title": "DNSSEC Chain Validation",
+    "domain": {
+      "label": "Domain",
+      "placeholder": "example.com"
+    },
+    "validate": "Validate DNSSEC Chain",
+    "validating": "Validating...",
+    "error": "Please enter a domain"
+  },
+
+  "results": {
+    "title": "DNSSEC Validation Results",
+    "secure": "Secure",
+    "insecure": "Insecure",
+    "bogus": "Bogus",
+    "chain_valid": "Chain Valid",
+    "chain_broken": "Chain Broken",
+    "ds_records": "DS Records",
+    "dnskey_records": "DNSKEY Records",
+    "rrsig_records": "RRSIG Records"
+  }
+}

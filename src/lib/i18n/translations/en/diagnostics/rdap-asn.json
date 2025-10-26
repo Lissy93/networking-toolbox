@@ -1,0 +1,28 @@
+{
+  "title": "RDAP ASN Lookup",
+  "description": "Look up registration data for an Autonomous System Number using RDAP",
+
+  "form": {
+    "title": "ASN Lookup",
+    "asn": {
+      "label": "ASN",
+      "placeholder": "AS15169 or 15169"
+    },
+    "lookup": "Lookup ASN",
+    "looking_up": "Looking up...",
+    "error": "Please enter a valid ASN"
+  },
+
+  "results": {
+    "title": "ASN Registration Data",
+    "asn": "ASN",
+    "name": "Name",
+    "country": "Country",
+    "registry": "Registry",
+    "registration_date": "Registration Date",
+    "last_updated": "Last Updated",
+    "status": "Status",
+    "entities": "Entities",
+    "remarks": "Remarks"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "title": "TLS Cipher Presets",
+  "description": "Probe connectivity with preset cipher lists (modern/intermediate/legacy)",
+
+  "examples": {
+    "github": "GitHub cipher support",
+    "cloudflare": "Cloudflare cipher support",
+    "google": "Google cipher support"
+  },
+
+  "form": {
+    "title": "Cipher Presets Configuration",
+    "hostname": {
+      "label": "Hostname and Port",
+      "placeholder": "example.com"
+    },
+    "port": {
+      "placeholder": "443"
+    },
+    "test": "Test Cipher Presets",
+    "testing": "Testing...",
+    "error": "Please enter a hostname"
+  },
+
+  "results": {
+    "title": "Cipher Preset Results",
+    "presets": {
+      "modern": "Modern",
+      "intermediate": "Intermediate",
+      "legacy": "Legacy"
+    },
+    "supported": "Supported",
+    "not_supported": "Not Supported",
+    "score": "Score: {score}%",
+    "grade": "Grade: {grade}"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "title": "RDAP Domain Lookup",
+  "description": "Look up registration data for a domain name using RDAP",
+
+  "form": {
+    "title": "Domain Lookup",
+    "domain": {
+      "label": "Domain Name",
+      "placeholder": "example.com"
+    },
+    "lookup": "Lookup Domain",
+    "looking_up": "Looking up...",
+    "error": "Please enter a valid domain name"
+  },
+
+  "results": {
+    "title": "Domain Registration Data",
+    "domain": "Domain",
+    "registrar": "Registrar",
+    "registration_date": "Registration Date",
+    "expiration_date": "Expiration Date",
+    "last_updated": "Last Updated",
+    "status": "Status",
+    "nameservers": "Nameservers",
+    "dnssec": "DNSSEC",
+    "entities": "Entities",
+    "registrant": "Registrant",
+    "admin": "Admin Contact",
+    "tech": "Tech Contact"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "title": "DMARC Record Checker",
+  "description": "Check and validate DMARC (Domain-based Message Authentication) records",
+
+  "form": {
+    "title": "DMARC Check",
+    "domain": {
+      "label": "Domain",
+      "placeholder": "example.com"
+    },
+    "check": "Check DMARC",
+    "checking": "Checking...",
+    "error": "Please enter a domain"
+  },
+
+  "results": {
+    "title": "DMARC Record Results",
+    "found": "DMARC Record Found",
+    "not_found": "DMARC Record Not Found",
+    "policy": "Policy",
+    "subdomain_policy": "Subdomain Policy",
+    "percentage": "Percentage",
+    "rua": "Aggregate Reports (RUA)",
+    "ruf": "Forensic Reports (RUF)",
+    "valid": "Valid",
+    "invalid": "Invalid"
+  }
+}

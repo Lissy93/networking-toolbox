@@ -1,0 +1,112 @@
+{
+  "title": "HTTP Headers Analyzer",
+  "description": "Analyze HTTP response headers, status codes, and response metadata. Supports custom request methods and headers for comprehensive HTTP testing.",
+
+  "examples": {
+    "title": "Header Examples",
+    "get": "Basic GET request headers",
+    "github": "GitHub API headers (HEAD)",
+    "cloudflare": "Cloudflare response headers",
+    "status_404": "404 status response",
+    "redirect": "Redirect chain headers",
+    "gzip": "Compressed response headers"
+  },
+
+  "form": {
+    "title": "Request Configuration",
+    "url": {
+      "label": "URL",
+      "tooltip": "Enter the URL to analyze",
+      "placeholder": "https://example.com",
+      "error": "Invalid URL format",
+      "required": "URL is required"
+    },
+    "method": {
+      "label": "Method",
+      "tooltip": "HTTP method to use"
+    },
+    "custom_headers": {
+      "label": "Custom Headers (Optional)",
+      "tooltip": "Custom headers (one per line: 'Name: Value')",
+      "placeholder": "User-Agent: My Custom Agent\nAuthorization: Bearer token123"
+    },
+    "analyze": "Analyze Headers",
+    "analyzing": "Analyzing Headers..."
+  },
+
+  "results": {
+    "title": "HTTP Response Analysis",
+
+    "status": {
+      "label": "HTTP Status",
+      "response_size": "Response Size",
+      "total_time": "Total Time"
+    },
+
+    "headers": {
+      "title": "Response Headers"
+    },
+
+    "timing": {
+      "title": "Performance Timing",
+      "dns": "DNS Resolution:",
+      "tcp": "TCP Connect:",
+      "tls": "TLS Handshake:",
+      "ttfb": "Time to First Byte:",
+      "help": "* Timing values are approximations when not isolated"
+    }
+  },
+
+  "error": {
+    "title": "Request Failed"
+  },
+
+  "info": {
+    "title": "About HTTP Headers",
+
+    "response": {
+      "heading": "Response Headers",
+      "description": "HTTP headers provide metadata about the response, including content type, caching instructions, security policies, and server information."
+    },
+
+    "status_codes": {
+      "heading": "Status Codes",
+      "2xx": {
+        "name": "2xx:",
+        "description": "Success responses"
+      },
+      "3xx": {
+        "name": "3xx:",
+        "description": "Redirection responses"
+      },
+      "4xx": {
+        "name": "4xx:",
+        "description": "Client error responses"
+      },
+      "5xx": {
+        "name": "5xx:",
+        "description": "Server error responses"
+      }
+    },
+
+    "common": {
+      "heading": "Common Headers",
+      "content_type": {
+        "name": "Content-Type:",
+        "description": "MIME type of content"
+      },
+      "cache_control": {
+        "name": "Cache-Control:",
+        "description": "Caching directives"
+      },
+      "set_cookie": {
+        "name": "Set-Cookie:",
+        "description": "Cookie instructions"
+      },
+      "location": {
+        "name": "Location:",
+        "description": "Redirect target URL"
+      }
+    }
+  }
+}

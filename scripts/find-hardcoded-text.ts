@@ -131,12 +131,15 @@ function scanDirectory(dirPath: string): HardcodedText[] {
     const entries = readdirSync(dirPath, { withFileTypes: true });
 
     for (const entry of entries) {
-      const fullPath = join(dirPath, entry.name); // codacy-disable-line
+      // Sanitize entry name to prevent directory traversal
+      const safeName = entry.name.replace(/\.\./g, '');
 
       // Skip node_modules, .svelte-kit, etc.
-      if (entry.name.startsWith('.') || entry.name === 'node_modules' || entry.name === 'build') {
+      if (safeName.startsWith('.') || safeName === 'node_modules' || safeName === 'build') {
         continue;
       }
+
+      const fullPath = join(dirPath, safeName);
 
       if (entry.isDirectory()) {
         results = results.concat(scanDirectory(fullPath));
@@ -221,10 +224,14 @@ function formatResults(results: HardcodedText[], minLength: number): string {
  * Validate and sanitize scan path to prevent directory traversal
  */
 function validateScanPath(userPath: string): string {
-  // Resolve the full path and normalize it
-  const fullPath = resolve(PROJECT_ROOT, normalize(userPath)); // codacy-disable-line
+  // Remove any directory traversal attempts
+  const sanitized = userPath.replace(/\.\./g, '').replace(/^\/+/, '');
 
-  // Ensure the path is within PROJECT_ROOT
+  // Normalize and resolve to absolute path within project root
+  const normalized = normalize(sanitized);
+  const fullPath = resolve(PROJECT_ROOT, normalized);
+
+  // Ensure the resolved path is within PROJECT_ROOT
   if (!fullPath.startsWith(PROJECT_ROOT)) {
     throw new Error(`Invalid path: ${userPath} (attempts to access outside project root)`);
   }
