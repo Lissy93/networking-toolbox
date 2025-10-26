@@ -131,8 +131,7 @@ function scanDirectory(dirPath: string): HardcodedText[] {
     const entries = readdirSync(dirPath, { withFileTypes: true });
 
     for (const entry of entries) {
-      // codacy-disable-next-line
-      const fullPath = join(dirPath, entry.name);
+      const fullPath = join(dirPath, entry.name); // codacy-disable-line
 
       // Skip node_modules, .svelte-kit, etc.
       if (entry.name.startsWith('.') || entry.name === 'node_modules' || entry.name === 'build') {
@@ -143,8 +142,7 @@ function scanDirectory(dirPath: string): HardcodedText[] {
         results = results.concat(scanDirectory(fullPath));
       } else if (entry.isFile() && entry.name.endsWith('.svelte')) {
         try {
-          // codacy-disable-next-line
-          const content = readFileSync(fullPath, 'utf-8');
+          const content = readFileSync(fullPath, 'utf-8'); // codacy-disable-line
           const found = findHardcodedText(fullPath, content);
           results = results.concat(found);
         } catch (error) {
@@ -224,8 +222,7 @@ function formatResults(results: HardcodedText[], minLength: number): string {
  */
 function validateScanPath(userPath: string): string {
   // Resolve the full path and normalize it
-  // codacy-disable-next-line
-  const fullPath = resolve(PROJECT_ROOT, normalize(userPath));
+  const fullPath = resolve(PROJECT_ROOT, normalize(userPath)); // codacy-disable-line
 
   // Ensure the path is within PROJECT_ROOT
   if (!fullPath.startsWith(PROJECT_ROOT)) {

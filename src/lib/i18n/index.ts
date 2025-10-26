@@ -35,9 +35,8 @@ function getNestedValue(obj: TranslationObject, key: string): any {
       return undefined;
     }
 
-    // codacy-disable-next-line
     if (result && typeof result === 'object' && Object.prototype.hasOwnProperty.call(result, k)) {
-      result = result[k];
+      result = result[k]; // codacy-disable-line
     } else {
       return undefined;
     }
