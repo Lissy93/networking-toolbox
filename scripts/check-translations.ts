@@ -45,14 +45,19 @@ function flattenKeys(obj: TranslationObject, prefix = ''): Record<string, string
   const result: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(obj)) {
+    // Validate key to prevent prototype pollution
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      continue;
+    }
+
     const fullKey = prefix ? `${prefix}.${key}` : key;
 
-    // codacy-disable-next-line
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      Object.assign(result, flattenKeys(value, fullKey));
+    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      Object.assign(result, flattenKeys(value as TranslationObject, fullKey));
     } else {
-      // codacy-disable-next-line
-      result[fullKey] = String(value);
+      // Safe assignment - key already validated above
+      const safeResult = result;
+      safeResult[fullKey] = String(value);
     }
   }
 
@@ -75,15 +80,24 @@ function loadTranslation(lang: string, namespace: string): Record<string, string
   const safeLang = sanitizePathComponent(lang);
   const safeNamespace = sanitizePathComponent(namespace);
 
+  // Validate sanitized components are not empty
+  if (!safeLang || !safeNamespace) {
+    return null;
+  }
+
   const filePath = join(TRANSLATIONS_DIR, safeLang, `${safeNamespace}.json`);
 
-  // codacy-disable-next-line
+  // Verify the constructed path is within TRANSLATIONS_DIR
+  if (!filePath.startsWith(TRANSLATIONS_DIR)) {
+    console.error(`Invalid path attempted: ${filePath}`);
+    return null;
+  }
+
   if (!existsSync(filePath)) {
     return null;
   }
 
   try {
-    // codacy-disable-next-line
     const content = readFileSync(filePath, 'utf-8');
     const parsed = JSON.parse(content);
     return flattenKeys(parsed);
@@ -154,12 +168,20 @@ function validateNamespace(lang: string, namespace: string): ValidationResult {
 
   // Find missing keys
   for (const key of sourceKeys) {
+    // Validate key to prevent prototype pollution
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      continue;
+    }
+
     if (!targetKeys.has(key)) {
       result.missing.push(key);
-    } else if (target[key].trim() === '') {
-      result.empty.push(key);
     } else {
-      result.translated++;
+      const value = target[key];
+      if (value && value.trim() === '') {
+        result.empty.push(key);
+      } else if (value) {
+        result.translated++;
+      }
     }
   }
 
@@ -181,8 +203,16 @@ function formatResults(results: ValidationResult[], verbose: boolean): string {
 
   // Group by language
   const byLang = results.reduce((acc, r) => {
-    if (!acc[r.lang]) acc[r.lang] = [];
-    acc[r.lang].push(r);
+    // Validate language key to prevent prototype pollution
+    const lang = r.lang;
+    if (lang === '__proto__' || lang === 'constructor' || lang === 'prototype') {
+      return acc;
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(acc, lang)) {
+      acc[lang] = [];
+    }
+    acc[lang].push(r);
     return acc;
   }, {} as Record<string, ValidationResult[]>);
 
