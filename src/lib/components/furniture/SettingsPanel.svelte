@@ -13,6 +13,8 @@
   import { storage } from '$lib/utils/localStorage';
   import * as config from '$lib/config/customizable-settings';
   import SegmentedControl from '$lib/components/global/SegmentedControl.svelte';
+  import { locale, setLanguage, loadNamespaces, t } from '$lib/stores/language';
+  import { SUPPORTED_LANGUAGES } from '$lib/i18n/supported-languages';
 
   interface Props {
     standalone?: boolean;
@@ -25,7 +27,6 @@
   let showMoreA11y = $state(standalone);
   let showMoreThemes = $state(standalone);
   let showCustomColorInput = $state(false);
-  let selectedLanguage = $state('en');
 
   // Store subscriptions
   let accessibilitySettings = $state(accessibility);
@@ -72,12 +73,6 @@
     '#11bbff',
     '#44aaff',
     '#7777ff',
-  ];
-  const LANGUAGES = [
-    { code: 'en', name: 'English', available: true, flag: '🇺🇸' },
-    { code: 'es', name: 'Español', available: false, flag: '🇪🇸' },
-    { code: 'fr', name: 'Français', available: false, flag: '🇫🇷' },
-    { code: 'de', name: 'Deutsch', available: false, flag: '🇩🇪' },
   ];
 
   // Derived state
@@ -134,6 +129,14 @@
     fontScaleChange: (e: Event) =>
       fontScale.setLevel(parseInt((e.currentTarget as HTMLInputElement).value, 10) as FontScaleLevel),
     linkClick: () => onClose?.(),
+
+    languageChange: async (langCode: string) => {
+      // Update language store and localStorage
+      setLanguage(langCode);
+
+      // Load necessary translation namespaces for the new language
+      await loadNamespaces(langCode, ['common', 'nav', 'settings', 'tools']);
+    },
 
     applyCustomCss: () => {
       const validation = customCss.validate(cssInput);
@@ -296,7 +299,7 @@
 <div class="settings-panel" class:standalone>
   <!-- Theme Selection -->
   <div class="settings-section theme-section">
-    <h3>Theme</h3>
+    <h3>{$t('settings.theme.title')}</h3>
     <div class="theme-options" role="radiogroup" aria-label="Theme selection">
       <!-- Primary themes (always visible - first 6) -->
       {#each themes.slice(0, 6) as themeOption (themeOption.id)}
@@ -317,14 +320,14 @@
     {#if themes.length > 6 && !standalone}
       <button class="show-more-btn" onclick={() => (showMoreThemes = !showMoreThemes)} aria-expanded={showMoreThemes}>
         <Icon name={showMoreThemes ? 'chevron-up' : 'chevron-down'} size="sm" />
-        <span>{showMoreThemes ? 'Show less' : 'Show more themes'}</span>
+        <span>{showMoreThemes ? $t('settings.theme.show_less') : $t('settings.theme.show_more')}</span>
       </button>
     {/if}
   </div>
 
   {#if standalone}
     <div class="settings-section font-size-section">
-      <h3>Font Scale</h3>
+      <h3>{$t('settings.font_scale.title')}</h3>
       <div class="font-scale-slider">
         <input
           type="range"
@@ -347,15 +350,13 @@
 
   <!-- Language Selection -->
   <div class="settings-section language-section">
-    <h3>Language</h3>
+    <h3>{$t('settings.language.title')}</h3>
     <div class="language-dropdown">
-      {#each LANGUAGES as lang (lang.code)}
+      {#each SUPPORTED_LANGUAGES as lang (lang.code)}
         <button
           class="language-option"
-          class:active={selectedLanguage === lang.code}
-          class:disabled={!lang.available}
-          onclick={() => (selectedLanguage = lang.code)}
-          disabled={!lang.available}
+          class:active={$locale === lang.code}
+          onclick={() => handlers.languageChange(lang.code)}
         >
           {lang.flag}
           {lang.name}
@@ -366,7 +367,7 @@
 
   <!-- Homepage Layout -->
   <div class="settings-section homepage-layout-section">
-    <h3>Homepage Layout</h3>
+    <h3>{$t('settings.homepage_layout.title')}</h3>
     <div class="navbar-select-wrapper">
       <select class="navbar-select" value={$currentHomepageLayout} onchange={handlers.homepageChange}>
         {#each homepageLayoutOptions as option (option.id)}
@@ -384,7 +385,7 @@
 
   <!-- Navbar Display -->
   <div class="settings-section navbar-display-section">
-    <h3>Top Navigation</h3>
+    <h3>{$t('settings.top_navigation.title')}</h3>
     <div class="navbar-select-wrapper">
       <select class="navbar-select" value={$currentNavbarDisplay} onchange={handlers.navbarChange}>
         {#each navbarDisplayOptions as option (option.id)}
@@ -402,7 +403,7 @@
 
   <!-- Accessibility Options -->
   <div class="settings-section accessibility-section">
-    <h3>Accessibility</h3>
+    <h3>{$t('settings.accessibility.title')}</h3>
     <div class="accessibility-options">
       <!-- Primary options (always visible) -->
       {#each primaryOptions as option (option.id)}
@@ -422,7 +423,7 @@
       {#if !standalone}
         <button class="show-more-btn" onclick={() => (showMoreA11y = !showMoreA11y)} aria-expanded={showMoreA11y}>
           <Icon name={showMoreA11y ? 'chevron-up' : 'chevron-down'} size="sm" />
-          <span>{showMoreA11y ? 'Show less' : 'Show all a11y options'}</span>
+          <span>{showMoreA11y ? $t('settings.accessibility.show_less') : $t('settings.accessibility.show_all')}</span>
         </button>
       {/if}
     </div>
@@ -431,11 +432,11 @@
   <!-- Site Customization (only in standalone mode) -->
   {#if standalone}
     <div class="settings-section site-branding-section">
-      <h3>Site Branding</h3>
-      <p class="section-description">Customize the site title, description, and icon.</p>
+      <h3>{$t('settings.site_branding.title')}</h3>
+      <p class="section-description">{$t('settings.site_branding.description')}</p>
 
       <div class="form-field">
-        <label for="site-title">Site Title</label>
+        <label for="site-title">{$t('settings.site_branding.site_title')}</label>
         <input
           id="site-title"
           type="text"
@@ -445,7 +446,7 @@
         />
       </div>
       <div class="form-field">
-        <label for="site-description">Description</label>
+        <label for="site-description">{$t('settings.site_branding.site_description')}</label>
         <input
           id="site-description"
           type="text"
@@ -455,7 +456,7 @@
         />
       </div>
       <div class="form-field">
-        <label for="site-icon-url">Icon URL</label>
+        <label for="site-icon-url">{$t('settings.site_branding.site_icon_url')}</label>
         <input
           id="site-icon-url"
           type="text"
@@ -470,8 +471,8 @@
 
     <!-- Primary Color (only in standalone mode) -->
     <div class="settings-section color-section">
-      <h3>Primary Color</h3>
-      <p class="section-description">Choose a primary color for the interface.</p>
+      <h3>{$t('settings.primary_color.title')}</h3>
+      <p class="section-description">{$t('settings.primary_color.description')}</p>
 
       <div class="color-palette">
         {#each COLOR_PALETTE as color (color)}
@@ -512,8 +513,8 @@
 
     <!-- Custom CSS (only in standalone mode) -->
     <div class="settings-section custom-css-section">
-      <h3>Custom CSS</h3>
-      <p class="section-description">Add your own CSS to customize the appearance globally.</p>
+      <h3>{$t('settings.custom_css.title')}</h3>
+      <p class="section-description">{$t('settings.custom_css.description')}</p>
 
       <textarea
         bind:value={cssInput}
@@ -549,14 +550,14 @@
   {/if}
   {#if standalone}
     <div class="settings-section delete-section">
-      <h3>Delete Data</h3>
+      <h3>{$t('settings.delete_data.title')}</h3>
       <div class="caution-message">
         <Icon name="alert-triangle" size="sm" />
-        <p>Caution: This will reset all local data.</p>
+        <p>{$t('settings.delete_data.caution')}</p>
       </div>
       <button class="action-btn danger" onclick={handlers.clearAllData}>
         <Icon name="trash" size="sm" />
-        Clear all Data
+        {$t('settings.delete_data.button')}
       </button>
     </div>
   {/if}
@@ -564,7 +565,7 @@
   <!-- Docs for saving settings -->
   {#if standalone}
     <div class="settings-section saving-section">
-      <h3>Syncing Settings and Backup/Restore</h3>
+      <h3>{$t('settings.sync.title')}</h3>
       <p class="line-1">
         Your settings are saved in your browser's local storage, and so they will be retained even after you quit the
         app.
@@ -674,7 +675,7 @@ EOF'</code
     <div class="settings-section settings-links">
       <a class="settings-link" href="/settings" onclick={handlers.linkClick}>
         <Icon name="settings" size="sm" />
-        <span>More Settings</span>
+        <span>{$t('settings.more_settings')}</span>
       </a>
     </div>
   {/if}

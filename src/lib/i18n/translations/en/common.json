@@ -1,0 +1,120 @@
+{
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "clear": "Clear",
+    "reset": "Reset",
+    "export": "Export",
+    "import": "Import",
+    "download": "Download",
+    "upload": "Upload",
+    "refresh": "Refresh",
+    "apply": "Apply",
+    "submit": "Submit",
+    "confirm": "Confirm"
+  },
+
+  "states": {
+    "loading": "Loading...",
+    "calculating": "Calculating...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Info",
+    "processing": "Processing...",
+    "validating": "Validating...",
+    "saving": "Saving...",
+    "empty": "No data available",
+    "notFound": "Not found"
+  },
+
+  "labels": {
+    "name": "Name",
+    "description": "Description",
+    "example": "Example",
+    "examples": "Examples",
+    "value": "Value",
+    "type": "Type",
+    "options": "Options",
+    "settings": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "help": "Help",
+    "documentation": "Documentation",
+    "about": "About",
+    "version": "Version",
+    "status": "Status"
+  },
+
+  "navigation": {
+    "home": "Home",
+    "settings": "Settings",
+    "bookmarks": "Bookmarks",
+    "search": "Search",
+    "sitemap": "Sitemap",
+    "about": "About",
+    "legal": "Legal",
+    "github": "GitHub"
+  },
+
+  "validation": {
+    "required": "This field is required",
+    "invalid": "Invalid value",
+    "invalidFormat": "Invalid format",
+    "invalidIp": "Invalid IP address",
+    "invalidCidr": "Invalid CIDR notation",
+    "outOfRange": "Value out of range",
+    "mustBePositive": "Value must be positive",
+    "tooShort": "Value is too short",
+    "tooLong": "Value is too long"
+  },
+
+  "time": {
+    "seconds": {
+      "zero": "0 seconds",
+      "one": "1 second",
+      "other": "{count} seconds"
+    },
+    "minutes": {
+      "zero": "0 minutes",
+      "one": "1 minute",
+      "other": "{count} minutes"
+    },
+    "hours": {
+      "zero": "0 hours",
+      "one": "1 hour",
+      "other": "{count} hours"
+    },
+    "days": {
+      "zero": "0 days",
+      "one": "1 day",
+      "other": "{count} days"
+    }
+  },
+
+  "clipboard": {
+    "copy": "Copy to clipboard",
+    "copySuccess": "Copied to clipboard!",
+    "copyError": "Failed to copy to clipboard"
+  },
+
+  "errors": {
+    "generic": "An error occurred",
+    "networkError": "Network error occurred",
+    "timeout": "Request timed out",
+    "notFound": "Not found",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden",
+    "serverError": "Server error",
+    "unknownError": "Unknown error occurred"
+  }
+}
