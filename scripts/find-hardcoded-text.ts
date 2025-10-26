@@ -12,7 +12,7 @@
  */
 
 import { readFileSync, readdirSync, statSync } from 'fs';
-import { join, relative, dirname } from 'path';
+import { join, relative, dirname, resolve, normalize } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -164,7 +164,10 @@ function groupByFile(results: HardcodedText[]): Map<string, HardcodedText[]> {
     if (!grouped.has(result.file)) {
       grouped.set(result.file, []);
     }
-    grouped.get(result.file)!.push(result);
+    const fileGroup = grouped.get(result.file);
+    if (fileGroup) {
+      fileGroup.push(result);
+    }
   }
 
   return grouped;
@@ -212,6 +215,21 @@ function formatResults(results: HardcodedText[], minLength: number): string {
 }
 
 /**
+ * Validate and sanitize scan path to prevent directory traversal
+ */
+function validateScanPath(userPath: string): string {
+  // Resolve the full path and normalize it
+  const fullPath = resolve(PROJECT_ROOT, normalize(userPath));
+
+  // Ensure the path is within PROJECT_ROOT
+  if (!fullPath.startsWith(PROJECT_ROOT)) {
+    throw new Error(`Invalid path: ${userPath} (attempts to access outside project root)`);
+  }
+
+  return fullPath;
+}
+
+/**
  * Main function
  */
 function main() {
@@ -219,7 +237,7 @@ function main() {
   const pathArg = args.find(arg => arg.startsWith('--path='))?.split('=')[1];
   const minLengthArg = args.find(arg => arg.startsWith('--min-length='))?.split('=')[1];
 
-  const scanPath = pathArg ? join(PROJECT_ROOT, pathArg) : DEFAULT_SCAN_PATH;
+  const scanPath = pathArg ? validateScanPath(pathArg) : DEFAULT_SCAN_PATH;
   const minLength = minLengthArg ? parseInt(minLengthArg, 10) : 3;
 
   console.log('🔍 Scanning for hardcoded text...\n');

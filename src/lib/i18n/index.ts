@@ -23,13 +23,19 @@ function interpolate(template: string, params: InterpolationParams): string {
 /**
  * Deep get value from nested object by dot-notation key
  * get({ foo: { bar: 'baz' } }, 'foo.bar') → 'baz'
+ * Protected against prototype pollution
  */
 function getNestedValue(obj: TranslationObject, key: string): any {
   const keys = key.split('.');
   let result: any = obj;
 
   for (const k of keys) {
-    if (result && typeof result === 'object' && k in result) {
+    // Prevent prototype pollution
+    if (k === '__proto__' || k === 'constructor' || k === 'prototype') {
+      return undefined;
+    }
+
+    if (result && typeof result === 'object' && Object.prototype.hasOwnProperty.call(result, k)) {
       result = result[k];
     } else {
       return undefined;

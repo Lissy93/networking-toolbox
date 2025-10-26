@@ -58,10 +58,22 @@ function flattenKeys(obj: TranslationObject, prefix = ''): Record<string, string
 }
 
 /**
+ * Sanitize path component to prevent path traversal
+ */
+function sanitizePathComponent(component: string): string {
+  // Remove any path traversal attempts and keep only safe characters
+  return component.replace(/[^a-zA-Z0-9_-]/g, '');
+}
+
+/**
  * Load and parse a translation file
  */
 function loadTranslation(lang: string, namespace: string): Record<string, string> | null {
-  const filePath = join(TRANSLATIONS_DIR, lang, `${namespace}.json`);
+  // Sanitize inputs to prevent path traversal
+  const safeLang = sanitizePathComponent(lang);
+  const safeNamespace = sanitizePathComponent(namespace);
+
+  const filePath = join(TRANSLATIONS_DIR, safeLang, `${safeNamespace}.json`);
 
   if (!existsSync(filePath)) {
     return null;

@@ -283,9 +283,9 @@ describe('language store', () => {
       locale.set('fr');
       mockBuildLocalizedPath.mockReturnValue('/fr/settings');
 
-      const path = localizedNavigate('/settings');
+      const result = localizedNavigate('/settings');
 
-      expect(path).toBe('/fr/settings');
+      expect(result).toBe('/fr/settings');
     });
   });
 

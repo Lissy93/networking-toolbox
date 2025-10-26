@@ -301,6 +301,32 @@ describe('I18n Core', () => {
     });
   });
 
+  describe('security', () => {
+    it('prevents prototype pollution via __proto__', () => {
+      i18n.addTranslations('en', {
+        safe: { value: 'Safe value' },
+      });
+
+      // Attempt prototype pollution
+      expect(i18n.t('__proto__.polluted')).toBe('__proto__.polluted');
+      expect(i18n.t('safe.__proto__')).toBe('safe.__proto__');
+    });
+
+    it('prevents prototype pollution via constructor', () => {
+      i18n.addTranslations('en', { test: { value: 'Test' } });
+
+      expect(i18n.t('constructor.prototype.polluted')).toBe('constructor.prototype.polluted');
+      expect(i18n.t('test.constructor')).toBe('test.constructor');
+    });
+
+    it('prevents prototype pollution via prototype', () => {
+      i18n.addTranslations('en', { test: { value: 'Test' } });
+
+      expect(i18n.t('prototype.polluted')).toBe('prototype.polluted');
+      expect(i18n.t('test.prototype')).toBe('test.prototype');
+    });
+  });
+
   describe('edge cases', () => {
     it('handles empty string keys gracefully', () => {
       expect(i18n.t('')).toBe('');
