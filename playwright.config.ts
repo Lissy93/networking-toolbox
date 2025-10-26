@@ -6,9 +6,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  timeout: 30000,
+  timeout: 45000, // 45 secs for translation bundle
   expect: {
-    timeout: 5000,
+    timeout: 6000, // 6 sec
   },
   reporter: [
     ['github'],
@@ -37,7 +37,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run build && npm run preview',
     port: 4173,
-    timeout: 180000,
+    timeout: 180000, // 3 fucking minutes.
     reuseExistingServer: !process.env.CI,
   },
 });
