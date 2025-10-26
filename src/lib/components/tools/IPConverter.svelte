@@ -5,6 +5,7 @@
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '../global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
 
   let ipAddress = $state('192.168.1.1');
   let formats = $state({
@@ -44,12 +45,12 @@
     const decimal = parseInt(value);
 
     if (isNaN(decimal)) {
-      formatErrors = { ...formatErrors, decimal: 'Must be a valid number' };
+      formatErrors = { ...formatErrors, decimal: $t('tools/ip-converter.errors.mustBeValidNumber') };
       return;
     }
 
     if (decimal < 0 || decimal > 4294967295) {
-      formatErrors = { ...formatErrors, decimal: 'Must be between 0 and 4,294,967,295' };
+      formatErrors = { ...formatErrors, decimal: $t('tools/ip-converter.errors.decimalOutOfRange') };
       return;
     }
 
@@ -57,7 +58,7 @@
       ipAddress = decimalToIP(decimal);
       formatErrors = { ...formatErrors, decimal: '' };
     } catch (err) {
-      formatErrors = { ...formatErrors, decimal: 'Invalid decimal value' };
+      formatErrors = { ...formatErrors, decimal: $t('tools/ip-converter.errors.invalidDecimal') };
       console.error('Invalid decimal conversion:', err);
     }
   }
@@ -79,26 +80,26 @@
     const binaryDigits = cleanBinary.replace(/[.\s]/g, '');
 
     if (cleanBinary !== value) {
-      formatErrors = { ...formatErrors, binary: 'Only 0, 1, dots, and spaces allowed' };
+      formatErrors = { ...formatErrors, binary: $t('tools/ip-converter.errors.binaryOnlyDigits') };
       return;
     }
 
     if (binaryDigits.length !== 32) {
-      formatErrors = { ...formatErrors, binary: 'Must be exactly 32 binary digits (8 digits per octet)' };
+      formatErrors = { ...formatErrors, binary: $t('tools/ip-converter.errors.binaryMust32Bits') };
       return;
     }
 
     // Validate octet structure (should be 8.8.8.8 format)
     const parts = cleanBinary.split('.');
     if (parts.length !== 4) {
-      formatErrors = { ...formatErrors, binary: 'Must use dotted format: 8bits.8bits.8bits.8bits' };
+      formatErrors = { ...formatErrors, binary: $t('tools/ip-converter.errors.binaryDottedFormat') };
       return;
     }
 
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i].replace(/\s/g, '');
       if (part.length !== 8) {
-        formatErrors = { ...formatErrors, binary: `Octet ${i + 1} must be exactly 8 bits` };
+        formatErrors = { ...formatErrors, binary: $t('tools/ip-converter.errors.binaryOctetLength', { octet: i + 1 }) };
         return;
       }
     }
@@ -107,7 +108,7 @@
       ipAddress = binaryToIP(cleanBinary);
       formatErrors = { ...formatErrors, binary: '' };
     } catch (err) {
-      formatErrors = { ...formatErrors, binary: 'Invalid binary format' };
+      formatErrors = { ...formatErrors, binary: $t('tools/ip-converter.errors.invalidBinary') };
       console.error('Invalid binary conversion:', err);
     }
   }
@@ -129,19 +130,19 @@
     const hexDigits = cleanHex.replace(/[.x]/g, '');
 
     if (cleanHex !== value) {
-      formatErrors = { ...formatErrors, hex: 'Only hex digits (0-9, A-F), dots, and x allowed' };
+      formatErrors = { ...formatErrors, hex: $t('tools/ip-converter.errors.hexOnlyDigits') };
       return;
     }
 
     if (hexDigits.length !== 8) {
-      formatErrors = { ...formatErrors, hex: 'Must be exactly 8 hex digits (2 digits per octet)' };
+      formatErrors = { ...formatErrors, hex: $t('tools/ip-converter.errors.hexMust8Digits') };
       return;
     }
 
     // Validate format (should be 0xXX.0xXX.0xXX.0xXX or XX.XX.XX.XX)
     const parts = cleanHex.split('.');
     if (parts.length !== 4) {
-      formatErrors = { ...formatErrors, hex: 'Must use dotted format: 0xXX.0xXX.0xXX.0xXX' };
+      formatErrors = { ...formatErrors, hex: $t('tools/ip-converter.errors.hexDottedFormat') };
       return;
     }
 
@@ -154,12 +155,12 @@
       }
 
       if (hexPart.length !== 2) {
-        formatErrors = { ...formatErrors, hex: `Octet ${i + 1} must be exactly 2 hex digits` };
+        formatErrors = { ...formatErrors, hex: $t('tools/ip-converter.errors.hexOctetLength', { octet: i + 1 }) };
         return;
       }
 
       if (!/^[0-9a-fA-F]{2}$/.test(hexPart)) {
-        formatErrors = { ...formatErrors, hex: `Octet ${i + 1} contains invalid hex digits` };
+        formatErrors = { ...formatErrors, hex: $t('tools/ip-converter.errors.hexInvalidDigits', { octet: i + 1 }) };
         return;
       }
     }
@@ -168,7 +169,7 @@
       ipAddress = hexToIP(cleanHex);
       formatErrors = { ...formatErrors, hex: '' };
     } catch (err) {
-      formatErrors = { ...formatErrors, hex: 'Invalid hexadecimal format' };
+      formatErrors = { ...formatErrors, hex: $t('tools/ip-converter.errors.invalidHex') };
       console.error('Invalid hex conversion:', err);
     }
   }
@@ -176,31 +177,35 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>IP Address Converter</h2>
-    <p>Convert IP addresses between different number formats.</p>
+    <h2>{$t('tools/ip-converter.title')}</h2>
+    <p>{$t('tools/ip-converter.description')}</p>
   </header>
 
   <!-- Main IP Input -->
   <div class="form-group">
-    <IPInput bind:value={ipAddress} label="IP Address" placeholder="192.168.1.1" />
+    <IPInput
+      bind:value={ipAddress}
+      label={$t('tools/ip-converter.input.ipAddress')}
+      placeholder={$t('tools/ip-converter.input.placeholder')}
+    />
   </div>
 
   {#if validateIPv4(ipAddress).valid}
     <div class="results-section fade-in">
       <!-- IP Class Information -->
       <section class="info-panel info">
-        <h3>IP Class Information</h3>
+        <h3>{$t('tools/ip-converter.ipClasses.title')}</h3>
         <div class="grid grid-3">
           <div class="class-info">
-            <span class="info-label">Class</span>
+            <span class="info-label">{$t('common.labels.type')}</span>
             <span class="class-value">{ipClass.class}</span>
           </div>
           <div class="class-info">
-            <span class="info-label">Type</span>
+            <span class="info-label">{$t('common.labels.type')}</span>
             <span class="class-value type">{ipClass.type}</span>
           </div>
           <div class="class-info">
-            <span class="info-label">Usage</span>
+            <span class="info-label">{$t('common.labels.usage')}</span>
             <span class="class-description">{ipClass.description}</span>
           </div>
         </div>
@@ -210,7 +215,7 @@
       <div class="grid grid-2 conversions-grid">
         <!-- Binary Format -->
         <div class="format-group">
-          <label for="binary-input">Binary Format</label>
+          <label for="binary-input">{$t('tools/ip-converter.formats.binary.title')}</label>
           <div class="format-input">
             <input
               id="binary-input"
@@ -221,14 +226,16 @@
               oninput={handleBinaryInput}
             />
             <Tooltip
-              text={clipboard.isCopied('binary') ? 'Copied!' : 'Copy binary format to clipboard'}
+              text={clipboard.isCopied('binary')
+                ? $t('common.clipboard.copied')
+                : $t('common.clipboard.copyBinaryFormat')}
               position="left"
             >
               <button
                 type="button"
                 class="copy-btn {clipboard.isCopied('binary') ? 'copied' : ''}"
                 onclick={() => clipboard.copy(formats.binary, 'binary')}
-                aria-label="Copy binary format to clipboard"
+                aria-label={$t('common.clipboard.copyBinaryFormat')}
               >
                 <Icon name={clipboard.isCopied('binary') ? 'check' : 'copy'} size="sm" />
               </button>
@@ -241,7 +248,7 @@
 
         <!-- Decimal Format -->
         <div class="format-group">
-          <label for="decimal-input">Decimal Format</label>
+          <label for="decimal-input">{$t('tools/ip-converter.formats.decimal.title')}</label>
           <div class="format-input">
             <input
               id="decimal-input"
@@ -252,14 +259,16 @@
               oninput={handleDecimalInput}
             />
             <Tooltip
-              text={clipboard.isCopied('decimal') ? 'Copied!' : 'Copy decimal format to clipboard'}
+              text={clipboard.isCopied('decimal')
+                ? $t('common.clipboard.copied')
+                : $t('common.clipboard.copyDecimalFormat')}
               position="left"
             >
               <button
                 type="button"
                 class="copy-btn {clipboard.isCopied('decimal') ? 'copied' : ''}"
                 onclick={() => clipboard.copy(formats.decimal, 'decimal')}
-                aria-label="Copy decimal format to clipboard"
+                aria-label={$t('common.clipboard.copyDecimalFormat')}
               >
                 <Icon name={clipboard.isCopied('decimal') ? 'check' : 'copy'} size="sm" />
               </button>
@@ -272,7 +281,7 @@
 
         <!-- Hexadecimal Format -->
         <div class="format-group">
-          <label for="hex-input">Hexadecimal Format</label>
+          <label for="hex-input">{$t('tools/ip-converter.formats.hexadecimal.title')}</label>
           <div class="format-input">
             <input
               id="hex-input"
@@ -283,14 +292,14 @@
               oninput={handleHexInput}
             />
             <Tooltip
-              text={clipboard.isCopied('hex') ? 'Copied!' : 'Copy hexadecimal format to clipboard'}
+              text={clipboard.isCopied('hex') ? $t('common.clipboard.copied') : $t('common.clipboard.copyHexFormat')}
               position="left"
             >
               <button
                 type="button"
                 class="copy-btn {clipboard.isCopied('hex') ? 'copied' : ''}"
                 onclick={() => clipboard.copy(formats.hex, 'hex')}
-                aria-label="Copy hexadecimal format to clipboard"
+                aria-label={$t('common.clipboard.copyHexFormat')}
               >
                 <Icon name={clipboard.isCopied('hex') ? 'check' : 'copy'} size="sm" />
               </button>
@@ -303,7 +312,7 @@
 
         <!-- Octal Format -->
         <div class="format-group">
-          <label for="octal-input">Octal Format</label>
+          <label for="octal-input">{$t('tools/ip-converter.formats.octal.title')}</label>
           <div class="format-input">
             <input
               id="octal-input"
@@ -313,12 +322,17 @@
               class="format-field octal"
               readonly
             />
-            <Tooltip text={clipboard.isCopied('octal') ? 'Copied!' : 'Copy octal format to clipboard'} position="left">
+            <Tooltip
+              text={clipboard.isCopied('octal')
+                ? $t('common.clipboard.copied')
+                : $t('common.clipboard.copyOctalFormat')}
+              position="left"
+            >
               <button
                 type="button"
                 class="copy-btn {clipboard.isCopied('octal') ? 'copied' : ''}"
                 onclick={() => clipboard.copy(formats.octal, 'octal')}
-                aria-label="Copy octal format to clipboard"
+                aria-label={$t('common.clipboard.copyOctalFormat')}
               >
                 <Icon name={clipboard.isCopied('octal') ? 'check' : 'copy'} size="sm" />
               </button>
@@ -335,50 +349,92 @@
   <div class="card">
     <h3>
       <Icon name="info" size="md" />
-      Number Format Explanations
+      {$t('tools/ip-converter.explanations.title')}
     </h3>
     <div class="explainer-content">
       <div class="format-explanations">
         <!-- Binary Format -->
         <div class="format-explanation">
-          <h4><span class="format-badge binary">Binary (Base-2)</span></h4>
+          <h4><span class="format-badge binary">{$t('tools/ip-converter.formats.binary.badge')}</span></h4>
           <p>
-            <strong>What it is:</strong> Uses only digits 0 and 1, representing how computers internally store IP addresses.
+            <strong>{$t('tools/ip-converter.explanations.whatItIs')}</strong>
+            {$t('tools/ip-converter.formats.binary.whatItIs')}
           </p>
-          <p><strong>Example:</strong> <code>192.168.1.1 = 11000000.10101000.00000001.00000001</code></p>
           <p>
-            <strong>Usage:</strong> Low-level networking, subnet calculations, understanding network/host boundaries.
+            <strong>{$t('tools/ip-converter.explanations.example')}</strong>
+            <code>{$t('tools/ip-converter.formats.binary.example')}</code>
           </p>
-          <p><strong>How to read:</strong> Each octet is 8 bits. Binary 11000000 = 128+64 = 192 in decimal.</p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.usage')}</strong>
+            {$t('tools/ip-converter.formats.binary.usage')}
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.howToRead')}</strong>
+            {$t('tools/ip-converter.formats.binary.howToRead')}
+          </p>
         </div>
 
         <!-- Decimal Format -->
         <div class="format-explanation">
-          <h4><span class="format-badge decimal">Decimal (Base-10)</span></h4>
-          <p><strong>What it is:</strong> The entire IP as a single large number (0-4,294,967,295).</p>
-          <p><strong>Example:</strong> <code>192.168.1.1 = 3,232,235,777</code></p>
-          <p><strong>Usage:</strong> Database storage, mathematical operations, IP range calculations.</p>
-          <p><strong>Calculation:</strong> (192×256³) + (168×256²) + (1×256) + 1 = 3,232,235,777</p>
+          <h4><span class="format-badge decimal">{$t('tools/ip-converter.formats.decimal.badge')}</span></h4>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.whatItIs')}</strong>
+            {$t('tools/ip-converter.formats.decimal.whatItIs')}
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.example')}</strong>
+            <code>{$t('tools/ip-converter.formats.decimal.example')}</code>
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.usage')}</strong>
+            {$t('tools/ip-converter.formats.decimal.usage')}
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.calculation')}</strong>
+            {$t('tools/ip-converter.formats.decimal.calculation')}
+          </p>
         </div>
 
         <!-- Hexadecimal Format -->
         <div class="format-explanation">
-          <h4><span class="format-badge hex">Hexadecimal (Base-16)</span></h4>
+          <h4><span class="format-badge hex">{$t('tools/ip-converter.formats.hexadecimal.badge')}</span></h4>
           <p>
-            <strong>What it is:</strong> Uses digits 0-9 and letters A-F, common in programming and system administration.
+            <strong>{$t('tools/ip-converter.explanations.whatItIs')}</strong>
+            {$t('tools/ip-converter.formats.hexadecimal.whatItIs')}
           </p>
-          <p><strong>Example:</strong> <code>192.168.1.1 = 0xC0.0xA8.0x01.0x01</code></p>
-          <p><strong>Usage:</strong> Programming, system logs, network debugging, firmware configuration.</p>
-          <p><strong>Conversion:</strong> 192 = C0 hex, 168 = A8 hex. Each hex digit represents 4 bits.</p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.example')}</strong>
+            <code>{$t('tools/ip-converter.formats.hexadecimal.example')}</code>
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.usage')}</strong>
+            {$t('tools/ip-converter.formats.hexadecimal.usage')}
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.conversion')}</strong>
+            {$t('tools/ip-converter.formats.hexadecimal.conversion')}
+          </p>
         </div>
 
         <!-- Octal Format -->
         <div class="format-explanation">
-          <h4><span class="format-badge octal">Octal (Base-8)</span></h4>
-          <p><strong>What it is:</strong> Uses digits 0-7, less common but still found in some Unix systems.</p>
-          <p><strong>Example:</strong> <code>192.168.1.1 = 0300.0250.001.001</code></p>
-          <p><strong>Usage:</strong> Legacy Unix configurations, file permissions, some network tools.</p>
-          <p><strong>Note:</strong> Leading zeros indicate octal format. 0300 octal = 192 decimal.</p>
+          <h4><span class="format-badge octal">{$t('tools/ip-converter.formats.octal.badge')}</span></h4>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.whatItIs')}</strong>
+            {$t('tools/ip-converter.formats.octal.whatItIs')}
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.example')}</strong>
+            <code>{$t('tools/ip-converter.formats.octal.example')}</code>
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.usage')}</strong>
+            {$t('tools/ip-converter.formats.octal.usage')}
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.note')}</strong>
+            {$t('tools/ip-converter.formats.octal.note')}
+          </p>
         </div>
       </div>
     </div>
@@ -388,44 +444,80 @@
   <div class="card">
     <h3>
       <Icon name="info" size="md" />
-      IP Address Classes
+      {$t('tools/ip-converter.explanations.ipClassesTitle')}
     </h3>
     <div class="explainer-content">
-      <p>IP address classes are historical categories that determine network size and usage patterns:</p>
+      <p>{$t('tools/ip-converter.ipClasses.description')}</p>
 
       <div class="class-explanations">
         <div class="class-explanation">
-          <h4><span class="class-badge class-a">Class A</span></h4>
-          <p><strong>Range:</strong> 1.0.0.0 to 126.255.255.255</p>
-          <p><strong>Default Mask:</strong> 255.0.0.0 (/8)</p>
-          <p><strong>Networks:</strong> 126 networks, 16.7 million hosts each</p>
-          <p><strong>Usage:</strong> Large organizations, ISPs, government networks</p>
+          <h4><span class="class-badge class-a">{$t('tools/ip-converter.ipClasses.classA.badge')}</span></h4>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.range')}</strong>
+            {$t('tools/ip-converter.ipClasses.classA.range')}
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.defaultMask')}</strong>
+            {$t('tools/ip-converter.ipClasses.classA.defaultMask')}
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.networks')}</strong>
+            {$t('tools/ip-converter.ipClasses.classA.networks')}
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.usage')}</strong>
+            {$t('tools/ip-converter.ipClasses.classA.usage')}
+          </p>
         </div>
 
         <div class="class-explanation">
-          <h4><span class="class-badge class-b">Class B</span></h4>
-          <p><strong>Range:</strong> 128.0.0.0 to 191.255.255.255</p>
-          <p><strong>Default Mask:</strong> 255.255.0.0 (/16)</p>
-          <p><strong>Networks:</strong> 16,384 networks, 65,534 hosts each</p>
-          <p><strong>Usage:</strong> Universities, medium-large organizations</p>
+          <h4><span class="class-badge class-b">{$t('tools/ip-converter.ipClasses.classB.badge')}</span></h4>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.range')}</strong>
+            {$t('tools/ip-converter.ipClasses.classB.range')}
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.defaultMask')}</strong>
+            {$t('tools/ip-converter.ipClasses.classB.defaultMask')}
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.networks')}</strong>
+            {$t('tools/ip-converter.ipClasses.classB.networks')}
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.usage')}</strong>
+            {$t('tools/ip-converter.ipClasses.classB.usage')}
+          </p>
         </div>
 
         <div class="class-explanation">
-          <h4><span class="class-badge class-c">Class C</span></h4>
-          <p><strong>Range:</strong> 192.0.0.0 to 223.255.255.255</p>
-          <p><strong>Default Mask:</strong> 255.255.255.0 (/24)</p>
-          <p><strong>Networks:</strong> 2.1 million networks, 254 hosts each</p>
-          <p><strong>Usage:</strong> Small businesses, home networks</p>
+          <h4><span class="class-badge class-c">{$t('tools/ip-converter.ipClasses.classC.badge')}</span></h4>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.range')}</strong>
+            {$t('tools/ip-converter.ipClasses.classC.range')}
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.defaultMask')}</strong>
+            {$t('tools/ip-converter.ipClasses.classC.defaultMask')}
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.networks')}</strong>
+            {$t('tools/ip-converter.ipClasses.classC.networks')}
+          </p>
+          <p>
+            <strong>{$t('tools/ip-converter.explanations.usage')}</strong>
+            {$t('tools/ip-converter.ipClasses.classC.usage')}
+          </p>
         </div>
       </div>
 
       <div class="class-notes">
-        <h4>Special Ranges</h4>
+        <h4>{$t('tools/ip-converter.ipClasses.specialRanges.title')}</h4>
         <ul>
-          <li><strong>Class D (224-239):</strong> Multicast addresses for group communication</li>
-          <li><strong>Class E (240-255):</strong> Reserved for experimental use</li>
-          <li><strong>Private Networks:</strong> 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16</li>
-          <li><strong>Loopback:</strong> 127.0.0.0/8 (localhost addresses)</li>
+          <li>{$t('tools/ip-converter.ipClasses.specialRanges.classD')}</li>
+          <li>{$t('tools/ip-converter.ipClasses.specialRanges.classE')}</li>
+          <li>{$t('tools/ip-converter.ipClasses.specialRanges.privateNetworks')}</li>
+          <li>{$t('tools/ip-converter.ipClasses.specialRanges.loopback')}</li>
         </ul>
       </div>
     </div>
@@ -435,34 +527,61 @@
   <div class="card">
     <h3>
       <Icon name="lightbulb" size="md" />
-      When to Use Each Format
+      {$t('tools/ip-converter.useCases.title')}
     </h3>
     <div class="explainer-content">
       <div class="usage-scenarios">
         <div class="usage-scenario">
-          <h4>Network Administration</h4>
+          <h4>{$t('tools/ip-converter.useCases.networkAdmin.title')}</h4>
           <ul>
-            <li><strong>Dotted Decimal:</strong> Daily configuration and documentation</li>
-            <li><strong>Binary:</strong> Subnet calculations and VLSM planning</li>
-            <li><strong>Hexadecimal:</strong> Debugging network captures and logs</li>
+            <li>
+              <strong>{$t('tools/ip-converter.explanations.dottedDecimal')}</strong>
+              {$t('tools/ip-converter.useCases.networkAdmin.dottedDecimal')}
+            </li>
+            <li>
+              <strong>{$t('tools/ip-converter.explanations.binary')}</strong>
+              {$t('tools/ip-converter.useCases.networkAdmin.binary')}
+            </li>
+            <li>
+              <strong>{$t('tools/ip-converter.explanations.hexadecimal')}</strong>
+              {$t('tools/ip-converter.useCases.networkAdmin.hexadecimal')}
+            </li>
           </ul>
         </div>
 
         <div class="usage-scenario">
-          <h4>Programming & Development</h4>
+          <h4>{$t('tools/ip-converter.useCases.programming.title')}</h4>
           <ul>
-            <li><strong>Decimal:</strong> Database storage and IP range operations</li>
-            <li><strong>Hexadecimal:</strong> Low-level socket programming</li>
-            <li><strong>Binary:</strong> Bitwise operations and subnet masking</li>
+            <li>
+              <strong>{$t('tools/ip-converter.explanations.decimal')}</strong>
+              {$t('tools/ip-converter.useCases.programming.decimal')}
+            </li>
+            <li>
+              <strong>{$t('tools/ip-converter.explanations.hexadecimal')}</strong>
+              {$t('tools/ip-converter.useCases.programming.hexadecimal')}
+            </li>
+            <li>
+              <strong>{$t('tools/ip-converter.explanations.binary')}</strong>
+              {$t('tools/ip-converter.useCases.programming.binary')}
+            </li>
           </ul>
         </div>
 
         <div class="usage-scenario">
-          <h4>Troubleshooting & Analysis</h4>
+          <h4>{$t('tools/ip-converter.useCases.troubleshooting.title')}</h4>
           <ul>
-            <li><strong>Binary:</strong> Understanding subnet boundaries</li>
-            <li><strong>Hexadecimal:</strong> Reading network packet captures</li>
-            <li><strong>Decimal:</strong> Quick IP range calculations</li>
+            <li>
+              <strong>{$t('tools/ip-converter.explanations.binary')}</strong>
+              {$t('tools/ip-converter.useCases.troubleshooting.binary')}
+            </li>
+            <li>
+              <strong>{$t('tools/ip-converter.explanations.hexadecimal')}</strong>
+              {$t('tools/ip-converter.useCases.troubleshooting.hexadecimal')}
+            </li>
+            <li>
+              <strong>{$t('tools/ip-converter.explanations.decimal')}</strong>
+              {$t('tools/ip-converter.useCases.troubleshooting.decimal')}
+            </li>
           </ul>
         </div>
       </div>

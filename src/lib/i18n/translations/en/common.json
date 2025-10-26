@@ -44,6 +44,7 @@
     "examples": "Examples",
     "value": "Value",
     "type": "Type",
+    "usage": "Usage",
     "options": "Options",
     "settings": "Settings",
     "language": "Language",
@@ -103,8 +104,15 @@
 
   "clipboard": {
     "copy": "Copy to clipboard",
+    "copied": "Copied!",
     "copySuccess": "Copied to clipboard!",
-    "copyError": "Failed to copy to clipboard"
+    "copyError": "Failed to copy to clipboard",
+    "copyNetworkAddress": "Copy network address to clipboard",
+    "copyBroadcastAddress": "Copy broadcast address to clipboard",
+    "copyBinaryFormat": "Copy binary format to clipboard",
+    "copyDecimalFormat": "Copy decimal format to clipboard",
+    "copyHexFormat": "Copy hexadecimal format to clipboard",
+    "copyOctalFormat": "Copy octal format to clipboard"
   },
 
   "errors": {

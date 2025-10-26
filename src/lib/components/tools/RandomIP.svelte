@@ -4,6 +4,7 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
   import '../../../styles/diagnostics-pages.scss';
+  import { t } from '$lib/stores/language';
 
   let inputText = $state('192.168.1.0/24 x 10\n10.0.0.0-10.0.0.255 5\n172.16.0.0/16 * 3\n2001:db8::/64[15]');
   let defaultCount = $state(5);
@@ -15,32 +16,32 @@
   let _userModified = $state(false);
   const clipboard = useClipboard();
 
-  const examples = [
+  const examples = $derived([
     {
-      input: '192.168.1.0/24 x 5',
-      description: 'Generate 5 random IPs from a /24 subnet',
+      input: $t('tools/random-ip.examples.items.basicCidr.input'),
+      description: $t('tools/random-ip.examples.items.basicCidr.description'),
     },
     {
-      input: '10.0.0.0-10.0.0.255 * 3\n172.16.0.0/16 [8]',
-      description: 'Multiple formats: range and CIDR with different counts',
+      input: $t('tools/random-ip.examples.items.multipleFormats.input'),
+      description: $t('tools/random-ip.examples.items.multipleFormats.description'),
     },
     {
-      input: '2001:db8::/64 # 10\nfe80::/10 x 5',
-      description: 'IPv6 networks with various syntax formats',
+      input: $t('tools/random-ip.examples.items.ipv6.input'),
+      description: $t('tools/random-ip.examples.items.ipv6.description'),
     },
     {
-      input: '192.168.0.0/16 100\n203.0.113.0/24 * 20',
-      description: 'Large generation counts from different networks',
+      input: $t('tools/random-ip.examples.items.largeCounts.input'),
+      description: $t('tools/random-ip.examples.items.largeCounts.description'),
     },
     {
-      input: '127.0.0.0/8\n::1/128 x 1\n169.254.0.0/16 [10]',
-      description: 'Special-use addresses: loopback and link-local',
+      input: $t('tools/random-ip.examples.items.specialUse.input'),
+      description: $t('tools/random-ip.examples.items.specialUse.description'),
     },
     {
-      input: '198.51.100.0/24 * 15\n198.18.0.0/15 [25]',
-      description: 'Test networks for documentation and benchmarking',
+      input: $t('tools/random-ip.examples.items.testNetworks.input'),
+      description: $t('tools/random-ip.examples.items.testNetworks.description'),
     },
-  ];
+  ]);
 
   function generateIPs() {
     if (!inputText.trim()) {
@@ -144,15 +145,15 @@
 
 <div class="tool-container">
   <div class="tool-header">
-    <h1>Random IP Generator</h1>
-    <p>Generate random IP addresses from networks and ranges with uniqueness control and seeded randomness</p>
+    <h1>{$t('tools/random-ip.title')}</h1>
+    <p>{$t('tools/random-ip.subtitle')}</p>
   </div>
 
   <div class="card examples-card">
     <details class="examples-details">
-      <summary class="examples-summary" use:tooltip={'Click to see example inputs'}>
+      <summary class="examples-summary" use:tooltip={$t('tools/random-ip.examples.titleTooltip')}>
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('tools/random-ip.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, index (`${example.input}-${index}`)}
@@ -171,31 +172,31 @@
   </div>
 
   <div class="card">
-    <h3>Network Configuration</h3>
+    <h3>{$t('tools/random-ip.networkConfig.title')}</h3>
     <div class="form-row">
       <div class="textarea-group">
         <div class="form-group">
-          <label for="inputs" use:tooltip={'Enter networks with generation counts using various formats'}
-            >Networks and Counts</label
+          <label for="inputs" use:tooltip={$t('tools/random-ip.networkConfig.networksTooltip')}
+            >{$t('tools/random-ip.networkConfig.networksLabel')}</label
           >
           <textarea
             id="inputs"
             bind:value={inputText}
             oninput={handleInputChange}
-            placeholder="192.168.1.0/24 x 10&#10;10.0.0.0-10.0.0.255 5&#10;172.16.0.0/16 * 3&#10;2001:db8::/64[15]"
+            placeholder={$t('tools/random-ip.networkConfig.networksPlaceholder')}
             rows="6"
-            use:tooltip={'Specify networks and generation counts'}
+            use:tooltip={$t('tools/random-ip.networkConfig.networksSpecifyTooltip')}
           ></textarea>
           <div class="input-help">
-            Formats: network x count, network * count, network count, network#count, network[count]
+            {$t('tools/random-ip.networkConfig.helpText')}
           </div>
         </div>
       </div>
 
       <div class="options-group">
         <div class="option-card">
-          <label for="default-count" use:tooltip={'Number of IPs to generate when count is not specified'}
-            >Default Count</label
+          <label for="default-count" use:tooltip={$t('tools/random-ip.networkConfig.defaultCount.tooltip')}
+            >{$t('tools/random-ip.networkConfig.defaultCount.label')}</label
           >
           <input
             id="default-count"
@@ -203,30 +204,36 @@
             bind:value={defaultCount}
             min="1"
             max="1000"
-            placeholder="5"
-            use:tooltip={'Default generation count'}
+            placeholder={$t('tools/random-ip.networkConfig.defaultCount.placeholder')}
+            use:tooltip={$t('tools/random-ip.networkConfig.defaultCount.valueTooltip')}
           />
         </div>
 
         <div class="checkbox-group">
-          <label class="checkbox-label" use:tooltip={'Ensure all generated IPs are unique within each network'}>
+          <label class="checkbox-label" use:tooltip={$t('tools/random-ip.networkConfig.unique.tooltip')}>
             <input type="checkbox" bind:checked={unique} />
             <span class="checkmark"></span>
-            Unique IPs Only
+            {$t('tools/random-ip.networkConfig.unique.label')}
           </label>
         </div>
 
         <div class="option-card">
-          <label for="seed" use:tooltip={'Use the same seed for reproducible random results'}>Random Seed</label>
+          <label for="seed" use:tooltip={$t('tools/random-ip.networkConfig.seed.tooltip')}
+            >{$t('tools/random-ip.networkConfig.seed.label')}</label
+          >
           <div class="seed-input">
             <input
               id="seed"
               type="text"
               bind:value={seed}
-              placeholder="Optional seed for reproducible results"
-              use:tooltip={'Enter seed for reproducible randomness'}
+              placeholder={$t('tools/random-ip.networkConfig.seed.placeholder')}
+              use:tooltip={$t('tools/random-ip.networkConfig.seed.valueTooltip')}
             />
-            <button onclick={generateNewSeed} type="button" use:tooltip={'Generate new random seed'}>
+            <button
+              onclick={generateNewSeed}
+              type="button"
+              use:tooltip={$t('tools/random-ip.networkConfig.seed.generateTooltip')}
+            >
               <Icon name="refresh" size="sm" />
             </button>
           </div>
@@ -238,7 +245,7 @@
   {#if isLoading}
     <div class="loading">
       <Icon name="loader" />
-      Generating random IPs...
+      {$t('tools/random-ip.loading')}
     </div>
   {/if}
 
@@ -247,7 +254,7 @@
       {#if result.errors.length > 0}
         <div class="card error-card">
           <div class="card-header row">
-            <h3><Icon name="alert-triangle" size="sm" /> Errors</h3>
+            <h3><Icon name="alert-triangle" size="sm" /> {$t('tools/random-ip.errors.title')}</h3>
           </div>
           <div class="card-content">
             {#each result.errors as error, index (index)}
@@ -263,7 +270,7 @@
       {#if result.generations.length > 0}
         <div class="card summary-card">
           <div class="card-header row">
-            <h3>Generation Summary</h3>
+            <h3>{$t('tools/random-ip.summary.title')}</h3>
             <button
               class="copy-btn"
               class:copied={clipboard.isCopied('summary')}
@@ -274,32 +281,42 @@
                   `Total Networks: ${result.summary.totalNetworks}\nValid: ${result.summary.validNetworks}\nInvalid: ${result.summary.invalidNetworks}\nTotal IPs: ${result.summary.totalIPsGenerated}\nUnique IPs: ${result.summary.uniqueIPsGenerated}`,
                   'summary',
                 )}
-              use:tooltip={'Copy summary to clipboard'}
+              use:tooltip={$t('tools/random-ip.summary.copyTooltip')}
             >
               <Icon name={clipboard.isCopied('summary') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('summary') ? 'Copied!' : 'Copy'}
+              {clipboard.isCopied('summary') ? $t('tools/random-ip.common.copied') : $t('tools/random-ip.common.copy')}
             </button>
           </div>
           <div class="card-content">
             <div class="summary-stats">
               <div class="info-card">
-                <div class="info-label" use:tooltip={'Total number of networks processed'}>Total Networks</div>
+                <div class="info-label" use:tooltip={$t('tools/random-ip.summary.totalNetworks.tooltip')}>
+                  {$t('tools/random-ip.summary.totalNetworks.label')}
+                </div>
                 <div class="metric-value">{result.summary.totalNetworks}</div>
               </div>
               <div class="info-card">
-                <div class="info-label" use:tooltip={'Networks that were processed successfully'}>Valid</div>
+                <div class="info-label" use:tooltip={$t('tools/random-ip.summary.valid.tooltip')}>
+                  {$t('tools/random-ip.summary.valid.label')}
+                </div>
                 <div class="metric-value success">{result.summary.validNetworks}</div>
               </div>
               <div class="info-card">
-                <div class="info-label" use:tooltip={'Networks that had processing errors'}>Invalid</div>
+                <div class="info-label" use:tooltip={$t('tools/random-ip.summary.invalid.tooltip')}>
+                  {$t('tools/random-ip.summary.invalid.label')}
+                </div>
                 <div class="metric-value error">{result.summary.invalidNetworks}</div>
               </div>
               <div class="info-card">
-                <div class="info-label" use:tooltip={'Total IP addresses generated across all networks'}>Total IPs</div>
+                <div class="info-label" use:tooltip={$t('tools/random-ip.summary.totalIps.tooltip')}>
+                  {$t('tools/random-ip.summary.totalIps.label')}
+                </div>
                 <div class="metric-value info">{result.summary.totalIPsGenerated}</div>
               </div>
               <div class="info-card">
-                <div class="info-label" use:tooltip={'Number of unique IP addresses generated'}>Unique IPs</div>
+                <div class="info-label" use:tooltip={$t('tools/random-ip.summary.uniqueIps.tooltip')}>
+                  {$t('tools/random-ip.summary.uniqueIps.label')}
+                </div>
                 <div class="metric-value">{result.summary.uniqueIPsGenerated}</div>
               </div>
             </div>
@@ -308,28 +325,36 @@
 
         <div class="card all-ips-card">
           <div class="card-header row">
-            <h3>All Generated IPs ({result.allGeneratedIPs.length})</h3>
+            <h3>
+              {$t('tools/random-ip.allIps.title')}
+              {$t('tools/random-ip.allIps.count', { count: result.allGeneratedIPs.length })}
+            </h3>
             <div class="export-buttons">
               <button
                 class="copy-btn"
                 class:copied={clipboard.isCopied('all-ips')}
                 onclick={copyAllIPs}
-                use:tooltip={'Copy all generated IPs to clipboard'}
+                use:tooltip={$t('tools/random-ip.allIps.copyAllTooltip')}
               >
                 <Icon name={clipboard.isCopied('all-ips') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('all-ips') ? 'Copied!' : 'Copy All'}
+                {clipboard.isCopied('all-ips')
+                  ? $t('tools/random-ip.common.copied')
+                  : $t('tools/random-ip.common.copyAll')}
               </button>
-              <button onclick={() => exportResults('txt')} use:tooltip={'Export as plain text file'}>
+              <button onclick={() => exportResults('txt')} use:tooltip={$t('tools/random-ip.allIps.exportTxtTooltip')}>
                 <Icon name="download" size="xs" />
-                TXT
+                {$t('tools/random-ip.common.txt')}
               </button>
-              <button onclick={() => exportResults('csv')} use:tooltip={'Export as CSV file'}>
+              <button onclick={() => exportResults('csv')} use:tooltip={$t('tools/random-ip.allIps.exportCsvTooltip')}>
                 <Icon name="csv-file" size="xs" />
-                CSV
+                {$t('tools/random-ip.common.csv')}
               </button>
-              <button onclick={() => exportResults('json')} use:tooltip={'Export as JSON file'}>
+              <button
+                onclick={() => exportResults('json')}
+                use:tooltip={$t('tools/random-ip.allIps.exportJsonTooltip')}
+              >
                 <Icon name="json-file" size="xs" />
-                JSON
+                {$t('tools/random-ip.common.json')}
               </button>
             </div>
           </div>
@@ -342,7 +367,7 @@
                     class="ip-tag"
                     class:copied={clipboard.isCopied(`ip-${index}`)}
                     onclick={() => clipboard.copy(ip, `ip-${index}`)}
-                    use:tooltip={'Click to copy IP address'}
+                    use:tooltip={$t('tools/random-ip.allIps.ipCopyTooltip')}
                   >
                     {ip}
                     <Icon name={clipboard.isCopied(`ip-${index}`) ? 'check' : 'copy'} size="xs" />
@@ -354,7 +379,7 @@
         </div>
 
         <div class="generations">
-          <h3>Network Generations</h3>
+          <h3>{$t('tools/random-ip.generations.title')}</h3>
 
           <div class="generations-list">
             {#each result.generations as generation, index (index)}
@@ -382,28 +407,32 @@
                     <div class="generation-info">
                       <div class="info-grid">
                         <div class="info-item">
-                          <span class="info-label">Requested:</span>
+                          <span class="info-label">{$t('tools/random-ip.generations.requested')}</span>
                           <span class="info-value">{generation.requestedCount}</span>
                         </div>
 
                         <div class="info-item">
-                          <span class="info-label">Generated:</span>
+                          <span class="info-label">{$t('tools/random-ip.generations.generated')}</span>
                           <span class="info-value">{generation.generatedIPs.length}</span>
                         </div>
 
                         <div class="info-item">
-                          <span class="info-label">Unique:</span>
-                          <span class="info-value">{generation.uniqueIPs ? 'Yes' : 'No'}</span>
+                          <span class="info-label">{$t('tools/random-ip.generations.unique')}</span>
+                          <span class="info-value"
+                            >{generation.uniqueIPs
+                              ? $t('tools/random-ip.generations.uniqueYes')
+                              : $t('tools/random-ip.generations.uniqueNo')}</span
+                          >
                         </div>
 
                         {#if generation.seed}
                           <div class="info-item">
-                            <span class="info-label">Seed:</span>
+                            <span class="info-label">{$t('tools/random-ip.generations.seed')}</span>
                             <button
                               type="button"
                               class="code-button info-code"
                               onclick={() => clipboard.copy(generation.seed!, 'seed')}
-                              title="Click to copy"
+                              title={$t('tools/random-ip.generations.seedCopyTooltip')}
                             >
                               {generation.seed}
                             </button>
@@ -414,34 +443,34 @@
 
                     {#if generation.networkDetails}
                       <div class="network-details">
-                        <h4>Network Range</h4>
+                        <h4>{$t('tools/random-ip.generations.networkRange.title')}</h4>
                         <div class="range-info">
                           <div class="range-item">
-                            <span class="range-label">Start:</span>
+                            <span class="range-label">{$t('tools/random-ip.generations.networkRange.start')}</span>
                             <button
                               type="button"
                               class="code-button range-code"
                               onclick={() => clipboard.copy(generation.networkDetails!.start, 'start')}
-                              title="Click to copy"
+                              title={$t('tools/random-ip.generations.networkRange.startCopyTooltip')}
                             >
                               {generation.networkDetails.start}
                             </button>
                           </div>
 
                           <div class="range-item">
-                            <span class="range-label">End:</span>
+                            <span class="range-label">{$t('tools/random-ip.generations.networkRange.end')}</span>
                             <button
                               type="button"
                               class="code-button range-code"
                               onclick={() => clipboard.copy(generation.networkDetails!.end, 'end')}
-                              title="Click to copy"
+                              title={$t('tools/random-ip.generations.networkRange.endCopyTooltip')}
                             >
                               {generation.networkDetails.end}
                             </button>
                           </div>
 
                           <div class="range-item">
-                            <span class="range-label">Total:</span>
+                            <span class="range-label">{$t('tools/random-ip.generations.networkRange.total')}</span>
                             <span class="range-value">{generation.networkDetails.totalAddresses}</span>
                           </div>
                         </div>
@@ -451,7 +480,12 @@
                     {#if generation.generatedIPs.length > 0}
                       <div class="generated-ips">
                         <div class="details-header">
-                          <h4>Generated IPs ({generation.generatedIPs.length})</h4>
+                          <h4>
+                            {$t('tools/random-ip.generations.generatedIps.title')}
+                            {$t('tools/random-ip.generations.generatedIps.count', {
+                              count: generation.generatedIPs.length,
+                            })}
+                          </h4>
                         </div>
                         <div class="ips-list">
                           {#each generation.generatedIPs as ip, ipIndex (`${ip}-${ipIndex}`)}
@@ -460,7 +494,7 @@
                               class="ip-tag"
                               class:copied={clipboard.isCopied(`gen-${index}-ip-${ipIndex}`)}
                               onclick={() => clipboard.copy(ip, `gen-${index}-ip-${ipIndex}`)}
-                              use:tooltip={'Click to copy IP address'}
+                              use:tooltip={$t('tools/random-ip.allIps.ipCopyTooltip')}
                             >
                               {ip}
                               <Icon

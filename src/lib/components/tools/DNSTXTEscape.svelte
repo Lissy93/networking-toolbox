@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
+  import { t } from '$lib/stores/language';
 
   interface TXTChunk {
     chunk: string;
@@ -79,7 +80,7 @@
     if (!rawText.trim()) {
       return {
         isValid: false,
-        message: 'Please enter text to escape',
+        message: $t('tools/dns-txt-escape.validation.emptyText'),
         type: 'error',
       };
     }
@@ -87,7 +88,7 @@
     if (maxChunkLength < 1 || maxChunkLength > 255) {
       return {
         isValid: false,
-        message: 'Chunk length must be between 1 and 255 characters',
+        message: $t('tools/dns-txt-escape.validation.invalidChunkLength'),
         type: 'error',
       };
     }
@@ -96,7 +97,7 @@
     if (oversizedChunks.length > 0) {
       return {
         isValid: false,
-        message: `${oversizedChunks.length} chunk(s) exceed the maximum length after escaping`,
+        message: $t('tools/dns-txt-escape.validation.oversizedChunks', { count: oversizedChunks.length }),
         type: 'error',
       };
     }
@@ -104,14 +105,14 @@
     if (chunks.length > 10) {
       return {
         isValid: true,
-        message: `Text split into ${chunks.length} chunks (consider splitting across multiple TXT records)`,
+        message: $t('tools/dns-txt-escape.validation.manyChunks', { count: chunks.length }),
         type: 'warning',
       };
     }
 
     return {
       isValid: true,
-      message: `Text successfully split into ${chunks.length} chunk(s)`,
+      message: $t('tools/dns-txt-escape.validation.success', { count: chunks.length }),
       type: 'success',
     };
   });
@@ -147,37 +148,35 @@
     showExamples = false;
   }
 
-  const exampleTexts = [
+  const exampleTexts = $derived([
     {
-      name: 'SPF Record',
-      description: 'Sender Policy Framework record for email authentication',
-      value: 'v=spf1 include:_spf.google.com include:mailgun.org include:servers.mcsv.net ~all',
+      name: $t('tools/dns-txt-escape.examples.spf.name'),
+      description: $t('tools/dns-txt-escape.examples.spf.description'),
+      value: $t('tools/dns-txt-escape.examples.spf.value'),
     },
     {
-      name: 'DKIM Key',
-      description: 'DomainKeys Identified Mail public key record',
-      value:
-        'k=rsa; t=s; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDGGYGqwVF6+nQKQ5R7fPqqJLmPjGYGqwVF6+nQKQ5R7fPqqJLmPjGYGqwVF6+nQKQ5R7fPqqJLmPjGYGqwVF6+nQKQ5R7fPqqJLmPjGYGqwVF6+nQKQ5R7fPqqJLmPjGYGqwVF6+nQKQ5R7fPqqJLmPjGYGqwVF6',
+      name: $t('tools/dns-txt-escape.examples.dkim.name'),
+      description: $t('tools/dns-txt-escape.examples.dkim.description'),
+      value: $t('tools/dns-txt-escape.examples.dkim.value'),
     },
     {
-      name: 'Domain Verification',
-      description: 'Google domain ownership verification token',
-      value: 'google-site-verification=rXOxyZounnZasA8Z7oaD3c14JdjS9aKSWvsR1EbUSIQ',
+      name: $t('tools/dns-txt-escape.examples.domainVerification.name'),
+      description: $t('tools/dns-txt-escape.examples.domainVerification.description'),
+      value: $t('tools/dns-txt-escape.examples.domainVerification.value'),
     },
     {
-      name: 'Long Text Sample',
-      description: 'Text that will need to be split into multiple chunks',
-      value:
-        'This is a very long text string that will definitely exceed the 255 character limit for DNS TXT records and will need to be properly escaped and split into multiple chunks. The escaping tool should handle this automatically and show you exactly how many chunks are created and what the final DNS record format will look like when you publish it to your DNS provider.',
+      name: $t('tools/dns-txt-escape.examples.longText.name'),
+      description: $t('tools/dns-txt-escape.examples.longText.description'),
+      value: $t('tools/dns-txt-escape.examples.longText.value'),
     },
-  ];
+  ]);
 </script>
 
 <div class="card">
   <div class="card-header">
-    <h1>TXT Record Escape Tool</h1>
+    <h1>{$t('tools/dns-txt-escape.title')}</h1>
     <p class="card-subtitle">
-      Safely escape and split TXT record strings into DNS-compatible chunks (≤255 characters each).
+      {$t('tools/dns-txt-escape.description')}
     </p>
   </div>
 
@@ -185,45 +184,51 @@
     <div class="input-section">
       <div class="text-input-config">
         <div class="input-group">
-          <label for="rawText" use:tooltip={'The original text that will be escaped and split into chunks'}>
+          <label for="rawText" use:tooltip={$t('tools/dns-txt-escape.input.textToEscape.tooltip')}>
             <Icon name="edit" size="sm" />
-            Text to Escape
+            {$t('tools/dns-txt-escape.input.textToEscape.label')}
           </label>
-          <textarea id="rawText" bind:value={rawText} placeholder="Enter your raw text here..." rows="6"></textarea>
+          <textarea
+            id="rawText"
+            bind:value={rawText}
+            placeholder={$t('tools/dns-txt-escape.input.textToEscape.placeholder')}
+            rows="6"
+          ></textarea>
         </div>
 
         <div class="config-row">
           <div class="input-group">
-            <label
-              for="maxChunkLength"
-              use:tooltip={'Maximum length for each chunk (DNS TXT record limit is 255 characters)'}
-            >
+            <label for="maxChunkLength" use:tooltip={$t('tools/dns-txt-escape.input.maxChunkLength.tooltip')}>
               <Icon name="ruler" size="sm" />
-              Max Chunk Length
+              {$t('tools/dns-txt-escape.input.maxChunkLength.label')}
             </label>
             <input id="maxChunkLength" type="number" bind:value={maxChunkLength} min="1" max="255" />
           </div>
 
           <div class="escape-options">
-            <h4 use:tooltip={'Configure how the text should be escaped for DNS compatibility'}>
+            <h4 use:tooltip={$t('tools/dns-txt-escape.input.escapeOptions.tooltip')}>
               <Icon name="settings" size="sm" />
-              Escape Options
+              {$t('tools/dns-txt-escape.input.escapeOptions.title')}
             </h4>
             <div class="checkbox-group">
               <label class="checkbox-label">
                 <input type="checkbox" bind:checked={escapeQuotes} />
-                <span>Escape Quotes (")</span>
-                <span use:tooltip={'Escape double quote characters as \\"'}><Icon name="help" size="sm" /></span>
+                <span>{$t('tools/dns-txt-escape.input.escapeOptions.escapeQuotes.label')}</span>
+                <span use:tooltip={$t('tools/dns-txt-escape.input.escapeOptions.escapeQuotes.tooltip')}
+                  ><Icon name="help" size="sm" /></span
+                >
               </label>
               <label class="checkbox-label">
                 <input type="checkbox" bind:checked={escapeBackslashes} />
-                <span>Escape Backslashes (\\)</span>
-                <span use:tooltip={'Escape backslash characters as \\\\'}><Icon name="help" size="sm" /></span>
+                <span>{$t('tools/dns-txt-escape.input.escapeOptions.escapeBackslashes.label')}</span>
+                <span use:tooltip={$t('tools/dns-txt-escape.input.escapeOptions.escapeBackslashes.tooltip')}
+                  ><Icon name="help" size="sm" /></span
+                >
               </label>
               <label class="checkbox-label">
                 <input type="checkbox" bind:checked={preserveSpaces} />
-                <span>Preserve Spacing</span>
-                <span use:tooltip={'Keep original whitespace formatting instead of normalizing spaces'}
+                <span>{$t('tools/dns-txt-escape.input.escapeOptions.preserveSpaces.label')}</span>
+                <span use:tooltip={$t('tools/dns-txt-escape.input.escapeOptions.preserveSpaces.tooltip')}
                   ><Icon name="help" size="sm" /></span
                 >
               </label>
@@ -247,10 +252,10 @@
       {#if chunks.length > 0}
         <div class="chunks-section">
           <div class="section-header">
-            <h3>Escaped Chunks ({chunks.length})</h3>
+            <h3>{$t('tools/dns-txt-escape.results.chunksTitle', { count: chunks.length })}</h3>
             <div class="stats">
-              <span class="stat" use:tooltip={'Total length after escaping'}>
-                {totalLength} chars
+              <span class="stat" use:tooltip={$t('tools/dns-txt-escape.results.totalLengthTooltip')}>
+                {$t('tools/dns-txt-escape.results.totalLengthLabel', { length: totalLength })}
               </span>
             </div>
           </div>
@@ -259,7 +264,9 @@
             {#each chunks as chunk, index (index)}
               <div class="chunk-item">
                 <div class="chunk-header">
-                  <span class="chunk-number">Chunk {index + 1}</span>
+                  <span class="chunk-number"
+                    >{$t('tools/dns-txt-escape.results.chunkNumber', { number: index + 1 })}</span
+                  >
                   <span class="chunk-length">{chunk.escapedLength}/{maxChunkLength}</span>
                 </div>
                 <div class="chunk-content">
@@ -268,7 +275,7 @@
                     type="button"
                     class="copy-btn"
                     onclick={() => copyToClipboard(`"${chunk.escaped}"`)}
-                    use:tooltip={'Copy this chunk to clipboard'}
+                    use:tooltip={$t('tools/dns-txt-escape.results.copyChunkTooltip')}
                   >
                     <Icon name="copy" size="sm" />
                   </button>
@@ -280,34 +287,39 @@
 
         <div class="output-section">
           <div class="section-header">
-            <h3>DNS Record Format</h3>
+            <h3>{$t('tools/dns-txt-escape.results.dnsRecordTitle')}</h3>
             <div class="actions">
               <button
                 type="button"
                 class="copy-btn"
                 onclick={() => copyToClipboard(dnsRecord)}
-                use:tooltip={'Copy single-line DNS record format'}
+                use:tooltip={$t('tools/dns-txt-escape.results.copyButtonTooltip')}
               >
                 <Icon name="copy" size="sm" />
-                Copy
+                {$t('tools/dns-txt-escape.results.copyButton')}
               </button>
-              <button type="button" class="export-btn" onclick={exportAsZoneFile} use:tooltip={'Download as zone file'}>
+              <button
+                type="button"
+                class="export-btn"
+                onclick={exportAsZoneFile}
+                use:tooltip={$t('tools/dns-txt-escape.results.exportButtonTooltip')}
+              >
                 <Icon name="download" size="sm" />
-                Export
+                {$t('tools/dns-txt-escape.results.exportButton')}
               </button>
             </div>
           </div>
 
           <div class="output-formats">
             <div class="format-section">
-              <h4>Single Line Format:</h4>
+              <h4>{$t('tools/dns-txt-escape.results.singleLineFormat')}</h4>
               <div class="code-block">
                 <code>{dnsRecord}</code>
               </div>
             </div>
 
             <div class="format-section">
-              <h4>Zone File Format:</h4>
+              <h4>{$t('tools/dns-txt-escape.results.zoneFileFormat')}</h4>
               <div class="code-block">
                 <pre><code>{zoneFileFormat()}</code></pre>
               </div>
@@ -322,7 +334,7 @@
     <details class="examples-toggle" bind:open={showExamples}>
       <summary>
         <Icon name="lightbulb" size="sm" />
-        Example Texts
+        {$t('tools/dns-txt-escape.examples.title')}
       </summary>
       <div class="examples-grid">
         {#each exampleTexts as example (example.name)}

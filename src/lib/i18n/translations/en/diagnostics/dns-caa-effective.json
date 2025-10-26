@@ -1,0 +1,148 @@
+{
+  "title": "CAA Effective Policy Checker",
+  "subtitle": "Check effective CAA (Certificate Authority Authorization) policies by walking up the domain label chain. Determine which Certificate Authorities are authorized to issue certificates for a domain.",
+  "examples": {
+    "title": "CAA Examples",
+    "items": {
+      "github": {
+        "domain": "github.com",
+        "description": "GitHub CAA configuration",
+        "tooltip": "Check CAA policy for github.com"
+      },
+      "google": {
+        "domain": "www.google.com",
+        "description": "Google subdomain CAA inheritance",
+        "tooltip": "Check CAA policy for www.google.com"
+      },
+      "stripe": {
+        "domain": "api.stripe.com",
+        "description": "Stripe API subdomain CAA",
+        "tooltip": "Check CAA policy for api.stripe.com"
+      },
+      "cloudflare": {
+        "domain": "blog.cloudflare.com",
+        "description": "Cloudflare blog CAA setup",
+        "tooltip": "Check CAA policy for blog.cloudflare.com"
+      },
+      "microsoft": {
+        "domain": "microsoft.com",
+        "description": "Microsoft CAA settings",
+        "tooltip": "Check CAA policy for microsoft.com"
+      },
+      "amazon": {
+        "domain": "amazon.com",
+        "description": "Amazon CAA implementation",
+        "tooltip": "Check CAA policy for amazon.com"
+      }
+    }
+  },
+  "form": {
+    "title": "CAA Policy Check",
+    "domainLabel": "Domain Name",
+    "domainPlaceholder": "example.com",
+    "domainTooltip": "Enter the domain name to check effective CAA policy for",
+    "invalidFormat": "Invalid domain name format",
+    "checkingButton": "Checking CAA...",
+    "checkButton": "Check CAA Policy"
+  },
+  "error": {
+    "title": "CAA Check Failed",
+    "domainRequired": "Domain name is required",
+    "invalidDomain": "Invalid domain name format. Use valid domain names like \"example.com\"",
+    "checkFailed": "CAA check failed ({status})",
+    "invalidRequest": "Invalid request. Please check your domain name.",
+    "serviceUnavailable": "CAA check service temporarily unavailable. Please try again."
+  },
+  "results": {
+    "title": "CAA Policy Results",
+    "copyButton": "Copy Results",
+    "copied": "Copied!",
+    "effectivePolicy": {
+      "title": "Effective CAA Policy",
+      "policyFoundAt": "Policy found at:",
+      "hasRecords": "This domain has CAA records that control certificate issuance",
+      "noPolicyFound": "No CAA policy found",
+      "noPolicyMessage": "No CAA records found in the domain chain for",
+      "implication": "This means any Certificate Authority can issue certificates for this domain."
+    },
+    "singleLevel": {
+      "title": "Top-level CAA Policy",
+      "message": "CAA records found directly on {domain} - no domain tree traversal required."
+    },
+    "chain": {
+      "title": "CAA Lookup Chain",
+      "description": "CAA records are looked up by walking up the domain tree until a CAA record is found or the root is reached.",
+      "levelUp": "level",
+      "levelsUp": "levels",
+      "up": "up",
+      "effectiveBadge": "Effective",
+      "noCAABadge": "No CAA"
+    },
+    "tags": {
+      "issue": {
+        "description": "Authorized to issue certificates"
+      },
+      "issuewild": {
+        "description": "Authorized to issue wildcard certificates"
+      },
+      "iodef": {
+        "description": "Incident reporting contact"
+      },
+      "unknown": {
+        "description": "Unknown CAA tag"
+      }
+    },
+    "flags": {
+      "critical": "Critical flag set - unknown properties must be ignored",
+      "standard": "Standard flag",
+      "flagLabel": "Flag: {flag}"
+    }
+  },
+  "copy": {
+    "header": "CAA Check for {domain}",
+    "generatedAt": "Generated at: {timestamp}",
+    "effectivePolicy": "Effective CAA Policy:",
+    "domainLabel": "Domain: {domain}",
+    "recordsLabel": "Records:",
+    "noRecords": "No CAA records found in the domain chain.",
+    "chainHeader": "CAA Chain (walked up from {domain}):"
+  },
+  "education": {
+    "title": "Understanding CAA Records",
+    "format": {
+      "title": "CAA Record Format",
+      "example": "flag tag \"value\"",
+      "flagDescription": "Flag: 0 (non-critical) or 128 (critical)",
+      "tagDescription": "Tag: issue, issuewild, or iodef",
+      "valueDescription": "Value: CA domain or contact information"
+    },
+    "tags": {
+      "title": "CAA Tags",
+      "issue": "issue: Authorizes a CA to issue certificates for the domain",
+      "issuewild": "issuewild: Authorizes a CA to issue wildcard certificates",
+      "iodef": "iodef: Specifies a URL/email for incident reporting"
+    },
+    "lookupProcess": {
+      "title": "CAA Lookup Process",
+      "step1": "Check for CAA records at the requested domain",
+      "step2": "If none found, check the parent domain",
+      "step3": "Continue up the tree until CAA records are found",
+      "step4": "If no CAA records exist, any CA can issue certificates"
+    },
+    "examples": {
+      "title": "Common CAA Examples",
+      "letsencrypt": {
+        "code": "0 issue \"letsencrypt.org\"",
+        "description": "Allow Let's Encrypt to issue certificates"
+      },
+      "prohibitWildcard": {
+        "code": "0 issuewild \";\"",
+        "description": "Prohibit wildcard certificate issuance"
+      },
+      "iodef": {
+        "code": "0 iodef \"mailto:security@example.com\"",
+        "description": "Report policy violations to security team"
+      }
+    }
+  }
+}

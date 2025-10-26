@@ -3,6 +3,7 @@
   import { useClipboard } from '$lib/composables';
   import Icon from '$lib/components/global/Icon.svelte';
   import { formatNumber } from '$lib/utils/formatters';
+  import { t } from '$lib/stores/language';
   import '../../../styles/diagnostics-pages.scss';
   let pools = $state(`192.168.0.0/16
 10.0.0.0/20`);
@@ -442,8 +443,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>CIDR Allocator</h2>
-    <p>Pack requested subnet sizes into pools using intelligent bin-packing algorithms</p>
+    <h2>{$t('tools/cidr-allocator.title')}</h2>
+    <p>{$t('tools/cidr-allocator.description')}</p>
   </header>
 
   <!-- Examples -->
@@ -451,7 +452,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('tools/cidr-allocator.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (example.label)}
@@ -462,7 +463,7 @@
           >
             <div class="example-label">{example.label}</div>
             <div class="example-preview">
-              Algorithm: {example.algorithm}
+              {$t('tools/cidr-allocator.examples.algorithm', { algorithm: example.algorithm })}
             </div>
           </button>
         {/each}
@@ -472,8 +473,8 @@
 
   <!-- Algorithm Selection -->
   <section class="algorithm-section">
-    <h4 use:tooltip={'Choose between first-fit (faster) and best-fit (more efficient packing) algorithms'}>
-      Allocation Algorithm
+    <h4 use:tooltip={$t('tools/cidr-allocator.algorithm.titleTooltip')}>
+      {$t('tools/cidr-allocator.algorithm.title')}
     </h4>
     <div class="algorithm-options">
       <label class="algorithm-option">
@@ -481,10 +482,10 @@
         <div class="option-content">
           <div class="option-title">
             <Icon name="zap" size="sm" />
-            First-Fit
+            {$t('tools/cidr-allocator.algorithm.firstFit.title')}
           </div>
           <div class="option-description">
-            Fast allocation - uses the first available block that fits (good for speed)
+            {$t('tools/cidr-allocator.algorithm.firstFit.description')}
           </div>
         </div>
       </label>
@@ -494,10 +495,10 @@
         <div class="option-content">
           <div class="option-title">
             <Icon name="target" size="sm" />
-            Best-Fit
+            {$t('tools/cidr-allocator.algorithm.bestFit.title')}
           </div>
           <div class="option-description">
-            Optimal packing - uses the smallest available block that fits (reduces fragmentation)
+            {$t('tools/cidr-allocator.algorithm.bestFit.description')}
           </div>
         </div>
       </label>
@@ -508,30 +509,30 @@
   <section class="input-section">
     <div class="input-grid">
       <div class="input-group">
-        <label for="pools" use:tooltip={'Available network pools - one CIDR block per line'}>
+        <label for="pools" use:tooltip={$t('tools/cidr-allocator.input.poolsTooltip')}>
           <Icon name="database" size="sm" />
-          Available Pools
+          {$t('tools/cidr-allocator.input.poolsLabel')}
         </label>
         <textarea
           id="pools"
           bind:value={pools}
           oninput={handleInputChange}
-          placeholder="192.168.0.0/16&#10;10.0.0.0/20"
+          placeholder={$t('tools/cidr-allocator.input.poolsPlaceholder')}
           rows="6"
           required
         ></textarea>
       </div>
 
       <div class="input-group">
-        <label for="requests" use:tooltip={"Subnet requests in format '/24 - Description' - one per line"}>
+        <label for="requests" use:tooltip={$t('tools/cidr-allocator.input.requestsTooltip')}>
           <Icon name="list-check" size="sm" />
-          Subnet Requests
+          {$t('tools/cidr-allocator.input.requestsLabel')}
         </label>
         <textarea
           id="requests"
           bind:value={requests}
           oninput={handleInputChange}
-          placeholder="/24 - Main Office&#10;/26 - Servers&#10;/28 - Management"
+          placeholder={$t('tools/cidr-allocator.input.requestsPlaceholder')}
           rows="6"
           required
         ></textarea>
@@ -546,14 +547,18 @@
         <!-- Summary -->
         <div class="allocation-summary">
           <div class="summary-header">
-            <h3 use:tooltip={'Summary of subnet allocation requests and pool utilization'}>Allocation Results</h3>
+            <h3 use:tooltip={$t('tools/cidr-allocator.results.titleTooltip')}>
+              {$t('tools/cidr-allocator.results.title')}
+            </h3>
             {#if result.summary.successfulAllocations > 0}
               <button
                 class="copy-all-button {clipboard.isCopied('all-allocations') ? 'copied' : ''}"
                 onclick={copyAllAllocations}
               >
                 <Icon name={clipboard.isCopied('all-allocations') ? 'check' : 'copy'} size="sm" />
-                {clipboard.isCopied('all-allocations') ? 'Copied!' : 'Copy All'}
+                {clipboard.isCopied('all-allocations')
+                  ? $t('tools/cidr-allocator.results.copied')
+                  : $t('tools/cidr-allocator.results.copyAll')}
               </button>
             {/if}
           </div>
@@ -565,7 +570,7 @@
               </div>
               <div class="summary-content">
                 <div class="summary-number">{result.summary.successfulAllocations}</div>
-                <div class="summary-label">Allocated</div>
+                <div class="summary-label">{$t('tools/cidr-allocator.summary.allocated')}</div>
               </div>
             </div>
 
@@ -575,7 +580,7 @@
               </div>
               <div class="summary-content">
                 <div class="summary-number">{result.summary.failedAllocations}</div>
-                <div class="summary-label">Failed</div>
+                <div class="summary-label">{$t('tools/cidr-allocator.summary.failed')}</div>
               </div>
             </div>
 
@@ -585,28 +590,30 @@
               </div>
               <div class="summary-content">
                 <div class="summary-number">{result.summary.efficiency.toFixed(1)}%</div>
-                <div class="summary-label">Efficiency</div>
+                <div class="summary-label">{$t('tools/cidr-allocator.summary.efficiency')}</div>
               </div>
             </div>
           </div>
 
           <div class="space-breakdown">
             <div class="breakdown-item">
-              <span class="breakdown-label">Total Pool Space:</span>
+              <span class="breakdown-label">{$t('tools/cidr-allocator.summary.totalPoolSpace')}</span>
               <span class="breakdown-value">
-                {formatNumber(result.summary.totalPoolSpace)} addresses
+                {$t('tools/cidr-allocator.summary.addresses', { count: formatNumber(result.summary.totalPoolSpace) })}
               </span>
             </div>
             <div class="breakdown-item">
-              <span class="breakdown-label">Allocated:</span>
+              <span class="breakdown-label">{$t('tools/cidr-allocator.summary.allocatedSpace')}</span>
               <span class="breakdown-value allocated">
-                {formatNumber(result.summary.allocatedSpace)} addresses
+                {$t('tools/cidr-allocator.summary.addresses', { count: formatNumber(result.summary.allocatedSpace) })}
               </span>
             </div>
             <div class="breakdown-item">
-              <span class="breakdown-label">Remaining:</span>
+              <span class="breakdown-label">{$t('tools/cidr-allocator.summary.remaining')}</span>
               <span class="breakdown-value">
-                {formatNumber(result.summary.totalPoolSpace - result.summary.allocatedSpace)} addresses
+                {$t('tools/cidr-allocator.summary.addresses', {
+                  count: formatNumber(result.summary.totalPoolSpace - result.summary.allocatedSpace),
+                })}
               </span>
             </div>
           </div>
@@ -614,7 +621,9 @@
 
         <!-- Allocations -->
         <div class="allocations-section">
-          <h4 use:tooltip={'Individual subnet allocation results with assigned CIDR blocks'}>Subnet Allocations</h4>
+          <h4 use:tooltip={$t('tools/cidr-allocator.allocations.titleTooltip')}>
+            {$t('tools/cidr-allocator.allocations.title')}
+          </h4>
           <div class="allocations-list">
             {#each result.allocations as allocation (allocation.request)}
               <div class="allocation-item {allocation.allocated ? 'success' : 'failed'}">
@@ -626,10 +635,10 @@
                   <div class="allocation-status">
                     {#if allocation.allocated}
                       <Icon name="check-circle" size="sm" />
-                      <span class="status-text success">Allocated</span>
+                      <span class="status-text success">{$t('tools/cidr-allocator.allocations.allocated')}</span>
                     {:else}
                       <Icon name="x-circle" size="sm" />
-                      <span class="status-text failed">Failed</span>
+                      <span class="status-text failed">{$t('tools/cidr-allocator.allocations.failed')}</span>
                     {/if}
                   </div>
                 </div>
@@ -638,9 +647,9 @@
                   <div class="allocation-result">
                     <div class="result-info">
                       <code class="result-cidr">{allocation.cidr}</code>
-                      <span class="result-pool">in {allocation.pool}</span>
+                      <span class="result-pool">{$t('tools/cidr-allocator.allocations.in')} {allocation.pool}</span>
                       <span class="result-size">
-                        ({formatNumber(allocation.size)} addresses)
+                        ({$t('tools/cidr-allocator.summary.addresses', { count: formatNumber(allocation.size) })})
                       </span>
                     </div>
                     <button
@@ -653,7 +662,7 @@
                 {:else if allocation.reason}
                   <div class="allocation-reason failed">
                     <Icon name="alert-triangle" size="xs" />
-                    {allocation.reason}
+                    {$t('tools/cidr-allocator.allocations.noSuitableBlock')}
                   </div>
                 {/if}
               </div>
@@ -663,7 +672,7 @@
 
         <!-- Pool Utilization -->
         <div class="pools-section">
-          <h4 use:tooltip={'Detailed breakdown of how address space was used in each pool'}>Pool Utilization</h4>
+          <h4 use:tooltip={$t('tools/cidr-allocator.pools.titleTooltip')}>{$t('tools/cidr-allocator.pools.title')}</h4>
           <div class="pools-grid">
             {#each result.pools as pool (pool.original)}
               <div class="pool-card">
@@ -676,7 +685,7 @@
                       class:medium={pool.utilization >= 50 && pool.utilization < 80}
                       class:low={pool.utilization < 50}
                     >
-                      {pool.utilization.toFixed(1)}% used
+                      {$t('tools/cidr-allocator.pools.used', { percent: pool.utilization.toFixed(1) })}
                     </span>
                   </div>
                 </div>
@@ -689,7 +698,7 @@
                 <!-- Allocated Subnets -->
                 {#if pool.allocated.length > 0}
                   <div class="pool-allocations">
-                    <h5>Allocated Subnets</h5>
+                    <h5>{$t('tools/cidr-allocator.pools.allocatedSubnets')}</h5>
                     <div class="allocated-list">
                       {#each pool.allocated as subnet (subnet.cidr)}
                         <div class="allocated-subnet">
@@ -704,12 +713,12 @@
                 <!-- Remaining Space -->
                 {#if pool.remaining.length > 0}
                   <div class="pool-remaining">
-                    <h5>Available Space</h5>
+                    <h5>{$t('tools/cidr-allocator.pools.availableSpace')}</h5>
                     <div class="remaining-list">
                       {#each pool.remaining.slice(0, 5) as remaining (remaining.cidr)}
                         <div class="remaining-block">
                           <code class="remaining-size">
-                            {formatNumber(remaining.size)} addresses
+                            {$t('tools/cidr-allocator.summary.addresses', { count: formatNumber(remaining.size) })}
                           </code>
                           <span class="remaining-range">
                             {ipToString(remaining.start)} - {ipToString(remaining.start + remaining.size - 1)}
@@ -718,7 +727,7 @@
                       {/each}
                       {#if pool.remaining.length > 5}
                         <div class="remaining-more">
-                          +{pool.remaining.length - 5} more blocks
+                          {$t('tools/cidr-allocator.pools.moreBlocks', { count: pool.remaining.length - 5 })}
                         </div>
                       {/if}
                     </div>
@@ -731,8 +740,8 @@
       {:else}
         <div class="error-message">
           <Icon name="alert-triangle" />
-          <h4>Allocation Error</h4>
-          <p>{result.error || 'Unknown error occurred'}</p>
+          <h4>{$t('tools/cidr-allocator.errors.title')}</h4>
+          <p>{result.error || $t('tools/cidr-allocator.errors.unknown')}</p>
         </div>
       {/if}
     </section>

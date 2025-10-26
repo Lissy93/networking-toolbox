@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
+  import { t } from '$lib/stores/language';
 
   interface SPFMechanism {
     type: 'all' | 'include' | 'a' | 'mx' | 'ptr' | 'ip4' | 'ip6' | 'exists';
@@ -52,16 +53,16 @@
     '?': 'Neutral',
   };
 
-  const mechanismDescriptions = {
-    all: 'Matches all IPs (should be last)',
-    include: 'Include another domains SPF record',
-    a: 'Match A/AAAA records of domain',
-    mx: 'Match MX records of domain',
-    ptr: 'Match PTR records (discouraged)',
-    ip4: 'Match specific IPv4 address/range',
-    ip6: 'Match specific IPv6 address/range',
-    exists: 'Check if domain exists',
-  };
+  const mechanismDescriptions = $derived({
+    all: $t('tools/spf-builder.mechanisms.types.all.description'),
+    include: $t('tools/spf-builder.mechanisms.types.include.description'),
+    a: $t('tools/spf-builder.mechanisms.types.a.description'),
+    mx: $t('tools/spf-builder.mechanisms.types.mx.description'),
+    ptr: $t('tools/spf-builder.mechanisms.types.ptr.description'),
+    ip4: $t('tools/spf-builder.mechanisms.types.ip4.description'),
+    ip6: $t('tools/spf-builder.mechanisms.types.ip6.description'),
+    exists: $t('tools/spf-builder.mechanisms.types.exists.description'),
+  });
 
   const spfRecord = $derived.by(() => {
     const enabledMechanisms = mechanisms.filter((m) => m.enabled);
@@ -110,7 +111,7 @@
 
     // Check for required elements
     if (enabledMechanisms.length === 0) {
-      messages.push('At least one mechanism must be enabled');
+      messages.push($t('tools/spf-builder.validation.errors.noMechanisms'));
     }
 
     // Count DNS lookups
@@ -125,33 +126,33 @@
 
     // Check DNS lookup limit
     if (dnsLookups > 10) {
-      messages.push(`Too many DNS lookups (${dnsLookups}). SPF limit is 10.`);
+      messages.push($t('tools/spf-builder.validation.errors.tooManyLookups', { count: dnsLookups }));
     } else if (dnsLookups > 8) {
-      warnings.push(`High DNS lookup count (${dnsLookups}). Consider consolidating.`);
+      warnings.push($t('tools/spf-builder.validation.warnings.highLookupCount', { count: dnsLookups }));
     }
 
     // Validate mechanism values
     for (const mech of enabledMechanisms) {
       if ((mech.type === 'include' || mech.type === 'exists') && !mech.value.trim()) {
-        messages.push(`${mech.type} mechanism requires a domain value`);
+        messages.push($t('tools/spf-builder.validation.errors.mechanismRequiresDomain', { type: mech.type }));
       }
 
       if ((mech.type === 'ip4' || mech.type === 'ip6') && !mech.value.trim()) {
-        messages.push(`${mech.type} mechanism requires an IP address`);
+        messages.push($t('tools/spf-builder.validation.errors.mechanismRequiresIP', { type: mech.type }));
       }
 
       // Basic IP validation
       if (mech.type === 'ip4' && mech.value.trim()) {
         const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$/;
         if (!ipv4Regex.test(mech.value.trim())) {
-          messages.push(`Invalid IPv4 address/range: ${mech.value}`);
+          messages.push($t('tools/spf-builder.validation.errors.invalidIPv4', { value: mech.value }));
         }
       }
 
       if (mech.type === 'ip6' && mech.value.trim()) {
         // Basic IPv6 validation (simplified)
         if (!mech.value.includes(':')) {
-          messages.push(`Invalid IPv6 address: ${mech.value}`);
+          messages.push($t('tools/spf-builder.validation.errors.invalidIPv6', { value: mech.value }));
         }
       }
     }
@@ -159,26 +160,26 @@
     // Check for 'all' mechanism position
     const allIndex = enabledMechanisms.findIndex((m) => m.type === 'all');
     if (allIndex >= 0 && allIndex < enabledMechanisms.length - 1) {
-      warnings.push("'all' mechanism should typically be last");
+      warnings.push($t('tools/spf-builder.validation.warnings.allShouldBeLast'));
     }
 
     // Check for PTR usage
     if (enabledMechanisms.some((m) => m.type === 'ptr')) {
-      warnings.push('PTR mechanism is discouraged (slow and unreliable)');
+      warnings.push($t('tools/spf-builder.validation.warnings.ptrDiscouraged'));
     }
 
     // Check record length
     const recordLength = spfRecord.length;
     if (recordLength > 255) {
-      messages.push(`SPF record too long (${recordLength} chars). DNS TXT limit is 255.`);
+      messages.push($t('tools/spf-builder.validation.errors.recordTooLong', { length: recordLength }));
     } else if (recordLength > 200) {
-      warnings.push(`SPF record is long (${recordLength} chars). Consider shortening.`);
+      warnings.push($t('tools/spf-builder.validation.warnings.recordLong', { length: recordLength }));
     }
 
     // Check for conflicting modifiers
     const redirectEnabled = modifiers.find((m) => m.type === 'redirect' && m.enabled);
     if (redirectEnabled && enabledMechanisms.length > 0) {
-      warnings.push('redirect modifier should not be used with mechanisms');
+      warnings.push($t('tools/spf-builder.validation.warnings.redirectWithMechanisms'));
     }
 
     return {
@@ -246,18 +247,18 @@
     selectedExample = example.name;
   }
 
-  const examplePolicies = [
+  const examplePolicies = $derived([
     {
-      name: 'Basic Email Provider',
-      description: 'Simple SPF policy for Google Workspace',
+      name: $t('tools/spf-builder.examples.basic.name'),
+      description: $t('tools/spf-builder.examples.basic.description'),
       mechanisms: [
         { type: 'include', qualifier: '+', value: '_spf.google.com', enabled: true },
         { type: 'all', qualifier: '~', value: '', enabled: true },
       ],
     },
     {
-      name: 'Multiple Providers',
-      description: 'SPF policy for multiple email services',
+      name: $t('tools/spf-builder.examples.multiple.name'),
+      description: $t('tools/spf-builder.examples.multiple.description'),
       mechanisms: [
         { type: 'include', qualifier: '+', value: '_spf.google.com', enabled: true },
         { type: 'include', qualifier: '+', value: 'mailgun.org', enabled: true },
@@ -266,8 +267,8 @@
       ],
     },
     {
-      name: 'Server + Provider',
-      description: 'Dedicated server with email provider fallback',
+      name: $t('tools/spf-builder.examples.serverProvider.name'),
+      description: $t('tools/spf-builder.examples.serverProvider.description'),
       mechanisms: [
         { type: 'ip4', qualifier: '+', value: '203.0.113.1', enabled: true },
         { type: 'mx', qualifier: '+', value: '', enabled: true },
@@ -276,36 +277,34 @@
       ],
     },
     {
-      name: 'Strict Policy',
-      description: 'Restrictive SPF policy with hard fail',
+      name: $t('tools/spf-builder.examples.strict.name'),
+      description: $t('tools/spf-builder.examples.strict.description'),
       mechanisms: [
         { type: 'ip4', qualifier: '+', value: '203.0.113.0/24', enabled: true },
         { type: 'include', qualifier: '+', value: '_spf.google.com', enabled: true },
         { type: 'all', qualifier: '-', value: '', enabled: true },
       ],
     },
-  ];
+  ]);
 </script>
 
 <div class="card">
   <div class="card-header">
-    <h1>SPF Policy Builder</h1>
-    <p class="card-subtitle">
-      Craft SPF (Sender Policy Framework) policies with mechanisms, qualifiers, and validation.
-    </p>
+    <h1>{$t('tools/spf-builder.title')}</h1>
+    <p class="card-subtitle">{$t('tools/spf-builder.description')}</p>
   </div>
 
   <div class="grid-layout">
     <div class="input-section">
       <div class="mechanisms-section">
         <div class="section-header">
-          <h3 use:tooltip={'Configure SPF mechanisms that define which servers can send email'}>
+          <h3 use:tooltip={$t('tools/spf-builder.mechanisms.tooltip')}>
             <Icon name="settings" size="sm" />
-            SPF Mechanisms
+            {$t('tools/spf-builder.mechanisms.title')}
           </h3>
           <button type="button" class="add-btn" onclick={addCustomMechanism}>
             <Icon name="plus" size="sm" />
-            Add Custom
+            {$t('tools/spf-builder.mechanisms.addButton')}
           </button>
         </div>
 
@@ -324,10 +323,10 @@
                 <div class="mechanism-controls">
                   <div class="qualifier-select">
                     <select bind:value={mechanism.qualifier} disabled={!mechanism.enabled}>
-                      <option value="+">+ Pass</option>
-                      <option value="-">- Fail</option>
-                      <option value="~">~ SoftFail</option>
-                      <option value="?">? Neutral</option>
+                      <option value="+">{$t('tools/spf-builder.mechanisms.qualifiers.pass')}</option>
+                      <option value="-">{$t('tools/spf-builder.mechanisms.qualifiers.fail')}</option>
+                      <option value="~">{$t('tools/spf-builder.mechanisms.qualifiers.softFail')}</option>
+                      <option value="?">{$t('tools/spf-builder.mechanisms.qualifiers.neutral')}</option>
                     </select>
                   </div>
 
@@ -336,7 +335,7 @@
                       type="button"
                       class="remove-btn"
                       onclick={() => removeMechanism(index)}
-                      use:tooltip={'Remove this mechanism'}
+                      use:tooltip={$t('tools/spf-builder.mechanisms.removeTooltip')}
                     >
                       <Icon name="x" size="sm" />
                     </button>
@@ -349,15 +348,7 @@
                   type="text"
                   bind:value={mechanism.value}
                   disabled={!mechanism.enabled}
-                  placeholder={mechanism.type === 'ip4'
-                    ? '203.0.113.1 or 203.0.113.0/24'
-                    : mechanism.type === 'ip6'
-                      ? '2001:db8::1 or 2001:db8::/32'
-                      : mechanism.type === 'include'
-                        ? '_spf.google.com'
-                        : mechanism.type === 'exists'
-                          ? 'check.example.com'
-                          : 'domain.com (optional)'}
+                  placeholder={$t(`tools/spf-builder.mechanisms.types.${mechanism.type}.placeholder`)}
                   class="mechanism-input"
                 />
               {/if}
@@ -368,9 +359,9 @@
 
       <div class="modifiers-section">
         <div class="section-header">
-          <h3 use:tooltip={'Optional SPF modifiers for advanced configuration'}>
+          <h3 use:tooltip={$t('tools/spf-builder.modifiers.tooltip')}>
             <Icon name="wrench" size="sm" />
-            SPF Modifiers
+            {$t('tools/spf-builder.modifiers.title')}
           </h3>
         </div>
 
@@ -386,7 +377,7 @@
                 type="text"
                 bind:value={modifier.value}
                 disabled={!modifier.enabled}
-                placeholder={modifier.type === 'redirect' ? 'fallback.example.com' : 'explain.example.com'}
+                placeholder={$t(`tools/spf-builder.modifiers.${modifier.type}.placeholder`)}
                 class="modifier-input"
               />
             </div>
@@ -398,27 +389,31 @@
     <div class="results-section">
       <div class="spf-record-section">
         <div class="section-header">
-          <h3>Generated SPF Record</h3>
+          <h3>{$t('tools/spf-builder.output.title')}</h3>
           <div class="actions">
             <button
               type="button"
               class="copy-btn"
               class:success={buttonStates['copy-spf']}
               onclick={() => copyToClipboard(spfRecord, 'copy-spf')}
-              use:tooltip={'Copy SPF record to clipboard'}
+              use:tooltip={$t('tools/spf-builder.output.copyTooltip')}
             >
               <Icon name={buttonStates['copy-spf'] ? 'check' : 'copy'} size="sm" />
-              {buttonStates['copy-spf'] ? 'Copied!' : 'Copy'}
+              {buttonStates['copy-spf']
+                ? $t('tools/spf-builder.output.copied')
+                : $t('tools/spf-builder.output.copyButton')}
             </button>
             <button
               type="button"
               class="export-btn"
               class:success={buttonStates['export-spf']}
               onclick={exportAsZoneFile}
-              use:tooltip={'Download as zone file'}
+              use:tooltip={$t('tools/spf-builder.output.exportTooltip')}
             >
               <Icon name={buttonStates['export-spf'] ? 'check' : 'download'} size="sm" />
-              {buttonStates['export-spf'] ? 'Downloaded!' : 'Export'}
+              {buttonStates['export-spf']
+                ? $t('tools/spf-builder.output.downloaded')
+                : $t('tools/spf-builder.output.exportButton')}
             </button>
           </div>
         </div>
@@ -430,7 +425,7 @@
         </div>
 
         <div class="zone-file-output">
-          <h4>Zone File Format:</h4>
+          <h4>{$t('tools/spf-builder.output.zoneFileFormat')}</h4>
           <div class="code-block">
             <code>example.com. IN TXT "{spfRecord}"</code>
           </div>
@@ -441,19 +436,19 @@
         <div class="section-header">
           <h3>
             <Icon name="certified" size="sm" />
-            Policy Validation
+            {$t('tools/spf-builder.validation.title')}
           </h3>
         </div>
 
         <div class="stats-grid">
           <div class="stat-item">
-            <span class="stat-label">DNS Lookups:</span>
+            <span class="stat-label">{$t('tools/spf-builder.validation.dnsLookupsLabel')}</span>
             <span class="stat-value" class:warning={validation.dnsLookups > 8} class:error={validation.dnsLookups > 10}>
               {validation.dnsLookups}/10
             </span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">Record Length:</span>
+            <span class="stat-label">{$t('tools/spf-builder.validation.recordLengthLabel')}</span>
             <span
               class="stat-value"
               class:warning={validation.recordLength > 200}
@@ -463,9 +458,11 @@
             </span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">Status:</span>
+            <span class="stat-label">{$t('tools/spf-builder.validation.statusLabel')}</span>
             <span class="stat-value" class:success={validation.isValid} class:error={!validation.isValid}>
-              {validation.isValid ? 'Valid' : 'Invalid'}
+              {validation.isValid
+                ? $t('tools/spf-builder.validation.validStatus')
+                : $t('tools/spf-builder.validation.invalidStatus')}
             </span>
           </div>
         </div>
@@ -495,7 +492,7 @@
         {#if validation.isValid && validation.messages.length === 0 && validation.warnings.length === 0}
           <div class="validation-messages success">
             <Icon name="check-circle" size="sm" />
-            <div class="message">SPF policy is valid and ready to use!</div>
+            <div class="message">{$t('tools/spf-builder.validation.successMessage')}</div>
           </div>
         {/if}
       </div>
@@ -506,7 +503,7 @@
     <details class="examples-toggle" bind:open={showExamples}>
       <summary>
         <Icon name="lightbulb" size="sm" />
-        Example Policies
+        {$t('tools/spf-builder.examples.title')}
       </summary>
       <div class="examples-grid">
         {#each examplePolicies as example (example.name)}

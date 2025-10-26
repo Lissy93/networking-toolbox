@@ -1,0 +1,170 @@
+{
+  "title": "DHCP Options 150/66/67 - TFTP Server Configuration",
+  "subtitle": "Configure TFTP servers for PXE boot and Cisco IP phones. Option 150 (Cisco TFTP list), Option 66 (TFTP server name), and Option 67 (bootfile name).",
+
+  "modes": {
+    "encode": "Encode",
+    "decode": "Decode"
+  },
+
+  "encodeExamples": {
+    "ciscoIPPhones": {
+      "label": "Cisco IP Phones",
+      "description": "Redundant TFTP servers for Cisco IP phone configuration"
+    },
+    "pxeBootStandard": {
+      "label": "PXE Boot (Standard)",
+      "description": "Standard PXE boot with single TFTP server"
+    },
+    "pxeBootUEFI": {
+      "label": "PXE Boot (UEFI)",
+      "description": "UEFI PXE boot configuration"
+    },
+    "combined": {
+      "label": "Combined (Option 150 + 67)",
+      "description": "Cisco phones with redundant TFTP and config template"
+    }
+  },
+
+  "decodeExamples": {
+    "option150DualTFTP": {
+      "label": "Option 150: Dual TFTP",
+      "description": "192.168.1.10 and 192.168.1.11"
+    },
+    "option66Hostname": {
+      "label": "Option 66: Hostname",
+      "description": "pxe.example.com"
+    },
+    "option67PXEBoot": {
+      "label": "Option 67: PXE Boot",
+      "description": "pxelinux.0"
+    },
+    "option67UEFIBoot": {
+      "label": "Option 67: UEFI Boot",
+      "description": "bootx64.efi"
+    }
+  },
+
+  "encode": {
+    "option150": {
+      "title": "Option 150: Cisco TFTP Server List",
+      "helpText": "Multiple IPv4 addresses for redundant TFTP servers (Cisco IP phones)",
+      "serverLabel": "Server {number}",
+      "serverPlaceholder": "192.168.1.10",
+      "addButton": "Add TFTP Server"
+    },
+    "option66": {
+      "title": "Option 66: TFTP Server Name (Standard)",
+      "helpText": "Single hostname or IP address for standard PXE boot",
+      "label": "TFTP Server Hostname/IP",
+      "placeholder": "tftp.example.com or 192.168.1.10"
+    },
+    "option67": {
+      "title": "Option 67: Bootfile Name",
+      "helpText": "Filename to boot from TFTP server (e.g., pxelinux.0 for BIOS, bootx64.efi for UEFI)",
+      "label": "Bootfile Name",
+      "placeholder": "pxelinux.0"
+    },
+    "networkSettings": {
+      "title": "Network Settings (Optional)",
+      "helpText": "Customize network values for configuration examples below",
+      "subnet": {
+        "label": "Subnet",
+        "placeholder": "192.168.1.0"
+      },
+      "netmask": {
+        "label": "Netmask",
+        "placeholder": "255.255.255.0"
+      },
+      "rangeStart": {
+        "label": "Range Start",
+        "placeholder": "192.168.1.100"
+      },
+      "rangeEnd": {
+        "label": "Range End",
+        "placeholder": "192.168.1.200"
+      },
+      "errorsTitle": "Network Settings Errors"
+    }
+  },
+
+  "decode": {
+    "title": "Decode TFTP Option",
+    "optionType": {
+      "label": "Option Type",
+      "option150": "Option 150: TFTP Server List",
+      "option66": "Option 66: TFTP Server Name",
+      "option67": "Option 67: Bootfile Name"
+    },
+    "hexInput": {
+      "label": "Hex-Encoded Option Data",
+      "placeholder": "Enter hex string (e.g., c0a8010ac0a8010b for Option 150)"
+    },
+    "decodeButton": "Decode"
+  },
+
+  "errors": {
+    "title": "Validation Errors"
+  },
+
+  "results": {
+    "option150": {
+      "title": "Option 150: TFTP Server List",
+      "hexEncodedTitle": "Hex-Encoded (Compact)",
+      "wireFormatTitle": "Wire Format (Spaced)",
+      "totalLength": "Total Length:",
+      "bytes": "{length} bytes",
+      "servers": "Servers:",
+      "serverCount": "{count}"
+    },
+    "option66": {
+      "title": "Option 66: TFTP Server Name",
+      "valueTitle": "Value",
+      "hexEncodedTitle": "Hex-Encoded",
+      "totalLength": "Total Length:",
+      "bytes": "{length} bytes"
+    },
+    "option67": {
+      "title": "Option 67: Bootfile Name",
+      "valueTitle": "Value",
+      "hexEncodedTitle": "Hex-Encoded",
+      "totalLength": "Total Length:",
+      "bytes": "{length} bytes"
+    },
+    "configExamples": {
+      "title": "Configuration Examples",
+      "iscDhcpd": "ISC dhcpd Configuration",
+      "keaDhcp4": "Kea DHCPv4 Configuration",
+      "ciscoIos": "Cisco IOS Configuration"
+    }
+  },
+
+  "decodeResults": {
+    "option150": {
+      "title": "Decoded Option 150: TFTP Server List",
+      "totalLength": "Total Length:",
+      "bytes": "{length} bytes",
+      "serversFound": "Servers Found:",
+      "serverCount": "{count}",
+      "serversTitle": "TFTP Servers",
+      "serverLabel": "Server {number}:"
+    },
+    "option66": {
+      "title": "Decoded Option 66: TFTP Server Name",
+      "totalLength": "Total Length:",
+      "bytes": "{length} bytes",
+      "serverTitle": "TFTP Server"
+    },
+    "option67": {
+      "title": "Decoded Option 67: Bootfile Name",
+      "totalLength": "Total Length:",
+      "bytes": "{length} bytes",
+      "bootfileTitle": "Bootfile"
+    }
+  },
+
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

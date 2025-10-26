@@ -1,0 +1,138 @@
+{
+  "title": "NAPTR Record Builder",
+  "description": "Construct NAPTR (Naming Authority Pointer) records for dynamic delegation and service mapping",
+
+  "examples": {
+    "title": "Quick Examples",
+    "sipService": "SIP Service",
+    "emailService": "Email Service",
+    "webService": "Web Service",
+    "srvDelegation": "SRV Delegation"
+  },
+
+  "flags": {
+    "uFlag": {
+      "label": "U - Terminal rule (URI)",
+      "description": "The Rule is terminal and the result is a URI"
+    },
+    "sFlag": {
+      "label": "S - Terminal rule (SRV)",
+      "description": "The Rule is terminal and the result is for SRV lookup"
+    },
+    "aFlag": {
+      "label": "A - Terminal rule (Address)",
+      "description": "The Rule is terminal and the result is an address record"
+    },
+    "pFlag": {
+      "label": "P - Protocol specific",
+      "description": "Protocol-specific flags"
+    },
+    "emptyFlag": {
+      "label": "Empty - Non-terminal",
+      "description": "The Rule is not terminal (continue processing)"
+    },
+    "selectPlaceholder": "Select flag type"
+  },
+
+  "services": {
+    "sip": {
+      "label": "SIP Service",
+      "description": "Session Initiation Protocol"
+    },
+    "email": {
+      "label": "Email Service",
+      "description": "Electronic mail service"
+    },
+    "webHttp": {
+      "label": "HTTP Web Service",
+      "description": "Web service over HTTP"
+    },
+    "webHttps": {
+      "label": "HTTPS Web Service",
+      "description": "Secure web service over HTTPS"
+    },
+    "tel": {
+      "label": "Telephone Service",
+      "description": "Telephone number mapping"
+    },
+    "fax": {
+      "label": "Fax Service",
+      "description": "Facsimile service"
+    },
+    "h323": {
+      "label": "H.323 Service",
+      "description": "H.323 multimedia protocol"
+    },
+    "im": {
+      "label": "Instant Messaging",
+      "description": "Instant messaging service"
+    },
+    "showExamples": "Show service examples"
+  },
+
+  "input": {
+    "domainLabel": "Domain Name *",
+    "domainTooltip": "The domain name for this NAPTR record",
+    "domainDescription": "The domain name for this NAPTR record",
+    "domainPlaceholder": "example.com",
+    "orderLabel": "Order *",
+    "orderTooltip": "Processing order - lower values are processed first (0-65535)",
+    "orderDescription": "Processing order (0-65535)",
+    "preferenceLabel": "Preference *",
+    "preferenceTooltip": "Preference within the same order value (0-65535)",
+    "preferenceDescription": "Preference within order (0-65535)",
+    "flagsLabel": "Flags",
+    "flagsTooltip": "Control processing behavior - affects how the result is interpreted",
+    "serviceLabel": "Service",
+    "serviceTooltip": "Service identifier or protocol (e.g., E2U+sip for SIP services)",
+    "servicePlaceholder": "E2U+sip",
+    "regexpLabel": "Regular Expression",
+    "regexpTooltip": "Regular expression for pattern matching and substitution (format: !pattern!replacement!)",
+    "regexpPlaceholder": "!^.*$!sip:info@example.com!",
+    "regexpDescription": "Substitution expression (format: !pattern!replacement!)",
+    "replacementLabel": "Replacement",
+    "replacementTooltip": "Next domain to query, or '.' for terminal rules",
+    "replacementPlaceholder": ".",
+    "replacementDescription": "Domain name for next lookup, or \".\" for terminal rules"
+  },
+
+  "output": {
+    "title": "Generated NAPTR Record",
+    "placeholder": "Fill in the required fields to generate the NAPTR record",
+    "copyButton": "Copy Record",
+    "copied": "Copied!",
+    "downloadButton": "Download",
+    "downloaded": "Downloaded!"
+  },
+
+  "warnings": {
+    "title": "Configuration Warnings",
+    "uriFlag": "URI flag requires a valid substitution expression with delimiters",
+    "srvFlag": "SRV flag typically requires a replacement domain, not \".\"",
+    "nonTerminal": "Non-terminal rules should have a replacement domain for continued processing",
+    "regexpFormat": "Regular expressions should follow the format: !pattern!replacement!",
+    "orderPreference": "Order and Preference should typically be different values"
+  },
+
+  "info": {
+    "aboutTitle": "About NAPTR Records",
+    "aboutDescription": "NAPTR (Naming Authority Pointer) records provide a way to map domain names to URIs or other domain names through regular expression-based rewriting. They're commonly used in telecommunications for ENUM (E.164 Number Mapping) and SIP services, allowing dynamic delegation and service discovery.",
+    "fieldsTitle": "Field Descriptions",
+    "fields": {
+      "order": "Processing order (lower values first)",
+      "preference": "Preference within same order",
+      "flags": "Control processing behavior",
+      "service": "Service identifier or protocol",
+      "regexp": "Pattern matching and substitution",
+      "replacement": "Next domain to query"
+    },
+    "useCasesTitle": "Common Use Cases",
+    "useCases": {
+      "enum": "ENUM telephone number mapping",
+      "sip": "SIP service discovery",
+      "delegation": "Dynamic delegation",
+      "protocol": "Protocol mapping",
+      "location": "Service location"
+    }
+  }
+}

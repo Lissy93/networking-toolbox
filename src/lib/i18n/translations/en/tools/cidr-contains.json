@@ -1,0 +1,80 @@
+{
+  "title": "CIDR Containment Checker",
+  "description": "Check if IP ranges and CIDR blocks are contained within other ranges",
+
+  "examples": {
+    "title": "Quick Examples",
+    "basicContainment": "Basic Containment",
+    "mixedResults": "Mixed Results",
+    "partialOverlap": "Partial Overlap",
+    "ipv6Containment": "IPv6 Containment"
+  },
+
+  "options": {
+    "title": "Options",
+    "mergeContainers": "Merge/normalize containers first",
+    "mergeContainersTooltip": "Combine overlapping ranges in set A before checking containment",
+    "strictEquality": "Strict equality counts as contain",
+    "strictEqualityTooltip": "Treat exact matches as 'equal' instead of 'inside'"
+  },
+
+  "input": {
+    "setALabel": "Set A (Containers)",
+    "setATooltip": "The containing set - these ranges may contain items from Set B",
+    "setAPlaceholder": "192.168.0.0/16\n10.0.0.0/8",
+    "setBLabel": "Set B (Candidates)",
+    "setBTooltip": "Items to check for containment within Set A",
+    "setBPlaceholder": "192.168.1.0/24\n172.16.0.0/24",
+    "clearAll": "Clear All"
+  },
+
+  "results": {
+    "errorsTitle": "Parse Errors",
+    "analysisTitle": "Containment Analysis",
+    "exportCSV": "CSV",
+    "exportJSON": "JSON",
+    "resultsTitle": "Containment Results"
+  },
+
+  "stats": {
+    "containersLabel": "Containers (A)",
+    "itemsCount": "{count} items",
+    "addressesCount": "{count} addresses",
+    "candidatesLabel": "Candidates (B)",
+    "checkedForContainment": "checked for containment",
+    "insideLabel": "Inside",
+    "fullyContained": "fully contained",
+    "equalLabel": "Equal",
+    "exactMatches": "exact matches",
+    "partialLabel": "Partial",
+    "partialOverlap": "partial overlap",
+    "outsideLabel": "Outside",
+    "noOverlap": "no overlap"
+  },
+
+  "table": {
+    "candidateColumn": "Candidate",
+    "statusColumn": "Status",
+    "coverageColumn": "Coverage",
+    "containersColumn": "Containers",
+    "gapsColumn": "Gaps",
+    "noDash": "-"
+  },
+
+  "status": {
+    "inside": "Inside",
+    "equal": "Equal",
+    "partial": "Partial",
+    "outside": "Outside"
+  },
+
+  "visualization": {
+    "title": "Containment Visualization",
+    "candidateRange": "Candidate Range",
+    "containerCoverage": "Container Coverage",
+    "uncoveredGaps": "Uncovered Gaps",
+    "candidateTooltip": "Candidate{label}\nSize: {size}{cidr}",
+    "containerTooltip": "Container{label}\nSize: {size}{cidr}",
+    "gapTooltip": "Gap{label}\nSize: {size}{cidr}"
+  }
+}

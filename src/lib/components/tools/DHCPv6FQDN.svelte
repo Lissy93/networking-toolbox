@@ -4,6 +4,7 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
   import {
     type FQDNConfig,
     type FQDNResult,
@@ -92,10 +93,7 @@
   });
 </script>
 
-<ToolContentContainer
-  title="DHCPv6 Client FQDN Option (RFC 4704)"
-  description="Configure the Client FQDN Option (Option 39) for DHCPv6, enabling dynamic DNS updates and hostname management for IPv6 clients."
->
+<ToolContentContainer title={$t('tools/dhcpv6-fqdn.title')} description={$t('tools/dhcpv6-fqdn.subtitle')}>
   <ExamplesCard
     examples={FQDN_EXAMPLES}
     onSelect={loadExample}
@@ -106,24 +104,29 @@
 
   <div class="card input-card">
     <div class="card-header">
-      <h3>FQDN Configuration</h3>
-      <p class="help-text">Fully Qualified Domain Name for the DHCPv6 client</p>
+      <h3>{$t('tools/dhcpv6-fqdn.configuration.fqdnTitle')}</h3>
+      <p class="help-text">{$t('tools/dhcpv6-fqdn.configuration.fqdnHelpText')}</p>
     </div>
     <div class="card-content">
       <div class="input-group">
         <label for="fqdn">
           <Icon name="globe" size="sm" />
-          Fully Qualified Domain Name (FQDN)
+          {$t('tools/dhcpv6-fqdn.configuration.fqdnLabel')}
         </label>
-        <input id="fqdn" type="text" bind:value={config.fqdn} placeholder="client.example.com" />
+        <input
+          id="fqdn"
+          type="text"
+          bind:value={config.fqdn}
+          placeholder={$t('tools/dhcpv6-fqdn.configuration.fqdnPlaceholder')}
+        />
       </div>
     </div>
   </div>
 
   <div class="card input-card">
     <div class="card-header">
-      <h3>DNS Update Flags</h3>
-      <p class="help-text">Control how DNS updates are performed</p>
+      <h3>{$t('tools/dhcpv6-fqdn.configuration.flagsTitle')}</h3>
+      <p class="help-text">{$t('tools/dhcpv6-fqdn.configuration.flagsHelpText')}</p>
     </div>
     <div class="card-content flags-content">
       <div class="checkbox-group">
@@ -131,8 +134,8 @@
         <label for="server-update">
           <Icon name="server" size="sm" />
           <div class="checkbox-text">
-            <strong>Server Should Update DNS (S Flag)</strong>
-            <span class="help-text">Server will perform AAAA and PTR record updates</span>
+            <strong>{$t('tools/dhcpv6-fqdn.configuration.serverUpdate.label')}</strong>
+            <span class="help-text">{$t('tools/dhcpv6-fqdn.configuration.serverUpdate.help')}</span>
           </div>
         </label>
       </div>
@@ -142,8 +145,8 @@
         <label for="server-override">
           <Icon name="shield" size="sm" />
           <div class="checkbox-text">
-            <strong>Server Override (O Flag)</strong>
-            <span class="help-text">Server can override client's preferences</span>
+            <strong>{$t('tools/dhcpv6-fqdn.configuration.serverOverride.label')}</strong>
+            <span class="help-text">{$t('tools/dhcpv6-fqdn.configuration.serverOverride.help')}</span>
           </div>
         </label>
       </div>
@@ -153,8 +156,8 @@
         <label for="client-update">
           <Icon name="user" size="sm" />
           <div class="checkbox-text">
-            <strong>Client Should Update DNS (N Flag = 0)</strong>
-            <span class="help-text">Client will perform its own DNS updates</span>
+            <strong>{$t('tools/dhcpv6-fqdn.configuration.clientUpdate.label')}</strong>
+            <span class="help-text">{$t('tools/dhcpv6-fqdn.configuration.clientUpdate.help')}</span>
           </div>
         </label>
       </div>
@@ -163,7 +166,7 @@
 
   {#if validationErrors.length > 0}
     <div class="card errors-card">
-      <h3>Validation Errors</h3>
+      <h3>{$t('tools/dhcpv6-fqdn.errors.title')}</h3>
       {#each validationErrors as error, i (i)}
         <div class="error-message">
           <Icon name="alert-triangle" size="sm" />
@@ -175,35 +178,50 @@
 
   {#if result && validationErrors.length === 0}
     <div class="card results">
-      <h3>Option 39: Client FQDN</h3>
+      <h3>{$t('tools/dhcpv6-fqdn.results.title')}</h3>
 
       <div class="summary-card">
-        <div><strong>FQDN:</strong> {result.fqdn}</div>
-        <div><strong>Total Length:</strong> {result.totalLength} bytes</div>
+        <div><strong>{$t('tools/dhcpv6-fqdn.results.fqdn')}</strong> {result.fqdn}</div>
+        <div>
+          <strong>{$t('tools/dhcpv6-fqdn.results.totalLength')}</strong>
+          {$t('tools/dhcpv6-fqdn.results.lengthBytes', { length: result.totalLength })}
+        </div>
       </div>
 
       <div class="flags-section">
-        <h4>Flags Breakdown</h4>
+        <h4>{$t('tools/dhcpv6-fqdn.results.flagsBreakdown')}</h4>
         <div class="flags-grid">
           <div class="flag-item" class:active={result.flags.S}>
             <Icon name="server" size="sm" />
             <div class="flag-content">
-              <strong>S Flag</strong>
-              <span>{result.flags.S ? 'Set' : 'Not Set'}</span>
+              <strong>{$t('tools/dhcpv6-fqdn.results.sFlag')}</strong>
+              <span
+                >{result.flags.S
+                  ? $t('tools/dhcpv6-fqdn.results.flagSet')
+                  : $t('tools/dhcpv6-fqdn.results.flagNotSet')}</span
+              >
             </div>
           </div>
           <div class="flag-item" class:active={result.flags.O}>
             <Icon name="shield" size="sm" />
             <div class="flag-content">
-              <strong>O Flag</strong>
-              <span>{result.flags.O ? 'Set' : 'Not Set'}</span>
+              <strong>{$t('tools/dhcpv6-fqdn.results.oFlag')}</strong>
+              <span
+                >{result.flags.O
+                  ? $t('tools/dhcpv6-fqdn.results.flagSet')
+                  : $t('tools/dhcpv6-fqdn.results.flagNotSet')}</span
+              >
             </div>
           </div>
           <div class="flag-item" class:active={result.flags.N}>
             <Icon name="user" size="sm" />
             <div class="flag-content">
-              <strong>N Flag</strong>
-              <span>{result.flags.N ? 'Set' : 'Not Set'}</span>
+              <strong>{$t('tools/dhcpv6-fqdn.results.nFlag')}</strong>
+              <span
+                >{result.flags.N
+                  ? $t('tools/dhcpv6-fqdn.results.flagSet')
+                  : $t('tools/dhcpv6-fqdn.results.flagNotSet')}</span
+              >
             </div>
           </div>
         </div>
@@ -219,7 +237,7 @@
 
         <div class="output-group">
           <div class="output-header">
-            <h4>Flags Byte</h4>
+            <h4>{$t('tools/dhcpv6-fqdn.results.flagsByte')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -227,7 +245,9 @@
               onclick={() => clipboard.copy(result!.flags.flagsByte, 'flags')}
             >
               <Icon name={clipboard.isCopied('flags') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('flags') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('flags')
+                ? $t('tools/dhcpv6-fqdn.buttons.copied')
+                : $t('tools/dhcpv6-fqdn.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.flags.flagsByte}</pre>
@@ -236,7 +256,7 @@
 
       <div class="output-group">
         <div class="output-header">
-          <h4>Hex-Encoded (Compact)</h4>
+          <h4>{$t('tools/dhcpv6-fqdn.results.hexEncoded')}</h4>
           <button
             type="button"
             class="copy-btn"
@@ -244,7 +264,7 @@
             onclick={() => clipboard.copy(result!.hexEncoded, 'hex')}
           >
             <Icon name={clipboard.isCopied('hex') ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied('hex') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('hex') ? $t('tools/dhcpv6-fqdn.buttons.copied') : $t('tools/dhcpv6-fqdn.buttons.copy')}
           </button>
         </div>
         <pre class="output-value code-block">{result.hexEncoded}</pre>
@@ -252,7 +272,7 @@
 
       <div class="output-group">
         <div class="output-header">
-          <h4>Wire Format (Spaced)</h4>
+          <h4>{$t('tools/dhcpv6-fqdn.results.wireFormat')}</h4>
           <button
             type="button"
             class="copy-btn"
@@ -260,21 +280,21 @@
             onclick={() => clipboard.copy(result!.wireFormat, 'wire')}
           >
             <Icon name={clipboard.isCopied('wire') ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied('wire') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('wire') ? $t('tools/dhcpv6-fqdn.buttons.copied') : $t('tools/dhcpv6-fqdn.buttons.copy')}
           </button>
         </div>
         <pre class="output-value code-block">{result.wireFormat}</pre>
       </div>
 
       <div class="breakdown-section">
-        <h4>Encoding Breakdown</h4>
+        <h4>{$t('tools/dhcpv6-fqdn.results.encodingBreakdown')}</h4>
         <div class="breakdown-grid">
           <div class="breakdown-item">
-            <span class="breakdown-label">Flags:</span>
+            <span class="breakdown-label">{$t('tools/dhcpv6-fqdn.results.flags')}</span>
             <span class="breakdown-value">{result.breakdown.flags}</span>
           </div>
           <div class="breakdown-item">
-            <span class="breakdown-label">FQDN:</span>
+            <span class="breakdown-label">{$t('tools/dhcpv6-fqdn.results.fqdnLabel')}</span>
             <span class="breakdown-value">{result.breakdown.fqdn}</span>
           </div>
         </div>
@@ -283,11 +303,11 @@
 
     {#if result.examples.keaDhcp6}
       <div class="card results">
-        <h3>Configuration Example</h3>
+        <h3>{$t('tools/dhcpv6-fqdn.results.configExample')}</h3>
 
         <div class="output-group">
           <div class="output-header">
-            <h4>Kea DHCPv6 Configuration</h4>
+            <h4>{$t('tools/dhcpv6-fqdn.results.keaDhcpv6')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -295,7 +315,9 @@
               onclick={() => clipboard.copy(result!.examples.keaDhcp6!, 'kea')}
             >
               <Icon name={clipboard.isCopied('kea') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('kea') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('kea')
+                ? $t('tools/dhcpv6-fqdn.buttons.copied')
+                : $t('tools/dhcpv6-fqdn.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.examples.keaDhcp6}</pre>
@@ -304,25 +326,26 @@
     {/if}
 
     <div class="card results info-card">
-      <h3>About RFC 4704</h3>
+      <h3>{$t('tools/dhcpv6-fqdn.about.title')}</h3>
       <p>
-        RFC 4704 defines the Client FQDN Option for DHCPv6, enabling clients and servers to negotiate dynamic DNS
-        updates for IPv6 addresses.
+        {$t('tools/dhcpv6-fqdn.about.intro')}
       </p>
       <ul>
         <li>
-          <strong>S Flag (Bit 0):</strong> Server should perform DNS updates
+          <strong>S Flag (Bit 0):</strong>
+          {$t('tools/dhcpv6-fqdn.about.sFlagDescription')}
         </li>
         <li>
-          <strong>O Flag (Bit 1):</strong> Server can override client preferences
+          <strong>O Flag (Bit 1):</strong>
+          {$t('tools/dhcpv6-fqdn.about.oFlagDescription')}
         </li>
         <li>
-          <strong>N Flag (Bit 2):</strong> Client requests server to perform updates (client will NOT update)
+          <strong>N Flag (Bit 2):</strong>
+          {$t('tools/dhcpv6-fqdn.about.nFlagDescription')}
         </li>
       </ul>
       <p>
-        The FQDN is encoded using DNS wire format with length-prefixed labels, enabling automated hostname registration
-        in DNS for IPv6 networks.
+        {$t('tools/dhcpv6-fqdn.about.conclusion')}
       </p>
     </div>
   {/if}

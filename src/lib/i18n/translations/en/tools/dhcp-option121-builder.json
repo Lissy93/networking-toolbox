@@ -1,0 +1,136 @@
+{
+  "title": "DHCP Option 121/249 - Classless Static Routes",
+  "subtitle": "Encode and decode Classless Static Routes (RFC 3442 / MSFT 249) with bit-packed network prefixes. Generate configurations for ISC dhcpd and Kea DHCP.",
+
+  "modes": {
+    "encode": "Encode",
+    "decode": "Decode"
+  },
+
+  "encodeExamples": {
+    "privateNetworks": {
+      "label": "Private Networks",
+      "description": "Routes to RFC 1918 private networks"
+    },
+    "defaultSpecific": {
+      "label": "Default + Specific",
+      "description": "Default route with specific override"
+    },
+    "multiSiteVPN": {
+      "label": "Multi-site VPN",
+      "description": "Multiple VPN site routes"
+    }
+  },
+
+  "decodeExamples": {
+    "privateNetworks": {
+      "label": "Private Networks",
+      "description": "10.0.0.0/8 and 172.16.0.0/12 via 192.168.1.1"
+    },
+    "defaultRoute": {
+      "label": "Default Route",
+      "description": "0.0.0.0/0 via 192.168.1.1"
+    },
+    "specific24": {
+      "label": "Specific /24",
+      "description": "192.168.10.0/24 via 192.168.1.1"
+    }
+  },
+
+  "encode": {
+    "staticRoutesTitle": "Static Routes",
+    "route": {
+      "title": "Route {number}",
+      "destination": {
+        "label": "Destination (CIDR)",
+        "placeholder": "10.0.0.0/8"
+      },
+      "gateway": {
+        "label": "Gateway",
+        "placeholder": "192.168.1.1"
+      }
+    },
+    "addRoute": "Add Route",
+    "networkSettings": {
+      "title": "Network Settings (Optional)",
+      "help": "Customize network values for configuration examples below",
+      "subnet": {
+        "label": "Subnet",
+        "placeholder": "192.168.1.0"
+      },
+      "netmask": {
+        "label": "Netmask",
+        "placeholder": "255.255.255.0"
+      },
+      "rangeStart": {
+        "label": "Range Start",
+        "placeholder": "192.168.1.100"
+      },
+      "rangeEnd": {
+        "label": "Range End",
+        "placeholder": "192.168.1.200"
+      },
+      "errorsTitle": "Network Settings Errors"
+    }
+  },
+
+  "decode": {
+    "title": "Decode Option 121/249 Hex",
+    "input": {
+      "label": "Hex-Encoded Option 121/249",
+      "placeholder": "Enter hex string (e.g., 080ac0a80101acc01000c0a80101)"
+    },
+    "button": "Decode"
+  },
+
+  "errors": {
+    "title": "Validation Errors",
+    "atLeastOneRoute": "At least one route is required",
+    "destinationRequired": "Route {number}: Destination is required",
+    "gatewayRequired": "Route {number}: Gateway is required",
+    "invalidCIDR": "Route {number}: Invalid CIDR notation (use format: x.x.x.x/y)",
+    "invalidPrefixLength": "Route {number}: Prefix length must be 0-32",
+    "invalidIPv4Dest": "Route {number}: Invalid IPv4 address in destination",
+    "invalidIPv4Octets": "Route {number}: Invalid IPv4 address (octets must be 0-255)",
+    "invalidGateway": "Route {number}: Invalid gateway IPv4 address",
+    "invalidGatewayOctets": "Route {number}: Invalid gateway address (octets must be 0-255)",
+    "invalidSubnet": "Invalid subnet address",
+    "invalidNetmask": "Invalid netmask",
+    "invalidRangeStart": "Invalid range start address",
+    "invalidRangeEnd": "Invalid range end address",
+    "invalidHex": "Invalid hex input: only hexadecimal characters allowed",
+    "encodingFailed": "Encoding failed",
+    "decodingFailed": "Decoding failed"
+  },
+
+  "results": {
+    "encodeTitle": "Encoded Option 121/249",
+    "hexEncoded": {
+      "title": "Hex-Encoded (Compact)"
+    },
+    "wireFormat": {
+      "title": "Wire Format (Spaced)"
+    },
+    "summary": {
+      "totalLength": "Total Length:",
+      "routes": "Routes:",
+      "bytes": "{length} bytes"
+    },
+    "configExamplesTitle": "Configuration Examples",
+    "formats": {
+      "iscDhcpd": "ISC dhcpd Configuration (Option 121)",
+      "keaDhcp4": "Kea DHCPv4 Configuration",
+      "msftOption249": "Microsoft Option 249 Configuration"
+    },
+    "decodeTitle": "Decoded Classless Static Routes",
+    "routesFound": "Routes Found:",
+    "routeListTitle": "Route List",
+    "destination": "Destination:",
+    "gateway": "Gateway:"
+  },
+
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

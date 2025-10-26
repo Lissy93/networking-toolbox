@@ -3,32 +3,33 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { parseDNSKEYRecord, calculateKeyTag, validateDNSKEY, DNSSEC_ALGORITHMS } from '$lib/utils/dnssec';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
 
   let dnskeyInput = $state('example.org. 3600 IN DNSKEY 257 3 8 AwEAAag');
   let activeExampleIndex = $state<number | null>(null);
   let isActiveExample = $state(true);
   const clipboard = useClipboard();
 
-  const examples = [
+  const examples = $derived([
     {
-      title: 'KSK Example (Algorithm 8 - RSASHA256)',
+      title: $t('tools/dnskey-key-tag.examples.ksk.title'),
       dnskey:
         'example.org. 3600 IN DNSKEY 257 3 8 AwEAAag/8pPvt1p1YKzY7mD5oCwrTDQeF3jhFV9h4n9JfCuPt1p1YKzY7mD5oCwrTDQeF3jhFV9h4n9JfCuPt1p1YKzY7mD5oCwrTDQeF3jhFV9h4n9JfCuP',
-      description: 'Key Signing Key with SEP flag set',
+      description: $t('tools/dnskey-key-tag.examples.ksk.description'),
     },
     {
-      title: 'ZSK Example (Algorithm 13 - ECDSAP256SHA256)',
+      title: $t('tools/dnskey-key-tag.examples.zsk.title'),
       dnskey:
         'example.org. 3600 IN DNSKEY 256 3 13 kC1gJ+0qtVgdl0VAO/6t9vRaB15v4PclEV9h4n9JfCuPt1p1YKzY7mD5oCwrTDQeF3jhFV9h4n9JfCuP',
-      description: 'Zone Signing Key for data signing',
+      description: $t('tools/dnskey-key-tag.examples.zsk.description'),
     },
     {
-      title: 'RDATA Only Format',
+      title: $t('tools/dnskey-key-tag.examples.rdataOnly.title'),
       dnskey:
         '257 3 8 AwEAAag/8pPvt1p1YKzY7mD5oCwrTDQeF3jhFV9h4n9JfCuPt1p1YKzY7mD5oCwrTDQeF3jhFV9h4n9JfCuPt1p1YKzY7mD5oCwrTDQeF3jhFV9h4n9JfCuP',
-      description: 'DNSKEY record data without owner name',
+      description: $t('tools/dnskey-key-tag.examples.rdataOnly.description'),
     },
-  ];
+  ]);
 
   const result = $derived.by(() => {
     if (!dnskeyInput.trim()) return null;
@@ -40,7 +41,7 @@
 
     const dnskey = parseDNSKEYRecord(dnskeyInput);
     if (!dnskey) {
-      return { error: 'Failed to parse DNSKEY record' };
+      return { error: $t('tools/dnskey-key-tag.errors.failedParse') };
     }
 
     const keyTag = calculateKeyTag(dnskey);
@@ -74,10 +75,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>DNSKEY Key Tag Calculator</h1>
+    <h1>{$t('tools/dnskey-key-tag.title')}</h1>
     <p>
-      Compute the DNSKEY key tag from a DNSKEY RR (RFC 4034 algorithm) and display it alongside key metadata for DNSSEC
-      validation purposes.
+      {$t('tools/dnskey-key-tag.description')}
     </p>
   </header>
 
@@ -86,7 +86,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>DNSKEY Examples</h4>
+        <h4>{$t('tools/dnskey-key-tag.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, index (index)}
@@ -106,23 +106,20 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="form-group">
-      <label
-        for="dnskey-input"
-        use:tooltip={"Enter a DNSKEY record in standard format (e.g., 'example.org. 3600 IN DNSKEY 257 3 8 AwEAAag') to calculate its key tag"}
-      >
+      <label for="dnskey-input" use:tooltip={$t('tools/dnskey-key-tag.input.tooltip')}>
         <Icon name="key" size="sm" />
-        DNSKEY Record
+        {$t('tools/dnskey-key-tag.input.label')}
       </label>
       <textarea
         id="dnskey-input"
         bind:value={dnskeyInput}
         oninput={handleInputChange}
-        placeholder="example.org. 3600 IN DNSKEY 257 3 8 AwEAAc..."
+        placeholder={$t('tools/dnskey-key-tag.input.placeholder')}
         rows="4"
         class="dnskey-input {isActiveExample ? 'example-active' : ''}"
       ></textarea>
       {#if isActiveExample}
-        <p class="field-help">Using example data - modify to see your results</p>
+        <p class="field-help">{$t('tools/dnskey-key-tag.input.exampleActive')}</p>
       {/if}
     </div>
   </div>
@@ -134,7 +131,7 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="sm" />
           <div>
-            <strong>Validation Error:</strong>
+            <strong>{$t('tools/dnskey-key-tag.errors.validationError')}</strong>
             {result.error}
           </div>
         </div>
@@ -142,74 +139,63 @@
     {:else if result.dnskey}
       <div class="card results-card">
         <div class="results-header">
-          <h3>Key Tag Calculation</h3>
+          <h3>{$t('tools/dnskey-key-tag.results.title')}</h3>
           <button
             class="copy-button {clipboard.isCopied() ? 'copied' : ''}"
             onclick={() =>
               result && !result.error && result.keyTag !== undefined && clipboard.copy(result.keyTag.toString())}
           >
             <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="sm" />
-            Copy Key Tag
+            {$t('tools/dnskey-key-tag.results.copyButton')}
           </button>
         </div>
 
         <!-- Key Tag Display -->
         <div class="key-tag-display">
-          <div
-            class="key-tag-label"
-            use:tooltip={'A 16-bit identifier calculated from the DNSKEY used to quickly identify which key was used to generate a signature'}
-          >
-            Key Tag
+          <div class="key-tag-label" use:tooltip={$t('tools/dnskey-key-tag.results.keyTagTooltip')}>
+            {$t('tools/dnskey-key-tag.results.keyTagLabel')}
           </div>
           <div class="key-tag-value">{result.keyTag}</div>
         </div>
 
         <!-- DNSKEY Metadata -->
         <div class="metadata-section">
-          <h4>DNSKEY Metadata</h4>
+          <h4>{$t('tools/dnskey-key-tag.metadata.title')}</h4>
           <div class="metadata-grid">
             <div class="metadata-item">
-              <span
-                class="metadata-label"
-                use:tooltip={'KSK (Key Signing Key) signs other keys and has the SEP flag set (257). ZSK (Zone Signing Key) signs zone data and has no SEP flag (256).'}
-                >Key Type</span
+              <span class="metadata-label" use:tooltip={$t('tools/dnskey-key-tag.metadata.keyType.tooltip')}
+                >{$t('tools/dnskey-key-tag.metadata.keyType.label')}</span
               >
               <span class="metadata-value key-type-{result.dnskey.keyType?.toLowerCase()}"
-                >{result.dnskey.keyType || 'Unknown'}</span
+                >{result.dnskey.keyType || $t('tools/dnskey-key-tag.metadata.keyType.unknown')}</span
               >
             </div>
             <div class="metadata-item">
-              <span
-                class="metadata-label"
-                use:tooltip={'16-bit flags field. Bit 15 (SEP flag) indicates if this is a Key Signing Key. 257 = KSK, 256 = ZSK.'}
-                >Flags</span
+              <span class="metadata-label" use:tooltip={$t('tools/dnskey-key-tag.metadata.flags.tooltip')}
+                >{$t('tools/dnskey-key-tag.metadata.flags.label')}</span
               >
               <span class="metadata-value mono">{result.dnskey.flags}</span>
             </div>
             <div class="metadata-item">
-              <span class="metadata-label" use:tooltip={'Protocol field for DNSKEY records. Must always be 3 (DNSSEC).'}
-                >Protocol</span
+              <span class="metadata-label" use:tooltip={$t('tools/dnskey-key-tag.metadata.protocol.tooltip')}
+                >{$t('tools/dnskey-key-tag.metadata.protocol.label')}</span
               >
               <span class="metadata-value mono">{result.dnskey.protocol}</span>
             </div>
             <div class="metadata-item">
-              <span
-                class="metadata-label"
-                use:tooltip={'Cryptographic algorithm used by this key. Common values: 8 (RSASHA256), 13 (ECDSA P-256), 15 (Ed25519).'}
-                >Algorithm</span
+              <span class="metadata-label" use:tooltip={$t('tools/dnskey-key-tag.metadata.algorithm.tooltip')}
+                >{$t('tools/dnskey-key-tag.metadata.algorithm.label')}</span
               >
               <span class="metadata-value mono"
                 >{result.dnskey.algorithm} ({(DNSSEC_ALGORITHMS as Record<number, string>)[result.dnskey.algorithm] ||
-                  'Unknown'})</span
+                  $t('tools/dnskey-key-tag.metadata.algorithm.unknown')})</span
               >
             </div>
           </div>
 
           <div class="public-key-section">
-            <h5
-              use:tooltip={'The actual cryptographic public key data encoded in Base64 format. This is used for signature verification.'}
-            >
-              Public Key (Base64)
+            <h5 use:tooltip={$t('tools/dnskey-key-tag.metadata.publicKey.tooltip')}>
+              {$t('tools/dnskey-key-tag.metadata.publicKey.label')}
             </h5>
             <div class="public-key">{result.dnskey.publicKey}</div>
           </div>
@@ -222,35 +208,30 @@
   <div class="education-card">
     <div class="education-grid">
       <div class="education-item info-panel">
-        <h4>Key Tag Purpose</h4>
+        <h4>{$t('tools/dnskey-key-tag.education.purpose.title')}</h4>
         <p>
-          The key tag is a short identifier used to quickly identify which DNSKEY was used to generate a signature. It's
-          calculated using a checksum algorithm defined in RFC 4034 and helps optimize DNSSEC validation by avoiding the
-          need to test every key.
+          {$t('tools/dnskey-key-tag.education.purpose.description')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Key Types</h4>
+        <h4>{$t('tools/dnskey-key-tag.education.keyTypes.title')}</h4>
         <p>
-          <strong>KSK (Key Signing Key):</strong> Used to sign other keys (ZSKs). Has the SEP flag set (bit 15).
-          <strong>ZSK (Zone Signing Key):</strong> Used to sign zone data. Does not have the SEP flag set.
+          {$t('tools/dnskey-key-tag.education.keyTypes.description')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Algorithm Support</h4>
+        <h4>{$t('tools/dnskey-key-tag.education.algorithmSupport.title')}</h4>
         <p>
-          Supports all modern DNSSEC algorithms including RSASHA256 (8), RSASHA512 (10), ECDSA P-256 (13), ECDSA P-384
-          (14), and Ed25519 (15). Legacy algorithms like RSAMD5 are deprecated and should not be used.
+          {$t('tools/dnskey-key-tag.education.algorithmSupport.description')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Validation Process</h4>
+        <h4>{$t('tools/dnskey-key-tag.education.validation.title')}</h4>
         <p>
-          The tool validates DNSKEY format, checks protocol compliance (must be 3), verifies algorithm support, and
-          ensures proper base64 encoding of the public key before calculating the key tag.
+          {$t('tools/dnskey-key-tag.education.validation.description')}
         </p>
       </div>
     </div>

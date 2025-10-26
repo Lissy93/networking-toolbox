@@ -1,0 +1,70 @@
+{
+  "title": "DHCP Snippets Generator",
+  "subtitle": "Generate configuration snippets for ISC dhcpd and Kea DHCP servers with customizable subnets, pools, and options.",
+
+  "targets": {
+    "iscDhcpd": "ISC dhcpd",
+    "keaDhcp4": "Kea DHCPv4",
+    "keaDhcp6": "Kea DHCPv6"
+  },
+
+  "configuration": {
+    "title": "Configuration",
+    "targetServers": "Target Servers",
+    "ipMode": "IP Mode",
+    "modes": {
+      "dhcp4": "DHCPv4 (IPv4)",
+      "dhcp6": "DHCPv6 (IPv6)"
+    },
+    "subnet": {
+      "label": "Subnet (CIDR)",
+      "placeholderV6": "2001:db8::/64",
+      "placeholderV4": "192.168.1.0/24"
+    },
+    "pools": {
+      "label": "Address Pools",
+      "startPlaceholder": "Start IP",
+      "endPlaceholder": "End IP",
+      "addPool": "Add Pool"
+    },
+    "gateway": {
+      "label": "Gateway (Router)",
+      "placeholderV6": "fe80::1",
+      "placeholderV4": "192.168.1.1"
+    },
+    "dns": {
+      "label": "DNS Servers (comma-separated)",
+      "placeholder": "8.8.8.8, 8.8.4.4"
+    },
+    "domain": {
+      "label": "Domain Name",
+      "placeholder": "example.com"
+    },
+    "leases": {
+      "defaultLabel": "Default Lease (seconds)",
+      "maxLabel": "Max Lease (seconds)",
+      "defaultPlaceholder": "86400",
+      "maxPlaceholder": "604800"
+    },
+    "options": {
+      "useOptionNames": "Use option names (ISC)",
+      "prettyJson": "Pretty JSON (Kea)"
+    }
+  },
+
+  "errors": {
+    "title": "Validation Errors"
+  },
+
+  "results": {
+    "title": "Generated Snippets",
+    "iscDhcpd": "ISC dhcpd.conf",
+    "keaDhcp4": "Kea DHCPv4 JSON",
+    "keaDhcp6": "Kea DHCPv6 JSON"
+  },
+
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

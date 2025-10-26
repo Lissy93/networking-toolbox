@@ -1,0 +1,78 @@
+{
+  "title": "DHCPv6 DNS Options (RFC 3646)",
+  "subtitle": "Configure DNS servers (Option 23) and search domains (Option 24) for DHCPv6 clients. Supports IPv6 DNS servers and multiple search domains.",
+
+  "examples": {
+    "googleDNS": {
+      "label": "Google Public DNS",
+      "description": "Google Public DNS servers with example.com search domains"
+    },
+    "cloudflareDNS": {
+      "label": "Cloudflare DNS",
+      "description": "Cloudflare 1.1.1.1 DNS with local search domain"
+    },
+    "quad9DNS": {
+      "label": "Quad9 DNS",
+      "description": "Quad9 DNS with corporate search domains"
+    },
+    "localNetwork": {
+      "label": "Local Network",
+      "description": "Local ULA DNS server with home.arpa domain"
+    }
+  },
+
+  "option23": {
+    "title": "Option 23: DNS Recursive Name Servers",
+    "helpText": "IPv6 addresses of DNS servers for client name resolution",
+    "serverLabel": "DNS Server {number}",
+    "placeholder": "2001:4860:4860::8888",
+    "removeLabel": "Remove DNS server",
+    "addButton": "Add DNS Server"
+  },
+
+  "option24": {
+    "title": "Option 24: Domain Search List",
+    "helpText": "DNS search domains for hostname resolution",
+    "domainLabel": "Search Domain {number}",
+    "placeholder": "example.com",
+    "removeLabel": "Remove search domain",
+    "addButton": "Add Search Domain"
+  },
+
+  "errors": {
+    "title": "Validation Errors"
+  },
+
+  "results": {
+    "option23Title": "Option 23: DNS Recursive Name Servers",
+    "option24Title": "Option 24: Domain Search List",
+    "totalLength": "Total Length:",
+    "lengthBytes": "{length} bytes",
+    "servers": "Servers:",
+    "serversCount": "{count}",
+    "domains": "Domains:",
+    "domainsCount": "{count}",
+    "dnsServersHeading": "DNS Servers",
+    "serverLabel": "Server {number}:",
+    "searchDomainsHeading": "Search Domains",
+    "domainLabel": "Domain {number}:",
+    "hexEncodedTitle": "Hex-Encoded (Compact)",
+    "wireFormatTitle": "Wire Format (Spaced)",
+    "breakdownTitle": "Domain Encoding Breakdown",
+    "configExampleTitle": "Configuration Example",
+    "keaDhcpv6Title": "Kea DHCPv6 Configuration"
+  },
+
+  "about": {
+    "title": "About RFC 3646",
+    "intro": "RFC 3646 defines DNS configuration options for DHCPv6, allowing IPv6 clients to automatically discover DNS servers and search domains.",
+    "option23Description": "DNS Recursive Name Server - List of IPv6 DNS server addresses (16 bytes each)",
+    "option24Description": "Domain Search List - DNS search domains encoded in DNS wire format (length-prefixed labels)",
+    "conclusion": "These options are essential for IPv6 network autoconfiguration, enabling clients to resolve hostnames without manual DNS configuration."
+  },
+
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

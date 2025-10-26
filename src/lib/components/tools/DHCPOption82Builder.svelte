@@ -4,6 +4,7 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
   import {
     buildOption82,
     parseOption82,
@@ -15,10 +16,10 @@
     type EncodingFormat,
   } from '$lib/utils/dhcp-option82.js';
 
-  const modeOptions = [
-    { value: 'build' as const, label: 'Build', icon: 'wrench' },
-    { value: 'parse' as const, label: 'Parse', icon: 'search' },
-  ];
+  const modeOptions = $derived([
+    { value: 'build' as const, label: $t('tools/dhcp-option82-builder.modes.build'), icon: 'wrench' },
+    { value: 'parse' as const, label: $t('tools/dhcp-option82-builder.modes.parse'), icon: 'search' },
+  ]);
 
   let mode = $state<'build' | 'parse'>('build');
   let config = $state<Option82Config>(getDefaultOption82Config());
@@ -30,12 +31,12 @@
 
   const clipboard = useClipboard();
 
-  const formatOptions: Array<{ value: EncodingFormat; label: string }> = [
-    { value: 'ascii', label: 'ASCII Text' },
-    { value: 'hex', label: 'Hexadecimal' },
-    { value: 'vlan-id', label: 'VLAN ID' },
-    { value: 'hostname-port', label: 'Hostname:Port' },
-  ];
+  const formatOptions = $derived<Array<{ value: EncodingFormat; label: string }>>([
+    { value: 'ascii', label: $t('tools/dhcp-option82-builder.formats.ascii') },
+    { value: 'hex', label: $t('tools/dhcp-option82-builder.formats.hex') },
+    { value: 'vlan-id', label: $t('tools/dhcp-option82-builder.formats.vlanId') },
+    { value: 'hostname-port', label: $t('tools/dhcp-option82-builder.formats.hostnamePort') },
+  ]);
 
   interface BuildExample {
     label: string;
@@ -51,68 +52,68 @@
     description: string;
   }
 
-  const buildExamples: BuildExample[] = [
+  const buildExamples = $derived<BuildExample[]>([
     {
-      label: 'VLAN 100',
+      label: $t('tools/dhcp-option82-builder.buildExamples.vlan100.label'),
       type: 'circuit-id',
       format: 'vlan-id',
       value: '100',
-      description: 'Circuit-ID as VLAN ID 100',
+      description: $t('tools/dhcp-option82-builder.buildExamples.vlan100.description'),
     },
     {
-      label: 'Switch Port',
+      label: $t('tools/dhcp-option82-builder.buildExamples.switchPort.label'),
       type: 'circuit-id',
       format: 'hostname-port',
       value: 'sw1:Gi0/1',
-      description: 'Circuit-ID as hostname:port',
+      description: $t('tools/dhcp-option82-builder.buildExamples.switchPort.description'),
     },
     {
-      label: 'Custom Circuit',
+      label: $t('tools/dhcp-option82-builder.buildExamples.customCircuit.label'),
       type: 'circuit-id',
       format: 'ascii',
       value: 'building-a-floor-3',
-      description: 'Circuit-ID as custom ASCII text',
+      description: $t('tools/dhcp-option82-builder.buildExamples.customCircuit.description'),
     },
     {
-      label: 'Switch Hostname',
+      label: $t('tools/dhcp-option82-builder.buildExamples.switchHostname.label'),
       type: 'remote-id',
       format: 'ascii',
       value: 'relay-sw1.example.com',
-      description: 'Remote-ID as hostname',
+      description: $t('tools/dhcp-option82-builder.buildExamples.switchHostname.description'),
     },
     {
-      label: 'MAC Address',
+      label: $t('tools/dhcp-option82-builder.buildExamples.macAddress.label'),
       type: 'remote-id',
       format: 'hex',
       value: '001122334455',
-      description: 'Remote-ID as MAC address',
+      description: $t('tools/dhcp-option82-builder.buildExamples.macAddress.description'),
     },
     {
-      label: 'Agent ID',
+      label: $t('tools/dhcp-option82-builder.buildExamples.agentId.label'),
       type: 'remote-id',
       format: 'ascii',
       value: 'DHCP-RELAY-01',
-      description: 'Remote-ID as relay agent identifier',
+      description: $t('tools/dhcp-option82-builder.buildExamples.agentId.description'),
     },
-  ];
+  ]);
 
-  const parseExamples: ParseExample[] = [
+  const parseExamples = $derived<ParseExample[]>([
     {
-      label: 'VLAN + Hostname',
+      label: $t('tools/dhcp-option82-builder.parseExamples.vlanHostname.label'),
       hexInput: '01020064020c7377312e6578616d706c65',
-      description: 'Circuit-ID (VLAN 100) + Remote-ID (sw1.example)',
+      description: $t('tools/dhcp-option82-builder.parseExamples.vlanHostname.description'),
     },
     {
-      label: 'Switch Port',
+      label: $t('tools/dhcp-option82-builder.parseExamples.switchPort.label'),
       hexInput: '01094769302f31020c7377312e6578616d706c65',
-      description: 'Circuit-ID (Gi0/1) + Remote-ID (sw1.example)',
+      description: $t('tools/dhcp-option82-builder.parseExamples.switchPort.description'),
     },
     {
-      label: 'MAC Address',
+      label: $t('tools/dhcp-option82-builder.parseExamples.macAddress.label'),
       hexInput: '0206001122334455',
-      description: 'Remote-ID as MAC address (00:11:22:33:44:55)',
+      description: $t('tools/dhcp-option82-builder.parseExamples.macAddress.description'),
     },
-  ];
+  ]);
 
   // Reactive generation - use untrack to prevent infinite loop
   $effect(() => {
@@ -153,20 +154,20 @@
       const sub = cfg.suboptions[i];
 
       if (!sub.value.trim()) {
-        errors.push(`Suboption ${i + 1}: Value is required`);
+        errors.push($t('tools/dhcp-option82-builder.errors.valueRequired', { number: i + 1 }));
         continue;
       }
 
       if (sub.format === 'vlan-id') {
         const vlan = parseInt(sub.value, 10);
         if (isNaN(vlan) || vlan < 0 || vlan > 4095) {
-          errors.push(`Suboption ${i + 1}: VLAN ID must be between 0 and 4095`);
+          errors.push($t('tools/dhcp-option82-builder.errors.vlanRange', { number: i + 1 }));
         }
       }
 
       if (sub.format === 'hex') {
         if (!/^[0-9a-fA-F:]+$/.test(sub.value.replace(/\s/g, ''))) {
-          errors.push(`Suboption ${i + 1}: Invalid hex format`);
+          errors.push($t('tools/dhcp-option82-builder.errors.invalidHex', { number: i + 1 }));
         }
       }
     }
@@ -188,7 +189,7 @@
     }
 
     if (!/^[0-9a-fA-F\s:]+$/.test(parseInput)) {
-      validationErrors = ['Invalid hex input: only hexadecimal characters allowed'];
+      validationErrors = [$t('tools/dhcp-option82-builder.errors.invalidHexInput')];
       parseResult = null;
       return;
     }
@@ -267,8 +268,8 @@
 </script>
 
 <ToolContentContainer
-  title="DHCP Option 82 Builder"
-  description="Construct and parse DHCP Relay Agent Information (Option 82) with Circuit-ID, Remote-ID, and VLAN formats. Includes examples for relay ACLs and policies."
+  title={$t('tools/dhcp-option82-builder.title')}
+  description={$t('tools/dhcp-option82-builder.subtitle')}
   navOptions={modeOptions}
   bind:selectedNav={mode}
 >
@@ -293,13 +294,13 @@
   {#if mode === 'build'}
     <div class="card input-card">
       <div class="card-header">
-        <h3>Configuration</h3>
+        <h3>{$t('tools/dhcp-option82-builder.build.configurationTitle')}</h3>
       </div>
       <div class="card-content">
         {#each config.suboptions as suboption, i (`sub-${i}-${suboption.type}`)}
           <div class="suboption-group">
             <div class="suboption-header">
-              <h4>Suboption {i + 1}</h4>
+              <h4>{$t('tools/dhcp-option82-builder.build.suboption.title', { number: i + 1 })}</h4>
               {#if config.suboptions.length > 1}
                 <button type="button" class="btn-icon" onclick={() => removeSuboption(i)}>
                   <Icon name="x" size="sm" />
@@ -311,18 +312,18 @@
               <div class="input-group">
                 <label for="type-{i}">
                   <Icon name="tag" size="sm" />
-                  Suboption Type
+                  {$t('tools/dhcp-option82-builder.build.suboption.typeLabel')}
                 </label>
                 <select id="type-{i}" bind:value={suboption.type}>
-                  <option value="circuit-id">Circuit-ID (Suboption 1)</option>
-                  <option value="remote-id">Remote-ID (Suboption 2)</option>
+                  <option value="circuit-id">{$t('tools/dhcp-option82-builder.build.suboption.circuitId')}</option>
+                  <option value="remote-id">{$t('tools/dhcp-option82-builder.build.suboption.remoteId')}</option>
                 </select>
               </div>
 
               <div class="input-group">
                 <label for="format-{i}">
                   <Icon name="code" size="sm" />
-                  Encoding Format
+                  {$t('tools/dhcp-option82-builder.build.suboption.encodingFormat')}
                 </label>
                 <select id="format-{i}" bind:value={suboption.format}>
                   {#each formatOptions as option (option.value)}
@@ -335,17 +336,17 @@
             <div class="input-group">
               <label for="value-{i}">
                 <Icon name="edit" size="sm" />
-                Value
+                {$t('tools/dhcp-option82-builder.build.suboption.valueLabel')}
               </label>
               <input
                 id="value-{i}"
                 type="text"
                 bind:value={suboption.value}
                 placeholder={suboption.format === 'vlan-id'
-                  ? '100'
+                  ? $t('tools/dhcp-option82-builder.build.suboption.placeholders.vlanId')
                   : suboption.format === 'hex'
-                    ? '001122334455'
-                    : 'Enter value'}
+                    ? $t('tools/dhcp-option82-builder.build.suboption.placeholders.hex')
+                    : $t('tools/dhcp-option82-builder.build.suboption.placeholders.default')}
               />
             </div>
           </div>
@@ -353,14 +354,14 @@
 
         <button type="button" class="btn-add" onclick={addSuboption}>
           <Icon name="plus" size="sm" />
-          Add Suboption
+          {$t('tools/dhcp-option82-builder.build.addSuboption')}
         </button>
       </div>
     </div>
 
     {#if validationErrors.length > 0}
       <div class="card errors-card">
-        <h3>Validation Errors</h3>
+        <h3>{$t('tools/dhcp-option82-builder.errors.title')}</h3>
         {#each validationErrors as error, i (i)}
           <div class="error-message">
             <Icon name="alert-triangle" size="sm" />
@@ -372,11 +373,11 @@
 
     {#if result && validationErrors.length === 0}
       <div class="card results">
-        <h3>Generated Option 82</h3>
+        <h3>{$t('tools/dhcp-option82-builder.build.results.title')}</h3>
 
         <div class="output-group">
           <div class="output-header">
-            <h4>Hex-Encoded Value</h4>
+            <h4>{$t('tools/dhcp-option82-builder.build.results.hexEncoded')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -384,24 +385,39 @@
               onclick={() => clipboard.copy(result!.hexEncoded, 'hex')}
             >
               <Icon name={clipboard.isCopied('hex') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('hex') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('hex')
+                ? $t('tools/dhcp-option82-builder.buttons.copied')
+                : $t('tools/dhcp-option82-builder.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.hexEncoded}</pre>
         </div>
 
         <div class="breakdown-section">
-          <h4>Breakdown</h4>
+          <h4>{$t('tools/dhcp-option82-builder.build.results.breakdown')}</h4>
           {#each result.breakdown as breakdown, i (i)}
             <div class="breakdown-item">
               <div class="breakdown-header">
-                <strong>{breakdown.type} (Code {breakdown.typeCode})</strong>
-                <span class="breakdown-length">Length: {breakdown.length} bytes</span>
+                <strong
+                  >{$t('tools/dhcp-option82-builder.build.results.typeCode', {
+                    type: breakdown.type,
+                    code: breakdown.typeCode,
+                  })}</strong
+                >
+                <span class="breakdown-length"
+                  >{$t('tools/dhcp-option82-builder.build.results.length', { length: breakdown.length })}</span
+                >
               </div>
               <p class="breakdown-desc">{breakdown.description}</p>
               <div class="breakdown-values">
-                <div><strong>Value:</strong> {breakdown.value}</div>
-                <div><strong>Hex:</strong> {breakdown.hexValue}</div>
+                <div>
+                  <strong>{$t('tools/dhcp-option82-builder.build.results.valueLabel')}</strong>
+                  {breakdown.value}
+                </div>
+                <div>
+                  <strong>{$t('tools/dhcp-option82-builder.build.results.hexLabel')}</strong>
+                  {breakdown.hexValue}
+                </div>
               </div>
             </div>
           {/each}
@@ -410,7 +426,7 @@
         {#if result.examples.iscDhcpd}
           <div class="output-group">
             <div class="output-header">
-              <h4>ISC dhcpd Configuration Example</h4>
+              <h4>{$t('tools/dhcp-option82-builder.build.results.examples.iscDhcpd')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -418,7 +434,9 @@
                 onclick={() => clipboard.copy(result!.examples.iscDhcpd!, 'isc')}
               >
                 <Icon name={clipboard.isCopied('isc') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('isc') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('isc')
+                  ? $t('tools/dhcp-option82-builder.buttons.copied')
+                  : $t('tools/dhcp-option82-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.examples.iscDhcpd}</pre>
@@ -428,7 +446,7 @@
         {#if result.examples.keaDhcp4}
           <div class="output-group">
             <div class="output-header">
-              <h4>Kea DHCPv4 Configuration Example</h4>
+              <h4>{$t('tools/dhcp-option82-builder.build.results.examples.keaDhcp4')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -436,7 +454,9 @@
                 onclick={() => clipboard.copy(result!.examples.keaDhcp4!, 'kea')}
               >
                 <Icon name={clipboard.isCopied('kea') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('kea') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('kea')
+                  ? $t('tools/dhcp-option82-builder.buttons.copied')
+                  : $t('tools/dhcp-option82-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.examples.keaDhcp4}</pre>
@@ -446,7 +466,7 @@
         {#if result.examples.ciscoRelay}
           <div class="output-group">
             <div class="output-header">
-              <h4>Cisco Relay Agent Example</h4>
+              <h4>{$t('tools/dhcp-option82-builder.build.results.examples.ciscoRelay')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -454,7 +474,9 @@
                 onclick={() => clipboard.copy(result!.examples.ciscoRelay!, 'cisco')}
               >
                 <Icon name={clipboard.isCopied('cisco') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('cisco') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('cisco')
+                  ? $t('tools/dhcp-option82-builder.buttons.copied')
+                  : $t('tools/dhcp-option82-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.examples.ciscoRelay}</pre>
@@ -465,31 +487,31 @@
   {:else}
     <div class="card input-card">
       <div class="card-header">
-        <h3>Parse Option 82 Hex</h3>
+        <h3>{$t('tools/dhcp-option82-builder.parse.title')}</h3>
       </div>
       <div class="card-content">
         <div class="input-group">
           <label for="parse-input">
             <Icon name="code" size="sm" />
-            Hex-Encoded Option 82
+            {$t('tools/dhcp-option82-builder.parse.hexEncoded')}
           </label>
           <textarea
             id="parse-input"
             bind:value={parseInput}
-            placeholder="Enter hex string (e.g., 01064769302f31020b7377312e6578616d706c65)"
+            placeholder={$t('tools/dhcp-option82-builder.parse.placeholder')}
             rows="4"
           ></textarea>
         </div>
         <button type="button" class="btn-primary" onclick={parse}>
           <Icon name="search" size="sm" />
-          Parse
+          {$t('tools/dhcp-option82-builder.parse.button')}
         </button>
       </div>
     </div>
 
     {#if validationErrors.length > 0}
       <div class="card errors-card">
-        <h3>Validation Errors</h3>
+        <h3>{$t('tools/dhcp-option82-builder.errors.title')}</h3>
         {#each validationErrors as error, i (i)}
           <div class="error-message">
             <Icon name="alert-triangle" size="sm" />
@@ -501,25 +523,44 @@
 
     {#if parseResult && validationErrors.length === 0}
       <div class="card results">
-        <h3>Parsed Option 82</h3>
+        <h3>{$t('tools/dhcp-option82-builder.parse.results.title')}</h3>
 
         <div class="parse-summary">
-          <div><strong>Total Length:</strong> {parseResult.totalLength} bytes</div>
-          <div><strong>Suboptions Found:</strong> {parseResult.suboptions.length}</div>
+          <div>
+            <strong>{$t('tools/dhcp-option82-builder.parse.results.totalLength')}</strong>
+            {$t('tools/dhcp-option82-builder.parse.results.bytes', { length: parseResult.totalLength })}
+          </div>
+          <div>
+            <strong>{$t('tools/dhcp-option82-builder.parse.results.suboptionsFound')}</strong>
+            {$t('tools/dhcp-option82-builder.parse.results.count', { count: parseResult.suboptions.length })}
+          </div>
         </div>
 
         <div class="breakdown-section">
-          <h4>Suboptions</h4>
+          <h4>{$t('tools/dhcp-option82-builder.parse.results.suboptionsTitle')}</h4>
           {#each parseResult.suboptions as suboption, i (i)}
             <div class="breakdown-item">
               <div class="breakdown-header">
-                <strong>{suboption.type} (Code {suboption.typeCode})</strong>
-                <span class="breakdown-length">Length: {suboption.length} bytes</span>
+                <strong
+                  >{$t('tools/dhcp-option82-builder.parse.results.typeCode', {
+                    type: suboption.type,
+                    code: suboption.typeCode,
+                  })}</strong
+                >
+                <span class="breakdown-length"
+                  >{$t('tools/dhcp-option82-builder.parse.results.length', { length: suboption.length })}</span
+                >
               </div>
               <p class="breakdown-desc">{suboption.description}</p>
               <div class="breakdown-values">
-                <div><strong>Decoded Value:</strong> {suboption.value}</div>
-                <div><strong>Hex Value:</strong> {suboption.hexValue}</div>
+                <div>
+                  <strong>{$t('tools/dhcp-option82-builder.parse.results.decodedValue')}</strong>
+                  {suboption.value}
+                </div>
+                <div>
+                  <strong>{$t('tools/dhcp-option82-builder.parse.results.hexValue')}</strong>
+                  {suboption.hexValue}
+                </div>
               </div>
             </div>
           {/each}

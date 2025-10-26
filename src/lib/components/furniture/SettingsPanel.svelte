@@ -950,7 +950,19 @@ EOF'</code
     grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
   }
 
-  .language-option,
+  .language-option {
+    &:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    &.active {
+      background: color-mix(in srgb, var(--color-primary), transparent 90%);
+      border-color: var(--color-primary);
+      color: var(--text-primary);
+    }
+  }
+
   .theme-option {
     &:hover:not(.disabled) {
       background: var(--surface-hover);

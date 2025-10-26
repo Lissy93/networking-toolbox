@@ -1,0 +1,131 @@
+{
+  "title": "DNS Trace Tool",
+  "subtitle": "Iterative trace from root to authoritative nameservers via DNS over HTTPS",
+
+  "examples": {
+    "title": "Quick Examples",
+    "items": {
+      "cloudflare": {
+        "domain": "www.cloudflare.com",
+        "description": "Cloudflare edge network",
+        "tooltip": "Trace DNS resolution path for www.cloudflare.com"
+      },
+      "google": {
+        "domain": "www.google.com",
+        "description": "Popular service with CDN",
+        "tooltip": "Trace DNS resolution path for www.google.com"
+      },
+      "github": {
+        "domain": "github.com",
+        "description": "GitHub platform trace",
+        "tooltip": "Trace DNS resolution path for github.com"
+      },
+      "bbc": {
+        "domain": "bbc.co.uk",
+        "description": "Multi-level TLD (.co.uk)",
+        "tooltip": "Trace DNS resolution path for bbc.co.uk"
+      },
+      "aws": {
+        "domain": "aws.amazon.com",
+        "description": "AWS subdomain delegation",
+        "tooltip": "Trace DNS resolution path for aws.amazon.com"
+      },
+      "alicia": {
+        "domain": "aliciasykes.com",
+        "description": "Homepage hosted on Vercel",
+        "tooltip": "Trace DNS resolution path for aliciasykes.com"
+      }
+    }
+  },
+
+  "form": {
+    "title": "Trace Configuration",
+    "domainLabel": "Domain Name",
+    "domainPlaceholder": "example.com",
+    "tracing": "Tracing...",
+    "traceButton": "Trace"
+  },
+
+  "loading": {
+    "title": "Performing DNS Trace",
+    "message": "Following the DNS resolution path from root servers to authoritative nameservers..."
+  },
+
+  "error": {
+    "title": "Trace Failed",
+    "emptyDomain": "Please enter a domain name",
+    "failed": "Failed to trace domain",
+    "general": "An error occurred"
+  },
+
+  "results": {
+    "pathTitle": "Trace Path",
+    "step": {
+      "query": "Query:",
+      "server": "Server:",
+      "response": "Response:",
+      "typeTooltip": "Type of DNS query operation",
+      "timingTooltip": "Time taken for this query",
+      "queryTooltip": "Domain name being queried",
+      "qtypeTooltip": "DNS record type requested",
+      "serverTooltip": "DNS server that responded to this query",
+      "responseTooltip": "Response received from the DNS server",
+      "referral": "Referral to {nameservers}",
+      "nodata": "No data for this record type",
+      "nxdomain": "Domain does not exist"
+    },
+    "flags": {
+      "aa": "Authoritative Answer",
+      "ad": "Authenticated Data (DNSSEC)",
+      "rd": "Recursion Desired",
+      "ra": "Recursion Available"
+    },
+    "summary": {
+      "title": "Trace Summary",
+      "totalTime": {
+        "label": "Total Time",
+        "tooltip": "Total time for the complete DNS trace"
+      },
+      "dnsQueries": {
+        "label": "DNS Queries",
+        "tooltip": "Number of DNS queries performed during trace"
+      },
+      "finalServer": {
+        "label": "Final Server",
+        "tooltip": "Final authoritative server that provided the answer"
+      },
+      "recordType": {
+        "label": "Record Type",
+        "tooltip": "Type of DNS record that was traced"
+      },
+      "totalHops": {
+        "label": "Total Hops",
+        "tooltip": "Number of DNS resolution hops from root to authoritative"
+      },
+      "avgLatency": {
+        "label": "Avg Latency",
+        "tooltip": "Average response time per DNS query"
+      },
+      "dnssecStatus": {
+        "label": "DNSSEC Status",
+        "tooltip": "DNSSEC validation status for the final response",
+        "valid": "Valid",
+        "notValidated": "Not Validated"
+      },
+      "authoritative": {
+        "label": "Authoritative",
+        "tooltip": "Whether the final answer came from an authoritative server",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "resolutionPath": {
+        "label": "Resolution Path",
+        "tooltip": "The path taken through different DNS servers"
+      },
+      "finalAnswer": {
+        "label": "Final Answer",
+        "tooltip": "The final answer received from the authoritative server"
+      }
+    }
+  }
+}

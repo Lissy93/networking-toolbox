@@ -12,6 +12,7 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables/useClipboard.svelte';
+  import { t } from '$lib/stores/language';
 
   const clipboard = useClipboard();
 
@@ -29,22 +30,38 @@
   let decodeResult = $state<LeaseTimeResult | null>(null);
   let decodeError = $state<string>('');
 
-  const navOptions = [
-    { value: 'build', label: 'Build Option' },
-    { value: 'decode', label: 'Decode Option' },
-  ];
+  const navOptions = $derived([
+    { value: 'build' as const, label: $t('tools/lease-time-option51.nav.build') },
+    { value: 'decode' as const, label: $t('tools/lease-time-option51.nav.decode') },
+  ]);
 
   const examples = LEASE_TIME_PRESETS.map((preset) => ({
     ...preset,
     description: `${preset.description} • ${preset.infinite ? 'Infinite' : formatTime(preset.seconds)}`,
   }));
 
-  const decodeExamples = [
-    { label: '1 Hour', hexValue: '00000e10', description: '3,600 seconds (0x00000e10)' },
-    { label: '24 Hours', hexValue: '00015180', description: '86,400 seconds (0x00015180)' },
-    { label: '7 Days', hexValue: '00093a80', description: '604,800 seconds (0x00093a80)' },
-    { label: 'Infinite', hexValue: 'ffffffff', description: 'Infinite lease (0xffffffff)' },
-  ];
+  const decodeExamples = $derived([
+    {
+      label: $t('tools/lease-time-option51.examples.decode.oneHour.label'),
+      hexValue: '00000e10',
+      description: $t('tools/lease-time-option51.examples.decode.oneHour.description'),
+    },
+    {
+      label: $t('tools/lease-time-option51.examples.decode.twentyFourHours.label'),
+      hexValue: '00015180',
+      description: $t('tools/lease-time-option51.examples.decode.twentyFourHours.description'),
+    },
+    {
+      label: $t('tools/lease-time-option51.examples.decode.sevenDays.label'),
+      hexValue: '00093a80',
+      description: $t('tools/lease-time-option51.examples.decode.sevenDays.description'),
+    },
+    {
+      label: $t('tools/lease-time-option51.examples.decode.infinite.label'),
+      hexValue: 'ffffffff',
+      description: $t('tools/lease-time-option51.examples.decode.infinite.description'),
+    },
+  ]);
 
   function loadPreset(preset: (typeof LEASE_TIME_PRESETS)[0]) {
     activeTab = 'build';
@@ -112,8 +129,8 @@
 </script>
 
 <ToolContentContainer
-  title="DHCP Option 51 - IP Address Lease Time"
-  description="Option 51 specifies the lease time in seconds for the IP address assignment. T1 (renewal at 50%) and T2 (rebinding at 87.5%) timers are automatically calculated."
+  title={$t('tools/lease-time-option51.title')}
+  description={$t('tools/lease-time-option51.subtitle')}
   {navOptions}
   bind:selectedNav={activeTab}
 >
@@ -126,38 +143,54 @@
     />
 
     <div class="card input-card">
-      <h3>Lease Time Configuration</h3>
+      <h3>{$t('tools/lease-time-option51.build.title')}</h3>
 
       <div class="form-group">
         <label class="checkbox-label">
           <input type="checkbox" bind:checked={infinite} />
-          Infinite Lease (0xFFFFFFFF)
+          {$t('tools/lease-time-option51.build.infinite.label')}
         </label>
-        <span class="hint">Permanent IP address assignment (may not be supported by all servers)</span>
+        <span class="hint">{$t('tools/lease-time-option51.build.infinite.hint')}</span>
       </div>
 
       {#if !infinite}
         <div class="form-group">
-          <label for="lease-seconds">Lease Time (seconds)</label>
+          <label for="lease-seconds">{$t('tools/lease-time-option51.build.leaseSeconds.label')}</label>
           <input id="lease-seconds" type="number" bind:value={leaseSeconds} min="0" max="4294967294" class="input" />
           {#if leaseSeconds > 0}
-            <span class="hint">= {formatTime(leaseSeconds)}</span>
+            <span class="hint"
+              >{$t('tools/lease-time-option51.build.leaseSeconds.hint', { time: formatTime(leaseSeconds) })}</span
+            >
           {/if}
         </div>
 
         <div class="quick-values">
-          <span class="label">Quick Values:</span>
-          <button class="btn-quick" onclick={() => (leaseSeconds = 3600)}>1h</button>
-          <button class="btn-quick" onclick={() => (leaseSeconds = 14400)}>4h</button>
-          <button class="btn-quick" onclick={() => (leaseSeconds = 86400)}>24h</button>
-          <button class="btn-quick" onclick={() => (leaseSeconds = 259200)}>3d</button>
-          <button class="btn-quick" onclick={() => (leaseSeconds = 604800)}>7d</button>
+          <span class="label">{$t('tools/lease-time-option51.build.quickValues.label')}</span>
+          <button class="btn-quick" onclick={() => (leaseSeconds = 3600)}
+            >{$t('tools/lease-time-option51.build.quickValues.oneHour')}</button
+          >
+          <button class="btn-quick" onclick={() => (leaseSeconds = 14400)}
+            >{$t('tools/lease-time-option51.build.quickValues.fourHours')}</button
+          >
+          <button class="btn-quick" onclick={() => (leaseSeconds = 86400)}
+            >{$t('tools/lease-time-option51.build.quickValues.twentyFourHours')}</button
+          >
+          <button class="btn-quick" onclick={() => (leaseSeconds = 259200)}
+            >{$t('tools/lease-time-option51.build.quickValues.threeDays')}</button
+          >
+          <button class="btn-quick" onclick={() => (leaseSeconds = 604800)}
+            >{$t('tools/lease-time-option51.build.quickValues.sevenDays')}</button
+          >
         </div>
       {/if}
 
       {#if buildErrors.length > 0}
         <div class="error-card" class:warning={buildErrors.every((e) => e.startsWith('Warning:'))}>
-          <strong>{buildErrors.some((e) => e.startsWith('Warning:')) ? 'Warnings:' : 'Validation Errors:'}</strong>
+          <strong
+            >{buildErrors.some((e) => e.startsWith('Warning:'))
+              ? $t('tools/lease-time-option51.build.errors.warnings')
+              : $t('tools/lease-time-option51.build.errors.validationErrors')}</strong
+          >
           <ul>
             {#each buildErrors as error, i (i)}
               <li>{error}</li>
@@ -169,16 +202,16 @@
 
     {#if buildResult}
       <div class="card result-card">
-        <h3>Option 51 - Lease Time</h3>
+        <h3>{$t('tools/lease-time-option51.results.buildTitle')}</h3>
 
         <div class="result-grid">
           <div class="result-item">
-            <span class="label">Lease Time:</span>
+            <span class="label">{$t('tools/lease-time-option51.results.leaseTime')}</span>
             <span class="value highlight">{buildResult.humanReadable}</span>
           </div>
 
           <div class="result-item">
-            <span class="label">Hex Encoded:</span>
+            <span class="label">{$t('tools/lease-time-option51.results.hexEncoded')}</span>
             <code class="code-value">{buildResult.hexEncoded}</code>
             <button
               class="btn-copy"
@@ -186,12 +219,14 @@
               onclick={() => clipboard.copy(buildResult!.hexEncoded, 'build-hex')}
               aria-label="Copy hex"
             >
-              {clipboard.isCopied('build-hex') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('build-hex')
+                ? $t('tools/lease-time-option51.buttons.copied')
+                : $t('tools/lease-time-option51.buttons.copy')}
             </button>
           </div>
 
           <div class="result-item">
-            <span class="label">Wire Format:</span>
+            <span class="label">{$t('tools/lease-time-option51.results.wireFormat')}</span>
             <code class="code-value">{buildResult.wireFormat}</code>
             <button
               class="btn-copy"
@@ -199,40 +234,54 @@
               onclick={() => clipboard.copy(buildResult!.wireFormat, 'build-wire')}
               aria-label="Copy wire format"
             >
-              {clipboard.isCopied('build-wire') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('build-wire')
+                ? $t('tools/lease-time-option51.buttons.copied')
+                : $t('tools/lease-time-option51.buttons.copy')}
             </button>
           </div>
 
           <div class="result-item">
-            <span class="label">Total Length:</span>
-            <span class="value">{buildResult.totalLength} bytes</span>
+            <span class="label">{$t('tools/lease-time-option51.results.totalLength')}</span>
+            <span class="value"
+              >{$t('tools/lease-time-option51.results.lengthBytes', { length: buildResult.totalLength })}</span
+            >
           </div>
 
           {#if !buildResult.isInfinite}
             <div class="result-item">
-              <span class="label">T1 Renewal:</span>
-              <span class="value">{buildResult.t1RenewalFormatted} (50% of lease)</span>
+              <span class="label">{$t('tools/lease-time-option51.results.t1Renewal')}</span>
+              <span class="value"
+                >{$t('tools/lease-time-option51.results.t1RenewalValue', {
+                  time: buildResult.t1RenewalFormatted ?? '',
+                })}</span
+              >
             </div>
 
             <div class="result-item">
-              <span class="label">T2 Rebinding:</span>
-              <span class="value">{buildResult.t2RebindingFormatted} (87.5% of lease)</span>
+              <span class="label">{$t('tools/lease-time-option51.results.t2Rebinding')}</span>
+              <span class="value"
+                >{$t('tools/lease-time-option51.results.t2RebindingValue', {
+                  time: buildResult.t2RebindingFormatted ?? '',
+                })}</span
+              >
             </div>
           {/if}
         </div>
 
         <div class="config-section">
-          <h4>Configuration Examples</h4>
+          <h4>{$t('tools/lease-time-option51.results.configExamples')}</h4>
 
           <div class="output-group">
             <div class="output-header">
-              <h5>ISC DHCPd</h5>
+              <h5>{$t('tools/lease-time-option51.results.iscDhcpd')}</h5>
               <button
                 class="btn-copy"
                 class:copied={clipboard.isCopied('build-isc')}
                 onclick={() => clipboard.copy(buildResult!.configExamples.iscDhcpd, 'build-isc')}
               >
-                {clipboard.isCopied('build-isc') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('build-isc')
+                  ? $t('tools/lease-time-option51.buttons.copied')
+                  : $t('tools/lease-time-option51.buttons.copy')}
               </button>
             </div>
             <pre class="code-block"><code>{buildResult.configExamples.iscDhcpd}</code></pre>
@@ -240,13 +289,15 @@
 
           <div class="output-group">
             <div class="output-header">
-              <h5>Kea DHCPv4</h5>
+              <h5>{$t('tools/lease-time-option51.results.keaDhcp4')}</h5>
               <button
                 class="btn-copy"
                 class:copied={clipboard.isCopied('build-kea')}
                 onclick={() => clipboard.copy(buildResult!.configExamples.keaDhcp4, 'build-kea')}
               >
-                {clipboard.isCopied('build-kea') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('build-kea')
+                  ? $t('tools/lease-time-option51.buttons.copied')
+                  : $t('tools/lease-time-option51.buttons.copy')}
               </button>
             </div>
             <pre class="code-block"><code>{buildResult.configExamples.keaDhcp4}</code></pre>
@@ -254,13 +305,15 @@
 
           <div class="output-group">
             <div class="output-header">
-              <h5>dnsmasq</h5>
+              <h5>{$t('tools/lease-time-option51.results.dnsmasq')}</h5>
               <button
                 class="btn-copy"
                 class:copied={clipboard.isCopied('build-dnsmasq')}
                 onclick={() => clipboard.copy(buildResult!.configExamples.dnsmasq, 'build-dnsmasq')}
               >
-                {clipboard.isCopied('build-dnsmasq') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('build-dnsmasq')
+                  ? $t('tools/lease-time-option51.buttons.copied')
+                  : $t('tools/lease-time-option51.buttons.copy')}
               </button>
             </div>
             <pre class="code-block"><code>{buildResult.configExamples.dnsmasq}</code></pre>
@@ -277,23 +330,23 @@
     />
 
     <div class="card input-card">
-      <h3>Decode Option 51</h3>
+      <h3>{$t('tools/lease-time-option51.decode.title')}</h3>
 
       <div class="form-group">
-        <label for="hex-input">Hex String</label>
+        <label for="hex-input">{$t('tools/lease-time-option51.decode.hexInput.label')}</label>
         <input
           id="hex-input"
           type="text"
           bind:value={hexInput}
-          placeholder="e.g., 00015180 or 00 01 51 80"
+          placeholder={$t('tools/lease-time-option51.decode.hexInput.placeholder')}
           class="input"
         />
-        <span class="hint">Enter 8 hex characters (4 bytes, spaces optional)</span>
+        <span class="hint">{$t('tools/lease-time-option51.decode.hexInput.hint')}</span>
       </div>
 
       {#if decodeError}
         <div class="error-card">
-          <strong>Decode Error:</strong>
+          <strong>{$t('tools/lease-time-option51.decode.error.title')}</strong>
           <p>{decodeError}</p>
         </div>
       {/if}
@@ -301,50 +354,64 @@
 
     {#if decodeResult}
       <div class="card result-card">
-        <h3>Decoded Option 51</h3>
+        <h3>{$t('tools/lease-time-option51.results.decodeTitle')}</h3>
 
         <div class="result-grid">
           <div class="result-item">
-            <span class="label">Lease Time:</span>
+            <span class="label">{$t('tools/lease-time-option51.results.leaseTime')}</span>
             <span class="value highlight">{decodeResult.humanReadable}</span>
           </div>
 
           <div class="result-item">
-            <span class="label">Seconds:</span>
-            <span class="value">{decodeResult.leaseSeconds.toLocaleString()}</span>
+            <span class="label">{$t('tools/lease-time-option51.results.seconds')}</span>
+            <span class="value"
+              >{$t('tools/lease-time-option51.results.secondsValue', {
+                seconds: decodeResult.leaseSeconds.toLocaleString(),
+              })}</span
+            >
           </div>
 
           {#if decodeResult.isInfinite}
             <div class="result-item infinite-badge">
-              <span class="badge">Infinite Lease</span>
+              <span class="badge">{$t('tools/lease-time-option51.results.infiniteLease')}</span>
             </div>
           {/if}
 
           {#if !decodeResult.isInfinite}
             <div class="result-item">
-              <span class="label">T1 Renewal:</span>
-              <span class="value">{decodeResult.t1RenewalFormatted} (50% of lease)</span>
+              <span class="label">{$t('tools/lease-time-option51.results.t1Renewal')}</span>
+              <span class="value"
+                >{$t('tools/lease-time-option51.results.t1RenewalValue', {
+                  time: decodeResult.t1RenewalFormatted ?? '',
+                })}</span
+              >
             </div>
 
             <div class="result-item">
-              <span class="label">T2 Rebinding:</span>
-              <span class="value">{decodeResult.t2RebindingFormatted} (87.5% of lease)</span>
+              <span class="label">{$t('tools/lease-time-option51.results.t2Rebinding')}</span>
+              <span class="value"
+                >{$t('tools/lease-time-option51.results.t2RebindingValue', {
+                  time: decodeResult.t2RebindingFormatted ?? '',
+                })}</span
+              >
             </div>
           {/if}
         </div>
 
         <div class="config-section">
-          <h4>Configuration Examples</h4>
+          <h4>{$t('tools/lease-time-option51.results.configExamples')}</h4>
 
           <div class="output-group">
             <div class="output-header">
-              <h5>ISC DHCPd</h5>
+              <h5>{$t('tools/lease-time-option51.results.iscDhcpd')}</h5>
               <button
                 class="btn-copy"
                 class:copied={clipboard.isCopied('decode-isc')}
                 onclick={() => clipboard.copy(decodeResult!.configExamples.iscDhcpd, 'decode-isc')}
               >
-                {clipboard.isCopied('decode-isc') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('decode-isc')
+                  ? $t('tools/lease-time-option51.buttons.copied')
+                  : $t('tools/lease-time-option51.buttons.copy')}
               </button>
             </div>
             <pre class="code-block"><code>{decodeResult.configExamples.iscDhcpd}</code></pre>
@@ -352,13 +419,15 @@
 
           <div class="output-group">
             <div class="output-header">
-              <h5>Kea DHCPv4</h5>
+              <h5>{$t('tools/lease-time-option51.results.keaDhcp4')}</h5>
               <button
                 class="btn-copy"
                 class:copied={clipboard.isCopied('decode-kea')}
                 onclick={() => clipboard.copy(decodeResult!.configExamples.keaDhcp4, 'decode-kea')}
               >
-                {clipboard.isCopied('decode-kea') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('decode-kea')
+                  ? $t('tools/lease-time-option51.buttons.copied')
+                  : $t('tools/lease-time-option51.buttons.copy')}
               </button>
             </div>
             <pre class="code-block"><code>{decodeResult.configExamples.keaDhcp4}</code></pre>
@@ -366,13 +435,15 @@
 
           <div class="output-group">
             <div class="output-header">
-              <h5>dnsmasq</h5>
+              <h5>{$t('tools/lease-time-option51.results.dnsmasq')}</h5>
               <button
                 class="btn-copy"
                 class:copied={clipboard.isCopied('decode-dnsmasq')}
                 onclick={() => clipboard.copy(decodeResult!.configExamples.dnsmasq, 'decode-dnsmasq')}
               >
-                {clipboard.isCopied('decode-dnsmasq') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('decode-dnsmasq')
+                  ? $t('tools/lease-time-option51.buttons.copied')
+                  : $t('tools/lease-time-option51.buttons.copy')}
               </button>
             </div>
             <pre class="code-block"><code>{decodeResult.configExamples.dnsmasq}</code></pre>

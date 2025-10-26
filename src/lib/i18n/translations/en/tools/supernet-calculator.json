@@ -1,0 +1,98 @@
+{
+  "title": "Supernet Calculator",
+  "description": "Aggregate multiple networks into a single supernet for route summarization and efficient routing table management.",
+
+  "examples": {
+    "title": "Quick Examples",
+    "networks": "{count} Networks",
+    "moreNetworks": "+ {count} more",
+    "contiguous": {
+      "label": "Contiguous Networks",
+      "description": "Adjacent subnets that aggregate efficiently"
+    },
+    "home": {
+      "label": "Home Network",
+      "description": "Typical residential setup with multiple VLANs"
+    },
+    "homelab": {
+      "label": "Homelab Setup",
+      "description": "Self-hosted services and virtualization lab"
+    },
+    "datacenter": {
+      "label": "Data Center Networks",
+      "description": "Well-planned contiguous allocation for servers"
+    },
+    "campus": {
+      "label": "Campus Network",
+      "description": "University or enterprise campus subnets"
+    },
+    "scattered": {
+      "label": "Scattered Networks",
+      "description": "Non-adjacent networks with limited aggregation"
+    }
+  },
+
+  "input": {
+    "title": "Input Networks",
+    "addNetwork": "Add Network",
+    "cidr": "CIDR",
+    "descriptionPlaceholder": "Description (optional)"
+  },
+
+  "analysis": {
+    "title": "Aggregation Analysis",
+    "efficiency": "Aggregation Efficiency",
+    "efficiencyTooltip": "How efficiently the networks can be aggregated - higher is better",
+    "canAggregate": "Can Aggregate",
+    "limitedAggregation": "Limited Aggregation",
+    "recommendations": "Recommendations"
+  },
+
+  "summary": {
+    "title": "Supernet Summary",
+    "address": "Supernet Address",
+    "addressTooltip": "The aggregated network address that encompasses all input networks",
+    "totalHosts": "Total Hosts",
+    "totalHostsTooltip": "Total number of host addresses available in the supernet"
+  },
+
+  "benefits": {
+    "title": "Route Aggregation Benefits",
+    "originalRoutes": "Original Routes",
+    "originalRoutesTooltip": "Number of individual routes before aggregation",
+    "aggregatedRoutes": "Aggregated Routes",
+    "aggregatedRoutesTooltip": "Number of routes after supernet aggregation",
+    "routesSaved": "Routes Saved",
+    "routesSavedTooltip": "Number of routes eliminated through aggregation",
+    "reduction": "Reduction",
+    "reductionTooltip": "Percentage reduction in routing table size"
+  },
+
+  "details": {
+    "title": "Supernet Details",
+    "networkAddress": "Network Address",
+    "networkAddressTooltip": "The first IP address in the supernet that identifies the network itself",
+    "subnetMask": "Subnet Mask",
+    "subnetMaskTooltip": "Defines which portion of the IP address represents the network vs host bits",
+    "wildcardMask": "Wildcard Mask",
+    "wildcardMaskTooltip": "Inverse of subnet mask, used in access control lists and routing protocols",
+    "addressRange": "Address Range",
+    "addressRangeTooltip": "First and last usable IP addresses in the supernet (excluding network and broadcast)",
+    "binaryMask": "Binary Subnet Mask",
+    "binaryMaskTooltip": "Binary representation of the subnet mask showing network (1) and host (0) bits"
+  },
+
+  "visualization": {
+    "title": "Network Visualization",
+    "heading": "Input Networks vs Supernet",
+    "description": "Visual representation of how individual networks are aggregated into a supernet",
+    "inputNetworks": "Input Networks",
+    "aggregatesTo": "Aggregates to",
+    "supernet": "Supernet",
+    "hosts": "{count} hosts"
+  },
+
+  "error": {
+    "title": "Calculation Error"
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "title": "DNSKEY Key Tag Calculator",
+  "description": "Compute the DNSKEY key tag from a DNSKEY RR (RFC 4034 algorithm) and display it alongside key metadata for DNSSEC validation purposes.",
+
+  "examples": {
+    "title": "DNSKEY Examples",
+    "ksk": {
+      "title": "KSK Example (Algorithm 8 - RSASHA256)",
+      "description": "Key Signing Key with SEP flag set"
+    },
+    "zsk": {
+      "title": "ZSK Example (Algorithm 13 - ECDSAP256SHA256)",
+      "description": "Zone Signing Key for data signing"
+    },
+    "rdataOnly": {
+      "title": "RDATA Only Format",
+      "description": "DNSKEY record data without owner name"
+    }
+  },
+
+  "input": {
+    "label": "DNSKEY Record",
+    "tooltip": "Enter a DNSKEY record in standard format (e.g., 'example.org. 3600 IN DNSKEY 257 3 8 AwEAAag') to calculate its key tag",
+    "placeholder": "example.org. 3600 IN DNSKEY 257 3 8 AwEAAc...",
+    "exampleActive": "Using example data - modify to see your results"
+  },
+
+  "errors": {
+    "validationError": "Validation Error:",
+    "failedParse": "Failed to parse DNSKEY record"
+  },
+
+  "results": {
+    "title": "Key Tag Calculation",
+    "copyButton": "Copy Key Tag",
+    "keyTagLabel": "Key Tag",
+    "keyTagTooltip": "A 16-bit identifier calculated from the DNSKEY used to quickly identify which key was used to generate a signature"
+  },
+
+  "metadata": {
+    "title": "DNSKEY Metadata",
+    "keyType": {
+      "label": "Key Type",
+      "tooltip": "KSK (Key Signing Key) signs other keys and has the SEP flag set (257). ZSK (Zone Signing Key) signs zone data and has no SEP flag (256).",
+      "unknown": "Unknown"
+    },
+    "flags": {
+      "label": "Flags",
+      "tooltip": "16-bit flags field. Bit 15 (SEP flag) indicates if this is a Key Signing Key. 257 = KSK, 256 = ZSK."
+    },
+    "protocol": {
+      "label": "Protocol",
+      "tooltip": "Protocol field for DNSKEY records. Must always be 3 (DNSSEC)."
+    },
+    "algorithm": {
+      "label": "Algorithm",
+      "tooltip": "Cryptographic algorithm used by this key. Common values: 8 (RSASHA256), 13 (ECDSA P-256), 15 (Ed25519).",
+      "unknown": "Unknown"
+    },
+    "publicKey": {
+      "label": "Public Key (Base64)",
+      "tooltip": "The actual cryptographic public key data encoded in Base64 format. This is used for signature verification."
+    }
+  },
+
+  "education": {
+    "purpose": {
+      "title": "Key Tag Purpose",
+      "description": "The key tag is a short identifier used to quickly identify which DNSKEY was used to generate a signature. It's calculated using a checksum algorithm defined in RFC 4034 and helps optimize DNSSEC validation by avoiding the need to test every key."
+    },
+    "keyTypes": {
+      "title": "Key Types",
+      "description": "KSK (Key Signing Key): Used to sign other keys (ZSKs). Has the SEP flag set (bit 15). ZSK (Zone Signing Key): Used to sign zone data. Does not have the SEP flag set."
+    },
+    "algorithmSupport": {
+      "title": "Algorithm Support",
+      "description": "Supports all modern DNSSEC algorithms including RSASHA256 (8), RSASHA512 (10), ECDSA P-256 (13), ECDSA P-384 (14), and Ed25519 (15). Legacy algorithms like RSAMD5 are deprecated and should not be used."
+    },
+    "validation": {
+      "title": "Validation Process",
+      "description": "The tool validates DNSKEY format, checks protocol compliance (must be 3), verifies algorithm support, and ensures proper base64 encoding of the public key before calculating the key tag."
+    }
+  }
+}

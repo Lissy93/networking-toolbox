@@ -1,0 +1,135 @@
+{
+  "title": "NS/SOA Consistency Checker",
+  "subtitle": "Verify DNS nameserver and SOA (Start of Authority) record consistency. Check that all listed nameservers resolve correctly and analyze SOA parameters for proper DNS configuration.",
+
+  "examples": {
+    "title": "NS/SOA Examples",
+    "items": {
+      "google": {
+        "domain": "google.com",
+        "description": "Google DNS infrastructure check",
+        "tooltip": "Check NS/SOA consistency for google.com"
+      },
+      "github": {
+        "domain": "github.com",
+        "description": "GitHub nameserver configuration",
+        "tooltip": "Check NS/SOA consistency for github.com"
+      },
+      "cloudflare": {
+        "domain": "cloudflare.com",
+        "description": "Cloudflare NS/SOA setup",
+        "tooltip": "Check NS/SOA consistency for cloudflare.com"
+      },
+      "stackoverflow": {
+        "domain": "stackoverflow.com",
+        "description": "Stack Overflow DNS consistency",
+        "tooltip": "Check NS/SOA consistency for stackoverflow.com"
+      },
+      "microsoft": {
+        "domain": "microsoft.com",
+        "description": "Microsoft nameserver analysis",
+        "tooltip": "Check NS/SOA consistency for microsoft.com"
+      },
+      "aws": {
+        "domain": "aws.amazon.com",
+        "description": "AWS subdomain NS/SOA check",
+        "tooltip": "Check NS/SOA consistency for aws.amazon.com"
+      }
+    }
+  },
+
+  "form": {
+    "title": "NS/SOA Check",
+    "domainLabel": "Domain Name",
+    "domainPlaceholder": "example.com",
+    "domainTooltip": "Enter the domain to check nameserver and SOA consistency for",
+    "checking": "Checking NS/SOA...",
+    "checkButton": "Check NS/SOA Records"
+  },
+
+  "results": {
+    "title": "NS/SOA Analysis Results",
+    "copyButton": "Copy Results",
+    "copied": "Copied!",
+    "status": {
+      "healthy": "DNS Configuration Healthy",
+      "issues": "DNS Issues Detected",
+      "problems": "DNS Configuration Problems"
+    },
+    "nameservers": {
+      "title": "Nameservers ({count})",
+      "failedToResolve": "Failed to resolve"
+    },
+    "soa": {
+      "title": "SOA (Start of Authority) Record",
+      "rawTitle": "Raw SOA Record",
+      "parsedTitle": "Parsed SOA Parameters",
+      "primaryNS": "Primary NS",
+      "primaryNSTooltip": "The primary nameserver for this zone",
+      "administrator": "Administrator",
+      "administratorTooltip": "Email address of the zone administrator (@ replaced with .)",
+      "serial": "Serial",
+      "serialTooltip": "Zone serial number - used to track zone changes",
+      "refresh": "Refresh",
+      "refreshTooltip": "How often secondary servers should check for updates",
+      "retry": "Retry",
+      "retryTooltip": "How long to wait before retrying a failed zone transfer",
+      "expire": "Expire",
+      "expireTooltip": "When secondary servers should stop answering queries if they can't contact the primary",
+      "minimumTTL": "Minimum TTL",
+      "minimumTTLTooltip": "Default TTL for negative responses (NXDOMAIN)"
+    },
+    "analysis": {
+      "title": "Configuration Analysis",
+      "serialYYYYMMDDNN": "Serial number appears to use YYYYMMDDNN format (recommended)",
+      "serialSuggestion": "Consider using YYYYMMDDNN format for serial numbers for easier tracking",
+      "refreshGood": "Refresh interval ({time}) is within recommended range",
+      "refreshTooFrequent": "Refresh interval ({time}) is quite frequent - consider increasing",
+      "refreshTooLong": "Refresh interval ({time}) is quite long - consider reducing",
+      "retryGood": "Retry interval is properly configured",
+      "retryTooLong": "Retry interval should be less than refresh interval",
+      "retryTooShort": "Retry interval ({time}) might be too short",
+      "expireGood": "Expire time ({time}) provides good resilience",
+      "expireShort": "Expire time ({time}) is quite short - consider at least 1 week"
+    }
+  },
+
+  "error": {
+    "title": "NS/SOA Check Failed"
+  },
+
+  "education": {
+    "title": "Understanding NS and SOA Records",
+    "nsRecords": {
+      "title": "NS (Name Server) Records",
+      "description": "NS records specify which name servers are authoritative for a domain. All listed nameservers should:",
+      "resolveToValidIP": "Resolve to valid IP addresses",
+      "beReachable": "Be reachable and responsive",
+      "serveConsistent": "Serve consistent zone data",
+      "beDistributed": "Be geographically distributed for redundancy"
+    },
+    "soaRecord": {
+      "title": "SOA (Start of Authority)",
+      "description": "The SOA record contains administrative information about the zone:",
+      "serial": "Serial: Version number for zone changes",
+      "refresh": "Refresh: How often secondaries check for updates",
+      "retry": "Retry: Wait time before retrying failed transfers",
+      "expire": "Expire: When to stop serving stale data",
+      "minimum": "Minimum: Default negative response TTL"
+    },
+    "recommended": {
+      "title": "Recommended Values",
+      "refresh": "Refresh: 1-24 hours (3600-86400s)",
+      "retry": "Retry: 10-60 minutes (600-3600s)",
+      "expire": "Expire: 1-4 weeks (604800-2419200s)",
+      "minimum": "Minimum: 5 minutes to 1 hour (300-3600s)"
+    },
+    "commonIssues": {
+      "title": "Common Issues",
+      "unreachable": "Unreachable nameservers: Can cause resolution failures",
+      "inconsistent": "Inconsistent data: Different responses from different NS",
+      "wrongValues": "Wrong SOA values: Too aggressive or too conservative timing",
+      "serialIssues": "Serial number issues: Outdated or incorrect format"
+    }
+  }
+}

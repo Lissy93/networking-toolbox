@@ -1,0 +1,77 @@
+{
+  "title": "CIDR Allocator",
+  "description": "Pack requested subnet sizes into pools using intelligent bin-packing algorithms",
+
+  "examples": {
+    "title": "Quick Examples",
+    "officeNetwork": "Office Network Planning",
+    "multiPool": "Multi-Pool Allocation",
+    "densePacking": "Dense Packing Challenge",
+    "campusVlan": "Campus VLAN Allocation",
+    "cloudInfrastructure": "Cloud Infrastructure",
+    "ispCustomer": "ISP Customer Allocation",
+    "algorithm": "Algorithm: {algorithm}"
+  },
+
+  "algorithm": {
+    "title": "Allocation Algorithm",
+    "titleTooltip": "Choose between first-fit (faster) and best-fit (more efficient packing) algorithms",
+    "firstFit": {
+      "title": "First-Fit",
+      "description": "Fast allocation - uses the first available block that fits (good for speed)"
+    },
+    "bestFit": {
+      "title": "Best-Fit",
+      "description": "Optimal packing - uses the smallest available block that fits (reduces fragmentation)"
+    }
+  },
+
+  "input": {
+    "poolsLabel": "Available Pools",
+    "poolsTooltip": "Available network pools - one CIDR block per line",
+    "poolsPlaceholder": "192.168.0.0/16\n10.0.0.0/20",
+    "requestsLabel": "Subnet Requests",
+    "requestsTooltip": "Subnet requests in format '/24 - Description' - one per line",
+    "requestsPlaceholder": "/24 - Main Office\n/26 - Servers\n/28 - Management"
+  },
+
+  "results": {
+    "title": "Allocation Results",
+    "titleTooltip": "Summary of subnet allocation requests and pool utilization",
+    "copyAll": "Copy All",
+    "copied": "Copied!"
+  },
+
+  "summary": {
+    "allocated": "Allocated",
+    "failed": "Failed",
+    "efficiency": "Efficiency",
+    "totalPoolSpace": "Total Pool Space:",
+    "allocatedSpace": "Allocated:",
+    "remaining": "Remaining:",
+    "addresses": "{count} addresses"
+  },
+
+  "allocations": {
+    "title": "Subnet Allocations",
+    "titleTooltip": "Individual subnet allocation results with assigned CIDR blocks",
+    "allocated": "Allocated",
+    "failed": "Failed",
+    "in": "in",
+    "noSuitableBlock": "No suitable block found with proper alignment"
+  },
+
+  "pools": {
+    "title": "Pool Utilization",
+    "titleTooltip": "Detailed breakdown of how address space was used in each pool",
+    "used": "{percent}% used",
+    "allocatedSubnets": "Allocated Subnets",
+    "availableSpace": "Available Space",
+    "moreBlocks": "+{count} more blocks"
+  },
+
+  "errors": {
+    "title": "Allocation Error",
+    "unknown": "Unknown error occurred"
+  }
+}

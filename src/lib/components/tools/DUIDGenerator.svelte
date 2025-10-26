@@ -15,6 +15,7 @@
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables';
   import { tooltip } from '$lib/actions/tooltip';
+  import { t } from '$lib/stores/language';
 
   let duidType = $state<DUIDType>('DUID-LLT');
   let macAddress = $state('');
@@ -36,11 +37,13 @@
     description: string;
   }
 
-  const examples: DUIDExample[] = DUID_EXAMPLES.map((ex) => ({
-    label: ex.name,
-    config: ex,
-    description: `${ex.type} configuration example`,
-  }));
+  const examples: DUIDExample[] = $derived(
+    DUID_EXAMPLES.map((ex) => ({
+      label: ex.name,
+      config: ex,
+      description: $t('tools/dhcp-duid-generator.exampleDescription', { type: ex.type }),
+    })),
+  );
 
   function loadExample(example: DUIDExample, index: number): void {
     const cfg = example.config;
@@ -138,8 +141,8 @@
 </script>
 
 <ToolContentContainer
-  title="DUID Generator"
-  description="Generate DHCP Unique Identifier (DUID) for DHCPv6 clients per RFC 8415. Supports DUID-LLT, DUID-EN, DUID-LL, and DUID-UUID types with configuration export."
+  title={$t('tools/dhcp-duid-generator.title')}
+  description={$t('tools/dhcp-duid-generator.subtitle')}
 >
   <ExamplesCard
     {examples}
@@ -151,20 +154,20 @@
 
   <div class="card input-card">
     <div class="card-header">
-      <h3>DUID Configuration</h3>
-      <p class="help-text">Configure DHCP Unique Identifier for DHCPv6 client identification</p>
+      <h3>{$t('tools/dhcp-duid-generator.input.title')}</h3>
+      <p class="help-text">{$t('tools/dhcp-duid-generator.input.helpText')}</p>
     </div>
     <div class="card-content">
       <div class="input-group">
         <label for="duid-type">
           <Icon name="settings" size="sm" />
-          DUID Type
+          {$t('tools/dhcp-duid-generator.input.duidType.label')}
         </label>
         <select id="duid-type" bind:value={duidType}>
-          <option value="DUID-LLT">DUID-LLT (Type 1) - Link-layer address + time</option>
-          <option value="DUID-EN">DUID-EN (Type 2) - Enterprise number</option>
-          <option value="DUID-LL">DUID-LL (Type 3) - Link-layer address</option>
-          <option value="DUID-UUID">DUID-UUID (Type 4) - UUID</option>
+          <option value="DUID-LLT">{$t('tools/dhcp-duid-generator.input.duidType.options.duidLlt')}</option>
+          <option value="DUID-EN">{$t('tools/dhcp-duid-generator.input.duidType.options.duidEn')}</option>
+          <option value="DUID-LL">{$t('tools/dhcp-duid-generator.input.duidType.options.duidLl')}</option>
+          <option value="DUID-UUID">{$t('tools/dhcp-duid-generator.input.duidType.options.duidUuid')}</option>
         </select>
       </div>
 
@@ -172,28 +175,51 @@
         <div class="input-group">
           <label for="mac-address">
             <Icon name="hash" size="sm" />
-            MAC Address
+            {$t('tools/dhcp-duid-generator.input.macAddress.label')}
           </label>
-          <input id="mac-address" type="text" bind:value={macAddress} placeholder="00:1A:2B:3C:4D:5E or 001A2B3C4D5E" />
-          <small>Enter MAC address in any common format</small>
+          <input
+            id="mac-address"
+            type="text"
+            bind:value={macAddress}
+            placeholder={$t('tools/dhcp-duid-generator.input.macAddress.placeholder')}
+          />
+          <small>{$t('tools/dhcp-duid-generator.input.macAddress.hint')}</small>
         </div>
 
         <div class="input-group">
           <label for="hardware-type">
             <Icon name="cpu" size="sm" />
-            Hardware Type
+            {$t('tools/dhcp-duid-generator.input.hardwareType.label')}
           </label>
           <select id="hardware-type" bind:value={hardwareType}>
-            <option value={HARDWARE_TYPES.ETHERNET}>Ethernet (1)</option>
-            <option value={HARDWARE_TYPES.EXPERIMENTAL_ETHERNET}>Experimental Ethernet (2)</option>
-            <option value={HARDWARE_TYPES.IEEE_802}>IEEE 802 (6)</option>
-            <option value={HARDWARE_TYPES.ARCNET}>ARCNET (7)</option>
-            <option value={HARDWARE_TYPES.FRAME_RELAY}>Frame Relay (15)</option>
-            <option value={HARDWARE_TYPES.ATM}>ATM (16)</option>
-            <option value={HARDWARE_TYPES.HDLC}>HDLC (17)</option>
-            <option value={HARDWARE_TYPES.FIBRE_CHANNEL}>Fibre Channel (18)</option>
-            <option value={HARDWARE_TYPES.IEEE_1394}>IEEE 1394 (24)</option>
-            <option value={HARDWARE_TYPES.INFINIBAND}>InfiniBand (32)</option>
+            <option value={HARDWARE_TYPES.ETHERNET}
+              >{$t('tools/dhcp-duid-generator.input.hardwareType.options.ethernet')}</option
+            >
+            <option value={HARDWARE_TYPES.EXPERIMENTAL_ETHERNET}
+              >{$t('tools/dhcp-duid-generator.input.hardwareType.options.experimentalEthernet')}</option
+            >
+            <option value={HARDWARE_TYPES.IEEE_802}
+              >{$t('tools/dhcp-duid-generator.input.hardwareType.options.ieee802')}</option
+            >
+            <option value={HARDWARE_TYPES.ARCNET}
+              >{$t('tools/dhcp-duid-generator.input.hardwareType.options.arcnet')}</option
+            >
+            <option value={HARDWARE_TYPES.FRAME_RELAY}
+              >{$t('tools/dhcp-duid-generator.input.hardwareType.options.frameRelay')}</option
+            >
+            <option value={HARDWARE_TYPES.ATM}>{$t('tools/dhcp-duid-generator.input.hardwareType.options.atm')}</option>
+            <option value={HARDWARE_TYPES.HDLC}
+              >{$t('tools/dhcp-duid-generator.input.hardwareType.options.hdlc')}</option
+            >
+            <option value={HARDWARE_TYPES.FIBRE_CHANNEL}
+              >{$t('tools/dhcp-duid-generator.input.hardwareType.options.fibreChannel')}</option
+            >
+            <option value={HARDWARE_TYPES.IEEE_1394}
+              >{$t('tools/dhcp-duid-generator.input.hardwareType.options.ieee1394')}</option
+            >
+            <option value={HARDWARE_TYPES.INFINIBAND}
+              >{$t('tools/dhcp-duid-generator.input.hardwareType.options.infiniband')}</option
+            >
           </select>
         </div>
       {/if}
@@ -202,18 +228,33 @@
         <div class="input-group">
           <label for="timestamp">
             <Icon name="clock" size="sm" />
-            Timestamp (seconds since Jan 1, 2000 UTC)
+            {$t('tools/dhcp-duid-generator.input.timestamp.label')}
           </label>
           <div class="timestamp-controls">
-            <input id="timestamp" type="number" bind:value={timestamp} placeholder="Leave empty for current time" />
-            <button type="button" class="btn-icon" onclick={useCurrentTimestamp} use:tooltip={'Use current timestamp'}>
+            <input
+              id="timestamp"
+              type="number"
+              bind:value={timestamp}
+              placeholder={$t('tools/dhcp-duid-generator.input.timestamp.placeholder')}
+            />
+            <button
+              type="button"
+              class="btn-icon"
+              onclick={useCurrentTimestamp}
+              use:tooltip={$t('tools/dhcp-duid-generator.input.timestamp.useCurrentTooltip')}
+            >
               <Icon name="clock" size="sm" />
             </button>
-            <button type="button" class="btn-icon" onclick={clearTimestamp} use:tooltip={'Clear timestamp'}>
+            <button
+              type="button"
+              class="btn-icon"
+              onclick={clearTimestamp}
+              use:tooltip={$t('tools/dhcp-duid-generator.input.timestamp.clearTooltip')}
+            >
               <Icon name="x" size="sm" />
             </button>
           </div>
-          <small>Current: {calculateDUIDTimestamp()} seconds since epoch</small>
+          <small>{$t('tools/dhcp-duid-generator.input.timestamp.hint', { timestamp: calculateDUIDTimestamp() })}</small>
         </div>
       {/if}
 
@@ -221,29 +262,29 @@
         <div class="input-group">
           <label for="enterprise-number">
             <Icon name="building" size="sm" />
-            Enterprise Number (IANA)
+            {$t('tools/dhcp-duid-generator.input.enterpriseNumber.label')}
           </label>
           <input
             id="enterprise-number"
             type="number"
             bind:value={enterpriseNumber}
-            placeholder="e.g., 9 for Cisco, 311 for Microsoft"
+            placeholder={$t('tools/dhcp-duid-generator.input.enterpriseNumber.placeholder')}
           />
-          <small>IANA Private Enterprise Number</small>
+          <small>{$t('tools/dhcp-duid-generator.input.enterpriseNumber.hint')}</small>
         </div>
 
         <div class="input-group">
           <label for="enterprise-identifier">
             <Icon name="key" size="sm" />
-            Enterprise Identifier (hex)
+            {$t('tools/dhcp-duid-generator.input.enterpriseIdentifier.label')}
           </label>
           <input
             id="enterprise-identifier"
             type="text"
             bind:value={enterpriseIdentifier}
-            placeholder="e.g., 0123456789abcdef"
+            placeholder={$t('tools/dhcp-duid-generator.input.enterpriseIdentifier.placeholder')}
           />
-          <small>Custom identifier in hexadecimal format</small>
+          <small>{$t('tools/dhcp-duid-generator.input.enterpriseIdentifier.hint')}</small>
         </div>
       {/if}
 
@@ -251,10 +292,15 @@
         <div class="input-group">
           <label for="uuid">
             <Icon name="fingerprint" size="sm" />
-            UUID
+            {$t('tools/dhcp-duid-generator.input.uuid.label')}
           </label>
-          <input id="uuid" type="text" bind:value={uuid} placeholder="e.g., 550e8400-e29b-41d4-a716-446655440000" />
-          <small>Standard UUID format (with or without hyphens)</small>
+          <input
+            id="uuid"
+            type="text"
+            bind:value={uuid}
+            placeholder={$t('tools/dhcp-duid-generator.input.uuid.placeholder')}
+          />
+          <small>{$t('tools/dhcp-duid-generator.input.uuid.hint')}</small>
         </div>
       {/if}
     </div>
@@ -262,7 +308,7 @@
 
   {#if validationErrors.length > 0}
     <div class="card errors-card">
-      <h3>Validation Errors</h3>
+      <h3>{$t('tools/dhcp-duid-generator.errors.title')}</h3>
       {#each validationErrors as error, i (i)}
         <div class="error-message">
           <Icon name="alert-triangle" size="sm" />
@@ -274,16 +320,23 @@
 
   {#if result && validationErrors.length === 0}
     <div class="card results">
-      <h3>Generated DUID</h3>
+      <h3>{$t('tools/dhcp-duid-generator.results.title')}</h3>
 
       <div class="summary-card">
-        <div><strong>Type:</strong> {result.type} (Type {result.typeCode})</div>
-        <div><strong>Total Length:</strong> {result.totalLength} bytes</div>
+        <div>
+          <strong>{$t('tools/dhcp-duid-generator.results.summary.type')}</strong>
+          {result.type}
+          {$t('tools/dhcp-duid-generator.results.summary.typeCode', { code: result.typeCode })}
+        </div>
+        <div>
+          <strong>{$t('tools/dhcp-duid-generator.results.summary.totalLength')}</strong>
+          {$t('tools/dhcp-duid-generator.results.summary.bytes', { length: result.totalLength })}
+        </div>
       </div>
 
       <div class="output-group">
         <div class="output-header">
-          <h4>Hex Encoded DUID</h4>
+          <h4>{$t('tools/dhcp-duid-generator.results.hexEncoded.title')}</h4>
           <button
             type="button"
             class="copy-btn"
@@ -291,7 +344,9 @@
             onclick={() => clipboard.copy(result!.hexEncoded, 'hex')}
           >
             <Icon name={clipboard.isCopied('hex') ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied('hex') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('hex')
+              ? $t('tools/dhcp-duid-generator.buttons.copied')
+              : $t('tools/dhcp-duid-generator.buttons.copy')}
           </button>
         </div>
         <pre class="output-value code-block">{result.hexEncoded}</pre>
@@ -299,7 +354,7 @@
 
       <div class="output-group">
         <div class="output-header">
-          <h4>Wire Format (Spaced)</h4>
+          <h4>{$t('tools/dhcp-duid-generator.results.wireFormat.title')}</h4>
           <button
             type="button"
             class="copy-btn"
@@ -307,7 +362,9 @@
             onclick={() => clipboard.copy(result!.wireFormat, 'wire')}
           >
             <Icon name={clipboard.isCopied('wire') ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied('wire') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('wire')
+              ? $t('tools/dhcp-duid-generator.buttons.copied')
+              : $t('tools/dhcp-duid-generator.buttons.copy')}
           </button>
         </div>
         <pre class="output-value code-block">{result.wireFormat}</pre>
@@ -315,7 +372,7 @@
 
       {#if result.breakdown && result.breakdown.length > 0}
         <div class="breakdown-section">
-          <h4>DUID Breakdown</h4>
+          <h4>{$t('tools/dhcp-duid-generator.results.breakdown.title')}</h4>
           {#each result.breakdown as item, i (i)}
             <div class="breakdown-item">
               <div class="breakdown-label">{item.field}</div>
@@ -333,7 +390,7 @@
 
     {#if result.examples.keaDhcp6}
       <div class="card results">
-        <h3>Kea DHCPv6 Configuration</h3>
+        <h3>{$t('tools/dhcp-duid-generator.config.keaDhcp6')}</h3>
         <div class="output-group">
           <div class="output-header">
             <button
@@ -343,7 +400,9 @@
               onclick={() => clipboard.copy(result!.examples.keaDhcp6!, 'kea')}
             >
               <Icon name={clipboard.isCopied('kea') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('kea') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('kea')
+                ? $t('tools/dhcp-duid-generator.buttons.copied')
+                : $t('tools/dhcp-duid-generator.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.examples.keaDhcp6}</pre>
@@ -353,7 +412,7 @@
 
     {#if result.examples.iscDhcpd}
       <div class="card results">
-        <h3>ISC DHCPd Configuration</h3>
+        <h3>{$t('tools/dhcp-duid-generator.config.iscDhcpd')}</h3>
         <div class="output-group">
           <div class="output-header">
             <button
@@ -363,7 +422,9 @@
               onclick={() => clipboard.copy(result!.examples.iscDhcpd!, 'isc')}
             >
               <Icon name={clipboard.isCopied('isc') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('isc') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('isc')
+                ? $t('tools/dhcp-duid-generator.buttons.copied')
+                : $t('tools/dhcp-duid-generator.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.examples.iscDhcpd}</pre>
