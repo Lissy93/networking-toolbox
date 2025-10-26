@@ -153,6 +153,11 @@ function scanDirectory(dirPath: string): HardcodedText[] {
         continue;
       }
 
+      // Validate safeName to prevent path traversal and unsafe characters
+      if (safeName.includes('..') || /[^a-zA-Z0-9._-]/.test(safeName)) {
+        console.error(`Unsafe file or directory name blocked: ${safeName}`);
+        continue;
+      }
       // Construct path and verify it stays within PROJECT_ROOT
       const fullPath = join(dirPath, safeName);
       if (!fullPath.startsWith(PROJECT_ROOT)) {
