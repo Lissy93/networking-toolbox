@@ -1,0 +1,47 @@
+{
+  "title": "Email SPF Policy Checker",
+  "description": "Check SPF (Sender Policy Framework) records for email authentication and deliverability. Analyze which servers are authorized to send email for your domain and assess delivery risk.",
+
+  "examples": {
+    "title": "SPF Examples",
+    "gmail": "Google Gmail SPF policy",
+    "outlook": "Microsoft Outlook SPF setup",
+    "salesforce": "Salesforce SPF configuration",
+    "mailchimp": "MailChimp email service SPF",
+    "github": "GitHub enterprise SPF policy",
+    "sendgrid": "SendGrid email platform SPF"
+  },
+
+  "form": {
+    "title": "SPF Policy Check",
+    "domain": {
+      "label": "Domain Name",
+      "tooltip": "Enter the domain to check SPF policy for",
+      "placeholder": "example.com"
+    },
+    "check": "Check SPF Policy",
+    "checking": "Checking SPF..."
+  },
+
+  "results": {
+    "title": "SPF Policy Analysis",
+    "copy": "Copy Results",
+    "copied": "Copied!",
+
+    "deliverability": {
+      "risk": "Deliverability Risk",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+
+    "analysis": {
+      "hard_fail": "Hard Fail (-all)",
+      "soft_fail": "Soft Fail (~all)",
+      "allows_all": "Allows All (+all)",
+      "total_lookups": "Total DNS lookups",
+      "mechanisms": "Mechanisms",
+      "includes": "Includes"
+    }
+  }
+}

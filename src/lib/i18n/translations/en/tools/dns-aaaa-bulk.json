@@ -1,0 +1,52 @@
+{
+  "title": "A/AAAA Bulk Generator",
+  "description": "Bulk create A and AAAA record sets from hostname and IP lists with TTL controls and zone file generation.",
+
+  "examples": {
+    "title": "Quick Examples",
+    "webServers": "Web Servers",
+    "mailServers": "Mail Servers",
+    "ipv6Services": "IPv6 Services",
+    "hostsCount": "{count} hosts"
+  },
+
+  "input": {
+    "hostnames": {
+      "label": "Hostnames",
+      "tooltip": "Enter hostnames, one per line",
+      "placeholder": "www\napi\nmail\nftp"
+    },
+    "ips": {
+      "label": "IP Addresses",
+      "tooltip": "Enter IP addresses (IPv4 or IPv6), one per line",
+      "placeholder": "192.168.1.10\n192.168.1.11\n2001:db8::1\n2001:db8::2"
+    },
+    "ttl": {
+      "label": "TTL (seconds)",
+      "tooltip": "Time To Live in seconds"
+    },
+    "zoneName": {
+      "label": "Zone Name",
+      "tooltip": "Domain name for the zone file",
+      "placeholder": "example.com"
+    },
+    "generateZoneFile": "Generate zone file"
+  },
+
+  "results": {
+    "title": "Generated Records",
+    "copyRecordsButton": "Copy Records",
+    "downloadZoneButton": "Download Zone",
+    "tableHeaders": {
+      "name": "Name",
+      "ttl": "TTL",
+      "type": "Type",
+      "value": "Value"
+    }
+  },
+
+  "zoneFile": {
+    "title": "Zone File Preview",
+    "copyButton": "Copy Zone File"
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "title": "Service Banner Grabber",
+  "subtitle": "Retrieve service banners from SSH, SMTP, HTTP, FTP, and other network services",
+
+  "services": {
+    "custom": "Custom port",
+    "ssh": "SSH Server",
+    "smtp": "SMTP Mail Server",
+    "whois": "WHOIS Service",
+    "http": "HTTP Web Server",
+    "https": "HTTPS Web Server",
+    "ftp": "FTP Server",
+    "telnet": "Telnet Server",
+    "pop3": "POP3 Mail Server",
+    "imap": "IMAP Mail Server",
+    "smtps": "SMTP over TLS",
+    "submission": "Mail Submission",
+    "imaps": "IMAP over TLS",
+    "pop3s": "POP3 over TLS",
+    "mysql": "MySQL Database",
+    "postgresql": "PostgreSQL Database",
+    "redis": "Redis Database",
+    "mongodb": "MongoDB Database",
+    "rdp": "Remote Desktop",
+    "vnc": "VNC Remote Desktop"
+  },
+
+  "examples": {
+    "title": "Quick Examples",
+    "items": {
+      "nmapSSH": {
+        "host": "scanme.nmap.org",
+        "port": 22,
+        "description": "Nmap SSH Test",
+        "tooltip": "Grab banner from scanme.nmap.org:22"
+      },
+      "rebexFTP": {
+        "host": "test.rebex.net",
+        "port": 21,
+        "description": "Rebex FTP Test",
+        "tooltip": "Grab banner from test.rebex.net:21"
+      },
+      "exampleHTTP": {
+        "host": "example.com",
+        "port": 80,
+        "description": "Example.com HTTP",
+        "tooltip": "Grab banner from example.com:80"
+      },
+      "googleHTTP": {
+        "host": "www.google.com",
+        "port": 80,
+        "description": "Google HTTP",
+        "tooltip": "Grab banner from www.google.com:80"
+      },
+      "googleMX": {
+        "host": "aspmx.l.google.com",
+        "port": 25,
+        "description": "Google MX Server",
+        "tooltip": "Grab banner from aspmx.l.google.com:25"
+      },
+      "ianaWHOIS": {
+        "host": "whois.iana.org",
+        "port": 43,
+        "description": "IANA WHOIS",
+        "tooltip": "Grab banner from whois.iana.org:43"
+      },
+      "freebsdFTP": {
+        "host": "ftp.freebsd.org",
+        "port": 21,
+        "description": "FreeBSD FTP",
+        "tooltip": "Grab banner from ftp.freebsd.org:21"
+      },
+      "httpbinAPI": {
+        "host": "httpbin.org",
+        "port": 80,
+        "description": "HTTPBin API",
+        "tooltip": "Grab banner from httpbin.org:80"
+      },
+      "verisignWHOIS": {
+        "host": "whois.verisign-grs.com",
+        "port": 43,
+        "description": "Verisign WHOIS",
+        "tooltip": "Grab banner from whois.verisign-grs.com:43"
+      }
+    }
+  },
+
+  "form": {
+    "title": "Target Service",
+    "serviceTypeLabel": "Service Type",
+    "hostLabel": "Host / IP Address",
+    "hostPlaceholder": "example.com or 192.168.1.1",
+    "portLabel": "Port",
+    "portPlaceholder": "1-65535",
+    "connecting": "Connecting...",
+    "grabButton": "Grab Banner"
+  },
+
+  "loading": {
+    "title": "Grabbing Banner",
+    "message": "Connecting to {host}:{port}..."
+  },
+
+  "error": {
+    "title": "Connection Failed",
+    "invalidInput": "Please enter a valid host and port (1-65535)",
+    "hostNotFound": "Host not found. Please check the hostname and try again.",
+    "connectionRefused": "Connection refused on port {port}. The service may be down or port closed.",
+    "timeout": "Connection timed out. The host may be unreachable or port filtered.",
+    "failed": "Failed to grab banner",
+    "unexpected": "An unexpected error occurred"
+  },
+
+  "results": {
+    "title": "Banner Information",
+    "connectionDetails": {
+      "title": "Connection Details",
+      "host": "Host:",
+      "port": "Port:",
+      "protocol": "Protocol:",
+      "protocolUnknown": "Unknown",
+      "responseTime": "Response Time:"
+    },
+    "serviceBanner": {
+      "title": "Service Banner",
+      "noBannerReceived": "No banner received from service",
+      "noBannerHint": "The service may not send a banner or requires specific protocol handshake"
+    },
+    "serviceAnalysis": {
+      "title": "Service Analysis",
+      "software": "Software",
+      "version": "Version",
+      "os": "Operating System",
+      "securityNotes": "Security Notes"
+    },
+    "tlsInformation": {
+      "title": "TLS Information",
+      "protocol": "Protocol:",
+      "cipher": "Cipher:",
+      "certificateCN": "Certificate CN:"
+    }
+  }
+}

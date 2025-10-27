@@ -1,0 +1,34 @@
+{
+  "title": "TLS Certificate Inspector",
+  "description": "Inspect TLS/SSL certificates for a domain including validity, issuer, and chain information",
+
+  "form": {
+    "title": "Certificate Inspection",
+    "hostname": {
+      "label": "Hostname",
+      "placeholder": "example.com"
+    },
+    "port": {
+      "label": "Port",
+      "placeholder": "443"
+    },
+    "inspect": "Inspect Certificate",
+    "inspecting": "Inspecting...",
+    "error": "Please enter a hostname"
+  },
+
+  "results": {
+    "title": "Certificate Information",
+    "subject": "Subject",
+    "issuer": "Issuer",
+    "valid_from": "Valid From",
+    "valid_to": "Valid To",
+    "expires_in": "Expires in {days} days",
+    "serial_number": "Serial Number",
+    "fingerprint": "Fingerprint",
+    "signature_algorithm": "Signature Algorithm",
+    "public_key": "Public Key",
+    "san": "Subject Alternative Names",
+    "chain": "Certificate Chain"
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "title": "CAA Record Builder",
+  "description": "Build CAA (Certificate Authority Authorization) records to control which CAs can issue certificates for your domain.",
+
+  "domain": {
+    "title": "Domain Configuration",
+    "label": "Domain:",
+    "tooltip": "Domain to create CAA records for",
+    "placeholder": "example.com"
+  },
+
+  "records": {
+    "title": "CAA Records",
+    "addButtons": {
+      "issue": {
+        "label": "Issue",
+        "tooltip": "Add certificate issuance authorization"
+      },
+      "issuewild": {
+        "label": "Wildcard",
+        "tooltip": "Add wildcard certificate issuance authorization"
+      },
+      "iodef": {
+        "label": "Contact",
+        "tooltip": "Add incident reporting contact"
+      }
+    },
+    "removeTooltip": "Remove this record"
+  },
+
+  "tags": {
+    "issue": "Authorize certificate issuance for this domain",
+    "issuewild": "Authorize wildcard certificate issuance for this domain",
+    "iodef": "Contact information for certificate abuse reports"
+  },
+
+  "flags": {
+    "nonCritical": "Flag 0 (Non-critical)",
+    "critical": "Flag 128 (Critical)",
+    "descriptions": {
+      "0": "Non-critical flag - unknown tags can be ignored",
+      "128": "Critical flag - unknown tags must cause rejection"
+    }
+  },
+
+  "placeholders": {
+    "issue": "letsencrypt.org or ; (to deny all)",
+    "issuewild": "letsencrypt.org or ; (to deny all)",
+    "iodef": "security@example.com or https://example.com/security"
+  },
+
+  "caShortcuts": {
+    "label": "Common CAs:",
+    "denyAll": "Deny All",
+    "denyAllTooltip": "Deny all certificate issuance"
+  },
+
+  "output": {
+    "title": "Generated CAA Records",
+    "copyButton": "Copy",
+    "copyTooltip": "Copy all CAA records to clipboard",
+    "copied": "Copied!",
+    "exportButton": "Export",
+    "exportTooltip": "Download as zone file",
+    "downloaded": "Downloaded!",
+    "noRecords": "Enable and configure CAA records to see output"
+  },
+
+  "validation": {
+    "title": "Policy Validation",
+    "activeRecordsLabel": "Active Records:",
+    "statusLabel": "Status:",
+    "valid": "Valid",
+    "invalid": "Invalid",
+    "success": "CAA configuration is valid and ready to deploy!",
+
+    "errors": {
+      "domainRequired": "Domain is required",
+      "invalidIodefEmail": "Invalid iodef email format - use \"mailto:user@domain.com\" or \"user@domain.com\""
+    },
+
+    "warnings": {
+      "domainNoTLD": "Domain should include TLD (e.g., .com, .org)",
+      "noRecordsEnabled": "No CAA records enabled - this will not provide any protection",
+      "noIssueRecords": "No issue or issuewild records - certificates can be issued by any CA",
+      "wildcardWithoutBase": "Wildcard authorization without base domain authorization may cause issues",
+      "denyAll": "Both issue and issuewild set to \";\" - this will block ALL certificate issuance",
+      "iodefURLFormat": "iodef URL should start with http:// or https://",
+      "duplicateRecords": "Duplicate CAA records found: {duplicates}"
+    }
+  },
+
+  "securityGuide": {
+    "title": "Security Tips",
+    "tips": [
+      "Start with monitoring: Add iodef records first to receive notifications",
+      "Use specific CAs: Only authorize certificate authorities you actually use",
+      "Include wildcards: Add issuewild records if you use wildcard certificates",
+      "Monitor regularly: Check iodef notifications for unauthorized issuance attempts",
+      "Test thoroughly: Verify legitimate certificate renewals still work after deployment"
+    ]
+  },
+
+  "examples": {
+    "title": "Example Configurations",
+    "letsEncryptOnly": {
+      "name": "Let's Encrypt Only",
+      "description": "Allow only Let's Encrypt certificates"
+    },
+    "multipleCAs": {
+      "name": "Multiple CAs",
+      "description": "Allow certificates from multiple providers"
+    },
+    "noCertificates": {
+      "name": "No Certificates",
+      "description": "Block all certificate issuance"
+    }
+  }
+}

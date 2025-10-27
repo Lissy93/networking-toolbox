@@ -4,6 +4,7 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
   import {
     buildTFTPOptions,
     parseOption150,
@@ -16,10 +17,10 @@
     type ParsedStringOption,
   } from '$lib/utils/dhcp-option150.js';
 
-  const modeOptions = [
-    { value: 'encode' as const, label: 'Encode', icon: 'wrench' },
-    { value: 'decode' as const, label: 'Decode', icon: 'search' },
-  ];
+  const modeOptions = $derived([
+    { value: 'encode' as const, label: $t('tools/dhcp-option150-builder.modes.encode'), icon: 'wrench' },
+    { value: 'decode' as const, label: $t('tools/dhcp-option150-builder.modes.decode'), icon: 'search' },
+  ]);
 
   let mode = $state<'encode' | 'decode'>('encode');
   let config = $state<TFTPConfig>({
@@ -58,58 +59,58 @@
     description: string;
   }
 
-  const encodeExamples: EncodeExample[] = [
+  const encodeExamples: EncodeExample[] = $derived([
     {
-      label: 'Cisco IP Phones',
+      label: $t('tools/dhcp-option150-builder.encodeExamples.ciscoIPPhones.label'),
       option150Servers: ['192.168.1.10', '192.168.1.11'],
-      description: 'Redundant TFTP servers for Cisco IP phone configuration',
+      description: $t('tools/dhcp-option150-builder.encodeExamples.ciscoIPPhones.description'),
     },
     {
-      label: 'PXE Boot (Standard)',
+      label: $t('tools/dhcp-option150-builder.encodeExamples.pxeBootStandard.label'),
       option66Server: 'pxe.example.com',
       option67Bootfile: 'pxelinux.0',
-      description: 'Standard PXE boot with single TFTP server',
+      description: $t('tools/dhcp-option150-builder.encodeExamples.pxeBootStandard.description'),
     },
     {
-      label: 'PXE Boot (UEFI)',
+      label: $t('tools/dhcp-option150-builder.encodeExamples.pxeBootUEFI.label'),
       option66Server: '192.168.1.10',
       option67Bootfile: 'bootx64.efi',
-      description: 'UEFI PXE boot configuration',
+      description: $t('tools/dhcp-option150-builder.encodeExamples.pxeBootUEFI.description'),
     },
     {
-      label: 'Combined (Option 150 + 67)',
+      label: $t('tools/dhcp-option150-builder.encodeExamples.combined.label'),
       option150Servers: ['192.168.1.10', '192.168.1.11'],
       option67Bootfile: 'SEP{MAC}.cnf.xml',
-      description: 'Cisco phones with redundant TFTP and config template',
+      description: $t('tools/dhcp-option150-builder.encodeExamples.combined.description'),
     },
-  ];
+  ]);
 
-  const decodeExamples: DecodeExample[] = [
+  const decodeExamples: DecodeExample[] = $derived([
     {
-      label: 'Option 150: Dual TFTP',
+      label: $t('tools/dhcp-option150-builder.decodeExamples.option150DualTFTP.label'),
       mode: 'option150',
       hexInput: 'c0a8010ac0a8010b',
-      description: '192.168.1.10 and 192.168.1.11',
+      description: $t('tools/dhcp-option150-builder.decodeExamples.option150DualTFTP.description'),
     },
     {
-      label: 'Option 66: Hostname',
+      label: $t('tools/dhcp-option150-builder.decodeExamples.option66Hostname.label'),
       mode: 'option66',
       hexInput: '7078652e6578616d706c652e636f6d',
-      description: 'pxe.example.com',
+      description: $t('tools/dhcp-option150-builder.decodeExamples.option66Hostname.description'),
     },
     {
-      label: 'Option 67: PXE Boot',
+      label: $t('tools/dhcp-option150-builder.decodeExamples.option67PXEBoot.label'),
       mode: 'option67',
       hexInput: '7078656c696e75782e30',
-      description: 'pxelinux.0',
+      description: $t('tools/dhcp-option150-builder.decodeExamples.option67PXEBoot.description'),
     },
     {
-      label: 'Option 67: UEFI Boot',
+      label: $t('tools/dhcp-option150-builder.decodeExamples.option67UEFIBoot.label'),
       mode: 'option67',
       hexInput: '626f6f747836 42e656669',
-      description: 'bootx64.efi',
+      description: $t('tools/dhcp-option150-builder.decodeExamples.option67UEFIBoot.description'),
     },
-  ];
+  ]);
 
   // Reactive generation
   $effect(() => {
@@ -345,8 +346,8 @@
 </script>
 
 <ToolContentContainer
-  title="DHCP Options 150/66/67 - TFTP Server Configuration"
-  description="Configure TFTP servers for PXE boot and Cisco IP phones. Option 150 (Cisco TFTP list), Option 66 (TFTP server name), and Option 67 (bootfile name)."
+  title={$t('tools/dhcp-option150-builder.title')}
+  description={$t('tools/dhcp-option150-builder.subtitle')}
   navOptions={modeOptions}
   bind:selectedNav={mode}
 >
@@ -371,8 +372,8 @@
   {#if mode === 'encode'}
     <div class="card input-card">
       <div class="card-header">
-        <h3>Option 150: Cisco TFTP Server List</h3>
-        <p class="help-text">Multiple IPv4 addresses for redundant TFTP servers (Cisco IP phones)</p>
+        <h3>{$t('tools/dhcp-option150-builder.encode.option150.title')}</h3>
+        <p class="help-text">{$t('tools/dhcp-option150-builder.encode.option150.helpText')}</p>
       </div>
       <div class="card-content">
         {#if config.option150Servers && config.option150Servers.length > 0}
@@ -381,13 +382,13 @@
               <div class="input-group flex-grow">
                 <label for="opt150-server-{i}">
                   <Icon name="server" size="sm" />
-                  Server {i + 1}
+                  {$t('tools/dhcp-option150-builder.encode.option150.serverLabel', { number: i + 1 })}
                 </label>
                 <input
                   id="opt150-server-{i}"
                   type="text"
                   bind:value={config.option150Servers[i]}
-                  placeholder="192.168.1.10"
+                  placeholder={$t('tools/dhcp-option150-builder.encode.option150.serverPlaceholder')}
                 />
               </div>
               <button type="button" class="btn-icon" onclick={() => removeOption150Server(i)}>
@@ -399,27 +400,27 @@
 
         <button type="button" class="btn-add" onclick={addOption150Server}>
           <Icon name="plus" size="sm" />
-          Add TFTP Server
+          {$t('tools/dhcp-option150-builder.encode.option150.addButton')}
         </button>
       </div>
     </div>
 
     <div class="card input-card">
       <div class="card-header">
-        <h3>Option 66: TFTP Server Name (Standard)</h3>
-        <p class="help-text">Single hostname or IP address for standard PXE boot</p>
+        <h3>{$t('tools/dhcp-option150-builder.encode.option66.title')}</h3>
+        <p class="help-text">{$t('tools/dhcp-option150-builder.encode.option66.helpText')}</p>
       </div>
       <div class="card-content">
         <div class="input-group">
           <label for="opt66-server">
             <Icon name="globe" size="sm" />
-            TFTP Server Hostname/IP
+            {$t('tools/dhcp-option150-builder.encode.option66.label')}
           </label>
           <input
             id="opt66-server"
             type="text"
             bind:value={config.option66Server}
-            placeholder="tftp.example.com or 192.168.1.10"
+            placeholder={$t('tools/dhcp-option150-builder.encode.option66.placeholder')}
           />
         </div>
       </div>
@@ -427,23 +428,28 @@
 
     <div class="card input-card">
       <div class="card-header">
-        <h3>Option 67: Bootfile Name</h3>
-        <p class="help-text">Filename to boot from TFTP server (e.g., pxelinux.0 for BIOS, bootx64.efi for UEFI)</p>
+        <h3>{$t('tools/dhcp-option150-builder.encode.option67.title')}</h3>
+        <p class="help-text">{$t('tools/dhcp-option150-builder.encode.option67.helpText')}</p>
       </div>
       <div class="card-content">
         <div class="input-group">
           <label for="opt67-bootfile">
             <Icon name="file" size="sm" />
-            Bootfile Name
+            {$t('tools/dhcp-option150-builder.encode.option67.label')}
           </label>
-          <input id="opt67-bootfile" type="text" bind:value={config.option67Bootfile} placeholder="pxelinux.0" />
+          <input
+            id="opt67-bootfile"
+            type="text"
+            bind:value={config.option67Bootfile}
+            placeholder={$t('tools/dhcp-option150-builder.encode.option67.placeholder')}
+          />
         </div>
       </div>
     </div>
 
     {#if validationErrors.length > 0}
       <div class="card errors-card">
-        <h3>Validation Errors</h3>
+        <h3>{$t('tools/dhcp-option150-builder.errors.title')}</h3>
         {#each validationErrors as error, i (i)}
           <div class="error-message">
             <Icon name="alert-triangle" size="sm" />
@@ -456,11 +462,11 @@
     {#if result && validationErrors.length === 0}
       {#if result.option150}
         <div class="card results">
-          <h3>Option 150: TFTP Server List</h3>
+          <h3>{$t('tools/dhcp-option150-builder.results.option150.title')}</h3>
 
           <div class="output-group">
             <div class="output-header">
-              <h4>Hex-Encoded (Compact)</h4>
+              <h4>{$t('tools/dhcp-option150-builder.results.option150.hexEncodedTitle')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -468,7 +474,9 @@
                 onclick={() => clipboard.copy(result!.option150!.hexEncoded, 'opt150-hex')}
               >
                 <Icon name={clipboard.isCopied('opt150-hex') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('opt150-hex') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('opt150-hex')
+                  ? $t('tools/dhcp-option150-builder.buttons.copied')
+                  : $t('tools/dhcp-option150-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.option150.hexEncoded}</pre>
@@ -476,7 +484,7 @@
 
           <div class="output-group">
             <div class="output-header">
-              <h4>Wire Format (Spaced)</h4>
+              <h4>{$t('tools/dhcp-option150-builder.results.option150.wireFormatTitle')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -484,26 +492,36 @@
                 onclick={() => clipboard.copy(result!.option150!.wireFormat, 'opt150-wire')}
               >
                 <Icon name={clipboard.isCopied('opt150-wire') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('opt150-wire') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('opt150-wire')
+                  ? $t('tools/dhcp-option150-builder.buttons.copied')
+                  : $t('tools/dhcp-option150-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.option150.wireFormat}</pre>
           </div>
 
           <div class="summary-card">
-            <div><strong>Total Length:</strong> {result.option150.totalLength} bytes</div>
-            <div><strong>Servers:</strong> {result.option150.servers.length}</div>
+            <div>
+              <strong>{$t('tools/dhcp-option150-builder.results.option150.totalLength')}</strong>
+              {$t('tools/dhcp-option150-builder.results.option150.bytes', { length: result.option150.totalLength })}
+            </div>
+            <div>
+              <strong>{$t('tools/dhcp-option150-builder.results.option150.servers')}</strong>
+              {$t('tools/dhcp-option150-builder.results.option150.serverCount', {
+                count: result.option150.servers.length,
+              })}
+            </div>
           </div>
         </div>
       {/if}
 
       {#if result.option66}
         <div class="card results">
-          <h3>Option 66: TFTP Server Name</h3>
+          <h3>{$t('tools/dhcp-option150-builder.results.option66.title')}</h3>
 
           <div class="output-group">
             <div class="output-header">
-              <h4>Value</h4>
+              <h4>{$t('tools/dhcp-option150-builder.results.option66.valueTitle')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -511,7 +529,9 @@
                 onclick={() => clipboard.copy(result!.option66!.value, 'opt66-value')}
               >
                 <Icon name={clipboard.isCopied('opt66-value') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('opt66-value') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('opt66-value')
+                  ? $t('tools/dhcp-option150-builder.buttons.copied')
+                  : $t('tools/dhcp-option150-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.option66.value}</pre>
@@ -519,7 +539,7 @@
 
           <div class="output-group">
             <div class="output-header">
-              <h4>Hex-Encoded</h4>
+              <h4>{$t('tools/dhcp-option150-builder.results.option66.hexEncodedTitle')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -527,25 +547,30 @@
                 onclick={() => clipboard.copy(result!.option66!.hexEncoded, 'opt66-hex')}
               >
                 <Icon name={clipboard.isCopied('opt66-hex') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('opt66-hex') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('opt66-hex')
+                  ? $t('tools/dhcp-option150-builder.buttons.copied')
+                  : $t('tools/dhcp-option150-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.option66.hexEncoded}</pre>
           </div>
 
           <div class="summary-card">
-            <div><strong>Total Length:</strong> {result.option66.totalLength} bytes</div>
+            <div>
+              <strong>{$t('tools/dhcp-option150-builder.results.option66.totalLength')}</strong>
+              {$t('tools/dhcp-option150-builder.results.option66.bytes', { length: result.option66.totalLength })}
+            </div>
           </div>
         </div>
       {/if}
 
       {#if result.option67}
         <div class="card results">
-          <h3>Option 67: Bootfile Name</h3>
+          <h3>{$t('tools/dhcp-option150-builder.results.option67.title')}</h3>
 
           <div class="output-group">
             <div class="output-header">
-              <h4>Value</h4>
+              <h4>{$t('tools/dhcp-option150-builder.results.option67.valueTitle')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -553,7 +578,9 @@
                 onclick={() => clipboard.copy(result!.option67!.value, 'opt67-value')}
               >
                 <Icon name={clipboard.isCopied('opt67-value') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('opt67-value') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('opt67-value')
+                  ? $t('tools/dhcp-option150-builder.buttons.copied')
+                  : $t('tools/dhcp-option150-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.option67.value}</pre>
@@ -561,7 +588,7 @@
 
           <div class="output-group">
             <div class="output-header">
-              <h4>Hex-Encoded</h4>
+              <h4>{$t('tools/dhcp-option150-builder.results.option67.hexEncodedTitle')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -569,14 +596,19 @@
                 onclick={() => clipboard.copy(result!.option67!.hexEncoded, 'opt67-hex')}
               >
                 <Icon name={clipboard.isCopied('opt67-hex') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('opt67-hex') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('opt67-hex')
+                  ? $t('tools/dhcp-option150-builder.buttons.copied')
+                  : $t('tools/dhcp-option150-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.option67.hexEncoded}</pre>
           </div>
 
           <div class="summary-card">
-            <div><strong>Total Length:</strong> {result.option67.totalLength} bytes</div>
+            <div>
+              <strong>{$t('tools/dhcp-option150-builder.results.option67.totalLength')}</strong>
+              {$t('tools/dhcp-option150-builder.results.option67.bytes', { length: result.option67.totalLength })}
+            </div>
           </div>
         </div>
       {/if}
@@ -587,25 +619,35 @@
     {#if result}
       <div class="card input-card">
         <div class="card-header">
-          <h3>Network Settings (Optional)</h3>
-          <p class="help-text">Customize network values for configuration examples below</p>
+          <h3>{$t('tools/dhcp-option150-builder.encode.networkSettings.title')}</h3>
+          <p class="help-text">{$t('tools/dhcp-option150-builder.encode.networkSettings.helpText')}</p>
         </div>
         <div class="card-content">
           <div class="input-row">
             <div class="input-group">
               <label for="subnet">
                 <Icon name="network" size="sm" />
-                Subnet
+                {$t('tools/dhcp-option150-builder.encode.networkSettings.subnet.label')}
               </label>
-              <input id="subnet" type="text" bind:value={config.network!.subnet} placeholder="192.168.1.0" />
+              <input
+                id="subnet"
+                type="text"
+                bind:value={config.network!.subnet}
+                placeholder={$t('tools/dhcp-option150-builder.encode.networkSettings.subnet.placeholder')}
+              />
             </div>
 
             <div class="input-group">
               <label for="netmask">
                 <Icon name="network" size="sm" />
-                Netmask
+                {$t('tools/dhcp-option150-builder.encode.networkSettings.netmask.label')}
               </label>
-              <input id="netmask" type="text" bind:value={config.network!.netmask} placeholder="255.255.255.0" />
+              <input
+                id="netmask"
+                type="text"
+                bind:value={config.network!.netmask}
+                placeholder={$t('tools/dhcp-option150-builder.encode.networkSettings.netmask.placeholder')}
+              />
             </div>
           </div>
 
@@ -613,24 +655,34 @@
             <div class="input-group">
               <label for="range-start">
                 <Icon name="arrow-right" size="sm" />
-                Range Start
+                {$t('tools/dhcp-option150-builder.encode.networkSettings.rangeStart.label')}
               </label>
-              <input id="range-start" type="text" bind:value={config.network!.rangeStart} placeholder="192.168.1.100" />
+              <input
+                id="range-start"
+                type="text"
+                bind:value={config.network!.rangeStart}
+                placeholder={$t('tools/dhcp-option150-builder.encode.networkSettings.rangeStart.placeholder')}
+              />
             </div>
 
             <div class="input-group">
               <label for="range-end">
                 <Icon name="arrow-right" size="sm" />
-                Range End
+                {$t('tools/dhcp-option150-builder.encode.networkSettings.rangeEnd.label')}
               </label>
-              <input id="range-end" type="text" bind:value={config.network!.rangeEnd} placeholder="192.168.1.200" />
+              <input
+                id="range-end"
+                type="text"
+                bind:value={config.network!.rangeEnd}
+                placeholder={$t('tools/dhcp-option150-builder.encode.networkSettings.rangeEnd.placeholder')}
+              />
             </div>
           </div>
         </div>
 
         {#if networkValidationErrors.length > 0}
           <div class="network-errors">
-            <h4>Network Settings Errors</h4>
+            <h4>{$t('tools/dhcp-option150-builder.encode.networkSettings.errorsTitle')}</h4>
             {#each networkValidationErrors as error, i (i)}
               <div class="network-error-item">
                 <Icon name="alert-triangle" size="sm" />
@@ -644,12 +696,12 @@
 
     {#if result && networkValidationErrors.length === 0}
       <div class="card results">
-        <h3>Configuration Examples</h3>
+        <h3>{$t('tools/dhcp-option150-builder.results.configExamples.title')}</h3>
 
         {#if result.examples.iscDhcpd}
           <div class="output-group">
             <div class="output-header">
-              <h4>ISC dhcpd Configuration</h4>
+              <h4>{$t('tools/dhcp-option150-builder.results.configExamples.iscDhcpd')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -657,7 +709,9 @@
                 onclick={() => clipboard.copy(result!.examples.iscDhcpd!, 'isc')}
               >
                 <Icon name={clipboard.isCopied('isc') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('isc') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('isc')
+                  ? $t('tools/dhcp-option150-builder.buttons.copied')
+                  : $t('tools/dhcp-option150-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.examples.iscDhcpd}</pre>
@@ -667,7 +721,7 @@
         {#if result.examples.keaDhcp4}
           <div class="output-group">
             <div class="output-header">
-              <h4>Kea DHCPv4 Configuration</h4>
+              <h4>{$t('tools/dhcp-option150-builder.results.configExamples.keaDhcp4')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -675,7 +729,9 @@
                 onclick={() => clipboard.copy(result!.examples.keaDhcp4!, 'kea')}
               >
                 <Icon name={clipboard.isCopied('kea') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('kea') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('kea')
+                  ? $t('tools/dhcp-option150-builder.buttons.copied')
+                  : $t('tools/dhcp-option150-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.examples.keaDhcp4}</pre>
@@ -685,7 +741,7 @@
         {#if result.examples.ciscoIos}
           <div class="output-group">
             <div class="output-header">
-              <h4>Cisco IOS Configuration</h4>
+              <h4>{$t('tools/dhcp-option150-builder.results.configExamples.ciscoIos')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -693,7 +749,9 @@
                 onclick={() => clipboard.copy(result!.examples.ciscoIos!, 'cisco')}
               >
                 <Icon name={clipboard.isCopied('cisco') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('cisco') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('cisco')
+                  ? $t('tools/dhcp-option150-builder.buttons.copied')
+                  : $t('tools/dhcp-option150-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.examples.ciscoIos}</pre>
@@ -704,43 +762,43 @@
   {:else}
     <div class="card input-card">
       <div class="card-header">
-        <h3>Decode TFTP Option</h3>
+        <h3>{$t('tools/dhcp-option150-builder.decode.title')}</h3>
       </div>
       <div class="card-content">
         <div class="input-group">
           <label for="decode-mode">
             <Icon name="settings" size="sm" />
-            Option Type
+            {$t('tools/dhcp-option150-builder.decode.optionType.label')}
           </label>
           <select id="decode-mode" bind:value={decodeMode}>
-            <option value="option150">Option 150: TFTP Server List</option>
-            <option value="option66">Option 66: TFTP Server Name</option>
-            <option value="option67">Option 67: Bootfile Name</option>
+            <option value="option150">{$t('tools/dhcp-option150-builder.decode.optionType.option150')}</option>
+            <option value="option66">{$t('tools/dhcp-option150-builder.decode.optionType.option66')}</option>
+            <option value="option67">{$t('tools/dhcp-option150-builder.decode.optionType.option67')}</option>
           </select>
         </div>
 
         <div class="input-group">
           <label for="decode-input">
             <Icon name="code" size="sm" />
-            Hex-Encoded Option Data
+            {$t('tools/dhcp-option150-builder.decode.hexInput.label')}
           </label>
           <textarea
             id="decode-input"
             bind:value={decodeInput}
-            placeholder="Enter hex string (e.g., c0a8010ac0a8010b for Option 150)"
+            placeholder={$t('tools/dhcp-option150-builder.decode.hexInput.placeholder')}
             rows="4"
           ></textarea>
         </div>
         <button type="button" class="btn-primary" onclick={decode}>
           <Icon name="search" size="sm" />
-          Decode
+          {$t('tools/dhcp-option150-builder.decode.decodeButton')}
         </button>
       </div>
     </div>
 
     {#if validationErrors.length > 0}
       <div class="card errors-card">
-        <h3>Validation Errors</h3>
+        <h3>{$t('tools/dhcp-option150-builder.errors.title')}</h3>
         {#each validationErrors as error, i (i)}
           <div class="error-message">
             <Icon name="alert-triangle" size="sm" />
@@ -752,19 +810,29 @@
 
     {#if decodeResult150 && validationErrors.length === 0}
       <div class="card results">
-        <h3>Decoded Option 150: TFTP Server List</h3>
+        <h3>{$t('tools/dhcp-option150-builder.decodeResults.option150.title')}</h3>
 
         <div class="summary-card">
-          <div><strong>Total Length:</strong> {decodeResult150.totalLength} bytes</div>
-          <div><strong>Servers Found:</strong> {decodeResult150.servers.length}</div>
+          <div>
+            <strong>{$t('tools/dhcp-option150-builder.decodeResults.option150.totalLength')}</strong>
+            {$t('tools/dhcp-option150-builder.decodeResults.option150.bytes', { length: decodeResult150.totalLength })}
+          </div>
+          <div>
+            <strong>{$t('tools/dhcp-option150-builder.decodeResults.option150.serversFound')}</strong>
+            {$t('tools/dhcp-option150-builder.decodeResults.option150.serverCount', {
+              count: decodeResult150.servers.length,
+            })}
+          </div>
         </div>
 
         <div class="servers-section">
-          <h4>TFTP Servers</h4>
+          <h4>{$t('tools/dhcp-option150-builder.decodeResults.option150.serversTitle')}</h4>
           {#each decodeResult150.servers as server, i (i)}
             <div class="server-item">
               <Icon name="server" size="sm" />
-              <span class="field-label">Server {i + 1}:</span>
+              <span class="field-label"
+                >{$t('tools/dhcp-option150-builder.decodeResults.option150.serverLabel', { number: i + 1 })}</span
+              >
               <span class="field-value">{server}</span>
             </div>
           {/each}
@@ -774,14 +842,17 @@
 
     {#if decodeResult66 && validationErrors.length === 0}
       <div class="card results">
-        <h3>Decoded Option 66: TFTP Server Name</h3>
+        <h3>{$t('tools/dhcp-option150-builder.decodeResults.option66.title')}</h3>
 
         <div class="summary-card">
-          <div><strong>Total Length:</strong> {decodeResult66.totalLength} bytes</div>
+          <div>
+            <strong>{$t('tools/dhcp-option150-builder.decodeResults.option66.totalLength')}</strong>
+            {$t('tools/dhcp-option150-builder.decodeResults.option66.bytes', { length: decodeResult66.totalLength })}
+          </div>
         </div>
 
         <div class="decoded-value">
-          <h4>TFTP Server</h4>
+          <h4>{$t('tools/dhcp-option150-builder.decodeResults.option66.serverTitle')}</h4>
           <div class="value-display">
             <Icon name="globe" size="sm" />
             <span>{decodeResult66.value}</span>
@@ -792,14 +863,17 @@
 
     {#if decodeResult67 && validationErrors.length === 0}
       <div class="card results">
-        <h3>Decoded Option 67: Bootfile Name</h3>
+        <h3>{$t('tools/dhcp-option150-builder.decodeResults.option67.title')}</h3>
 
         <div class="summary-card">
-          <div><strong>Total Length:</strong> {decodeResult67.totalLength} bytes</div>
+          <div>
+            <strong>{$t('tools/dhcp-option150-builder.decodeResults.option67.totalLength')}</strong>
+            {$t('tools/dhcp-option150-builder.decodeResults.option67.bytes', { length: decodeResult67.totalLength })}
+          </div>
         </div>
 
         <div class="decoded-value">
-          <h4>Bootfile</h4>
+          <h4>{$t('tools/dhcp-option150-builder.decodeResults.option67.bootfileTitle')}</h4>
           <div class="value-display">
             <Icon name="file" size="sm" />
             <span>{decodeResult67.value}</span>

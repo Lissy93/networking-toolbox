@@ -1,0 +1,59 @@
+{
+  "top": {
+    "subnetting": {
+      "label": "Subnetting",
+      "description": "Subnet calculators for IPv4, IPv6, VLSM, supernetting"
+    },
+    "cidr": {
+      "label": "CIDR",
+      "description": "CIDR notation tools, converters, and calculators"
+    },
+    "ip_tools": {
+      "label": "IP Tools",
+      "description": "IP address converters, validators, and generators"
+    },
+    "dns_tools": {
+      "label": "DNS Tools",
+      "description": "DNS record generators, validators, and DNSSEC tools"
+    },
+    "dhcp": {
+      "label": "DHCP",
+      "description": "DHCP option generators for wireless controllers and network configuration"
+    },
+    "diagnostics": {
+      "label": "Lookups",
+      "description": "Network diagnostics and connectivity testing"
+    },
+    "reference": {
+      "label": "Ref",
+      "description": "Networking reference guides and lookup tables"
+    }
+  },
+
+  "standalone": {
+    "bookmarks": {
+      "label": "Bookmarks",
+      "description": "Save and organize network calculations and tool results"
+    },
+    "search": {
+      "label": "Search",
+      "description": "Find tools and reference content quickly"
+    },
+    "settings": {
+      "label": "Settings",
+      "description": "Customize themes, layouts, and accessibility options"
+    }
+  },
+
+  "common_tools": {
+    "subnet_calculator": "Subnet Calculator",
+    "ipv6_subnet_calculator": "IPv6 Subnet Calculator",
+    "vlsm_calculator": "VLSM Calculator",
+    "supernet_calculator": "Supernet Calculator",
+    "cidr_summarizer": "CIDR Summarizer",
+    "cidr_splitter": "CIDR Splitter",
+    "ip_validator": "IP Validator",
+    "dns_lookup": "DNS Lookup",
+    "tls_certificate": "TLS Certificate Analyzer"
+  }
+}

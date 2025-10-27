@@ -1,0 +1,135 @@
+{
+  "title": "IP Address Converter",
+  "description": "Convert IP addresses between different number formats.",
+
+  "input": {
+    "ipAddress": "IP Address",
+    "placeholder": "192.168.1.1"
+  },
+
+  "errors": {
+    "mustBeValidNumber": "Must be a valid number",
+    "decimalOutOfRange": "Must be between 0 and 4,294,967,295",
+    "invalidDecimal": "Invalid decimal value",
+    "invalidBinary": "Invalid binary format",
+    "invalidHex": "Invalid hexadecimal format",
+    "binaryOnlyDigits": "Only 0, 1, dots, and spaces allowed",
+    "binaryMust32Bits": "Must be exactly 32 binary digits (8 digits per octet)",
+    "binaryDottedFormat": "Must use dotted format: 8bits.8bits.8bits.8bits",
+    "binaryOctetLength": "Octet {octet} must be exactly 8 bits",
+    "hexOnlyDigits": "Only hex digits (0-9, A-F), dots, and x allowed",
+    "hexMust8Digits": "Must be exactly 8 hex digits (2 digits per octet)",
+    "hexDottedFormat": "Must use dotted format: 0xXX.0xXX.0xXX.0xXX",
+    "hexOctetLength": "Octet {octet} must be exactly 2 hex digits",
+    "hexInvalidDigits": "Octet {octet} contains invalid hex digits"
+  },
+
+  "formats": {
+    "binary": {
+      "title": "Binary Format",
+      "badge": "Binary (Base-2)",
+      "whatItIs": "Uses only digits 0 and 1, representing how computers store IP addresses at the hardware level",
+      "example": "192.168.1.1 = 11000000.10101000.00000001.00000001",
+      "usage": "Low-level networking, subnet calculations, understanding binary operations",
+      "howToRead": "Each octet is 8 bits. Binary 11000000 = 128+64 = 192 decimal"
+    },
+    "decimal": {
+      "title": "Decimal Format",
+      "badge": "Decimal (Base-10)",
+      "whatItIs": "The entire IP as a single large number (0-4,294,967,295)",
+      "example": "192.168.1.1 = 3,232,235,777",
+      "usage": "Database storage, mathematical operations, IP range calculations",
+      "calculation": "(192×256³) + (168×256²) + (1×256) + 1 = 3,232,235,777"
+    },
+    "hexadecimal": {
+      "title": "Hexadecimal Format",
+      "badge": "Hexadecimal (Base-16)",
+      "whatItIs": "Uses digits 0-9 and letters A-F, common in programming and low-level operations",
+      "example": "192.168.1.1 = 0xC0.0xA8.0x01.0x01",
+      "usage": "Programming, system logs, network debugging, firmware configuration",
+      "conversion": "192 = C0 hex, 168 = A8 hex. Each hex digit represents 4 binary bits"
+    },
+    "octal": {
+      "title": "Octal Format",
+      "badge": "Octal (Base-8)",
+      "whatItIs": "Uses digits 0-7, less common but still found in some configurations",
+      "example": "192.168.1.1 = 0300.0250.001.001",
+      "usage": "Legacy Unix configurations, file permissions, some network tools",
+      "note": "Leading zeros indicate octal format. 0300 octal = 192 decimal"
+    }
+  },
+
+  "ipClasses": {
+    "title": "IP Class Information",
+    "description": "IP address classes are historical categories that determine network size and usage patterns:",
+    "classA": {
+      "badge": "Class A",
+      "range": "1.0.0.0 to 126.255.255.255",
+      "defaultMask": "255.0.0.0 (/8)",
+      "networks": "126 networks, 16.7 million hosts each",
+      "usage": "Large organizations, ISPs, government networks"
+    },
+    "classB": {
+      "badge": "Class B",
+      "range": "128.0.0.0 to 191.255.255.255",
+      "defaultMask": "255.255.0.0 (/16)",
+      "networks": "16,384 networks, 65,534 hosts each",
+      "usage": "Universities, medium-large organizations"
+    },
+    "classC": {
+      "badge": "Class C",
+      "range": "192.0.0.0 to 223.255.255.255",
+      "defaultMask": "255.255.255.0 (/24)",
+      "networks": "2.1 million networks, 254 hosts each",
+      "usage": "Small businesses, home networks"
+    },
+    "specialRanges": {
+      "title": "Special Ranges",
+      "classD": "Class D (224-239): Multicast addresses for group communication",
+      "classE": "Class E (240-255): Reserved for experimental use",
+      "privateNetworks": "Private Networks: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16",
+      "loopback": "Loopback: 127.0.0.0/8 (localhost addresses)"
+    }
+  },
+
+  "useCases": {
+    "title": "When to Use Each Format",
+    "networkAdmin": {
+      "title": "Network Administration",
+      "dottedDecimal": "Daily configuration and documentation",
+      "binary": "Subnet calculations and VLSM planning",
+      "hexadecimal": "Debugging network captures and logs"
+    },
+    "programming": {
+      "title": "Programming & Development",
+      "decimal": "Database storage and IP range operations",
+      "hexadecimal": "Low-level socket programming",
+      "binary": "Bitwise operations and subnet masking"
+    },
+    "troubleshooting": {
+      "title": "Troubleshooting & Analysis",
+      "binary": "Understanding subnet boundaries",
+      "hexadecimal": "Reading network packet captures",
+      "decimal": "Quick IP range calculations"
+    }
+  },
+
+  "explanations": {
+    "title": "Number Format Explanations",
+    "ipClassesTitle": "IP Address Classes",
+    "whatItIs": "What it is:",
+    "example": "Example:",
+    "usage": "Usage:",
+    "howToRead": "How to read:",
+    "calculation": "Calculation:",
+    "conversion": "Conversion:",
+    "note": "Note:",
+    "range": "Range:",
+    "defaultMask": "Default Mask:",
+    "networks": "Networks:",
+    "dottedDecimal": "Dotted Decimal:",
+    "decimal": "Decimal:",
+    "binary": "Binary:",
+    "hexadecimal": "Hexadecimal:"
+  }
+}

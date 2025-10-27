@@ -1,0 +1,24 @@
+{
+  "title": "DNS Blacklist Checker",
+  "description": "Check if an IP address is listed on DNS-based blacklists (RBLs/DNSBLs)",
+
+  "form": {
+    "title": "Blacklist Check",
+    "ip": {
+      "label": "IP Address",
+      "placeholder": "8.8.8.8"
+    },
+    "check": "Check Blacklists",
+    "checking": "Checking...",
+    "error": "Please enter a valid IP address"
+  },
+
+  "results": {
+    "title": "Blacklist Check Results",
+    "listed": "Listed",
+    "not_listed": "Not Listed",
+    "blacklists_checked": "{count} blacklists checked",
+    "clean": "Clean",
+    "issues_found": "{count} issues found"
+  }
+}

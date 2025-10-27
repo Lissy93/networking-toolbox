@@ -1,0 +1,26 @@
+{
+  "title": "HTTP Compression Checker",
+  "description": "Check HTTP compression support and analyze compression ratios",
+
+  "form": {
+    "title": "Compression Check",
+    "url": {
+      "label": "URL",
+      "placeholder": "https://example.com"
+    },
+    "check": "Check Compression",
+    "checking": "Checking...",
+    "error": "Please enter a valid URL"
+  },
+
+  "results": {
+    "title": "Compression Analysis",
+    "compression_enabled": "Compression Enabled",
+    "compression_disabled": "Compression Disabled",
+    "encoding": "Encoding",
+    "original_size": "Original Size",
+    "compressed_size": "Compressed Size",
+    "compression_ratio": "Compression Ratio",
+    "savings": "{percent}% savings"
+  }
+}

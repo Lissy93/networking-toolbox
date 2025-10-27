@@ -11,6 +11,7 @@
   import { useClipboard } from '$lib/composables';
   import { goto } from '$app/navigation';
   import type { SubnetInfo } from '$lib/types/ip.js';
+  import { t } from '$lib/stores/language';
 
   const versionOptions = [
     { value: 'ipv4' as const, label: 'IPv4' },
@@ -54,15 +55,19 @@
 </script>
 
 <ToolContentContainer
-  title="Subnet Calculator"
-  description="Calculate network, broadcast, and host information for any subnet."
+  title={$t('tools.subnet_calculator.title')}
+  description={$t('tools.subnet_calculator.description')}
   navOptions={versionOptions}
   bind:selectedNav={selectedVersion}
   onNavChange={handleVersionChange}
 >
   <!-- Input -->
   <div class="form-group">
-    <CIDRInput bind:value={cidrInput} label="Network Address (CIDR)" placeholder="192.168.1.0/24" />
+    <CIDRInput
+      bind:value={cidrInput}
+      label={$t('tools.subnet_calculator.input.cidr_label')}
+      placeholder={$t('tools.subnet_calculator.input.cidr_placeholder')}
+    />
   </div>
 
   <!-- Results -->
@@ -73,12 +78,14 @@
         <h3
           style="margin-bottom: var(--spacing-md); border-bottom: 1px solid var(--border-primary); padding-bottom: var(--spacing-xs);"
         >
-          Network Information
+          {$t('tools.subnet_calculator.sections.network_info')}
         </h3>
 
         <div class="info-cards">
           <div class="info-card">
-            <span class="info-label" use:tooltip={'First IP in subnet - identifies the network'}>Network Address</span>
+            <span class="info-label" use:tooltip={$t('tools.subnet_calculator.tooltips.network_address')}
+              >{$t('tools.subnet_calculator.fields.network_address')}</span
+            >
             <div class="value-copy">
               <code class="ip-value success">{subnetInfo.network.octets.join('.')}</code>
               <Tooltip
@@ -98,7 +105,9 @@
           </div>
 
           <div class="info-card">
-            <span class="info-label" use:tooltip={'Last IP in subnet - sends to all hosts'}>Broadcast Address</span>
+            <span class="info-label" use:tooltip={$t('tools.subnet_calculator.tooltips.broadcast_address')}
+              >{$t('tools.subnet_calculator.fields.broadcast_address')}</span
+            >
             <div class="value-copy">
               <code class="ip-value error">{subnetInfo.broadcast.octets.join('.')}</code>
               <Tooltip
@@ -118,7 +127,9 @@
           </div>
 
           <div class="info-card">
-            <span class="info-label" use:tooltip={'Defines network vs host portion of IP'}>Subnet Mask</span>
+            <span class="info-label" use:tooltip={$t('tools.subnet_calculator.tooltips.subnet_mask')}
+              >{$t('tools.subnet_calculator.fields.subnet_mask')}</span
+            >
             <div class="value-copy">
               <code class="ip-value info">{subnetInfo.subnet.octets.join('.')}</code>
               <span class="cidr">/{subnetInfo.cidr}</span>
@@ -137,7 +148,7 @@
         <h3
           style="margin-bottom: var(--spacing-md); border-bottom: 1px solid var(--border-primary); padding-bottom: var(--spacing-xs);"
         >
-          Host Information
+          {$t('tools.subnet_calculator.sections.host_info')}
         </h3>
 
         <div class="info-cards">
@@ -168,7 +179,7 @@
 
     <!-- Binary Representation -->
     <section class="info-panel" style="margin-top: var(--spacing-lg);">
-      <h3>Binary Representation</h3>
+      <h3>{$t('tools.subnet_calculator.sections.binary_representation')}</h3>
       <div class="binary-display">
         <div class="binary-row">
           <span class="info-label" use:tooltip={'Network address in binary format'}>Network:</span>
@@ -201,7 +212,7 @@
 
   <!-- Explainer Section -->
   <section class="explainer-section">
-    <h3>Understanding Subnet Calculations</h3>
+    <h3>{$t('tools.subnet_calculator.explainer.title')}</h3>
 
     <div class="explainer-grid">
       <div class="explainer-card no-hover">

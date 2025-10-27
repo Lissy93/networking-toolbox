@@ -1,0 +1,220 @@
+{
+  "title": "Email Greylisting Tester",
+  "description": "Test if a mail server implements greylisting by performing multiple connection attempts and analyzing rejection patterns",
+
+  "examples": {
+    "title": "Quick Examples",
+    "protonmail": "ProtonMail (privacy-focused)",
+    "tutanota": "Tutanota (encrypted email)",
+    "icloud": "iCloud Mail",
+    "zoho": "Zoho Mail (business)",
+    "google": "Google Workspace MX",
+    "runbox": "Runbox (Exim-based)",
+    "port_label": "Port {port}"
+  },
+
+  "form": {
+    "title": "Test Mail Server Greylisting",
+    "domain": {
+      "label": "Domain",
+      "placeholder": "smtp.example.com"
+    },
+    "port": {
+      "label": "Port",
+      "placeholder": "25"
+    },
+    "attempts": {
+      "label": "Connection Attempts"
+    },
+    "delay": {
+      "label": "Delay Between Attempts (seconds)"
+    },
+    "test": "Test Greylisting",
+    "testing": "Testing...",
+    "error": "Please enter a domain name"
+  },
+
+  "loading": {
+    "title": "Testing Greylisting",
+    "description": "Testing {attempts} connection{plural} to {domain}:{port} with {delay}s delay...",
+    "note": "This will take approximately {duration} seconds to complete"
+  },
+
+  "results": {
+    "title": "Test Results for {domain}:{port}",
+
+    "status": {
+      "detected": {
+        "title": "Greylisting Detected",
+        "description": "Server implements greylisting (Confidence: {confidence})"
+      },
+      "not_detected": {
+        "title": "No Greylisting Detected",
+        "description": "Server does not appear to implement greylisting"
+      },
+      "typical_delay": {
+        "title": "Typical Delay",
+        "description": "{delay} seconds between rejection and acceptance"
+      }
+    },
+
+    "attempts": {
+      "title": "Connection Attempts",
+      "failed": "Failed",
+      "response": "Response:",
+      "duration": "Duration:",
+      "error": "Error:"
+    },
+
+    "analysis": {
+      "title": "Analysis",
+      "server": "Server:",
+      "total_attempts": "Total Attempts:",
+      "successful_connections": "Successful Connections:",
+      "test_duration": "Test Duration:",
+      "initial_connection": "Initial Connection:",
+      "temporarily_rejected": "Temporarily rejected",
+      "accepted_immediately": "Accepted immediately",
+      "subsequent_attempts": "Subsequent Attempts:",
+      "accepted_after_delay": "Accepted after delay",
+      "still_rejected": "Still rejected",
+      "delay_duration": "Delay Duration:",
+      "delay_seconds": "{delay} seconds",
+      "confidence_level": "Confidence Level:"
+    }
+  },
+
+  "info": {
+    "title": "Understanding Greylisting",
+
+    "what_is": {
+      "title": "What is Greylisting?",
+      "content": "Greylisting is an anti-spam technique where a mail server temporarily rejects emails from unknown senders. The sending server is expected to retry delivery after a delay (typically 1-15 minutes). Legitimate mail servers will retry, while many spam sources will not, effectively reducing spam without blocking legitimate mail."
+    },
+
+    "how_it_works": {
+      "title": "How Greylisting Works",
+      "steps": {
+        "initial": {
+          "title": "Initial Connection",
+          "description": "First email delivery attempt from unknown sender (triplet: sender IP, sender address, recipient address)"
+        },
+        "rejection": {
+          "title": "Temporary Rejection",
+          "description": "Server responds with 4xx temporary error code (usually 450 or 451) asking sender to try again later"
+        },
+        "retry": {
+          "title": "Retry Period",
+          "description": "Legitimate mail servers wait a specified period (usually 1-15 minutes) before retrying"
+        },
+        "acceptance": {
+          "title": "Acceptance",
+          "description": "After retry delay, server accepts the email and adds triplet to whitelist for future deliveries"
+        }
+      }
+    },
+
+    "smtp_codes": {
+      "title": "SMTP Response Codes",
+      "220": {
+        "name": "Service Ready",
+        "description": "Server is ready to accept mail - no greylisting active"
+      },
+      "421": {
+        "name": "Service Not Available",
+        "description": "Server is temporarily unavailable - may indicate greylisting"
+      },
+      "450": {
+        "name": "Mailbox Unavailable",
+        "description": "Temporary failure - common greylisting response code"
+      },
+      "451": {
+        "name": "Local Error",
+        "description": "Temporary error processing request - another greylisting indicator"
+      }
+    },
+
+    "confidence": {
+      "title": "Confidence Levels",
+      "high": {
+        "title": "High",
+        "description": "Explicit greylisting keywords in response + subsequent acceptance after delay"
+      },
+      "medium": {
+        "title": "Medium",
+        "description": "Temporary rejection codes (450/451) + subsequent acceptance"
+      },
+      "low": {
+        "title": "Low",
+        "description": "Inconsistent behavior or unclear rejection pattern"
+      },
+      "none": {
+        "title": "None",
+        "description": "No greylisting detected - consistent acceptance or rejection"
+      }
+    },
+
+    "benefits": {
+      "title": "Benefits of Greylisting",
+      "spam_reduction": {
+        "title": "Spam Reduction",
+        "description": "Blocks 50-90% of spam without false positives, as most spam sources do not retry"
+      },
+      "resource_efficient": {
+        "title": "Resource Efficient",
+        "description": "Minimal server resources required compared to content filtering"
+      },
+      "no_false_positives": {
+        "title": "No False Positives",
+        "description": "Legitimate mail is always delivered, just with a slight delay"
+      },
+      "compliant": {
+        "title": "Compliant",
+        "description": "Works within SMTP RFC standards - temporary rejection is expected behavior"
+      }
+    },
+
+    "drawbacks": {
+      "title": "Drawbacks of Greylisting",
+      "delivery_delay": {
+        "title": "Delivery Delay",
+        "description": "Initial emails from new senders are delayed by 1-15 minutes"
+      },
+      "time_sensitive": {
+        "title": "Time-Sensitive Issues",
+        "description": "Can cause problems with password resets, verification codes, and urgent communications"
+      },
+      "legitimate_failures": {
+        "title": "Legitimate Failures",
+        "description": "Some legitimate mail servers or services may not retry properly"
+      },
+      "resource_usage": {
+        "title": "Resource Usage",
+        "description": "Requires database to track triplets and manage whitelist"
+      }
+    },
+
+    "best_practices": {
+      "title": "Best Practices",
+      "practices": [
+        "Use shorter retry delays (1-5 minutes) to minimize user impact",
+        "Implement automatic whitelisting of known good servers",
+        "Provide bypass mechanisms for time-sensitive emails",
+        "Combine with SPF, DKIM, and DMARC for better protection",
+        "Monitor false positive rates and adjust policies accordingly",
+        "Whitelist common email services (Gmail, Outlook, etc.) to reduce delays"
+      ]
+    },
+
+    "quick_tips": {
+      "title": "Quick Tips",
+      "tips": [
+        "Greylisting typically delays first-time emails by 1-15 minutes",
+        "Look for SMTP codes 450 or 451 as indicators of greylisting",
+        "Most greylisting implementations whitelist senders after successful retry",
+        "Greylisting is most effective when combined with other anti-spam measures",
+        "Some mail servers use adaptive greylisting that adjusts based on sender reputation"
+      ]
+    }
+  }
+}

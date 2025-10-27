@@ -1,0 +1,126 @@
+{
+  "title": "DHCP Option 119 - Domain Search List",
+  "subtitle": "Encode and decode Domain Search List (RFC 3397/6731) to/from RFC 1035 wire format with domain compression. Generate configurations for ISC dhcpd and Kea DHCP.",
+
+  "modes": {
+    "encode": "Encode",
+    "decode": "Decode"
+  },
+
+  "encodeExamples": {
+    "corporate": {
+      "label": "Corporate",
+      "description": "Corporate network with domain compression"
+    },
+    "multiSite": {
+      "label": "Multi-site",
+      "description": "Multiple sites sharing common suffix"
+    },
+    "development": {
+      "label": "Development",
+      "description": "Development environments"
+    }
+  },
+
+  "decodeExamples": {
+    "corporate": {
+      "label": "Corporate",
+      "description": "corp.example.com, example.com (with compression)"
+    },
+    "multiSite": {
+      "label": "Multi-site",
+      "description": "site1.example.com, site2.example.com, example.com"
+    },
+    "singleDomain": {
+      "label": "Single Domain",
+      "description": "example.com (no compression)"
+    }
+  },
+
+  "encode": {
+    "domainListTitle": "Domain List",
+    "domain": {
+      "title": "Domain {number}",
+      "placeholder": "example.com"
+    },
+    "addDomain": "Add Domain",
+    "networkSettings": {
+      "title": "Network Settings (Optional)",
+      "help": "Customize network values for configuration examples below",
+      "subnet": {
+        "label": "Subnet",
+        "placeholder": "192.168.1.0"
+      },
+      "netmask": {
+        "label": "Netmask",
+        "placeholder": "255.255.255.0"
+      },
+      "rangeStart": {
+        "label": "Range Start",
+        "placeholder": "192.168.1.100"
+      },
+      "rangeEnd": {
+        "label": "Range End",
+        "placeholder": "192.168.1.200"
+      },
+      "errorsTitle": "Network Settings Errors"
+    }
+  },
+
+  "decode": {
+    "title": "Decode Option 119 Hex",
+    "input": {
+      "label": "Hex-Encoded Option 119",
+      "placeholder": "Enter hex string (e.g., 0765786d706c6503636f6d00)"
+    },
+    "button": "Decode"
+  },
+
+  "errors": {
+    "title": "Validation Errors",
+    "atLeastOneDomain": "At least one domain is required",
+    "domainRequired": "Domain {number}: Value is required",
+    "invalidCharacters": "Domain {number}: Invalid characters (use only letters, numbers, dots, hyphens)",
+    "cannotStartOrEndWithDot": "Domain {number}: Cannot start or end with a dot",
+    "consecutiveDots": "Domain {number}: Cannot contain consecutive dots",
+    "exceedsMaxLength": "Domain {number}: Exceeds maximum length of 253 characters",
+    "emptyLabel": "Domain {number}: Empty label found",
+    "labelTooLong": "Domain {number}: Label \"{label}\" exceeds maximum length of 63 characters",
+    "labelInvalidHyphen": "Domain {number}: Label \"{label}\" cannot start or end with hyphen",
+    "invalidSubnet": "Invalid subnet address",
+    "invalidNetmask": "Invalid netmask",
+    "invalidRangeStart": "Invalid range start address",
+    "invalidRangeEnd": "Invalid range end address",
+    "invalidHex": "Invalid hex input: only hexadecimal characters allowed",
+    "encodingFailed": "Encoding failed",
+    "decodingFailed": "Decoding failed"
+  },
+
+  "results": {
+    "encodeTitle": "Encoded Option 119",
+    "hexEncoded": {
+      "title": "Hex-Encoded (Compact)"
+    },
+    "wireFormat": {
+      "title": "Wire Format (Spaced)"
+    },
+    "summary": {
+      "totalLength": "Total Length:",
+      "domains": "Domains:",
+      "bytes": "{length} bytes"
+    },
+    "configExamplesTitle": "Configuration Examples",
+    "formats": {
+      "iscDhcpd": "ISC dhcpd Configuration",
+      "keaDhcp4": "Kea DHCPv4 Configuration"
+    },
+    "decodeTitle": "Decoded Domain Search List",
+    "domainsFound": "Domains Found:",
+    "domainListTitle": "Domain List"
+  },
+
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

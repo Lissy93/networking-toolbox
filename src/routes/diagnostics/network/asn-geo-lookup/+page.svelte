@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/stores/language';
   import { asnGeoContent } from '$lib/content/asn-geo';
   import '../../../../styles/diagnostics-pages.scss';
 
@@ -32,14 +33,38 @@
   let copiedState = $state(false);
   let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
-    { ip: '8.8.8.8', description: 'Google Public DNS' },
-    { ip: '2.58.47.0', description: 'M247 Proton' },
-    { ip: '1.1.1.1', description: 'Cloudflare DNS' },
-    { ip: '140.82.121.4', description: 'GitHub' },
-    { ip: '151.101.1.140', description: 'Fastly CDN' },
-    { ip: '2606:4700:4700::1111', description: 'Cloudflare IPv6' },
-  ];
+  const examples = $derived([
+    {
+      ip: $t('diagnostics/network-asn-geo-lookup.examples.items.googleDNS.ip'),
+      description: $t('diagnostics/network-asn-geo-lookup.examples.items.googleDNS.description'),
+      tooltip: $t('diagnostics/network-asn-geo-lookup.examples.items.googleDNS.tooltip'),
+    },
+    {
+      ip: $t('diagnostics/network-asn-geo-lookup.examples.items.m247.ip'),
+      description: $t('diagnostics/network-asn-geo-lookup.examples.items.m247.description'),
+      tooltip: $t('diagnostics/network-asn-geo-lookup.examples.items.m247.tooltip'),
+    },
+    {
+      ip: $t('diagnostics/network-asn-geo-lookup.examples.items.cloudflareDNS.ip'),
+      description: $t('diagnostics/network-asn-geo-lookup.examples.items.cloudflareDNS.description'),
+      tooltip: $t('diagnostics/network-asn-geo-lookup.examples.items.cloudflareDNS.tooltip'),
+    },
+    {
+      ip: $t('diagnostics/network-asn-geo-lookup.examples.items.github.ip'),
+      description: $t('diagnostics/network-asn-geo-lookup.examples.items.github.description'),
+      tooltip: $t('diagnostics/network-asn-geo-lookup.examples.items.github.tooltip'),
+    },
+    {
+      ip: $t('diagnostics/network-asn-geo-lookup.examples.items.fastly.ip'),
+      description: $t('diagnostics/network-asn-geo-lookup.examples.items.fastly.description'),
+      tooltip: $t('diagnostics/network-asn-geo-lookup.examples.items.fastly.tooltip'),
+    },
+    {
+      ip: $t('diagnostics/network-asn-geo-lookup.examples.items.cloudflareIPv6.ip'),
+      description: $t('diagnostics/network-asn-geo-lookup.examples.items.cloudflareIPv6.description'),
+      tooltip: $t('diagnostics/network-asn-geo-lookup.examples.items.cloudflareIPv6.tooltip'),
+    },
+  ]);
 
   async function lookupIP() {
     loading = true;
@@ -113,8 +138,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>{asnGeoContent.title}</h1>
-    <p>{asnGeoContent.description}</p>
+    <h1>{$t('diagnostics/network-asn-geo-lookup.title')}</h1>
+    <p>{$t('diagnostics/network-asn-geo-lookup.subtitle')}</p>
   </header>
 
   <!-- Examples -->
@@ -122,7 +147,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Example Lookups</h4>
+        <h4>{$t('diagnostics/network-asn-geo-lookup.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -130,7 +155,7 @@
             class="example-card"
             class:selected={selectedExampleIndex === i}
             onclick={() => loadExample(example, i)}
-            use:tooltip={`Look up ${example.ip}`}
+            use:tooltip={example.tooltip}
           >
             <h5>{example.ip}</h5>
             <p>{example.description}</p>
@@ -143,17 +168,19 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>IP Lookup</h3>
+      <h3>{$t('diagnostics/network-asn-geo-lookup.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="lookup-form">
         <div class="input-row">
-          <label for="ip" use:tooltip={'Enter an IPv4 or IPv6 address'}> IP Address </label>
+          <label for="ip" use:tooltip={$t('diagnostics/network-asn-geo-lookup.form.ipTooltip')}>
+            {$t('diagnostics/network-asn-geo-lookup.form.ipLabel')}
+          </label>
           <input
             id="ip"
             type="text"
             bind:value={ip}
-            placeholder="8.8.8.8 or 2001:4860:4860::8888"
+            placeholder={$t('diagnostics/network-asn-geo-lookup.form.ipPlaceholder')}
             onchange={() => {
               clearExampleSelection();
               if (ip.trim()) lookupIP();
@@ -163,10 +190,10 @@
         <button class="lookup-btn" onclick={lookupIP} disabled={loading || !ip.trim()}>
           {#if loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Looking up...
+            {$t('diagnostics/network-asn-geo-lookup.form.lookingUp')}
           {:else}
             <Icon name="search" size="sm" />
-            Lookup
+            {$t('diagnostics/network-asn-geo-lookup.form.lookupButton')}
           {/if}
         </button>
       </div>
@@ -177,23 +204,25 @@
   {#if results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>Results for {results.ip}</h3>
+        <h3>{$t('diagnostics/network-asn-geo-lookup.results.title', { ip: results.ip })}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
           <Icon name={copiedState ? 'check' : 'copy'} size="xs" />
-          {copiedState ? 'Copied!' : 'Copy Results'}
+          {copiedState
+            ? $t('diagnostics/network-asn-geo-lookup.results.copied')
+            : $t('diagnostics/network-asn-geo-lookup.results.copyButton')}
         </button>
       </div>
       <div class="card-content">
         <div class="results-grid">
           <!-- Network Information -->
           <div class="result-card">
-            <h4>Network Information</h4>
+            <h4>{$t('diagnostics/network-asn-geo-lookup.results.networkInfo.title')}</h4>
             <div class="info-list">
               {#if results.asn}
                 <div class="info-item">
                   <Icon name="hash" size="sm" />
                   <div class="info-content">
-                    <span class="info-label">ASN</span>
+                    <span class="info-label">{$t('diagnostics/network-asn-geo-lookup.results.networkInfo.asn')}</span>
                     <span class="info-value asn-badge">AS{results.asn}</span>
                   </div>
                 </div>
@@ -202,7 +231,9 @@
                 <div class="info-item">
                   <Icon name="building" size="sm" />
                   <div class="info-content">
-                    <span class="info-label">Organization</span>
+                    <span class="info-label"
+                      >{$t('diagnostics/network-asn-geo-lookup.results.networkInfo.organization')}</span
+                    >
                     <span class="info-value">{results.asnOrg}</span>
                   </div>
                 </div>
@@ -211,7 +242,7 @@
                 <div class="info-item">
                   <Icon name="wifi" size="sm" />
                   <div class="info-content">
-                    <span class="info-label">ISP</span>
+                    <span class="info-label">{$t('diagnostics/network-asn-geo-lookup.results.networkInfo.isp')}</span>
                     <span class="info-value">{results.isp}</span>
                   </div>
                 </div>
@@ -221,13 +252,15 @@
 
           <!-- Geographic Location -->
           <div class="result-card">
-            <h4>Geographic Location</h4>
+            <h4>{$t('diagnostics/network-asn-geo-lookup.results.geoLocation.title')}</h4>
             <div class="info-list">
               {#if results.country}
                 <div class="info-item">
                   <Icon name="flag" size="sm" />
                   <div class="info-content">
-                    <span class="info-label">Country</span>
+                    <span class="info-label"
+                      >{$t('diagnostics/network-asn-geo-lookup.results.geoLocation.country')}</span
+                    >
                     <span class="info-value">{results.country} ({results.countryCode})</span>
                   </div>
                 </div>
@@ -236,7 +269,8 @@
                 <div class="info-item">
                   <Icon name="map-pin" size="sm" />
                   <div class="info-content">
-                    <span class="info-label">Region</span>
+                    <span class="info-label">{$t('diagnostics/network-asn-geo-lookup.results.geoLocation.region')}</span
+                    >
                     <span class="info-value">{results.regionName}</span>
                   </div>
                 </div>
@@ -245,7 +279,7 @@
                 <div class="info-item">
                   <Icon name="building" size="sm" />
                   <div class="info-content">
-                    <span class="info-label">City</span>
+                    <span class="info-label">{$t('diagnostics/network-asn-geo-lookup.results.geoLocation.city')}</span>
                     <span class="info-value">{results.city}</span>
                   </div>
                 </div>
@@ -254,7 +288,9 @@
                 <div class="info-item">
                   <Icon name="clock" size="sm" />
                   <div class="info-content">
-                    <span class="info-label">Timezone</span>
+                    <span class="info-label"
+                      >{$t('diagnostics/network-asn-geo-lookup.results.geoLocation.timezone')}</span
+                    >
                     <span class="info-value">{results.timezone}</span>
                   </div>
                 </div>
@@ -265,18 +301,22 @@
           <!-- Coordinates -->
           {#if results.latitude !== undefined && results.longitude !== undefined}
             <div class="result-card">
-              <h4>Coordinates</h4>
+              <h4>{$t('diagnostics/network-asn-geo-lookup.results.coordinates.title')}</h4>
               <div class="coordinates-display">
                 <div class="coordinate-info">
                   <div class="coordinate-item">
                     <Icon name="navigation" size="md" />
                     <div class="coordinate-values">
                       <div class="coordinate-row">
-                        <span class="coordinate-label">Latitude:</span>
+                        <span class="coordinate-label"
+                          >{$t('diagnostics/network-asn-geo-lookup.results.coordinates.latitude')}</span
+                        >
                         <span class="coordinate-value">{results.latitude.toFixed(4)}°</span>
                       </div>
                       <div class="coordinate-row">
-                        <span class="coordinate-label">Longitude:</span>
+                        <span class="coordinate-label"
+                          >{$t('diagnostics/network-asn-geo-lookup.results.coordinates.longitude')}</span
+                        >
                         <span class="coordinate-value">{results.longitude.toFixed(4)}°</span>
                       </div>
                     </div>
@@ -288,7 +328,7 @@
                     class="map-link"
                   >
                     <Icon name="external-link" size="xs" />
-                    View full map
+                    {$t('diagnostics/network-asn-geo-lookup.results.coordinates.viewMap')}
                   </a>
                 </div>
                 <div class="map-container">
@@ -304,19 +344,19 @@
 
           <!-- Connection Type -->
           <div class="result-card">
-            <h4>Connection Type</h4>
+            <h4>{$t('diagnostics/network-asn-geo-lookup.results.connectionType.title')}</h4>
             <div class="connection-flags">
               <div class="flag-item" class:active={results.mobile}>
                 <Icon name={results.mobile ? 'check-circle' : 'circle'} size="sm" />
-                <span>Mobile Network</span>
+                <span>{$t('diagnostics/network-asn-geo-lookup.results.connectionType.mobile')}</span>
               </div>
               <div class="flag-item" class:active={results.proxy}>
                 <Icon name={results.proxy ? 'check-circle' : 'circle'} size="sm" />
-                <span>Proxy/VPN</span>
+                <span>{$t('diagnostics/network-asn-geo-lookup.results.connectionType.proxy')}</span>
               </div>
               <div class="flag-item" class:active={results.hosting}>
                 <Icon name={results.hosting ? 'check-circle' : 'circle'} size="sm" />
-                <span>Hosting/Datacenter</span>
+                <span>{$t('diagnostics/network-asn-geo-lookup.results.connectionType.hosting')}</span>
               </div>
             </div>
           </div>
@@ -331,7 +371,7 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="md" />
           <div>
-            <strong>Lookup Failed</strong>
+            <strong>{$t('diagnostics/network-asn-geo-lookup.error.title')}</strong>
             <p>{error}</p>
           </div>
         </div>
@@ -342,7 +382,7 @@
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>About ASN & Geolocation</h3>
+      <h3>{$t('diagnostics/network-asn-geo-lookup.info.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
@@ -375,7 +415,7 @@
       </div>
 
       <div class="quick-tips">
-        <h4>Quick Tips</h4>
+        <h4>{$t('diagnostics/network-asn-geo-lookup.info.quickTips.title')}</h4>
         <ul>
           {#each asnGeoContent.quickTips as tip, idx (idx)}
             <li>{tip}</li>

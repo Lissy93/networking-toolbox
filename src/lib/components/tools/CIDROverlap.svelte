@@ -1,6 +1,7 @@
 <script lang="ts">
   import { computeCIDROverlap, type OverlapResult } from '$lib/utils/cidr-overlap.js';
   import { tooltip } from '$lib/actions/tooltip.js';
+  import { t } from '$lib/stores/language';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
@@ -17,30 +18,30 @@
   let selectedExample = $state<string | null>(null);
   let userModified = $state(false);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Basic Overlap',
+      label: $t('tools/cidr-overlap.examples.basicOverlap'),
       setA: '192.168.1.0/24',
       setB: '192.168.1.128/25',
     },
     {
-      label: 'No Overlap',
+      label: $t('tools/cidr-overlap.examples.noOverlap'),
       setA: '192.168.1.0/24',
       setB: '192.168.2.0/24',
     },
     {
-      label: 'Partial Overlap',
+      label: $t('tools/cidr-overlap.examples.partialOverlap'),
       setA: `192.168.1.0/25
 192.168.2.0/24`,
       setB: `192.168.1.64/26
 192.168.3.0/24`,
     },
     {
-      label: 'IPv6 Overlap',
+      label: $t('tools/cidr-overlap.examples.ipv6Overlap'),
       setA: '2001:db8::/48',
       setB: '2001:db8:1::/64',
     },
-  ];
+  ]);
 
   /* Set example */
   function setExample(example: (typeof examples)[0]) {
@@ -178,13 +179,13 @@
 
 <!-- Options -->
 <div class="options-section">
-  <h3>Options</h3>
+  <h3>{$t('tools/cidr-overlap.options.title')}</h3>
   <div class="options-grid">
     <label class="checkbox-label">
       <input type="checkbox" bind:checked={mergeInputs} onchange={() => (userModified = true)} />
       <span class="checkbox-text">
-        Merge overlapping inputs first
-        <Tooltip text="Combine overlapping ranges within each set before comparison">
+        {$t('tools/cidr-overlap.options.mergeInputs')}
+        <Tooltip text={$t('tools/cidr-overlap.options.mergeInputsTooltip')}>
           <Icon name="help" size="sm" />
         </Tooltip>
       </span>
@@ -192,8 +193,8 @@
     <label class="checkbox-label">
       <input type="checkbox" bind:checked={showOnlyBoolean} onchange={() => (userModified = true)} />
       <span class="checkbox-text">
-        Show only boolean result
-        <Tooltip text="Display just yes/no overlap instead of detailed intersection blocks">
+        {$t('tools/cidr-overlap.options.showOnlyBoolean')}
+        <Tooltip text={$t('tools/cidr-overlap.options.showOnlyBooleanTooltip')}>
           <Icon name="help" size="sm" />
         </Tooltip>
       </span>
@@ -207,8 +208,8 @@
     <!-- Set A -->
     <div class="input-group">
       <h3>
-        Set A
-        <Tooltip text="First set of IP addresses, CIDR blocks, or ranges">
+        {$t('tools/cidr-overlap.input.setALabel')}
+        <Tooltip text={$t('tools/cidr-overlap.input.setATooltip')}>
           <Icon name="help" size="sm" />
         </Tooltip>
       </h3>
@@ -216,7 +217,7 @@
         <textarea
           bind:value={setA}
           oninput={() => (userModified = true)}
-          placeholder="192.168.1.0/24&#10;10.0.0.0-10.0.0.100"
+          placeholder={$t('tools/cidr-overlap.input.setAPlaceholder')}
           class="input-textarea set-a"
           rows="6"
         ></textarea>
@@ -226,8 +227,8 @@
     <!-- Set B -->
     <div class="input-group">
       <h3>
-        Set B
-        <Tooltip text="Second set of IP addresses, CIDR blocks, or ranges">
+        {$t('tools/cidr-overlap.input.setBLabel')}
+        <Tooltip text={$t('tools/cidr-overlap.input.setBTooltip')}>
           <Icon name="help" size="sm" />
         </Tooltip>
       </h3>
@@ -235,7 +236,7 @@
         <textarea
           bind:value={setB}
           oninput={() => (userModified = true)}
-          placeholder="192.168.1.128/25&#10;10.0.0.50-10.0.0.150"
+          placeholder={$t('tools/cidr-overlap.input.setBPlaceholder')}
           class="input-textarea set-b"
           rows="6"
         ></textarea>
@@ -246,13 +247,13 @@
   <div class="input-actions">
     <button type="button" class="btn btn-secondary btn-sm" onclick={clearInputs}>
       <Icon name="trash" size="sm" />
-      Clear All
+      {$t('tools/cidr-overlap.input.clearAll')}
     </button>
   </div>
 
   <!-- Examples -->
   <div class="examples-section">
-    <h4>Quick Examples</h4>
+    <h4>{$t('tools/cidr-overlap.examples.title')}</h4>
     <div class="examples-grid">
       {#each examples as example (example.label)}
         <button
@@ -273,7 +274,7 @@
   <div class="results-section">
     {#if result.errors.length > 0}
       <div class="info-panel error">
-        <h3>Parse Errors</h3>
+        <h3>{$t('tools/cidr-overlap.status.errorTitle')}</h3>
         <ul class="error-list">
           {#each result.errors as error (error)}
             <li>{error}</li>
@@ -289,11 +290,15 @@
           <Icon name={result.hasOverlap ? 'check-circle' : 'x-circle'} size="lg" />
         </div>
         <div class="status-content">
-          <h3>{result.hasOverlap ? 'Overlap Detected' : 'No Overlap'}</h3>
+          <h3>
+            {result.hasOverlap
+              ? $t('tools/cidr-overlap.status.overlapDetected')
+              : $t('tools/cidr-overlap.status.noOverlap')}
+          </h3>
           <p>
             {result.hasOverlap
-              ? `Sets A and B have overlapping address ranges (${result.stats.overlapPercent}% of smaller set)`
-              : 'Sets A and B do not share any common address ranges'}
+              ? $t('tools/cidr-overlap.status.overlapMessage', { percent: result.stats.overlapPercent })
+              : $t('tools/cidr-overlap.status.noOverlapMessage')}
           </p>
         </div>
       </div>
@@ -303,7 +308,7 @@
       <!-- Statistics -->
       <div class="stats-section">
         <div class="summary-header">
-          <h3>Intersection Results (A ∩ B)</h3>
+          <h3>{$t('tools/cidr-overlap.results.title')}</h3>
           <div class="export-buttons">
             <button
               type="button"
@@ -312,7 +317,7 @@
               onclick={() => copyAllResults('text')}
             >
               <Icon name={clipboard.isCopied('all-text') ? 'check' : 'copy'} size="sm" />
-              Text
+              {$t('tools/cidr-overlap.results.copyText')}
             </button>
             <button
               type="button"
@@ -321,31 +326,43 @@
               onclick={() => copyAllResults('json')}
             >
               <Icon name={clipboard.isCopied('all-json') ? 'check' : 'download'} size="sm" />
-              JSON
+              {$t('tools/cidr-overlap.results.copyJSON')}
             </button>
           </div>
         </div>
 
         <div class="stats-grid">
           <div class="stat-card set-a">
-            <span class="stat-label">Set A</span>
-            <span class="stat-value">{result.stats.setA.count} items</span>
-            <span class="stat-detail">{result.stats.setA.addresses} addresses</span>
+            <span class="stat-label">{$t('tools/cidr-overlap.results.setALabel')}</span>
+            <span class="stat-value"
+              >{$t('tools/cidr-overlap.results.itemsCount', { count: result.stats.setA.count })}</span
+            >
+            <span class="stat-detail"
+              >{$t('tools/cidr-overlap.results.addressesCount', { count: result.stats.setA.addresses })}</span
+            >
           </div>
           <div class="stat-card set-b">
-            <span class="stat-label">Set B</span>
-            <span class="stat-value">{result.stats.setB.count} items</span>
-            <span class="stat-detail">{result.stats.setB.addresses} addresses</span>
+            <span class="stat-label">{$t('tools/cidr-overlap.results.setBLabel')}</span>
+            <span class="stat-value"
+              >{$t('tools/cidr-overlap.results.itemsCount', { count: result.stats.setB.count })}</span
+            >
+            <span class="stat-detail"
+              >{$t('tools/cidr-overlap.results.addressesCount', { count: result.stats.setB.addresses })}</span
+            >
           </div>
           <div class="stat-card intersection">
-            <span class="stat-label">Intersection</span>
-            <span class="stat-value">{result.stats.intersection.count} CIDRs</span>
-            <span class="stat-detail">{result.stats.intersection.addresses} addresses</span>
+            <span class="stat-label">{$t('tools/cidr-overlap.results.intersectionLabel')}</span>
+            <span class="stat-value"
+              >{$t('tools/cidr-overlap.results.cidrsCount', { count: result.stats.intersection.count })}</span
+            >
+            <span class="stat-detail"
+              >{$t('tools/cidr-overlap.results.addressesCount', { count: result.stats.intersection.addresses })}</span
+            >
           </div>
           <div class="stat-card overlap-percent">
-            <span class="stat-label">Overlap</span>
+            <span class="stat-label">{$t('tools/cidr-overlap.results.overlapLabel')}</span>
             <span class="stat-value">{result.stats.overlapPercent}%</span>
-            <span class="stat-detail">of smaller set</span>
+            <span class="stat-detail">{$t('tools/cidr-overlap.results.ofSmallerSet')}</span>
           </div>
         </div>
       </div>
@@ -353,26 +370,26 @@
       <!-- Visualization -->
       {#if result.visualization.setA.length > 0 || result.visualization.setB.length > 0}
         <div class="visualization-section">
-          <h4>Overlap Visualization</h4>
+          <h4>{$t('tools/cidr-overlap.visualization.title')}</h4>
           <div class="viz-legend">
             <div class="legend-item">
               <div class="legend-color set-a-color"></div>
-              <span>Set A</span>
+              <span>{$t('tools/cidr-overlap.visualization.setALegend')}</span>
             </div>
             <div class="legend-item">
               <div class="legend-color set-b-color"></div>
-              <span>Set B</span>
+              <span>{$t('tools/cidr-overlap.visualization.setBLegend')}</span>
             </div>
             <div class="legend-item">
               <div class="legend-color intersection-color"></div>
-              <span>Intersection (A ∩ B)</span>
+              <span>{$t('tools/cidr-overlap.visualization.intersectionLegend')}</span>
             </div>
           </div>
 
           <div class="visualization-stack">
             <!-- Set A Bar -->
             <div class="viz-bar set-a-bar">
-              <div class="bar-label">Set A</div>
+              <div class="bar-label">{$t('tools/cidr-overlap.visualization.setALabel')}</div>
               <div class="bar-segments">
                 {#each result.visualization.setA as range (`${range.start}-${range.end}`)}
                   <div
@@ -386,7 +403,7 @@
 
             <!-- Set B Bar -->
             <div class="viz-bar set-b-bar">
-              <div class="bar-label">Set B</div>
+              <div class="bar-label">{$t('tools/cidr-overlap.visualization.setBLabel')}</div>
               <div class="bar-segments">
                 {#each result.visualization.setB as range (`${range.start}-${range.end}`)}
                   <div
@@ -400,7 +417,7 @@
 
             <!-- Intersection Highlights -->
             <div class="viz-bar intersection-bar">
-              <div class="bar-label">A ∩ B</div>
+              <div class="bar-label">{$t('tools/cidr-overlap.visualization.intersectionLabel')}</div>
               <div class="bar-segments">
                 {#each result.visualization.intersection as range (`${range.start}-${range.end}`)}
                   <div
@@ -421,7 +438,7 @@
         {#if result.ipv4.length > 0}
           <div class="result-panel ipv4">
             <div class="panel-header">
-              <h4>IPv4 Intersection ({result.ipv4.length})</h4>
+              <h4>{$t('tools/cidr-overlap.intersection.ipv4Title', { count: result.ipv4.length })}</h4>
               <button
                 type="button"
                 class="btn btn-icon"
@@ -453,7 +470,7 @@
         {#if result.ipv6.length > 0}
           <div class="result-panel ipv6">
             <div class="panel-header">
-              <h4>IPv6 Intersection ({result.ipv6.length})</h4>
+              <h4>{$t('tools/cidr-overlap.intersection.ipv6Title', { count: result.ipv6.length })}</h4>
               <button
                 type="button"
                 class="btn btn-icon"

@@ -1,0 +1,140 @@
+{
+  "title": "DHCP Option 60 - Vendor Class Identifier",
+  "subtitle": "Configure vendor-specific DHCP policies using Option 60 (Vendor Class Identifier) for device type detection and class-based configuration",
+
+  "examples": {
+    "ciscoPhone": "Cisco IP Phones with TFTP",
+    "ciscoAp": "Cisco APs with Option 43",
+    "pxeClient": "PXE network boot",
+    "arubaAp": "Aruba wireless APs",
+    "tooltip": "Generate config for {vendor}"
+  },
+
+  "input": {
+    "title": "Vendor Class Configuration",
+    "preset": {
+      "label": "Vendor Preset"
+    },
+    "custom": {
+      "label": "Custom Vendor Class",
+      "placeholder": "MyCustomVendorClass",
+      "help": "1-255 printable ASCII characters"
+    },
+    "advancedOptions": "Advanced Options",
+    "subnet": {
+      "label": "Subnet (CIDR)",
+      "placeholder": "192.168.10.0/24",
+      "help": "Network address in CIDR notation"
+    },
+    "poolStart": {
+      "label": "Pool Start",
+      "placeholder": "192.168.10.100",
+      "help": "First IP in matching pool"
+    },
+    "poolEnd": {
+      "label": "Pool End",
+      "placeholder": "192.168.10.200",
+      "help": "Last IP in matching pool"
+    },
+    "nonMatchingPoolStart": {
+      "label": "Non-Matching Pool Start",
+      "placeholder": "192.168.10.50",
+      "help": "First IP for non-matching clients"
+    },
+    "nonMatchingPoolEnd": {
+      "label": "Non-Matching Pool End",
+      "placeholder": "192.168.10.99",
+      "help": "Last IP for non-matching clients"
+    },
+    "serverIp": {
+      "label": {
+        "tftp": "TFTP Server IP",
+        "config": "Config File Server IP"
+      },
+      "help": "IP address of the provisioning server"
+    },
+    "bootFilename": {
+      "label": {
+        "default": "Boot Filename",
+        "config": "Config Filename"
+      },
+      "placeholder": {
+        "pxe": "pxelinux.0",
+        "docsis": "modem.cfg",
+        "cisco": "SEPDefault.cnf.xml"
+      },
+      "help": "Name of the configuration or boot file"
+    },
+    "mikrotikServerName": {
+      "label": "MikroTik DHCP Server Name",
+      "placeholder": "dhcp1",
+      "help": "Name of DHCP server in MikroTik config"
+    },
+    "leaseTime": {
+      "label": "Lease Time (dnsmasq)",
+      "placeholder": "24h",
+      "help": "DHCP lease time (e.g., 24h, 1h, 30m)"
+    }
+  },
+
+  "errors": {
+    "customRequired": "Custom vendor class identifier is required",
+    "invalidVendorClass": "Invalid vendor class identifier. Must be 1-255 printable ASCII characters.",
+    "invalidSubnet": "Invalid subnet CIDR notation (e.g., 192.168.10.0/24)",
+    "invalidPoolStart": "Invalid pool start IP address",
+    "invalidPoolEnd": "Invalid pool end IP address",
+    "invalidNonMatchingPoolStart": "Invalid non-matching pool start IP address",
+    "invalidNonMatchingPoolEnd": "Invalid non-matching pool end IP address",
+    "invalidServerIp": "Invalid server IP address",
+    "invalidBootFilename": "Invalid boot filename",
+    "invalidMikrotikServerName": "MikroTik server name cannot be empty",
+    "invalidLeaseTime": "Invalid lease time format (e.g., 24h, 1h, 30m)",
+    "failedToGenerate": "Failed to generate configuration"
+  },
+
+  "results": {
+    "title": "Generated Configurations",
+    "vendorClass": {
+      "title": "Vendor Class Identifier (Option 60)",
+      "useCase": "Use Case:"
+    },
+    "formats": {
+      "isc": {
+        "title": "ISC DHCP Server",
+        "hint": "Add to /etc/dhcp/dhcpd.conf"
+      },
+      "kea": {
+        "title": "Kea DHCP Server",
+        "hint": "Add to Kea configuration JSON"
+      },
+      "windows": {
+        "title": "Windows DHCP Server",
+        "hint": "Run PowerShell commands as Administrator"
+      },
+      "dnsmasq": {
+        "title": "dnsmasq",
+        "hint": "Add to /etc/dnsmasq.conf"
+      },
+      "mikrotik": {
+        "title": "MikroTik RouterOS",
+        "hint": "RouterOS CLI commands"
+      }
+    }
+  },
+
+  "notes": {
+    "title": "Important Notes",
+    "list": {
+      "vendorClass": "DHCP Option 60 (Vendor Class Identifier) allows DHCP servers to provide different configurations based on client type",
+      "classPolicies": "Class-based policies enable separate IP pools and options for different device types",
+      "option43": "Wireless APs typically require both Option 60 and Option 43 for controller discovery",
+      "testing": "Test configurations in a lab environment before deploying to production networks",
+      "customize": "Adjust subnet addresses, pool ranges, and option values to match your network design"
+    }
+  },
+
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

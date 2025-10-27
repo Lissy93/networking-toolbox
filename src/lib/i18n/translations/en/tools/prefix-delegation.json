@@ -1,0 +1,65 @@
+{
+  "title": "DHCPv6 Prefix Delegation (IA_PD)",
+  "subtitle": "Build DHCPv6 IA_PD options for delegating IPv6 prefixes to requesting routers. Configure Identity Association for Prefix Delegation (Option 25) with IA Prefix options (Option 26) per RFC 8415.",
+
+  "config": {
+    "title": "Prefix Delegation Configuration",
+
+    "iaid": {
+      "label": "IAID (Identity Association ID)",
+      "hint": "Unique identifier for this IA_PD (0-4294967295)"
+    },
+
+    "t1": {
+      "label": "T1 Renewal Time (seconds)",
+      "placeholder": "Optional"
+    },
+
+    "t2": {
+      "label": "T2 Rebinding Time (seconds)",
+      "placeholder": "Optional"
+    },
+
+    "prefixes": {
+      "label": "Delegated Prefixes",
+      "prefixPlaceholder": "e.g., 2001:db8::/56",
+      "preferredPlaceholder": "Preferred (s)",
+      "validPlaceholder": "Valid (s)",
+      "addButton": "Add Prefix",
+      "removeButton": "Remove"
+    }
+  },
+
+  "errors": {
+    "title": "Validation Errors:"
+  },
+
+  "results": {
+    "title": "Option 25 - IA_PD",
+
+    "iaid": "IAID:",
+    "t1Renewal": "T1 Renewal:",
+    "t2Rebinding": "T2 Rebinding:",
+    "fullHex": "Full Hex:",
+    "wireFormat": "Wire Format:",
+    "totalLength": "Total Length:",
+    "bytes": "{length} bytes",
+
+    "prefixesSection": {
+      "title": "Delegated Prefixes (Option 26)",
+      "preferredLifetime": "Preferred Lifetime:",
+      "validLifetime": "Valid Lifetime:",
+      "prefixWireFormat": "Wire Format:"
+    },
+
+    "configSection": {
+      "title": "Configuration Example",
+      "keaDhcp6": "Kea DHCPv6"
+    }
+  },
+
+  "common": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

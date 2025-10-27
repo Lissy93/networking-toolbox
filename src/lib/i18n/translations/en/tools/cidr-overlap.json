@@ -1,0 +1,67 @@
+{
+  "title": "CIDR Overlap Checker",
+  "description": "Find overlapping address ranges between two sets of networks",
+
+  "examples": {
+    "title": "Quick Examples",
+    "basicOverlap": "Basic Overlap",
+    "noOverlap": "No Overlap",
+    "partialOverlap": "Partial Overlap",
+    "ipv6Overlap": "IPv6 Overlap"
+  },
+
+  "options": {
+    "title": "Options",
+    "mergeInputs": "Merge overlapping inputs first",
+    "mergeInputsTooltip": "Combine overlapping ranges within each set before comparison",
+    "showOnlyBoolean": "Show only boolean result",
+    "showOnlyBooleanTooltip": "Display just yes/no overlap instead of detailed intersection blocks"
+  },
+
+  "input": {
+    "setALabel": "Set A",
+    "setATooltip": "First set of IP addresses, CIDR blocks, or ranges",
+    "setAPlaceholder": "192.168.1.0/24\n10.0.0.0-10.0.0.100",
+    "setBLabel": "Set B",
+    "setBTooltip": "Second set of IP addresses, CIDR blocks, or ranges",
+    "setBPlaceholder": "192.168.1.128/25\n10.0.0.50-10.0.0.150",
+    "clearAll": "Clear All"
+  },
+
+  "status": {
+    "overlapDetected": "Overlap Detected",
+    "noOverlap": "No Overlap",
+    "overlapMessage": "Sets A and B have overlapping address ranges ({percent}% of smaller set)",
+    "noOverlapMessage": "Sets A and B do not share any common address ranges",
+    "errorTitle": "Parse Errors"
+  },
+
+  "results": {
+    "title": "Intersection Results (A ∩ B)",
+    "copyText": "Text",
+    "copyJSON": "JSON",
+    "setALabel": "Set A",
+    "setBLabel": "Set B",
+    "intersectionLabel": "Intersection",
+    "overlapLabel": "Overlap",
+    "itemsCount": "{count} items",
+    "cidrsCount": "{count} CIDRs",
+    "addressesCount": "{count} addresses",
+    "ofSmallerSet": "of smaller set"
+  },
+
+  "visualization": {
+    "title": "Overlap Visualization",
+    "setALegend": "Set A",
+    "setBLegend": "Set B",
+    "intersectionLegend": "Intersection (A ∩ B)",
+    "setALabel": "Set A",
+    "setBLabel": "Set B",
+    "intersectionLabel": "A ∩ B"
+  },
+
+  "intersection": {
+    "ipv4Title": "IPv4 Intersection ({count})",
+    "ipv6Title": "IPv6 Intersection ({count})"
+  }
+}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { checkCIDRAlignment, type AlignmentResult } from '$lib/utils/cidr-alignment.js';
   import { tooltip } from '$lib/actions/tooltip.js';
+  import { t } from '$lib/stores/language';
   import Icon from '$lib/components/global/Icon.svelte';
   import '../../../styles/diagnostics-pages.scss';
 
@@ -14,23 +15,23 @@
   let _userModified = $state(false);
   let validationErrors = $state<string[]>([]);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Basic IPv4 Alignment',
+      label: $t('tools/cidr-alignment.examples.basicIPv4'),
       input: `192.168.1.0/24
 192.168.2.0/24
 192.168.3.0/24`,
       targetPrefix: 22,
     },
     {
-      label: 'Mixed IP Types',
+      label: $t('tools/cidr-alignment.examples.mixedIPTypes'),
       input: `10.0.0.0-10.0.0.255
 172.16.5.100
 192.168.1.0/25`,
       targetPrefix: 24,
     },
     {
-      label: 'Subnet Aggregation Check',
+      label: $t('tools/cidr-alignment.examples.subnetAggregation'),
       input: `192.168.0.0/26
 192.168.0.64/26
 192.168.0.128/26
@@ -38,7 +39,7 @@
       targetPrefix: 24,
     },
     {
-      label: 'Network Consolidation',
+      label: $t('tools/cidr-alignment.examples.networkConsolidation'),
       input: `10.1.0.0/24
 10.1.1.0/24
 10.1.2.0/24
@@ -46,7 +47,7 @@
       targetPrefix: 22,
     },
     {
-      label: 'VLAN Alignment Check',
+      label: $t('tools/cidr-alignment.examples.vlanAlignment'),
       input: `172.16.10.0/24
 172.16.11.0/24
 172.16.15.0/24
@@ -54,27 +55,27 @@
       targetPrefix: 20,
     },
     {
-      label: 'Point-to-Point Links',
+      label: $t('tools/cidr-alignment.examples.pointToPointLinks'),
       input: `192.168.100.0/30
 192.168.100.4/30
 192.168.100.8/30
 192.168.100.12/30`,
       targetPrefix: 28,
     },
-  ];
+  ]);
 
   function validateTargetPrefix(): string[] {
     const errors: string[] = [];
 
     // Check if target prefix is a valid number
     if (isNaN(targetPrefix) || targetPrefix === null || targetPrefix === undefined) {
-      errors.push('Target prefix length must be a valid number');
+      errors.push($t('tools/cidr-alignment.validation.mustBeValidNumber'));
       return errors;
     }
 
     // Check if target prefix is within basic bounds
     if (targetPrefix < 0 || targetPrefix > 128) {
-      errors.push('Target prefix length must be between 0 and 128');
+      errors.push($t('tools/cidr-alignment.validation.outOfRange'));
       return errors;
     }
 
@@ -104,16 +105,16 @@
 
     // Validate prefix length based on IP types present
     if (hasIPv4 && !hasIPv6 && targetPrefix > 32) {
-      errors.push('Target prefix length cannot exceed 32 for IPv4 addresses');
+      errors.push($t('tools/cidr-alignment.validation.ipv4OutOfRange'));
     }
 
     if (hasIPv6 && targetPrefix > 128) {
-      errors.push('Target prefix length cannot exceed 128 for IPv6 addresses');
+      errors.push($t('tools/cidr-alignment.validation.ipv6OutOfRange'));
     }
 
     // Additional practical validation
     if (targetPrefix === 0) {
-      errors.push('Target prefix length of 0 is not practical for alignment checking');
+      errors.push($t('tools/cidr-alignment.validation.notPractical'));
     }
 
     return errors;
@@ -225,8 +226,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>CIDR Boundary Alignment</h2>
-    <p>Check if IP addresses, ranges, and CIDR blocks align to specific prefix boundaries</p>
+    <h2>{$t('tools/cidr-alignment.title')}</h2>
+    <p>{$t('tools/cidr-alignment.description')}</p>
   </header>
 
   <!-- Examples -->
@@ -234,7 +235,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('tools/cidr-alignment.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (example.label)}
@@ -245,7 +246,7 @@
           >
             <div class="example-label">{example.label}</div>
             <div class="example-preview">
-              Target: /{example.targetPrefix}
+              {$t('tools/cidr-alignment.input.targetPreview', { targetPrefix: example.targetPrefix })}
             </div>
           </button>
         {/each}
@@ -255,29 +256,28 @@
 
   <div class="input-section">
     <div class="inputs-card">
-      <h3 use:tooltip={'Enter IP addresses, CIDR blocks, or ranges to check alignment'}>Network Inputs</h3>
+      <h3 use:tooltip={$t('tools/cidr-alignment.input.networkInputsTooltip')}>
+        {$t('tools/cidr-alignment.input.networkInputsTitle')}
+      </h3>
       <div class="input-group">
-        <label for="inputs" use:tooltip={'Enter one per line: CIDR blocks, IP ranges, or individual IP addresses'}>
-          IP Addresses, CIDRs, or Ranges
+        <label for="inputs" use:tooltip={$t('tools/cidr-alignment.input.inputsTooltip')}>
+          {$t('tools/cidr-alignment.input.inputsLabel')}
         </label>
         <textarea
           id="inputs"
           bind:value={inputText}
           oninput={handleInputChange}
-          placeholder="192.168.1.0/24&#10;10.0.0.0-10.0.0.255&#10;172.16.1.5&#10;2001:db8::/32"
+          placeholder={$t('tools/cidr-alignment.input.inputsPlaceholder')}
           rows="8"
         ></textarea>
         <div class="input-help">
-          Enter one per line: CIDR blocks (192.168.1.0/24), IP ranges (10.0.0.1-10.0.0.100), or single IPs (172.16.1.5)
+          {$t('tools/cidr-alignment.input.inputHelp')}
         </div>
       </div>
 
       <div class="input-group">
-        <label
-          for="prefix"
-          use:tooltip={'The prefix length boundary to check alignment against (e.g., 24 for /24 boundaries)'}
-        >
-          Target Prefix Length
+        <label for="prefix" use:tooltip={$t('tools/cidr-alignment.input.targetPrefixTooltip')}>
+          {$t('tools/cidr-alignment.input.targetPrefixLabel')}
         </label>
         <input
           id="prefix"
@@ -286,10 +286,10 @@
           oninput={handleInputChange}
           min="0"
           max="128"
-          placeholder="24"
+          placeholder={$t('tools/cidr-alignment.input.targetPrefixPlaceholder')}
           class:error={validationErrors.length > 0}
         />
-        <div class="input-help">Prefix length to check alignment against (0-32 for IPv4, 0-128 for IPv6)</div>
+        <div class="input-help">{$t('tools/cidr-alignment.input.targetPrefixHelp')}</div>
         {#if validationErrors.length > 0}
           <div class="validation-errors">
             {#each validationErrors as error (error)}
@@ -307,7 +307,7 @@
   {#if isLoading}
     <div class="loading">
       <Icon name="loader" />
-      Checking alignment...
+      {$t('tools/cidr-alignment.loading')}
     </div>
   {/if}
 
@@ -315,7 +315,7 @@
     <div class="results">
       {#if result.errors.length > 0}
         <div class="errors">
-          <h3><Icon name="alert-triangle" /> Errors</h3>
+          <h3><Icon name="alert-triangle" /> {$t('tools/cidr-alignment.results.errorsTitle')}</h3>
           {#each result.errors as error (error)}
             <div class="error-item">{error}</div>
           {/each}
@@ -324,26 +324,32 @@
 
       {#if result.checks.length > 0}
         <div class="summary">
-          <h3 use:tooltip={'Overview of alignment results across all inputs'}>Alignment Summary</h3>
+          <h3 use:tooltip={$t('tools/cidr-alignment.results.summaryTooltip')}>
+            {$t('tools/cidr-alignment.results.summaryTitle')}
+          </h3>
           <div class="summary-stats">
             <div class="stat">
               <span class="stat-value">{result.summary.totalInputs}</span>
-              <span class="stat-label" use:tooltip={'Total number of network inputs processed'}>Total Inputs</span>
+              <span class="stat-label" use:tooltip={$t('tools/cidr-alignment.results.totalInputsTooltip')}
+                >{$t('tools/cidr-alignment.results.totalInputsLabel')}</span
+              >
             </div>
             <div class="stat aligned">
               <span class="stat-value">{result.summary.alignedInputs}</span>
-              <span class="stat-label" use:tooltip={'Networks that align to the target prefix boundary'}>Aligned</span>
+              <span class="stat-label" use:tooltip={$t('tools/cidr-alignment.results.alignedTooltip')}
+                >{$t('tools/cidr-alignment.results.alignedLabel')}</span
+              >
             </div>
             <div class="stat misaligned">
               <span class="stat-value">{result.summary.misalignedInputs}</span>
-              <span class="stat-label" use:tooltip={'Networks that do not align to the target prefix boundary'}
-                >Misaligned</span
+              <span class="stat-label" use:tooltip={$t('tools/cidr-alignment.results.misalignedTooltip')}
+                >{$t('tools/cidr-alignment.results.misalignedLabel')}</span
               >
             </div>
             <div class="stat">
               <span class="stat-value">{result.summary.alignmentRate}%</span>
-              <span class="stat-label" use:tooltip={'Percentage of inputs that align to the target boundary'}
-                >Alignment Rate</span
+              <span class="stat-label" use:tooltip={$t('tools/cidr-alignment.results.alignmentRateTooltip')}
+                >{$t('tools/cidr-alignment.results.alignmentRateLabel')}</span
               >
             </div>
           </div>
@@ -351,15 +357,17 @@
 
         <div class="checks">
           <div class="checks-header">
-            <h3 use:tooltip={'Detailed results for each network input'}>Alignment Checks</h3>
+            <h3 use:tooltip={$t('tools/cidr-alignment.results.checksTooltip')}>
+              {$t('tools/cidr-alignment.results.checksTitle')}
+            </h3>
             <div class="export-buttons">
               <button onclick={() => exportResults('csv')}>
                 <Icon name="csv-file" />
-                Export CSV
+                {$t('tools/cidr-alignment.results.exportCSV')}
               </button>
               <button onclick={() => exportResults('json')}>
                 <Icon name="json-file" />
-                Export JSON
+                {$t('tools/cidr-alignment.results.exportJSON')}
               </button>
             </div>
           </div>
@@ -375,20 +383,22 @@
                   <div class="check-status">
                     {#if check.isAligned}
                       <Icon name="check-circle" size="sm" />
-                      <span class="status-text">Aligned to /{check.targetPrefix}</span>
+                      <span class="status-text"
+                        >{$t('tools/cidr-alignment.check.alignedTo', { targetPrefix: check.targetPrefix })}</span
+                      >
                     {:else}
                       <Icon name="x-circle" size="sm" />
-                      <span class="status-text">Not aligned to /{check.targetPrefix}</span>
+                      <span class="status-text"
+                        >{$t('tools/cidr-alignment.check.notAlignedTo', { targetPrefix: check.targetPrefix })}</span
+                      >
                     {/if}
                   </div>
                 </div>
 
                 {#if check.alignedCIDR}
                   <div class="aligned-cidr">
-                    <span
-                      class="aligned-label"
-                      use:tooltip={'The CIDR block that properly aligns to the target prefix boundary'}
-                      >Aligned CIDR:</span
+                    <span class="aligned-label" use:tooltip={$t('tools/cidr-alignment.check.alignedCIDRTooltip')}
+                      >{$t('tools/cidr-alignment.check.alignedCIDRLabel')}</span
                     >
                     <div class="cidr-with-copy">
                       <code class="aligned-code">{check.alignedCIDR}</code>
@@ -396,7 +406,7 @@
                         type="button"
                         class="copy-button {copiedStates[`cidr-${check.input}`] ? 'copied' : ''}"
                         onclick={() => copyToClipboard(check.alignedCIDR!, `cidr-${check.input}`)}
-                        use:tooltip={'Copy aligned CIDR to clipboard'}
+                        use:tooltip={$t('tools/cidr-alignment.check.copyAlignedCIDR')}
                       >
                         <Icon name={copiedStates[`cidr-${check.input}`] ? 'check' : 'copy'} size="xs" />
                       </button>
@@ -406,8 +416,8 @@
 
                 {#if check.reason}
                   <div class="reason">
-                    <span class="reason-label" use:tooltip={"Explanation of why this input aligns or doesn't align"}
-                      >Reason:</span
+                    <span class="reason-label" use:tooltip={$t('tools/cidr-alignment.check.reasonTooltip')}
+                      >{$t('tools/cidr-alignment.check.reasonLabel')}</span
                     >
                     <span class="reason-text">{check.reason}</span>
                   </div>
@@ -415,10 +425,8 @@
 
                 {#if check.suggestions.length > 0}
                   <div class="suggestions">
-                    <span
-                      class="suggestions-label"
-                      use:tooltip={'Alternative CIDR configurations that would align to the target boundary'}
-                      >Suggestions:</span
+                    <span class="suggestions-label" use:tooltip={$t('tools/cidr-alignment.check.suggestionsTooltip')}
+                      >{$t('tools/cidr-alignment.check.suggestionsLabel')}</span
                     >
                     {#each check.suggestions as suggestion (suggestion.type + suggestion.description)}
                       <div class="suggestion">
@@ -440,7 +448,7 @@
                                 type="button"
                                 class="copy-button {copiedStates[`suggestion-${check.input}-${idx}`] ? 'copied' : ''}"
                                 onclick={() => copyToClipboard(cidr, `suggestion-${check.input}-${idx}`)}
-                                use:tooltip={'Copy suggested CIDR to clipboard'}
+                                use:tooltip={$t('tools/cidr-alignment.check.copySuggestedCIDR')}
                               >
                                 <Icon
                                   name={copiedStates[`suggestion-${check.input}-${idx}`] ? 'check' : 'copy'}
@@ -453,9 +461,9 @@
                         {#if suggestion.efficiency}
                           <div
                             class="suggestion-efficiency"
-                            use:tooltip={'Address space utilization efficiency of this suggestion'}
+                            use:tooltip={$t('tools/cidr-alignment.check.efficiencyTooltip')}
                           >
-                            Efficiency: {suggestion.efficiency}%
+                            {$t('tools/cidr-alignment.check.efficiency', { efficiency: suggestion.efficiency })}
                           </div>
                         {/if}
                       </div>

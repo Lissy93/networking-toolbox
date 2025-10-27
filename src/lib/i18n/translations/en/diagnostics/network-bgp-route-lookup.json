@@ -1,0 +1,26 @@
+{
+  "title": "BGP Route Lookup",
+  "description": "Look up BGP routing information for an IP address or prefix",
+
+  "form": {
+    "title": "BGP Route Lookup",
+    "ip": {
+      "label": "IP Address or Prefix",
+      "placeholder": "8.8.8.8 or 8.8.8.0/24"
+    },
+    "lookup": "Lookup BGP Route",
+    "looking_up": "Looking up...",
+    "error": "Please enter a valid IP address or prefix"
+  },
+
+  "results": {
+    "title": "BGP Route Information",
+    "prefix": "Prefix",
+    "asn": "ASN",
+    "as_path": "AS Path",
+    "origin": "Origin",
+    "next_hop": "Next Hop",
+    "community": "Community",
+    "local_pref": "Local Preference"
+  }
+}

@@ -2,6 +2,7 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
   import { SvelteSet } from 'svelte/reactivity';
+  import { t } from '$lib/stores/language';
 
   interface CAARecord {
     flag: number;
@@ -34,16 +35,16 @@
     { name: 'Cloudflare', value: 'comodoca.com' },
   ];
 
-  const tagDescriptions = {
-    issue: 'Authorize certificate issuance for this domain',
-    issuewild: 'Authorize wildcard certificate issuance for this domain',
-    iodef: 'Contact information for certificate abuse reports',
-  };
+  const tagDescriptions = $derived({
+    issue: $t('tools/caa-builder.tags.issue'),
+    issuewild: $t('tools/caa-builder.tags.issuewild'),
+    iodef: $t('tools/caa-builder.tags.iodef'),
+  });
 
-  const _flagDescriptions = {
-    0: 'Non-critical flag - unknown tags can be ignored',
-    128: 'Critical flag - unknown tags must cause rejection',
-  };
+  const _flagDescriptions = $derived({
+    0: $t('tools/caa-builder.flags.descriptions.0'),
+    128: $t('tools/caa-builder.flags.descriptions.128'),
+  });
 
   const caaRecords = $derived.by(() => {
     return records
@@ -71,14 +72,14 @@
 
     // Check domain format
     if (!domain.trim()) {
-      errors.push('Domain is required');
+      errors.push($t('tools/caa-builder.validation.errors.domainRequired'));
     } else if (!domain.includes('.')) {
-      warnings.push('Domain should include TLD (e.g., .com, .org)');
+      warnings.push($t('tools/caa-builder.validation.warnings.domainNoTLD'));
     }
 
     // Check if any records are enabled
     if (enabledRecords.length === 0) {
-      warnings.push('No CAA records enabled - this will not provide any protection');
+      warnings.push($t('tools/caa-builder.validation.warnings.noRecordsEnabled'));
     }
 
     // Check for issue records
@@ -86,12 +87,12 @@
     const issuewildRecords = enabledRecords.filter((r) => r.tag === 'issuewild');
 
     if (issueRecords.length === 0 && issuewildRecords.length === 0) {
-      warnings.push('No issue or issuewild records - certificates can be issued by any CA');
+      warnings.push($t('tools/caa-builder.validation.warnings.noIssueRecords'));
     }
 
     // Check for wildcard without base issue
     if (issuewildRecords.length > 0 && issueRecords.length === 0) {
-      warnings.push('Wildcard authorization without base domain authorization may cause issues');
+      warnings.push($t('tools/caa-builder.validation.warnings.wildcardWithoutBase'));
     }
 
     // Check for deny-all configuration
@@ -99,7 +100,7 @@
     const hasIssuewildNone = issuewildRecords.some((r) => r.value.trim() === ';');
 
     if (hasIssueNone && hasIssuewildNone) {
-      warnings.push('Both issue and issuewild set to ";" - this will block ALL certificate issuance');
+      warnings.push($t('tools/caa-builder.validation.warnings.denyAll'));
     }
 
     // Validate iodef records
@@ -110,10 +111,10 @@
         if (value.includes('@')) {
           // Email format
           if (!value.includes('@') || (!value.startsWith('mailto:') && value.indexOf('@') === -1)) {
-            errors.push('Invalid iodef email format - use "mailto:user@domain.com" or "user@domain.com"');
+            errors.push($t('tools/caa-builder.validation.errors.invalidIodefEmail'));
           }
         } else if (!value.startsWith('http://') && !value.startsWith('https://')) {
-          warnings.push('iodef URL should start with http:// or https://');
+          warnings.push($t('tools/caa-builder.validation.warnings.iodefURLFormat'));
         }
       }
     }
@@ -131,7 +132,11 @@
     }
 
     if (duplicateValues.size > 0) {
-      warnings.push(`Duplicate CAA records found: ${Array.from(duplicateValues).join(', ')}`);
+      warnings.push(
+        $t('tools/caa-builder.validation.warnings.duplicateRecords', {
+          duplicates: Array.from(duplicateValues).join(', '),
+        }),
+      );
     }
 
     return {
@@ -189,10 +194,10 @@
     showButtonSuccess('export-caa');
   }
 
-  const exampleConfigurations = [
+  const exampleConfigurations = $derived([
     {
-      name: "Let's Encrypt Only",
-      description: "Allow only Let's Encrypt certificates",
+      name: $t('tools/caa-builder.examples.letsEncryptOnly.name'),
+      description: $t('tools/caa-builder.examples.letsEncryptOnly.description'),
       domain: 'example.com',
       records: [
         { flag: 0, tag: 'issue' as const, value: 'letsencrypt.org', enabled: true },
@@ -200,8 +205,8 @@
       ],
     },
     {
-      name: 'Multiple CAs',
-      description: 'Allow certificates from multiple providers',
+      name: $t('tools/caa-builder.examples.multipleCAs.name'),
+      description: $t('tools/caa-builder.examples.multipleCAs.description'),
       domain: 'mycompany.com',
       records: [
         { flag: 0, tag: 'issue' as const, value: 'letsencrypt.org', enabled: true },
@@ -211,8 +216,8 @@
       ],
     },
     {
-      name: 'No Certificates',
-      description: 'Block all certificate issuance',
+      name: $t('tools/caa-builder.examples.noCertificates.name'),
+      description: $t('tools/caa-builder.examples.noCertificates.description'),
       domain: 'secure.example.com',
       records: [
         { flag: 0, tag: 'issue' as const, value: ';', enabled: true },
@@ -220,7 +225,7 @@
         { flag: 0, tag: 'iodef' as const, value: 'security@example.com', enabled: true },
       ],
     },
-  ];
+  ]);
 
   function loadExample(example: (typeof exampleConfigurations)[0]): void {
     domain = example.domain;
@@ -244,21 +249,14 @@
     showExamples = false;
   }
 
-  const securityTips = [
-    'Start with monitoring: Add iodef records first to receive notifications',
-    'Use specific CAs: Only authorize certificate authorities you actually use',
-    'Include wildcards: Add issuewild records if you use wildcard certificates',
-    'Monitor regularly: Check iodef notifications for unauthorized issuance attempts',
-    'Test thoroughly: Verify legitimate certificate renewals still work after deployment',
-  ];
+  const securityTips = $derived($t('tools/caa-builder.securityGuide.tips'));
 </script>
 
 <div class="card">
   <div class="card-header">
-    <h1>CAA Record Builder</h1>
+    <h1>{$t('tools/caa-builder.title')}</h1>
     <p class="card-subtitle">
-      Build CAA (Certificate Authority Authorization) records to control which CAs can issue certificates for your
-      domain.
+      {$t('tools/caa-builder.description')}
     </p>
   </div>
 
@@ -268,13 +266,15 @@
         <div class="section-header">
           <h3>
             <Icon name="globe" size="sm" />
-            Domain Configuration
+            {$t('tools/caa-builder.domain.title')}
           </h3>
         </div>
 
         <div class="input-group">
-          <label for="domain" use:tooltip={'Domain to create CAA records for'}> Domain: </label>
-          <input id="domain" type="text" bind:value={domain} placeholder="example.com" />
+          <label for="domain" use:tooltip={$t('tools/caa-builder.domain.tooltip')}>
+            {$t('tools/caa-builder.domain.label')}
+          </label>
+          <input id="domain" type="text" bind:value={domain} placeholder={$t('tools/caa-builder.domain.placeholder')} />
         </div>
       </div>
 
@@ -282,35 +282,35 @@
         <div class="section-header">
           <h3>
             <Icon name="shield" size="sm" />
-            CAA Records
+            {$t('tools/caa-builder.records.title')}
           </h3>
           <div class="add-buttons">
             <button
               type="button"
               class="add-btn"
               onclick={() => addRecord('issue')}
-              use:tooltip={'Add certificate issuance authorization'}
+              use:tooltip={$t('tools/caa-builder.records.addButtons.issue.tooltip')}
             >
               <Icon name="plus" size="sm" />
-              Issue
+              {$t('tools/caa-builder.records.addButtons.issue.label')}
             </button>
             <button
               type="button"
               class="add-btn"
               onclick={() => addRecord('issuewild')}
-              use:tooltip={'Add wildcard certificate issuance authorization'}
+              use:tooltip={$t('tools/caa-builder.records.addButtons.issuewild.tooltip')}
             >
               <Icon name="plus" size="sm" />
-              Wildcard
+              {$t('tools/caa-builder.records.addButtons.issuewild.label')}
             </button>
             <button
               type="button"
               class="add-btn"
               onclick={() => addRecord('iodef')}
-              use:tooltip={'Add incident reporting contact'}
+              use:tooltip={$t('tools/caa-builder.records.addButtons.iodef.tooltip')}
             >
               <Icon name="plus" size="sm" />
-              Contact
+              {$t('tools/caa-builder.records.addButtons.iodef.label')}
             </button>
           </div>
         </div>
@@ -330,8 +330,8 @@
                 <div class="record-controls">
                   <div class="flag-select">
                     <select bind:value={record.flag} disabled={!record.enabled}>
-                      <option value={0}>Flag 0 (Non-critical)</option>
-                      <option value={128}>Flag 128 (Critical)</option>
+                      <option value={0}>{$t('tools/caa-builder.flags.nonCritical')}</option>
+                      <option value={128}>{$t('tools/caa-builder.flags.critical')}</option>
                     </select>
                   </div>
 
@@ -339,7 +339,7 @@
                     type="button"
                     class="remove-btn"
                     onclick={() => removeRecord(index)}
-                    use:tooltip={'Remove this record'}
+                    use:tooltip={$t('tools/caa-builder.records.removeTooltip')}
                   >
                     <Icon name="x" size="sm" />
                   </button>
@@ -352,16 +352,16 @@
                   bind:value={record.value}
                   disabled={!record.enabled}
                   placeholder={record.tag === 'issue'
-                    ? 'letsencrypt.org or ; (to deny all)'
+                    ? $t('tools/caa-builder.placeholders.issue')
                     : record.tag === 'issuewild'
-                      ? 'letsencrypt.org or ; (to deny all)'
-                      : 'security@example.com or https://example.com/security'}
+                      ? $t('tools/caa-builder.placeholders.issuewild')
+                      : $t('tools/caa-builder.placeholders.iodef')}
                   class="record-input"
                 />
 
                 {#if (record.tag === 'issue' || record.tag === 'issuewild') && record.enabled}
                   <div class="ca-shortcuts">
-                    <span class="shortcuts-label">Common CAs:</span>
+                    <span class="shortcuts-label">{$t('tools/caa-builder.caShortcuts.label')}</span>
                     <div class="ca-buttons">
                       {#each commonCAs.slice(0, 4) as ca (ca.name)}
                         <button
@@ -377,9 +377,9 @@
                         type="button"
                         class="ca-btn deny-all"
                         onclick={() => addCA(index, ';')}
-                        use:tooltip={'Deny all certificate issuance'}
+                        use:tooltip={$t('tools/caa-builder.caShortcuts.denyAllTooltip')}
                       >
-                        Deny All
+                        {$t('tools/caa-builder.caShortcuts.denyAll')}
                       </button>
                     </div>
                   </div>
@@ -394,29 +394,33 @@
     <div class="results-section">
       <div class="records-output-section">
         <div class="section-header">
-          <h3>Generated CAA Records</h3>
+          <h3>{$t('tools/caa-builder.output.title')}</h3>
           <div class="actions">
             <button
               type="button"
               class="copy-btn"
               class:success={buttonStates['copy-caa']}
               onclick={() => copyToClipboard(caaRecords.join('\n'), 'copy-caa')}
-              use:tooltip={'Copy all CAA records to clipboard'}
+              use:tooltip={$t('tools/caa-builder.output.copyTooltip')}
               disabled={caaRecords.length === 0}
             >
               <Icon name={buttonStates['copy-caa'] ? 'check' : 'copy'} size="sm" />
-              {buttonStates['copy-caa'] ? 'Copied!' : 'Copy'}
+              {buttonStates['copy-caa']
+                ? $t('tools/caa-builder.output.copied')
+                : $t('tools/caa-builder.output.copyButton')}
             </button>
             <button
               type="button"
               class="export-btn"
               class:success={buttonStates['export-caa']}
               onclick={exportAsZoneFile}
-              use:tooltip={'Download as zone file'}
+              use:tooltip={$t('tools/caa-builder.output.exportTooltip')}
               disabled={caaRecords.length === 0}
             >
               <Icon name={buttonStates['export-caa'] ? 'check' : 'download'} size="sm" />
-              {buttonStates['export-caa'] ? 'Downloaded!' : 'Export'}
+              {buttonStates['export-caa']
+                ? $t('tools/caa-builder.output.downloaded')
+                : $t('tools/caa-builder.output.exportButton')}
             </button>
           </div>
         </div>
@@ -432,7 +436,7 @@
         {:else}
           <div class="no-records">
             <Icon name="info" size="sm" />
-            <span>Enable and configure CAA records to see output</span>
+            <span>{$t('tools/caa-builder.output.noRecords')}</span>
           </div>
         {/if}
       </div>
@@ -441,19 +445,21 @@
         <div class="section-header">
           <h3>
             <Icon name="bar-chart" size="sm" />
-            Policy Validation
+            {$t('tools/caa-builder.validation.title')}
           </h3>
         </div>
 
         <div class="validation-stats">
           <div class="stat-item">
-            <span class="stat-label">Active Records:</span>
+            <span class="stat-label">{$t('tools/caa-builder.validation.activeRecordsLabel')}</span>
             <span class="stat-value">{validation.recordCount}</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">Status:</span>
+            <span class="stat-label">{$t('tools/caa-builder.validation.statusLabel')}</span>
             <span class="stat-value" class:success={validation.isValid} class:error={!validation.isValid}>
-              {validation.isValid ? 'Valid' : 'Invalid'}
+              {validation.isValid
+                ? $t('tools/caa-builder.validation.valid')
+                : $t('tools/caa-builder.validation.invalid')}
             </span>
           </div>
         </div>
@@ -483,7 +489,7 @@
         {#if validation.isValid && validation.errors.length === 0 && validation.warnings.length === 0}
           <div class="validation-messages success">
             <Icon name="check-circle" size="sm" />
-            <div class="message">CAA configuration is valid and ready to deploy!</div>
+            <div class="message">{$t('tools/caa-builder.validation.success')}</div>
           </div>
         {/if}
       </div>
@@ -492,7 +498,7 @@
         <div class="section-header">
           <h3>
             <Icon name="info" size="sm" />
-            Security Tips
+            {$t('tools/caa-builder.securityGuide.title')}
           </h3>
         </div>
 
@@ -511,7 +517,7 @@
     <details class="examples-toggle" bind:open={showExamples}>
       <summary>
         <Icon name="lightbulb" size="sm" />
-        Example Configurations
+        {$t('tools/caa-builder.examples.title')}
       </summary>
       <div class="examples-grid">
         {#each exampleConfigurations as example (example.name)}

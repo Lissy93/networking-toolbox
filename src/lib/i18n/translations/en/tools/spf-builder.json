@@ -1,0 +1,124 @@
+{
+  "title": "SPF Policy Builder",
+  "description": "Craft SPF (Sender Policy Framework) policies with mechanisms, qualifiers, and validation.",
+
+  "mechanisms": {
+    "title": "SPF Mechanisms",
+    "tooltip": "Configure SPF mechanisms that define which servers can send email",
+    "addButton": "Add Custom",
+    "removeTooltip": "Remove this mechanism",
+
+    "types": {
+      "all": {
+        "description": "Matches all IPs (should be last)"
+      },
+      "include": {
+        "description": "Include another domains SPF record",
+        "placeholder": "_spf.google.com"
+      },
+      "a": {
+        "description": "Match A/AAAA records of domain",
+        "placeholder": "domain.com (optional)"
+      },
+      "mx": {
+        "description": "Match MX records of domain",
+        "placeholder": "domain.com (optional)"
+      },
+      "ptr": {
+        "description": "Match PTR records (discouraged)",
+        "placeholder": "domain.com (optional)"
+      },
+      "ip4": {
+        "description": "Match specific IPv4 address/range",
+        "placeholder": "203.0.113.1 or 203.0.113.0/24"
+      },
+      "ip6": {
+        "description": "Match specific IPv6 address/range",
+        "placeholder": "2001:db8::1 or 2001:db8::/32"
+      },
+      "exists": {
+        "description": "Check if domain exists",
+        "placeholder": "check.example.com"
+      }
+    },
+
+    "qualifiers": {
+      "pass": "+ Pass",
+      "fail": "- Fail",
+      "softFail": "~ SoftFail",
+      "neutral": "? Neutral"
+    }
+  },
+
+  "modifiers": {
+    "title": "SPF Modifiers",
+    "tooltip": "Optional SPF modifiers for advanced configuration",
+
+    "redirect": {
+      "placeholder": "fallback.example.com"
+    },
+    "exp": {
+      "placeholder": "explain.example.com"
+    }
+  },
+
+  "output": {
+    "title": "Generated SPF Record",
+    "copyButton": "Copy",
+    "copyTooltip": "Copy SPF record to clipboard",
+    "copied": "Copied!",
+    "exportButton": "Export",
+    "exportTooltip": "Download as zone file",
+    "downloaded": "Downloaded!",
+    "zoneFileFormat": "Zone File Format:"
+  },
+
+  "validation": {
+    "title": "Policy Validation",
+    "dnsLookupsLabel": "DNS Lookups:",
+    "recordLengthLabel": "Record Length:",
+    "statusLabel": "Status:",
+    "validStatus": "Valid",
+    "invalidStatus": "Invalid",
+    "successMessage": "SPF policy is valid and ready to use!",
+
+    "errors": {
+      "noMechanisms": "At least one mechanism must be enabled",
+      "tooManyLookups": "Too many DNS lookups ({count}). SPF limit is 10.",
+      "mechanismRequiresDomain": "{type} mechanism requires a domain value",
+      "mechanismRequiresIP": "{type} mechanism requires an IP address",
+      "invalidIPv4": "Invalid IPv4 address/range: {value}",
+      "invalidIPv6": "Invalid IPv6 address: {value}",
+      "recordTooLong": "SPF record too long ({length} chars). DNS TXT limit is 255."
+    },
+
+    "warnings": {
+      "highLookupCount": "High DNS lookup count ({count}). Consider consolidating.",
+      "allShouldBeLast": "'all' mechanism should typically be last",
+      "ptrDiscouraged": "PTR mechanism is discouraged (slow and unreliable)",
+      "recordLong": "SPF record is long ({length} chars). Consider shortening.",
+      "redirectWithMechanisms": "redirect modifier should not be used with mechanisms"
+    }
+  },
+
+  "examples": {
+    "title": "Example Policies",
+
+    "basic": {
+      "name": "Basic Email Provider",
+      "description": "Simple SPF policy for Google Workspace"
+    },
+    "multiple": {
+      "name": "Multiple Providers",
+      "description": "SPF policy for multiple email services"
+    },
+    "serverProvider": {
+      "name": "Server + Provider",
+      "description": "Dedicated server with email provider fallback"
+    },
+    "strict": {
+      "name": "Strict Policy",
+      "description": "Restrictive SPF policy with hard fail"
+    }
+  }
+}

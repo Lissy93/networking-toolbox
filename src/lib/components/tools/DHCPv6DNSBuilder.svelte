@@ -4,6 +4,7 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
   import {
     type DNSv6Config,
     type DNSv6Result,
@@ -30,28 +31,28 @@
     description: string;
   }
 
-  const examples: DNSv6Example[] = [
+  const examples = $derived<DNSv6Example[]>([
     {
-      label: 'Google Public DNS',
+      label: $t('tools/dhcpv6-dns-builder.examples.googleDNS.label'),
       config: DNSv6_EXAMPLES[0],
-      description: 'Google Public DNS servers with example.com search domains',
+      description: $t('tools/dhcpv6-dns-builder.examples.googleDNS.description'),
     },
     {
-      label: 'Cloudflare DNS',
+      label: $t('tools/dhcpv6-dns-builder.examples.cloudflareDNS.label'),
       config: DNSv6_EXAMPLES[1],
-      description: 'Cloudflare 1.1.1.1 DNS with local search domain',
+      description: $t('tools/dhcpv6-dns-builder.examples.cloudflareDNS.description'),
     },
     {
-      label: 'Quad9 DNS',
+      label: $t('tools/dhcpv6-dns-builder.examples.quad9DNS.label'),
       config: DNSv6_EXAMPLES[2],
-      description: 'Quad9 DNS with corporate search domains',
+      description: $t('tools/dhcpv6-dns-builder.examples.quad9DNS.description'),
     },
     {
-      label: 'Local Network',
+      label: $t('tools/dhcpv6-dns-builder.examples.localNetwork.label'),
       config: DNSv6_EXAMPLES[3],
-      description: 'Local ULA DNS server with home.arpa domain',
+      description: $t('tools/dhcpv6-dns-builder.examples.localNetwork.description'),
     },
-  ];
+  ]);
 
   function loadExample(example: DNSv6Example, index: number): void {
     config = {
@@ -150,8 +151,8 @@
 </script>
 
 <ToolContentContainer
-  title="DHCPv6 DNS Options (RFC 3646)"
-  description="Configure DNS servers (Option 23) and search domains (Option 24) for DHCPv6 clients. Supports IPv6 DNS servers and multiple search domains."
+  title={$t('tools/dhcpv6-dns-builder.title')}
+  description={$t('tools/dhcpv6-dns-builder.subtitle')}
 >
   <ExamplesCard
     {examples}
@@ -163,8 +164,8 @@
 
   <div class="card input-card">
     <div class="card-header">
-      <h3>Option 23: DNS Recursive Name Servers</h3>
-      <p class="help-text">IPv6 addresses of DNS servers for client name resolution</p>
+      <h3>{$t('tools/dhcpv6-dns-builder.option23.title')}</h3>
+      <p class="help-text">{$t('tools/dhcpv6-dns-builder.option23.helpText')}</p>
     </div>
     <div class="card-content">
       {#each config.dnsServers as _, i (`dns-${i}`)}
@@ -172,13 +173,13 @@
           <div class="input-group flex-grow">
             <label for="dns-server-{i}">
               <Icon name="server" size="sm" />
-              DNS Server {i + 1}
+              {$t('tools/dhcpv6-dns-builder.option23.serverLabel', { number: i + 1 })}
             </label>
             <input
               id="dns-server-{i}"
               type="text"
               bind:value={config.dnsServers[i]}
-              placeholder="2001:4860:4860::8888"
+              placeholder={$t('tools/dhcpv6-dns-builder.option23.placeholder')}
             />
           </div>
           <button
@@ -186,7 +187,7 @@
             class="btn-icon btn-remove"
             onclick={() => removeDNSServer(i)}
             disabled={config.dnsServers.length === 1}
-            aria-label="Remove DNS server"
+            aria-label={$t('tools/dhcpv6-dns-builder.option23.removeLabel')}
           >
             <Icon name="x" size="sm" />
           </button>
@@ -195,15 +196,15 @@
 
       <button type="button" class="btn-add" onclick={addDNSServer}>
         <Icon name="plus" size="sm" />
-        Add DNS Server
+        {$t('tools/dhcpv6-dns-builder.option23.addButton')}
       </button>
     </div>
   </div>
 
   <div class="card input-card">
     <div class="card-header">
-      <h3>Option 24: Domain Search List</h3>
-      <p class="help-text">DNS search domains for hostname resolution</p>
+      <h3>{$t('tools/dhcpv6-dns-builder.option24.title')}</h3>
+      <p class="help-text">{$t('tools/dhcpv6-dns-builder.option24.helpText')}</p>
     </div>
     <div class="card-content">
       {#each config.searchDomains as _, i (`domain-${i}`)}
@@ -211,16 +212,21 @@
           <div class="input-group flex-grow">
             <label for="search-domain-{i}">
               <Icon name="globe" size="sm" />
-              Search Domain {i + 1}
+              {$t('tools/dhcpv6-dns-builder.option24.domainLabel', { number: i + 1 })}
             </label>
-            <input id="search-domain-{i}" type="text" bind:value={config.searchDomains[i]} placeholder="example.com" />
+            <input
+              id="search-domain-{i}"
+              type="text"
+              bind:value={config.searchDomains[i]}
+              placeholder={$t('tools/dhcpv6-dns-builder.option24.placeholder')}
+            />
           </div>
           <button
             type="button"
             class="btn-icon btn-remove"
             onclick={() => removeSearchDomain(i)}
             disabled={config.searchDomains.length === 1}
-            aria-label="Remove search domain"
+            aria-label={$t('tools/dhcpv6-dns-builder.option24.removeLabel')}
           >
             <Icon name="x" size="sm" />
           </button>
@@ -229,14 +235,14 @@
 
       <button type="button" class="btn-add" onclick={addSearchDomain}>
         <Icon name="plus" size="sm" />
-        Add Search Domain
+        {$t('tools/dhcpv6-dns-builder.option24.addButton')}
       </button>
     </div>
   </div>
 
   {#if validationErrors.length > 0}
     <div class="card errors-card">
-      <h3>Validation Errors</h3>
+      <h3>{$t('tools/dhcpv6-dns-builder.errors.title')}</h3>
       {#each validationErrors as error, i (i)}
         <div class="error-message">
           <Icon name="alert-triangle" size="sm" />
@@ -249,19 +255,25 @@
   {#if result && validationErrors.length === 0}
     {#if result.option23}
       <div class="card results">
-        <h3>Option 23: DNS Recursive Name Servers</h3>
+        <h3>{$t('tools/dhcpv6-dns-builder.results.option23Title')}</h3>
 
         <div class="summary-card">
-          <div><strong>Total Length:</strong> {result.option23.totalLength} bytes</div>
-          <div><strong>Servers:</strong> {result.option23.servers.length}</div>
+          <div>
+            <strong>{$t('tools/dhcpv6-dns-builder.results.totalLength')}</strong>
+            {$t('tools/dhcpv6-dns-builder.results.lengthBytes', { length: result.option23.totalLength })}
+          </div>
+          <div>
+            <strong>{$t('tools/dhcpv6-dns-builder.results.servers')}</strong>
+            {$t('tools/dhcpv6-dns-builder.results.serversCount', { count: result.option23.servers.length })}
+          </div>
         </div>
 
         <div class="servers-section">
-          <h4>DNS Servers</h4>
+          <h4>{$t('tools/dhcpv6-dns-builder.results.dnsServersHeading')}</h4>
           {#each result.option23.servers as server, i (i)}
             <div class="server-item">
               <Icon name="server" size="sm" />
-              <span class="field-label">Server {i + 1}:</span>
+              <span class="field-label">{$t('tools/dhcpv6-dns-builder.results.serverLabel', { number: i + 1 })}</span>
               <span class="field-value">{server}</span>
             </div>
           {/each}
@@ -269,7 +281,7 @@
 
         <div class="output-group">
           <div class="output-header">
-            <h4>Hex-Encoded (Compact)</h4>
+            <h4>{$t('tools/dhcpv6-dns-builder.results.hexEncodedTitle')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -277,7 +289,9 @@
               onclick={() => clipboard.copy(result!.option23!.hexEncoded, 'opt23-hex')}
             >
               <Icon name={clipboard.isCopied('opt23-hex') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('opt23-hex') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('opt23-hex')
+                ? $t('tools/dhcpv6-dns-builder.buttons.copied')
+                : $t('tools/dhcpv6-dns-builder.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.option23.hexEncoded}</pre>
@@ -285,7 +299,7 @@
 
         <div class="output-group">
           <div class="output-header">
-            <h4>Wire Format (Spaced)</h4>
+            <h4>{$t('tools/dhcpv6-dns-builder.results.wireFormatTitle')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -293,7 +307,9 @@
               onclick={() => clipboard.copy(result!.option23!.wireFormat, 'opt23-wire')}
             >
               <Icon name={clipboard.isCopied('opt23-wire') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('opt23-wire') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('opt23-wire')
+                ? $t('tools/dhcpv6-dns-builder.buttons.copied')
+                : $t('tools/dhcpv6-dns-builder.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.option23.wireFormat}</pre>
@@ -303,19 +319,25 @@
 
     {#if result.option24}
       <div class="card results">
-        <h3>Option 24: Domain Search List</h3>
+        <h3>{$t('tools/dhcpv6-dns-builder.results.option24Title')}</h3>
 
         <div class="summary-card">
-          <div><strong>Total Length:</strong> {result.option24.totalLength} bytes</div>
-          <div><strong>Domains:</strong> {result.option24.domains.length}</div>
+          <div>
+            <strong>{$t('tools/dhcpv6-dns-builder.results.totalLength')}</strong>
+            {$t('tools/dhcpv6-dns-builder.results.lengthBytes', { length: result.option24.totalLength })}
+          </div>
+          <div>
+            <strong>{$t('tools/dhcpv6-dns-builder.results.domains')}</strong>
+            {$t('tools/dhcpv6-dns-builder.results.domainsCount', { count: result.option24.domains.length })}
+          </div>
         </div>
 
         <div class="servers-section">
-          <h4>Search Domains</h4>
+          <h4>{$t('tools/dhcpv6-dns-builder.results.searchDomainsHeading')}</h4>
           {#each result.option24.domains as domain, i (i)}
             <div class="server-item">
               <Icon name="globe" size="sm" />
-              <span class="field-label">Domain {i + 1}:</span>
+              <span class="field-label">{$t('tools/dhcpv6-dns-builder.results.domainLabel', { number: i + 1 })}</span>
               <span class="field-value">{domain}</span>
             </div>
           {/each}
@@ -323,7 +345,7 @@
 
         <div class="output-group">
           <div class="output-header">
-            <h4>Hex-Encoded (Compact)</h4>
+            <h4>{$t('tools/dhcpv6-dns-builder.results.hexEncodedTitle')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -331,7 +353,9 @@
               onclick={() => clipboard.copy(result!.option24!.hexEncoded, 'opt24-hex')}
             >
               <Icon name={clipboard.isCopied('opt24-hex') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('opt24-hex') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('opt24-hex')
+                ? $t('tools/dhcpv6-dns-builder.buttons.copied')
+                : $t('tools/dhcpv6-dns-builder.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.option24.hexEncoded}</pre>
@@ -339,7 +363,7 @@
 
         <div class="output-group">
           <div class="output-header">
-            <h4>Wire Format (Spaced)</h4>
+            <h4>{$t('tools/dhcpv6-dns-builder.results.wireFormatTitle')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -347,7 +371,9 @@
               onclick={() => clipboard.copy(result!.option24!.wireFormat, 'opt24-wire')}
             >
               <Icon name={clipboard.isCopied('opt24-wire') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('opt24-wire') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('opt24-wire')
+                ? $t('tools/dhcpv6-dns-builder.buttons.copied')
+                : $t('tools/dhcpv6-dns-builder.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.option24.wireFormat}</pre>
@@ -355,7 +381,7 @@
 
         {#if result.option24.breakdown.length > 0}
           <div class="breakdown-section">
-            <h4>Domain Encoding Breakdown</h4>
+            <h4>{$t('tools/dhcpv6-dns-builder.results.breakdownTitle')}</h4>
             {#each result.option24.breakdown as item, i (i)}
               <div class="breakdown-item">
                 <div class="breakdown-label">{item.domain}</div>
@@ -369,11 +395,11 @@
 
     {#if result.examples.keaDhcp6}
       <div class="card results">
-        <h3>Configuration Example</h3>
+        <h3>{$t('tools/dhcpv6-dns-builder.results.configExampleTitle')}</h3>
 
         <div class="output-group">
           <div class="output-header">
-            <h4>Kea DHCPv6 Configuration</h4>
+            <h4>{$t('tools/dhcpv6-dns-builder.results.keaDhcpv6Title')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -381,7 +407,9 @@
               onclick={() => clipboard.copy(result!.examples.keaDhcp6!, 'kea')}
             >
               <Icon name={clipboard.isCopied('kea') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('kea') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('kea')
+                ? $t('tools/dhcpv6-dns-builder.buttons.copied')
+                : $t('tools/dhcpv6-dns-builder.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.examples.keaDhcp6}</pre>
@@ -390,23 +418,22 @@
     {/if}
 
     <div class="card results info-card">
-      <h3>About RFC 3646</h3>
+      <h3>{$t('tools/dhcpv6-dns-builder.about.title')}</h3>
       <p>
-        RFC 3646 defines DNS configuration options for DHCPv6, allowing IPv6 clients to automatically discover DNS
-        servers and search domains.
+        {$t('tools/dhcpv6-dns-builder.about.intro')}
       </p>
       <ul>
         <li>
-          <strong>Option 23:</strong> DNS Recursive Name Server - List of IPv6 DNS server addresses (16 bytes each)
+          <strong>Option 23:</strong>
+          {$t('tools/dhcpv6-dns-builder.about.option23Description')}
         </li>
         <li>
-          <strong>Option 24:</strong> Domain Search List - DNS search domains encoded in DNS wire format (length-prefixed
-          labels)
+          <strong>Option 24:</strong>
+          {$t('tools/dhcpv6-dns-builder.about.option24Description')}
         </li>
       </ul>
       <p>
-        These options are essential for IPv6 network autoconfiguration, enabling clients to resolve hostnames without
-        manual DNS configuration.
+        {$t('tools/dhcpv6-dns-builder.about.conclusion')}
       </p>
     </div>
   {/if}

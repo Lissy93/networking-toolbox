@@ -1,0 +1,64 @@
+{
+  "title": "CIDR Deaggregate",
+  "description": "Decompose CIDR blocks and ranges into uniform target prefix subnets",
+
+  "examples": {
+    "title": "Quick Examples",
+    "break22to24": "Break /22 into /24s",
+    "decomposeRangeTo28": "Decompose Range to /28s",
+    "multipleBlocksTo26": "Multiple Blocks to /26s",
+    "enterpriseCampusTo25": "Enterprise Campus to /25s",
+    "dataCenterRacksTo29": "Data Center Racks to /29s",
+    "serviceProviderTo30": "Service Provider to /30s",
+    "targetPreview": "Target: /{targetPrefix}"
+  },
+
+  "input": {
+    "networksLabel": "Input Networks/Ranges",
+    "networksTooltip": "Enter CIDR blocks, IP ranges, or individual IPs - one per line",
+    "networksPlaceholder": "192.168.0.0/22\n10.0.0.0-10.0.255.255\n172.16.1.1",
+    "targetPrefixLabel": "Target Prefix Length",
+    "targetPrefixTooltip": "Target prefix length for uniform decomposition (e.g., 24 for /24 subnets)",
+    "prefixHint": "/{prefix}",
+    "subnetSize": "Each /{prefix} subnet = {count} addresses"
+  },
+
+  "results": {
+    "title": "Deaggregated Subnets",
+    "titleTooltip": "Generated uniform subnets from input networks and ranges",
+    "subnetsCount": "{count} subnets",
+    "addressesCount": "{count} addresses",
+    "copyAll": "Copy All",
+    "copied": "Copied!"
+  },
+
+  "summary": {
+    "inputLabel": "Input:",
+    "inputTooltip": "Original networks, ranges, and addresses provided",
+    "inputValue": "{count} items, {addresses} addresses",
+    "outputLabel": "Output:",
+    "outputTooltip": "Uniform subnets generated from input",
+    "outputValue": "{count} /{prefix} subnets, {addresses} addresses",
+    "noteLabel": "Note:",
+    "noteTooltip": "Address count difference due to subnet boundary alignment",
+    "expanded": "Expanded by {count} addresses (due to alignment to /{prefix} boundaries)",
+    "reduced": "Reduced by {count} addresses (due to alignment to /{prefix} boundaries)"
+  },
+
+  "subnet": {
+    "addressesCount": "{count} addresses",
+    "sizeClass": "{count}×/16",
+    "sizeClassSmall": "{count}×/24",
+    "copyAria": "Copy CIDR block"
+  },
+
+  "empty": {
+    "title": "No Subnets Generated",
+    "message": "The target prefix length may be too large for the input networks, or the input is empty."
+  },
+
+  "error": {
+    "title": "Deaggregation Error",
+    "unknown": "Unknown error occurred"
+  }
+}

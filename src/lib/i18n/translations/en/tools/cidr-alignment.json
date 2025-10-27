@@ -1,0 +1,71 @@
+{
+  "title": "CIDR Boundary Alignment",
+  "description": "Check if IP addresses, ranges, and CIDR blocks align to specific prefix boundaries",
+
+  "examples": {
+    "title": "Quick Examples",
+    "basicIPv4": "Basic IPv4 Alignment",
+    "mixedIPTypes": "Mixed IP Types",
+    "subnetAggregation": "Subnet Aggregation Check",
+    "networkConsolidation": "Network Consolidation",
+    "vlanAlignment": "VLAN Alignment Check",
+    "pointToPointLinks": "Point-to-Point Links"
+  },
+
+  "input": {
+    "networkInputsTitle": "Network Inputs",
+    "networkInputsTooltip": "Enter IP addresses, CIDR blocks, or ranges to check alignment",
+    "inputsLabel": "IP Addresses, CIDRs, or Ranges",
+    "inputsTooltip": "Enter one per line: CIDR blocks, IP ranges, or individual IP addresses",
+    "inputsPlaceholder": "192.168.1.0/24\n10.0.0.0-10.0.0.255\n172.16.1.5\n2001:db8::/32",
+    "inputHelp": "Enter one per line: CIDR blocks (192.168.1.0/24), IP ranges (10.0.0.1-10.0.0.100), or single IPs (172.16.1.5)",
+    "targetPrefixLabel": "Target Prefix Length",
+    "targetPrefixTooltip": "The prefix length boundary to check alignment against (e.g., 24 for /24 boundaries)",
+    "targetPrefixPlaceholder": "24",
+    "targetPrefixHelp": "Prefix length to check alignment against (0-32 for IPv4, 0-128 for IPv6)",
+    "targetPreview": "Target: /{targetPrefix}"
+  },
+
+  "validation": {
+    "mustBeValidNumber": "Target prefix length must be a valid number",
+    "outOfRange": "Target prefix length must be between 0 and 128",
+    "ipv4OutOfRange": "Target prefix length cannot exceed 32 for IPv4 addresses",
+    "ipv6OutOfRange": "Target prefix length cannot exceed 128 for IPv6 addresses",
+    "notPractical": "Target prefix length of 0 is not practical for alignment checking"
+  },
+
+  "loading": "Checking alignment...",
+
+  "results": {
+    "errorsTitle": "Errors",
+    "summaryTitle": "Alignment Summary",
+    "summaryTooltip": "Overview of alignment results across all inputs",
+    "totalInputsLabel": "Total Inputs",
+    "totalInputsTooltip": "Total number of network inputs processed",
+    "alignedLabel": "Aligned",
+    "alignedTooltip": "Networks that align to the target prefix boundary",
+    "misalignedLabel": "Misaligned",
+    "misalignedTooltip": "Networks that do not align to the target prefix boundary",
+    "alignmentRateLabel": "Alignment Rate",
+    "alignmentRateTooltip": "Percentage of inputs that align to the target boundary",
+    "checksTitle": "Alignment Checks",
+    "checksTooltip": "Detailed results for each network input",
+    "exportCSV": "Export CSV",
+    "exportJSON": "Export JSON"
+  },
+
+  "check": {
+    "alignedTo": "Aligned to /{targetPrefix}",
+    "notAlignedTo": "Not aligned to /{targetPrefix}",
+    "alignedCIDRLabel": "Aligned CIDR:",
+    "alignedCIDRTooltip": "The CIDR block that properly aligns to the target prefix boundary",
+    "copyAlignedCIDR": "Copy aligned CIDR to clipboard",
+    "reasonLabel": "Reason:",
+    "reasonTooltip": "Explanation of why this input aligns or doesn't align",
+    "suggestionsLabel": "Suggestions:",
+    "suggestionsTooltip": "Alternative CIDR configurations that would align to the target boundary",
+    "copySuggestedCIDR": "Copy suggested CIDR to clipboard",
+    "efficiency": "Efficiency: {efficiency}%",
+    "efficiencyTooltip": "Address space utilization efficiency of this suggestion"
+  }
+}
