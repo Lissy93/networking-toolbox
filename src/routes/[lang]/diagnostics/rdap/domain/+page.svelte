@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/stores/language';
   import '../../../../../styles/diagnostics-pages.scss';
 
   let domain = $state('example.com');
@@ -10,14 +11,32 @@
   let copiedState = $state(false);
   let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
-    { domain: 'example.com', description: 'Example domain for testing' },
-    { domain: 'google.com', description: 'Popular domain with comprehensive records' },
-    { domain: 'github.com', description: 'Tech company domain' },
-    { domain: 'stackoverflow.com', description: 'Community platform domain' },
-    { domain: 'cloudflare.com', description: 'CDN provider domain' },
-    { domain: 'iana.org', description: 'Internet registry domain' },
-  ];
+  const examples = $derived([
+    {
+      domain: $t('diagnostics/rdap-domain.examples.items.example.domain'),
+      description: $t('diagnostics/rdap-domain.examples.items.example.description'),
+    },
+    {
+      domain: $t('diagnostics/rdap-domain.examples.items.google.domain'),
+      description: $t('diagnostics/rdap-domain.examples.items.google.description'),
+    },
+    {
+      domain: $t('diagnostics/rdap-domain.examples.items.github.domain'),
+      description: $t('diagnostics/rdap-domain.examples.items.github.description'),
+    },
+    {
+      domain: $t('diagnostics/rdap-domain.examples.items.stackoverflow.domain'),
+      description: $t('diagnostics/rdap-domain.examples.items.stackoverflow.description'),
+    },
+    {
+      domain: $t('diagnostics/rdap-domain.examples.items.cloudflare.domain'),
+      description: $t('diagnostics/rdap-domain.examples.items.cloudflare.description'),
+    },
+    {
+      domain: $t('diagnostics/rdap-domain.examples.items.iana.domain'),
+      description: $t('diagnostics/rdap-domain.examples.items.iana.description'),
+    },
+  ]);
 
   async function lookupDomain() {
     loading = true;
@@ -36,12 +55,14 @@
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
-        throw new Error(errorData.message || `Domain RDAP lookup failed: ${response.status}`);
+        throw new Error(
+          errorData.message || $t('diagnostics/rdap-domain.error.lookupFailed', { status: response.status }),
+        );
       }
 
       results = await response.json();
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : 'Unknown error occurred';
+      error = err instanceof Error ? err.message : $t('diagnostics/rdap-domain.error.unknownError');
     } finally {
       loading = false;
     }
@@ -70,7 +91,7 @@
   }
 
   function formatDate(dateString: string | undefined): string {
-    if (!dateString) return 'Not available';
+    if (!dateString) return $t('diagnostics/rdap-domain.results.notAvailable');
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -96,11 +117,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>Domain RDAP Lookup</h1>
-    <p>
-      Query domain registration data using RDAP (Registration Data Access Protocol). RDAP is the modern successor to
-      WHOIS, providing structured JSON responses through IANA bootstrap registry routing.
-    </p>
+    <h1>{$t('diagnostics/rdap-domain.title')}</h1>
+    <p>{$t('diagnostics/rdap-domain.subtitle')}</p>
   </header>
 
   <!-- Examples -->
@@ -108,7 +126,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Common Domain Examples</h4>
+        <h4>{$t('diagnostics/rdap-domain.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -116,7 +134,9 @@
             class="example-card"
             class:selected={selectedExampleIndex === i}
             onclick={() => loadExample(example, i)}
-            use:tooltip={`Perform RDAP lookup for ${example.domain} (${example.description})`}
+            use:tooltip={$t(
+              `diagnostics/rdap-domain.examples.items.${['example', 'google', 'github', 'stackoverflow', 'cloudflare', 'iana'][i]}.tooltip`,
+            )}
           >
             <h5>{example.domain}</h5>
             <p>{example.description}</p>
@@ -129,18 +149,18 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>RDAP Lookup Configuration</h3>
+      <h3>{$t('diagnostics/rdap-domain.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-grid">
         <div class="form-group">
-          <label for="domain" use:tooltip={'Enter a domain name to query registration data via RDAP'}>
-            Domain Name
+          <label for="domain" use:tooltip={$t('diagnostics/rdap-domain.form.domainTooltip')}>
+            {$t('diagnostics/rdap-domain.form.domainLabel')}
             <input
               id="domain"
               type="text"
               bind:value={domain}
-              placeholder="example.com"
+              placeholder={$t('diagnostics/rdap-domain.form.domainPlaceholder')}
               onchange={() => {
                 clearExampleSelection();
                 if (domain.trim()) lookupDomain();
@@ -154,10 +174,10 @@
         <button class="lookup-btn" onclick={lookupDomain} disabled={loading || !domain.trim()}>
           {#if loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Performing RDAP Lookup...
+            {$t('diagnostics/rdap-domain.form.performing')}
           {:else}
             <Icon name="search" size="sm" />
-            Lookup Domain
+            {$t('diagnostics/rdap-domain.form.lookupButton')}
           {/if}
         </button>
       </div>
@@ -168,22 +188,26 @@
   {#if results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>RDAP Data for {results.domain}</h3>
+        <h3>{$t('diagnostics/rdap-domain.results.title', { domain: results.domain })}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
           <span class={copiedState ? 'text-green-500' : ''}
             ><Icon name={copiedState ? 'check' : 'copy'} size="xs" /></span
           >
-          {copiedState ? 'Copied!' : 'Copy Raw JSON'}
+          {copiedState ? $t('diagnostics/rdap-domain.results.copied') : $t('diagnostics/rdap-domain.results.copy')}
         </button>
       </div>
       <div class="card-content">
         <div class="lookup-info">
           <div class="info-item">
-            <span class="info-label" use:tooltip={'The domain name that was queried'}>Domain:</span>
+            <span class="info-label" use:tooltip={$t('diagnostics/rdap-domain.results.domainTooltip')}
+              >{$t('diagnostics/rdap-domain.results.domain')}:</span
+            >
             <span class="info-value mono">{results.data.domain || results.domain}</span>
           </div>
           <div class="info-item">
-            <span class="info-label" use:tooltip={'RDAP service used for the query'}>RDAP Service:</span>
+            <span class="info-label" use:tooltip={$t('diagnostics/rdap-domain.results.rdapServiceTooltip')}
+              >{$t('diagnostics/rdap-domain.results.rdapService')}:</span
+            >
             <span class="info-value mono">{results.serviceUrl}</span>
           </div>
         </div>
@@ -191,12 +215,12 @@
         <div class="results-grid">
           <!-- Domain Information -->
           <div class="result-section">
-            <h4>Domain Information</h4>
+            <h4>{$t('diagnostics/rdap-domain.results.domainInfo.title')}</h4>
             <dl class="definition-list">
-              <dt>Domain Name:</dt>
+              <dt>{$t('diagnostics/rdap-domain.results.domainInfo.domainName')}</dt>
               <dd><code>{results.data.domain || results.domain}</code></dd>
 
-              <dt>Status:</dt>
+              <dt>{$t('diagnostics/rdap-domain.results.domainInfo.status')}</dt>
               <dd>
                 {#if results.data.status?.length}
                   <div class="status-list">
@@ -205,33 +229,33 @@
                     {/each}
                   </div>
                 {:else}
-                  Not available
+                  {$t('diagnostics/rdap-domain.results.notAvailable')}
                 {/if}
               </dd>
 
-              <dt>Registrar:</dt>
-              <dd>{results.data.registrar || 'Not available'}</dd>
+              <dt>{$t('diagnostics/rdap-domain.results.domainInfo.registrar')}</dt>
+              <dd>{results.data.registrar || $t('diagnostics/rdap-domain.results.notAvailable')}</dd>
             </dl>
           </div>
 
           <!-- Important Dates -->
           <div class="result-section">
-            <h4>Important Dates</h4>
+            <h4>{$t('diagnostics/rdap-domain.results.dates.title')}</h4>
             <dl class="definition-list">
-              <dt>Registration Date:</dt>
+              <dt>{$t('diagnostics/rdap-domain.results.dates.registration')}</dt>
               <dd>{formatDate(results.data.created)}</dd>
 
-              <dt>Last Updated:</dt>
+              <dt>{$t('diagnostics/rdap-domain.results.dates.lastUpdated')}</dt>
               <dd>{formatDate(results.data.updated)}</dd>
 
-              <dt>Expiration Date:</dt>
+              <dt>{$t('diagnostics/rdap-domain.results.dates.expiration')}</dt>
               <dd
                 class:expires-soon={results.data.expires &&
                   new Date(results.data.expires) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)}
               >
                 {formatDate(results.data.expires)}
                 {#if results.data.expires && new Date(results.data.expires) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)}
-                  <span class="warning-badge">Expires Soon!</span>
+                  <span class="warning-badge">{$t('diagnostics/rdap-domain.results.dates.expiresSoon')}</span>
                 {/if}
               </dd>
             </dl>
@@ -240,7 +264,9 @@
           <!-- Nameservers -->
           {#if results.data.nameservers?.length}
             <div class="result-section">
-              <h4>Nameservers ({results.data.nameservers.length})</h4>
+              <h4>
+                {$t('diagnostics/rdap-domain.results.nameservers.title', { count: results.data.nameservers.length })}
+              </h4>
               <ul class="nameserver-list">
                 {#each results.data.nameservers as ns, index (index)}
                   <li><code>{ns}</code></li>
@@ -252,24 +278,28 @@
           <!-- Contact Information -->
           {#if results.data.contacts?.length}
             <div class="result-section full-width">
-              <h4>Contact Information</h4>
+              <h4>{$t('diagnostics/rdap-domain.results.contacts.title')}</h4>
               <div class="contacts-grid">
                 {#each results.data.contacts as contact, index (index)}
                   <div class="contact-card">
                     <h5>
                       {#if contact.roles?.includes('registrant')}
-                        Registrant
+                        {$t('diagnostics/rdap-domain.results.contacts.registrant')}
                       {:else if contact.roles?.includes('administrative')}
-                        Administrative
+                        {$t('diagnostics/rdap-domain.results.contacts.administrative')}
                       {:else if contact.roles?.includes('technical')}
-                        Technical
+                        {$t('diagnostics/rdap-domain.results.contacts.technical')}
                       {:else}
-                        Contact
+                        {$t('diagnostics/rdap-domain.results.contacts.contact')}
                       {/if}
                     </h5>
                     <p><strong>{formatContact(contact)}</strong></p>
                     {#if contact.handle}
-                      <p><small>Handle: {contact.handle}</small></p>
+                      <p>
+                        <small
+                          >{$t('diagnostics/rdap-domain.results.contacts.handle', { handle: contact.handle })}</small
+                        >
+                      </p>
                     {/if}
                   </div>
                 {/each}
@@ -287,15 +317,15 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="md" />
           <div>
-            <strong>RDAP Lookup Failed</strong>
+            <strong>{$t('diagnostics/rdap-domain.error.title')}</strong>
             <p>{error}</p>
             <div class="troubleshooting">
-              <p><strong>Troubleshooting Tips:</strong></p>
+              <p><strong>{$t('diagnostics/rdap-domain.error.troubleshooting.title')}</strong></p>
               <ul>
-                <li>Ensure the domain name is valid and properly formatted</li>
-                <li>Check if the domain actually exists and is registered</li>
-                <li>Some registries may have rate limiting or access restrictions</li>
-                <li>Try again in a few moments if the service is temporarily unavailable</li>
+                <li>{$t('diagnostics/rdap-domain.error.troubleshooting.validDomain')}</li>
+                <li>{$t('diagnostics/rdap-domain.error.troubleshooting.domainExists')}</li>
+                <li>{$t('diagnostics/rdap-domain.error.troubleshooting.rateLimiting')}</li>
+                <li>{$t('diagnostics/rdap-domain.error.troubleshooting.tryAgain')}</li>
               </ul>
             </div>
           </div>
@@ -307,35 +337,32 @@
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>About RDAP Domain Lookups</h3>
+      <h3>{$t('diagnostics/rdap-domain.educational.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>What is RDAP?</h4>
-          <p>
-            RDAP (Registration Data Access Protocol) is the modern successor to WHOIS, providing structured JSON
-            responses for domain registration information through IANA bootstrap registry routing.
-          </p>
+          <h4>{$t('diagnostics/rdap-domain.educational.whatIsRDAP.title')}</h4>
+          <p>{$t('diagnostics/rdap-domain.educational.whatIsRDAP.description')}</p>
         </div>
 
         <div class="info-section">
-          <h4>What You'll Get</h4>
+          <h4>{$t('diagnostics/rdap-domain.educational.whatYouGet.title')}</h4>
           <ul>
-            <li>Registration status and dates</li>
-            <li>Nameserver information</li>
-            <li>Registrar details</li>
-            <li>Contact information (if available)</li>
+            <li>{$t('diagnostics/rdap-domain.educational.whatYouGet.statusDates')}</li>
+            <li>{$t('diagnostics/rdap-domain.educational.whatYouGet.nameservers')}</li>
+            <li>{$t('diagnostics/rdap-domain.educational.whatYouGet.registrar')}</li>
+            <li>{$t('diagnostics/rdap-domain.educational.whatYouGet.contacts')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>RDAP vs WHOIS</h4>
+          <h4>{$t('diagnostics/rdap-domain.educational.rdapVsWhois.title')}</h4>
           <ul>
-            <li>Structured JSON instead of free text</li>
-            <li>Unicode support for internationalized domains</li>
-            <li>Built-in rate limiting and privacy controls</li>
-            <li>RESTful API with standard HTTP methods</li>
+            <li>{$t('diagnostics/rdap-domain.educational.rdapVsWhois.structuredJSON')}</li>
+            <li>{$t('diagnostics/rdap-domain.educational.rdapVsWhois.unicodeSupport')}</li>
+            <li>{$t('diagnostics/rdap-domain.educational.rdapVsWhois.rateLimiting')}</li>
+            <li>{$t('diagnostics/rdap-domain.educational.rdapVsWhois.restfulAPI')}</li>
           </ul>
         </div>
       </div>

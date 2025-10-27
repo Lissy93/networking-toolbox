@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/stores/language';
   import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
@@ -12,45 +13,77 @@
   const diagnosticState = useDiagnosticState<any>();
   const clipboard = useClipboard();
 
-  const examplesList = [
+  const examplesList = $derived([
     {
-      targets: 'google.com:443\ngithub.com:443\nstackoverflow.com:443',
-      description: 'Common HTTPS ports',
+      targets: $t('diagnostics/network-tcp-port-check.examples.items.https.targets'),
+      description: $t('diagnostics/network-tcp-port-check.examples.items.https.description'),
     },
     {
-      targets: 'smtp.gmail.com:587\nsmtp.gmail.com:465\nsmtp.gmail.com:25',
-      description: 'Gmail SMTP ports',
+      targets: $t('diagnostics/network-tcp-port-check.examples.items.smtp.targets'),
+      description: $t('diagnostics/network-tcp-port-check.examples.items.smtp.description'),
     },
     {
-      targets: 'dns.google:53\n1.1.1.1:53\n8.8.8.8:53',
-      description: 'DNS server ports',
+      targets: $t('diagnostics/network-tcp-port-check.examples.items.dns.targets'),
+      description: $t('diagnostics/network-tcp-port-check.examples.items.dns.description'),
     },
     {
-      targets: 'reddit.com:80\nreddit.com:443\napi.reddit.com:443',
-      description: 'HTTP vs HTTPS ports',
+      targets: $t('diagnostics/network-tcp-port-check.examples.items.httpVsHttps.targets'),
+      description: $t('diagnostics/network-tcp-port-check.examples.items.httpVsHttps.description'),
     },
     {
-      targets: 'localhost:22\nlocalhost:80\nlocalhost:443\nlocalhost:3306\nlocalhost:5432',
-      description: 'Local development ports',
+      targets: $t('diagnostics/network-tcp-port-check.examples.items.localDev.targets'),
+      description: $t('diagnostics/network-tcp-port-check.examples.items.localDev.description'),
     },
     {
-      targets: 'microsoft.com:443\noffice.com:443\noutlook.com:443',
-      description: 'Microsoft services',
+      targets: $t('diagnostics/network-tcp-port-check.examples.items.microsoft.targets'),
+      description: $t('diagnostics/network-tcp-port-check.examples.items.microsoft.description'),
     },
-  ];
+  ]);
 
   const examples = useExamples(examplesList);
 
-  const commonPorts = [
-    { port: '22', service: 'SSH', description: 'Secure Shell' },
-    { port: '80', service: 'HTTP', description: 'Web traffic' },
-    { port: '443', service: 'HTTPS', description: 'Secure web traffic' },
-    { port: '25', service: 'SMTP', description: 'Email sending' },
-    { port: '587', service: 'SMTP', description: 'Email submission' },
-    { port: '993', service: 'IMAPS', description: 'Secure IMAP' },
-    { port: '995', service: 'POP3S', description: 'Secure POP3' },
-    { port: '53', service: 'DNS', description: 'Domain resolution' },
-  ];
+  const commonPorts = $derived([
+    {
+      port: $t('diagnostics/network-tcp-port-check.commonPorts.ssh.port'),
+      service: $t('diagnostics/network-tcp-port-check.commonPorts.ssh.service'),
+      description: $t('diagnostics/network-tcp-port-check.commonPorts.ssh.description'),
+    },
+    {
+      port: $t('diagnostics/network-tcp-port-check.commonPorts.http.port'),
+      service: $t('diagnostics/network-tcp-port-check.commonPorts.http.service'),
+      description: $t('diagnostics/network-tcp-port-check.commonPorts.http.description'),
+    },
+    {
+      port: $t('diagnostics/network-tcp-port-check.commonPorts.https.port'),
+      service: $t('diagnostics/network-tcp-port-check.commonPorts.https.service'),
+      description: $t('diagnostics/network-tcp-port-check.commonPorts.https.description'),
+    },
+    {
+      port: $t('diagnostics/network-tcp-port-check.commonPorts.smtp.port'),
+      service: $t('diagnostics/network-tcp-port-check.commonPorts.smtp.service'),
+      description: $t('diagnostics/network-tcp-port-check.commonPorts.smtp.description'),
+    },
+    {
+      port: $t('diagnostics/network-tcp-port-check.commonPorts.smtpSubmission.port'),
+      service: $t('diagnostics/network-tcp-port-check.commonPorts.smtpSubmission.service'),
+      description: $t('diagnostics/network-tcp-port-check.commonPorts.smtpSubmission.description'),
+    },
+    {
+      port: $t('diagnostics/network-tcp-port-check.commonPorts.imaps.port'),
+      service: $t('diagnostics/network-tcp-port-check.commonPorts.imaps.service'),
+      description: $t('diagnostics/network-tcp-port-check.commonPorts.imaps.description'),
+    },
+    {
+      port: $t('diagnostics/network-tcp-port-check.commonPorts.pop3s.port'),
+      service: $t('diagnostics/network-tcp-port-check.commonPorts.pop3s.service'),
+      description: $t('diagnostics/network-tcp-port-check.commonPorts.pop3s.description'),
+    },
+    {
+      port: $t('diagnostics/network-tcp-port-check.commonPorts.dns.port'),
+      service: $t('diagnostics/network-tcp-port-check.commonPorts.dns.service'),
+      description: $t('diagnostics/network-tcp-port-check.commonPorts.dns.description'),
+    },
+  ]);
 
   // Reactive validation
   const targetsList = $derived(() => {
@@ -127,13 +160,13 @@
       return {
         icon: 'check-circle',
         class: 'success',
-        text: `Open (${result.latency}ms)`,
+        text: $t('diagnostics/network-tcp-port-check.results.statusOpen', { latency: result.latency || 0 }),
       };
     } else {
       return {
         icon: 'x-circle',
         class: 'error',
-        text: result.error || 'Closed',
+        text: result.error || $t('diagnostics/network-tcp-port-check.results.statusClosed'),
       };
     }
   }
@@ -167,11 +200,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>TCP Port Checker</h1>
-    <p>
-      Test TCP connectivity to one or more host:port combinations. Attempts direct TCP connections to check if ports are
-      open and measures connection latency.
-    </p>
+    <h1>{$t('diagnostics/network-tcp-port-check.title')}</h1>
+    <p>{$t('diagnostics/network-tcp-port-check.subtitle')}</p>
   </header>
 
   <!-- Examples -->
@@ -179,7 +209,7 @@
     examples={examplesList}
     selectedIndex={examples.selectedIndex}
     onSelect={loadExample}
-    title="Port Check Examples"
+    title={$t('diagnostics/network-tcp-port-check.examples.title')}
     getLabel={(ex) => ex.description}
     getDescription={(ex) => {
       const targets = ex.targets.split('\n');
@@ -192,17 +222,17 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>Port Check Configuration</h3>
+      <h3>{$t('diagnostics/network-tcp-port-check.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-row">
         <div class="form-group">
-          <label for="targets" use:tooltip={'Enter host:port combinations, one per line (max 50)'}>
-            Target Hosts & Ports
+          <label for="targets" use:tooltip={$t('diagnostics/network-tcp-port-check.form.targetsTooltip')}>
+            {$t('diagnostics/network-tcp-port-check.form.targetsLabel')}
             <textarea
               id="targets"
               bind:value={targets}
-              placeholder="google.com:443&#10;github.com:22&#10;example.com:80"
+              placeholder={$t('diagnostics/network-tcp-port-check.form.targetsPlaceholder')}
               rows="6"
               class:invalid={targets && !isInputValid()}
               onchange={() => {
@@ -211,9 +241,11 @@
               }}
             ></textarea>
             <div class="input-help">
-              <span class="target-count">{targetsList.length}/50 targets</span>
+              <span class="target-count"
+                >{$t('diagnostics/network-tcp-port-check.form.targetCount', { count: targetsList().length })}</span
+              >
               {#if targets && !isInputValid}
-                <span class="error-text">Use format: hostname:port (one per line)</span>
+                <span class="error-text">{$t('diagnostics/network-tcp-port-check.form.invalidFormat')}</span>
               {/if}
             </div>
           </label>
@@ -223,7 +255,7 @@
       <!-- Common Ports -->
       <div class="form-row">
         <div class="form-group">
-          <h3>Common Ports</h3>
+          <h3>{$t('diagnostics/network-tcp-port-check.form.commonPortsTitle')}</h3>
           <div class="port-shortcuts">
             {#each commonPorts as port, index (index)}
               <button
@@ -241,8 +273,8 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label for="timeout" use:tooltip={'Connection timeout in milliseconds'}>
-            Timeout (ms)
+          <label for="timeout" use:tooltip={$t('diagnostics/network-tcp-port-check.form.timeoutTooltip')}>
+            {$t('diagnostics/network-tcp-port-check.form.timeoutLabel')}
             <input
               id="timeout"
               type="number"
@@ -263,10 +295,10 @@
         <button class="lookup-btn" onclick={checkPorts} disabled={diagnosticState.loading || !isInputValid()}>
           {#if diagnosticState.loading}
             <Icon name="loader-2" size="sm" animate="spin" />
-            Checking Ports...
+            {$t('diagnostics/network-tcp-port-check.form.checking')}
           {:else}
             <Icon name="activity" size="sm" />
-            Check Ports
+            {$t('diagnostics/network-tcp-port-check.form.checkButton')}
           {/if}
         </button>
       </div>
@@ -277,10 +309,12 @@
   {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>Port Check Results</h3>
+        <h3>{$t('diagnostics/network-tcp-port-check.results.title')}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
           <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
-          {clipboard.isCopied() ? 'Copied!' : 'Copy Results'}
+          {clipboard.isCopied()
+            ? $t('diagnostics/network-tcp-port-check.results.copied')
+            : $t('diagnostics/network-tcp-port-check.results.copyButton')}
         </button>
       </div>
       <div class="card-content">
@@ -289,23 +323,35 @@
           <div class="status-item success">
             <Icon name="check-circle" size="sm" />
             <div>
-              <span class="status-title">{diagnosticState.results.summary.open} Open</span>
-              <p class="status-desc">Ports accepting connections</p>
+              <span class="status-title"
+                >{$t('diagnostics/network-tcp-port-check.results.summaryOpenPorts', {
+                  count: diagnosticState.results.summary.open,
+                })}</span
+              >
+              <p class="status-desc">{$t('diagnostics/network-tcp-port-check.results.openPortsDescription')}</p>
             </div>
           </div>
           <div class="status-item error">
             <Icon name="x-circle" size="sm" />
             <div>
-              <span class="status-title">{diagnosticState.results.summary.closed} Closed</span>
-              <p class="status-desc">Ports not responding</p>
+              <span class="status-title"
+                >{$t('diagnostics/network-tcp-port-check.results.summaryClosedPorts', {
+                  count: diagnosticState.results.summary.closed,
+                })}</span
+              >
+              <p class="status-desc">{$t('diagnostics/network-tcp-port-check.results.closedPortsDescription')}</p>
             </div>
           </div>
           {#if diagnosticState.results.summary.avgLatency}
             <div class="status-item">
               <Icon name="zap" size="sm" />
               <div>
-                <span class="status-title">{diagnosticState.results.summary.avgLatency}ms</span>
-                <p class="status-desc">Average latency</p>
+                <span class="status-title"
+                  >{$t('diagnostics/network-tcp-port-check.results.summaryAvgLatency', {
+                    latency: diagnosticState.results.summary.avgLatency,
+                  })}</span
+                >
+                <p class="status-desc">{$t('diagnostics/network-tcp-port-check.results.avgLatencyDescription')}</p>
               </div>
             </div>
           {/if}
@@ -313,7 +359,11 @@
 
         <!-- Detailed Results -->
         <div class="ports-section">
-          <h4>Port Status ({diagnosticState.results.results.length} targets)</h4>
+          <h4>
+            {$t('diagnostics/network-tcp-port-check.results.portStatusTitle', {
+              count: diagnosticState.results.results.length,
+            })}
+          </h4>
           <div class="ports-list">
             {#each diagnosticState.results.results as result, index (index)}
               {@const status = getPortStatus(result)}
@@ -338,42 +388,66 @@
     </div>
   {/if}
 
-  <ErrorCard title="Port Check Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('diagnostics/network-tcp-port-check.error.title')} error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>Understanding TCP Port Connectivity</h3>
+      <h3>{$t('diagnostics/network-tcp-port-check.info.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>Port States</h4>
+          <h4>{$t('diagnostics/network-tcp-port-check.info.portStates.title')}</h4>
           <ul>
-            <li><strong>Open:</strong> Port accepts connections and responds</li>
-            <li><strong>Closed:</strong> Port actively refuses connections</li>
-            <li><strong>Filtered:</strong> Port blocked by firewall (appears as timeout)</li>
-            <li><strong>Timeout:</strong> No response within timeout period</li>
+            <li>
+              <strong>{$t('diagnostics/network-tcp-port-check.info.portStates.open')}</strong>
+              {$t('diagnostics/network-tcp-port-check.info.portStates.openDesc')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics/network-tcp-port-check.info.portStates.closed')}</strong>
+              {$t('diagnostics/network-tcp-port-check.info.portStates.closedDesc')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics/network-tcp-port-check.info.portStates.filtered')}</strong>
+              {$t('diagnostics/network-tcp-port-check.info.portStates.filteredDesc')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics/network-tcp-port-check.info.portStates.timeout')}</strong>
+              {$t('diagnostics/network-tcp-port-check.info.portStates.timeoutDesc')}
+            </li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Common Ports</h4>
+          <h4>{$t('diagnostics/network-tcp-port-check.info.commonPorts.title')}</h4>
           <ul>
-            <li><strong>SSH (22):</strong> Secure remote access</li>
-            <li><strong>HTTP (80):</strong> Web traffic</li>
-            <li><strong>HTTPS (443):</strong> Secure web traffic</li>
-            <li><strong>SMTP (25/587):</strong> Email sending</li>
+            <li>
+              <strong>{$t('diagnostics/network-tcp-port-check.info.commonPorts.ssh')}</strong>
+              {$t('diagnostics/network-tcp-port-check.info.commonPorts.sshDesc')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics/network-tcp-port-check.info.commonPorts.http')}</strong>
+              {$t('diagnostics/network-tcp-port-check.info.commonPorts.httpDesc')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics/network-tcp-port-check.info.commonPorts.https')}</strong>
+              {$t('diagnostics/network-tcp-port-check.info.commonPorts.httpsDesc')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics/network-tcp-port-check.info.commonPorts.smtp')}</strong>
+              {$t('diagnostics/network-tcp-port-check.info.commonPorts.smtpDesc')}
+            </li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Troubleshooting Tips</h4>
+          <h4>{$t('diagnostics/network-tcp-port-check.info.troubleshooting.title')}</h4>
           <ul>
-            <li>Timeouts often indicate firewall blocking</li>
-            <li>Connection refused means service is not running</li>
-            <li>Check both client and server firewalls</li>
-            <li>Verify service is listening on expected port</li>
+            <li>{$t('diagnostics/network-tcp-port-check.info.troubleshooting.tip1')}</li>
+            <li>{$t('diagnostics/network-tcp-port-check.info.troubleshooting.tip2')}</li>
+            <li>{$t('diagnostics/network-tcp-port-check.info.troubleshooting.tip3')}</li>
+            <li>{$t('diagnostics/network-tcp-port-check.info.troubleshooting.tip4')}</li>
           </ul>
         </div>
       </div>

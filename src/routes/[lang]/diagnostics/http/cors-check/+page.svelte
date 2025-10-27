@@ -7,6 +7,7 @@
   import ActionButton from '$lib/components/common/ActionButton.svelte';
   import ResultsCard from '$lib/components/common/ResultsCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
+  import { t } from '$lib/stores/language';
   import '../../../../../styles/diagnostics-pages.scss';
 
   let url = $state('https://api.github.com');
@@ -18,20 +19,32 @@
 
   const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
 
-  const examplesList = [
-    { url: 'https://api.github.com', origin: 'https://example.com', description: 'GitHub API CORS policy' },
-    { url: 'https://httpbin.org/get', origin: 'https://test.com', description: 'HTTPBin CORS test' },
+  const examplesList = $derived([
+    {
+      url: 'https://api.github.com',
+      origin: 'https://example.com',
+      description: $t('diagnostics/http-cors-check.examples.github'),
+      tooltip: `Test CORS policy for https://api.github.com`,
+    },
+    {
+      url: 'https://httpbin.org/get',
+      origin: 'https://test.com',
+      description: $t('diagnostics/http-cors-check.examples.httpbin'),
+      tooltip: `Test CORS policy for https://httpbin.org/get`,
+    },
     {
       url: 'https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&current=temperature_2m',
       origin: 'https://weather-app.com',
-      description: 'Open weather API',
+      description: $t('diagnostics/http-cors-check.examples.weather'),
+      tooltip: `Test CORS policy for Open weather API`,
     },
     {
       url: 'https://jsonplaceholder.typicode.com/posts/1',
       origin: 'https://example.org',
-      description: 'JSON Placeholder API',
+      description: $t('diagnostics/http-cors-check.examples.placeholder'),
+      tooltip: `Test CORS policy for JSON Placeholder API`,
     },
-  ];
+  ]);
 
   const examples = useExamples(examplesList);
 
@@ -59,12 +72,12 @@
     const trimmedOrigin = origin.trim();
 
     if (!trimmedUrl) {
-      diagnosticState.setError('URL is required');
+      diagnosticState.setError($t('diagnostics/http-cors-check.form.url.required'));
       return;
     }
 
     if (!trimmedOrigin) {
-      diagnosticState.setError('Origin is required');
+      diagnosticState.setError($t('diagnostics/http-cors-check.form.origin.required'));
       return;
     }
 
@@ -72,7 +85,7 @@
       new URL(trimmedUrl);
       new URL(trimmedOrigin);
     } catch {
-      diagnosticState.setError('Invalid URL or Origin format');
+      diagnosticState.setError($t('diagnostics/http-cors-check.form.origin.invalid'));
       return;
     }
 
@@ -178,11 +191,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>CORS Policy Checker</h1>
-    <p>
-      Test Cross-Origin Resource Sharing (CORS) policies by sending preflight requests and analyzing the server's CORS
-      configuration. Check if your origin is allowed to access the target resource.
-    </p>
+    <h1>{$t('diagnostics/http-cors-check.title')}</h1>
+    <p>{$t('diagnostics/http-cors-check.description')}</p>
   </header>
 
   <!-- Examples -->
@@ -190,27 +200,27 @@
     examples={examplesList}
     selectedIndex={examples.selectedIndex}
     onSelect={loadExample}
-    title="CORS Examples"
-    getLabel={(ex) => ex.url}
-    getDescription={(ex) => ex.description}
-    getTooltip={(ex) => `Test CORS policy for ${ex.url}`}
+    title={$t('diagnostics/http-cors-check.examples.title')}
+    getLabel={(ex: { url: string }) => ex.url}
+    getDescription={(ex: { description: string }) => ex.description}
+    getTooltip={(ex: { tooltip: string }) => ex.tooltip}
   />
 
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>CORS Test Configuration</h3>
+      <h3>{$t('diagnostics/http-cors-check.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-grid">
         <div class="form-group">
-          <label for="url" use:tooltip={'Target API/resource URL to test CORS against'}>
-            Target URL
+          <label for="url" use:tooltip={$t('diagnostics/http-cors-check.form.url.tooltip')}>
+            {$t('diagnostics/http-cors-check.form.url.label')}
             <input
               id="url"
               type="url"
               bind:value={url}
-              placeholder="https://api.example.com"
+              placeholder={$t('diagnostics/http-cors-check.form.url.placeholder')}
               class:invalid={url && !isInputValid()}
               onchange={() => {
                 examples.clear();
@@ -218,19 +228,19 @@
               }}
             />
             {#if url && !isInputValid()}
-              <span class="error-text">Invalid URL format</span>
+              <span class="error-text">{$t('diagnostics/http-cors-check.form.url.error')}</span>
             {/if}
           </label>
         </div>
 
         <div class="form-group">
-          <label for="origin" use:tooltip={"Your website's origin (where the request would come from)"}>
-            Origin
+          <label for="origin" use:tooltip={$t('diagnostics/http-cors-check.form.origin.tooltip')}>
+            {$t('diagnostics/http-cors-check.form.origin.label')}
             <input
               id="origin"
               type="url"
               bind:value={origin}
-              placeholder="https://yoursite.com"
+              placeholder={$t('diagnostics/http-cors-check.form.origin.placeholder')}
               class:invalid={origin && !isInputValid}
               onchange={() => {
                 examples.clear();
@@ -238,14 +248,14 @@
               }}
             />
             {#if origin && !isInputValid}
-              <span class="error-text">Invalid origin format</span>
+              <span class="error-text">{$t('diagnostics/http-cors-check.form.origin.error')}</span>
             {/if}
           </label>
         </div>
 
         <div class="form-group">
-          <label for="method" use:tooltip={'HTTP method to test in preflight request'}>
-            Method
+          <label for="method" use:tooltip={$t('diagnostics/http-cors-check.form.method.tooltip')}>
+            {$t('diagnostics/http-cors-check.form.method.label')}
             <select
               id="method"
               bind:value={method}
@@ -415,7 +425,7 @@
     </ResultsCard>
   {/if}
 
-  <ErrorCard title="CORS Check Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('diagnostics/http-cors-check.error.title')} error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">

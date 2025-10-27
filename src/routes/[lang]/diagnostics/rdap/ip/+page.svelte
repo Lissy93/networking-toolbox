@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/stores/language';
   import '../../../../../styles/diagnostics-pages.scss';
 
   let ip = $state('8.8.8.8');
@@ -10,14 +11,32 @@
   let copiedState = $state(false);
   let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
-    { ip: '8.8.8.8', description: 'Google DNS - Public DNS service' },
-    { ip: '1.1.1.1', description: 'Cloudflare DNS - Fast public resolver' },
-    { ip: '208.67.222.222', description: 'OpenDNS - Cisco public DNS' },
-    { ip: '192.0.2.1', description: 'RFC 5737 - Documentation IP range' },
-    { ip: '2001:4860:4860::8888', description: 'Google IPv6 DNS' },
-    { ip: '2606:4700:4700::1111', description: 'Cloudflare IPv6 DNS' },
-  ];
+  const examples = $derived([
+    {
+      ip: $t('diagnostics/rdap-ip.examples.items.googleDNS.ip'),
+      description: $t('diagnostics/rdap-ip.examples.items.googleDNS.description'),
+    },
+    {
+      ip: $t('diagnostics/rdap-ip.examples.items.cloudflareDNS.ip'),
+      description: $t('diagnostics/rdap-ip.examples.items.cloudflareDNS.description'),
+    },
+    {
+      ip: $t('diagnostics/rdap-ip.examples.items.openDNS.ip'),
+      description: $t('diagnostics/rdap-ip.examples.items.openDNS.description'),
+    },
+    {
+      ip: $t('diagnostics/rdap-ip.examples.items.rfc5737.ip'),
+      description: $t('diagnostics/rdap-ip.examples.items.rfc5737.description'),
+    },
+    {
+      ip: $t('diagnostics/rdap-ip.examples.items.googleIPv6.ip'),
+      description: $t('diagnostics/rdap-ip.examples.items.googleIPv6.description'),
+    },
+    {
+      ip: $t('diagnostics/rdap-ip.examples.items.cloudflareIPv6.ip'),
+      description: $t('diagnostics/rdap-ip.examples.items.cloudflareIPv6.description'),
+    },
+  ]);
 
   async function lookupIP() {
     loading = true;
@@ -36,12 +55,12 @@
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
-        throw new Error(errorData.message || `IP RDAP lookup failed: ${response.status}`);
+        throw new Error(errorData.message || $t('diagnostics/rdap-ip.error.lookupFailed', { status: response.status }));
       }
 
       results = await response.json();
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : 'Unknown error occurred';
+      error = err instanceof Error ? err.message : $t('diagnostics/rdap-ip.error.unknownError');
     } finally {
       loading = false;
     }
@@ -70,7 +89,7 @@
   }
 
   function formatDate(dateString: string | undefined): string {
-    if (!dateString) return 'Not available';
+    if (!dateString) return $t('diagnostics/rdap-ip.results.notAvailable');
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -100,11 +119,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>IP Address RDAP Lookup</h1>
-    <p>
-      Look up IP address allocation and registration data using RDAP through Regional Internet Registry (RIR) services.
-      Automatically routes queries to the appropriate RIR based on IP address prefix.
-    </p>
+    <h1>{$t('diagnostics/rdap-ip.title')}</h1>
+    <p>{$t('diagnostics/rdap-ip.subtitle')}</p>
   </header>
 
   <!-- Examples -->
@@ -112,7 +128,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Common IP Examples</h4>
+        <h4>{$t('diagnostics/rdap-ip.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -120,7 +136,9 @@
             class="example-card"
             class:selected={selectedExampleIndex === i}
             onclick={() => loadExample(example, i)}
-            use:tooltip={`Perform RDAP lookup for ${example.ip} (${example.description})`}
+            use:tooltip={$t(
+              `diagnostics/rdap-ip.examples.items.${['googleDNS', 'cloudflareDNS', 'openDNS', 'rfc5737', 'googleIPv6', 'cloudflareIPv6'][i]}.tooltip`,
+            )}
           >
             <h5>{example.ip}</h5>
             <p>{example.description}</p>
@@ -134,24 +152,24 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>RDAP Lookup Configuration</h3>
+      <h3>{$t('diagnostics/rdap-ip.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-grid">
         <div class="form-group">
-          <label for="ip" use:tooltip={'Enter an IPv4 or IPv6 address to query allocation data via RDAP'}>
-            IP Address
+          <label for="ip" use:tooltip={$t('diagnostics/rdap-ip.form.ipTooltip')}>
+            {$t('diagnostics/rdap-ip.form.ipLabel')}
             <input
               id="ip"
               type="text"
               bind:value={ip}
-              placeholder="8.8.8.8 or 2001:4860:4860::8888"
+              placeholder={$t('diagnostics/rdap-ip.form.ipPlaceholder')}
               onchange={() => {
                 clearExampleSelection();
                 if (ip.trim()) lookupIP();
               }}
             />
-            <small>Supports both IPv4 (e.g., 8.8.8.8) and IPv6 (e.g., 2001:4860:4860::8888) addresses</small>
+            <small>{$t('diagnostics/rdap-ip.form.ipHint')}</small>
           </label>
         </div>
       </div>
@@ -160,10 +178,10 @@
         <button class="lookup-btn" onclick={lookupIP} disabled={loading || !ip.trim()}>
           {#if loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Performing RDAP Lookup...
+            {$t('diagnostics/rdap-ip.form.performing')}
           {:else}
             <Icon name="search" size="sm" />
-            Lookup IP Address
+            {$t('diagnostics/rdap-ip.form.lookupButton')}
           {/if}
         </button>
       </div>
@@ -174,25 +192,29 @@
   {#if results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>RDAP Data for {results.ip}</h3>
+        <h3>{$t('diagnostics/rdap-ip.results.title', { ip: results.ip })}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
           <span class={copiedState ? 'text-green-500' : ''}
             ><Icon name={copiedState ? 'check' : 'copy'} size="xs" /></span
           >
-          {copiedState ? 'Copied!' : 'Copy Raw JSON'}
+          {copiedState ? $t('diagnostics/rdap-ip.results.copied') : $t('diagnostics/rdap-ip.results.copy')}
         </button>
       </div>
       <div class="card-content">
         <div class="lookup-info">
           <div class="info-item">
-            <span class="info-label" use:tooltip={'The IP address that was queried'}>IP Address:</span>
+            <span class="info-label" use:tooltip={$t('diagnostics/rdap-ip.results.ipAddressTooltip')}
+              >{$t('diagnostics/rdap-ip.results.ipAddress')}:</span
+            >
             <span class="info-value">
               <span class="mono">{results.ip}</span>
               <span class="ip-version">{getIPVersion(results.ip)}</span>
             </span>
           </div>
           <div class="info-item">
-            <span class="info-label" use:tooltip={'RDAP service used for the query'}>RDAP Service:</span>
+            <span class="info-label" use:tooltip={$t('diagnostics/rdap-ip.results.rdapServiceTooltip')}
+              >{$t('diagnostics/rdap-ip.results.rdapService')}:</span
+            >
             <span class="info-value mono">{results.serviceUrl}</span>
           </div>
         </div>
@@ -200,36 +222,36 @@
         <div class="results-grid">
           <!-- Network Information -->
           <div class="result-section">
-            <h4>Network Information</h4>
+            <h4>{$t('diagnostics/rdap-ip.results.networkInfo.title')}</h4>
             <dl class="definition-list">
-              <dt>Network Block:</dt>
-              <dd><code>{results.data.network || 'Not available'}</code></dd>
+              <dt>{$t('diagnostics/rdap-ip.results.networkInfo.networkBlock')}</dt>
+              <dd><code>{results.data.network || $t('diagnostics/rdap-ip.results.notAvailable')}</code></dd>
 
-              <dt>Network Name:</dt>
-              <dd>{results.data.name || 'Not available'}</dd>
+              <dt>{$t('diagnostics/rdap-ip.results.networkInfo.networkName')}</dt>
+              <dd>{results.data.name || $t('diagnostics/rdap-ip.results.notAvailable')}</dd>
 
-              <dt>Type:</dt>
-              <dd>{results.data.type || 'Not available'}</dd>
+              <dt>{$t('diagnostics/rdap-ip.results.networkInfo.type')}</dt>
+              <dd>{results.data.type || $t('diagnostics/rdap-ip.results.notAvailable')}</dd>
 
-              <dt>Country:</dt>
+              <dt>{$t('diagnostics/rdap-ip.results.networkInfo.country')}</dt>
               <dd>
                 {#if results.data.country}
                   <span class="country-code">{results.data.country}</span>
                 {:else}
-                  Not available
+                  {$t('diagnostics/rdap-ip.results.notAvailable')}
                 {/if}
               </dd>
 
-              <dt>Registry:</dt>
-              <dd>{results.data.registry || 'Not available'}</dd>
+              <dt>{$t('diagnostics/rdap-ip.results.networkInfo.registry')}</dt>
+              <dd>{results.data.registry || $t('diagnostics/rdap-ip.results.notAvailable')}</dd>
             </dl>
           </div>
 
           <!-- Status and Dates -->
           <div class="result-section">
-            <h4>Allocation Details</h4>
+            <h4>{$t('diagnostics/rdap-ip.results.allocation.title')}</h4>
             <dl class="definition-list">
-              <dt>Status:</dt>
+              <dt>{$t('diagnostics/rdap-ip.results.allocation.status')}</dt>
               <dd>
                 {#if results.data.status?.length}
                   <div class="status-list">
@@ -238,14 +260,14 @@
                     {/each}
                   </div>
                 {:else}
-                  Not available
+                  {$t('diagnostics/rdap-ip.results.notAvailable')}
                 {/if}
               </dd>
 
-              <dt>Allocation Date:</dt>
+              <dt>{$t('diagnostics/rdap-ip.results.allocation.allocationDate')}</dt>
               <dd>{formatDate(results.data.allocation)}</dd>
 
-              <dt>Last Changed:</dt>
+              <dt>{$t('diagnostics/rdap-ip.results.allocation.lastChanged')}</dt>
               <dd>{formatDate(results.data.lastChanged)}</dd>
             </dl>
           </div>
@@ -253,26 +275,28 @@
           <!-- Contact Information -->
           {#if results.data.contacts?.length}
             <div class="result-section full-width">
-              <h4>Contact Information</h4>
+              <h4>{$t('diagnostics/rdap-ip.results.contacts.title')}</h4>
               <div class="contacts-grid">
                 {#each results.data.contacts as contact, index (index)}
                   <div class="contact-card">
                     <h5>
                       {#if contact.roles?.includes('registrant')}
-                        Registrant
+                        {$t('diagnostics/rdap-ip.results.contacts.registrant')}
                       {:else if contact.roles?.includes('administrative')}
-                        Administrative
+                        {$t('diagnostics/rdap-ip.results.contacts.administrative')}
                       {:else if contact.roles?.includes('technical')}
-                        Technical
+                        {$t('diagnostics/rdap-ip.results.contacts.technical')}
                       {:else if contact.roles?.includes('abuse')}
-                        Abuse
+                        {$t('diagnostics/rdap-ip.results.contacts.abuse')}
                       {:else}
-                        Contact
+                        {$t('diagnostics/rdap-ip.results.contacts.contact')}
                       {/if}
                     </h5>
                     <p><strong>{formatContact(contact)}</strong></p>
                     {#if contact.handle}
-                      <p><small>Handle: {contact.handle}</small></p>
+                      <p>
+                        <small>{$t('diagnostics/rdap-ip.results.contacts.handle', { handle: contact.handle })}</small>
+                      </p>
                     {/if}
                     {#if contact.roles}
                       <div class="roles-list">
@@ -297,16 +321,16 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="md" />
           <div>
-            <strong>RDAP Lookup Failed</strong>
+            <strong>{$t('diagnostics/rdap-ip.error.title')}</strong>
             <p>{error}</p>
             <div class="troubleshooting">
-              <p><strong>Troubleshooting Tips:</strong></p>
+              <p><strong>{$t('diagnostics/rdap-ip.error.troubleshooting.title')}</strong></p>
               <ul>
-                <li>Ensure the IP address is valid and properly formatted</li>
-                <li>Private IP addresses (RFC 1918) may not have RDAP data</li>
-                <li>Some RIRs may have rate limiting or access restrictions</li>
-                <li>Reserved or special-use addresses may not be publicly queryable</li>
-                <li>Try again in a few moments if the service is temporarily unavailable</li>
+                <li>{$t('diagnostics/rdap-ip.error.troubleshooting.validIP')}</li>
+                <li>{$t('diagnostics/rdap-ip.error.troubleshooting.privateIP')}</li>
+                <li>{$t('diagnostics/rdap-ip.error.troubleshooting.rateLimiting')}</li>
+                <li>{$t('diagnostics/rdap-ip.error.troubleshooting.specialUse')}</li>
+                <li>{$t('diagnostics/rdap-ip.error.troubleshooting.tryAgain')}</li>
               </ul>
             </div>
           </div>
@@ -318,36 +342,33 @@
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>About IP Address RDAP Lookups</h3>
+      <h3>{$t('diagnostics/rdap-ip.educational.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>How it Works</h4>
-          <p>
-            IP RDAP provides detailed allocation information from Regional Internet Registries (RIRs). The tool
-            automatically routes queries to the appropriate RIR using IANA bootstrap registries.
-          </p>
+          <h4>{$t('diagnostics/rdap-ip.educational.howItWorks.title')}</h4>
+          <p>{$t('diagnostics/rdap-ip.educational.howItWorks.description')}</p>
         </div>
 
         <div class="info-section">
-          <h4>Regional Internet Registries</h4>
+          <h4>{$t('diagnostics/rdap-ip.educational.rirs.title')}</h4>
           <ul>
-            <li><strong>ARIN:</strong> North America, parts of Caribbean</li>
-            <li><strong>RIPE NCC:</strong> Europe, Central Asia, Middle East</li>
-            <li><strong>APNIC:</strong> Asia Pacific region</li>
-            <li><strong>LACNIC:</strong> Latin America, parts of Caribbean</li>
-            <li><strong>AFRINIC:</strong> Africa</li>
+            <li><strong>{$t('diagnostics/rdap-ip.educational.rirs.arin')}</strong></li>
+            <li><strong>{$t('diagnostics/rdap-ip.educational.rirs.ripe')}</strong></li>
+            <li><strong>{$t('diagnostics/rdap-ip.educational.rirs.apnic')}</strong></li>
+            <li><strong>{$t('diagnostics/rdap-ip.educational.rirs.lacnic')}</strong></li>
+            <li><strong>{$t('diagnostics/rdap-ip.educational.rirs.afrinic')}</strong></li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>What You'll Get</h4>
+          <h4>{$t('diagnostics/rdap-ip.educational.whatYouGet.title')}</h4>
           <ul>
-            <li>Network block and CIDR prefix</li>
-            <li>Allocation type and country</li>
-            <li>Organization responsible for the block</li>
-            <li>Contact information (registrant, admin, technical, abuse)</li>
+            <li>{$t('diagnostics/rdap-ip.educational.whatYouGet.networkBlock')}</li>
+            <li>{$t('diagnostics/rdap-ip.educational.whatYouGet.allocationType')}</li>
+            <li>{$t('diagnostics/rdap-ip.educational.whatYouGet.organization')}</li>
+            <li>{$t('diagnostics/rdap-ip.educational.whatYouGet.contacts')}</li>
           </ul>
         </div>
       </div>

@@ -1,78 +1,71 @@
 {
   "title": "Email DMARC Policy Checker",
-  "subtitle": "Check DMARC (Domain-based Message Authentication, Reporting & Conformance) policies with focus on email deliverability impact. Understand how DMARC affects your email delivery and reputation.",
-
+  "subtitle": "Check DMARC policy for email authentication, analyze deliverability impact, and get implementation recommendations",
   "examples": {
     "title": "DMARC Examples",
     "items": {
       "gmail": {
         "domain": "gmail.com",
         "description": "Google Gmail DMARC policy",
-        "tooltip": "Check DMARC policy for gmail.com"
+        "tooltip": "Check DMARC configuration for gmail.com"
       },
       "outlook": {
         "domain": "outlook.com",
         "description": "Microsoft Outlook DMARC setup",
-        "tooltip": "Check DMARC policy for outlook.com"
+        "tooltip": "Check DMARC configuration for outlook.com"
       },
       "github": {
         "domain": "github.com",
         "description": "GitHub enterprise DMARC",
-        "tooltip": "Check DMARC policy for github.com"
+        "tooltip": "Check DMARC configuration for github.com"
       },
       "paypal": {
         "domain": "paypal.com",
         "description": "PayPal strict DMARC policy",
-        "tooltip": "Check DMARC policy for paypal.com"
+        "tooltip": "Check DMARC configuration for paypal.com"
       },
       "amazon": {
         "domain": "amazon.com",
         "description": "Amazon DMARC implementation",
-        "tooltip": "Check DMARC policy for amazon.com"
+        "tooltip": "Check DMARC configuration for amazon.com"
       },
       "salesforce": {
         "domain": "salesforce.com",
         "description": "Salesforce DMARC configuration",
-        "tooltip": "Check DMARC policy for salesforce.com"
+        "tooltip": "Check DMARC configuration for salesforce.com"
       }
     }
   },
-
   "form": {
     "title": "DMARC Policy Check",
     "domainLabel": "Domain Name",
     "domainPlaceholder": "example.com",
-    "checking": "Checking DMARC...",
-    "checkButton": "Check DMARC Policy"
+    "checkButton": "Check DMARC Policy",
+    "checking": "Checking DMARC..."
   },
-
   "results": {
     "title": "DMARC Policy Analysis",
     "copyButton": "Copy Results",
     "copied": "Copied!",
-
     "deliverability": {
       "title": "Email Deliverability Impact",
       "recommendations": "Deliverability Recommendations"
     },
-
     "record": {
       "title": "DMARC Record"
     },
-
     "policy": {
       "title": "Policy Configuration",
       "mainPolicy": "Main Policy",
       "subdomainPolicy": "Subdomain Policy",
-      "coverage": "Coverage",
-      "coverageDescription": "of messages affected",
+      "coverage": "Coverage Percentage",
+      "coverageDescription": "Percentage of mail subject to policy",
       "dkimAlignment": "DKIM Alignment",
       "spfAlignment": "SPF Alignment",
-      "failureOptions": "Failure Options",
-
+      "failureOptions": "Failure Reporting Options",
       "values": {
-        "reject": "Reject non-compliant messages",
-        "quarantine": "Quarantine suspicious messages",
+        "reject": "Block all unauthorized emails",
+        "quarantine": "Mark as spam/junk",
         "none": "Monitor only, no action",
         "unknown": "Unknown policy",
         "strict": "Strict",
@@ -80,16 +73,14 @@
         "strictDescription": "Exact domain match required",
         "relaxedDescription": "Organizational domain match allowed"
       },
-
       "failureOptionsValues": {
-        "0": "DKIM and SPF failure",
-        "1": "Any alignment failure",
-        "d": "DKIM failure only",
-        "s": "SPF failure only",
-        "custom": "Custom configuration"
+        "0": "Generate reports if all mechanisms fail",
+        "1": "Generate reports if any mechanism fails",
+        "d": "Generate reports if DKIM check fails",
+        "s": "Generate reports if SPF check fails",
+        "custom": "Custom failure reporting configuration"
       }
     },
-
     "reporting": {
       "title": "Email Reporting Configuration",
       "aggregateTitle": "Aggregate Reports (RUA)",
@@ -102,10 +93,9 @@
       "forensicNotConfiguredHint": "Optional - provides detailed failure analysis"
     }
   },
-
   "noRecord": {
     "title": "No DMARC Record Found",
-    "message": "Domain {domain} does not have a DMARC policy configured at _dmarc.{domain}.",
+    "message": "No DMARC record was found for {domain}",
     "impactTitle": "Email Deliverability Impact:",
     "impacts": {
       "noProtection": "No protection against email spoofing",
@@ -114,41 +104,36 @@
       "recommendation": "Consider implementing DMARC starting with p=none for monitoring"
     }
   },
-
   "error": {
     "title": "DMARC Check Failed"
   },
-
   "education": {
     "title": "Understanding DMARC for Email Delivery",
     "policiesTitle": "DMARC Policies & Email Impact",
     "policies": {
-      "none": "none: Monitor mode - no delivery impact, collect data only",
-      "quarantine": "quarantine: Failed messages may go to spam/junk folder",
-      "reject": "reject: Failed messages rejected outright - strongest protection"
+      "none": "none: Monitoring mode - no action taken on failures, only reporting",
+      "quarantine": "quarantine: Failed emails are marked as spam or moved to quarantine",
+      "reject": "reject: Failed emails are rejected outright, strongest protection"
     },
-
     "bestPracticesTitle": "Email Delivery Best Practices",
     "bestPractices": {
-      "startNone": "Start with p=none to monitor before enforcement",
-      "gradual": "Gradually increase to p=quarantine then p=reject",
-      "reporting": "Set up aggregate reporting to monitor delivery",
-      "testAlignment": "Test alignment requirements carefully",
-      "subdomain": "Consider subdomain policy for comprehensive coverage"
+      "startNone": "Start with p=none to monitor without affecting email delivery",
+      "gradual": "Gradually move to p=quarantine, then p=reject as you fix issues",
+      "reporting": "Set up aggregate reporting (rua=) to track authentication results",
+      "testAlignment": "Test DKIM and SPF alignment before enforcing strict policies",
+      "subdomain": "Consider subdomain policy (sp=) if subdomains send email"
     },
-
-    "alignmentTitle": "Alignment Modes & Delivery",
+    "alignmentTitle": "Alignment Modes",
     "alignment": {
-      "relaxed": "Relaxed (r): Allows organizational domain matching (safer for delivery)",
-      "strict": "Strict (s): Requires exact domain matching (higher security, delivery risk)"
+      "relaxed": "Relaxed (r): Allows organizational domain matches (subdomain.example.com matches example.com)",
+      "strict": "Strict (s): Requires exact domain match for DKIM/SPF alignment"
     },
-
-    "issuesTitle": "Common Delivery Issues",
+    "issuesTitle": "Common Email Delivery Issues",
     "issues": {
-      "thirdParty": "Strict alignment with third-party senders",
-      "forwarding": "Forwarded emails failing DMARC checks",
-      "mailingLists": "Mailing lists modifying message headers",
-      "percentage": "Percentage rollout causing inconsistent delivery"
+      "thirdParty": "Third-party senders may fail if not properly configured in SPF/DKIM",
+      "forwarding": "Email forwarding can break SPF alignment",
+      "mailingLists": "Mailing lists may modify messages, breaking DKIM signatures",
+      "percentage": "Use pct= to gradually roll out enforcement (default 100%)"
     }
   }
 }

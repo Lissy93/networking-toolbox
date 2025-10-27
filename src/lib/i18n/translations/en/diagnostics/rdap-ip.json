@@ -1,30 +1,121 @@
 {
-  "title": "RDAP IP Lookup",
-  "description": "Look up registration data for an IP address or network using RDAP",
+  "title": "IP Address RDAP Lookup",
+  "subtitle": "Look up IP address allocation and registration data using RDAP through Regional Internet Registry (RIR) services. Automatically routes queries to the appropriate RIR based on IP address prefix.",
+
+  "examples": {
+    "title": "Common IP Examples",
+    "items": {
+      "googleDNS": {
+        "ip": "8.8.8.8",
+        "description": "Google DNS - Public DNS service",
+        "tooltip": "Perform RDAP lookup for 8.8.8.8 (Google DNS - Public DNS service)"
+      },
+      "cloudflareDNS": {
+        "ip": "1.1.1.1",
+        "description": "Cloudflare DNS - Fast public resolver",
+        "tooltip": "Perform RDAP lookup for 1.1.1.1 (Cloudflare DNS - Fast public resolver)"
+      },
+      "openDNS": {
+        "ip": "208.67.222.222",
+        "description": "OpenDNS - Cisco public DNS",
+        "tooltip": "Perform RDAP lookup for 208.67.222.222 (OpenDNS - Cisco public DNS)"
+      },
+      "rfc5737": {
+        "ip": "192.0.2.1",
+        "description": "RFC 5737 - Documentation IP range",
+        "tooltip": "Perform RDAP lookup for 192.0.2.1 (RFC 5737 - Documentation IP range)"
+      },
+      "googleIPv6": {
+        "ip": "2001:4860:4860::8888",
+        "description": "Google IPv6 DNS",
+        "tooltip": "Perform RDAP lookup for 2001:4860:4860::8888 (Google IPv6 DNS)"
+      },
+      "cloudflareIPv6": {
+        "ip": "2606:4700:4700::1111",
+        "description": "Cloudflare IPv6 DNS",
+        "tooltip": "Perform RDAP lookup for 2606:4700:4700::1111 (Cloudflare IPv6 DNS)"
+      }
+    }
+  },
 
   "form": {
-    "title": "IP Lookup",
-    "ip": {
-      "label": "IP Address",
-      "placeholder": "8.8.8.8 or 2001:4860:4860::8888"
-    },
-    "lookup": "Lookup IP",
-    "looking_up": "Looking up...",
-    "error": "Please enter a valid IP address"
+    "title": "RDAP Lookup Configuration",
+    "ipLabel": "IP Address",
+    "ipPlaceholder": "8.8.8.8 or 2001:4860:4860::8888",
+    "ipTooltip": "Enter an IPv4 or IPv6 address to query allocation data via RDAP",
+    "ipHint": "Supports both IPv4 (e.g., 8.8.8.8) and IPv6 (e.g., 2001:4860:4860::8888) addresses",
+    "lookupButton": "Lookup IP Address",
+    "performing": "Performing RDAP Lookup..."
   },
 
   "results": {
-    "title": "IP Registration Data",
-    "ip_address": "IP Address",
-    "network": "Network",
-    "cidr": "CIDR",
-    "name": "Name",
-    "country": "Country",
-    "registry": "Registry",
-    "registration_date": "Registration Date",
-    "last_updated": "Last Updated",
-    "status": "Status",
-    "type": "Type",
-    "entities": "Entities"
+    "title": "RDAP Data for {ip}",
+    "copy": "Copy Raw JSON",
+    "copied": "Copied!",
+    "ipAddress": "IP Address",
+    "ipAddressTooltip": "The IP address that was queried",
+    "rdapService": "RDAP Service",
+    "rdapServiceTooltip": "RDAP service used for the query",
+    "notAvailable": "Not available",
+    "networkInfo": {
+      "title": "Network Information",
+      "networkBlock": "Network Block:",
+      "networkName": "Network Name:",
+      "type": "Type:",
+      "country": "Country:",
+      "registry": "Registry:"
+    },
+    "allocation": {
+      "title": "Allocation Details",
+      "status": "Status:",
+      "allocationDate": "Allocation Date:",
+      "lastChanged": "Last Changed:"
+    },
+    "contacts": {
+      "title": "Contact Information",
+      "registrant": "Registrant",
+      "administrative": "Administrative",
+      "technical": "Technical",
+      "abuse": "Abuse",
+      "contact": "Contact",
+      "handle": "Handle: {handle}"
+    }
+  },
+
+  "error": {
+    "title": "RDAP Lookup Failed",
+    "unknownError": "Unknown error occurred",
+    "lookupFailed": "IP RDAP lookup failed: {status}",
+    "troubleshooting": {
+      "title": "Troubleshooting Tips:",
+      "validIP": "Ensure the IP address is valid and properly formatted",
+      "privateIP": "Private IP addresses (RFC 1918) may not have RDAP data",
+      "rateLimiting": "Some RIRs may have rate limiting or access restrictions",
+      "specialUse": "Reserved or special-use addresses may not be publicly queryable",
+      "tryAgain": "Try again in a few moments if the service is temporarily unavailable"
+    }
+  },
+
+  "educational": {
+    "title": "About IP Address RDAP Lookups",
+    "howItWorks": {
+      "title": "How it Works",
+      "description": "IP RDAP provides detailed allocation information from Regional Internet Registries (RIRs). The tool automatically routes queries to the appropriate RIR using IANA bootstrap registries."
+    },
+    "rirs": {
+      "title": "Regional Internet Registries",
+      "arin": "ARIN: North America, parts of Caribbean",
+      "ripe": "RIPE NCC: Europe, Central Asia, Middle East",
+      "apnic": "APNIC: Asia Pacific region",
+      "lacnic": "LACNIC: Latin America, parts of Caribbean",
+      "afrinic": "AFRINIC: Africa"
+    },
+    "whatYouGet": {
+      "title": "What You'll Get",
+      "networkBlock": "Network block and CIDR prefix",
+      "allocationType": "Allocation type and country",
+      "organization": "Organization responsible for the block",
+      "contacts": "Contact information (registrant, admin, technical, abuse)"
+    }
   }
 }

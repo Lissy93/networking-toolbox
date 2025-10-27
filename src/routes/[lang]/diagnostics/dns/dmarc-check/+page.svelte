@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/stores/language';
   import '../../../../../styles/diagnostics-pages.scss';
 
   let domain = $state('google.com');
@@ -10,14 +11,38 @@
   let copiedState = $state(false);
   let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
-    { domain: 'google.com', description: 'Google DMARC policy' },
-    { domain: 'github.com', description: 'GitHub enterprise DMARC' },
-    { domain: 'microsoft.com', description: 'Microsoft DMARC configuration' },
-    { domain: 'paypal.com', description: 'PayPal strict DMARC policy' },
-    { domain: 'amazon.com', description: 'Amazon DMARC implementation' },
-    { domain: 'salesforce.com', description: 'Salesforce DMARC setup' },
-  ];
+  const examples = $derived([
+    {
+      domain: $t('diagnostics/dns-dmarc-check.examples.items.google.domain'),
+      description: $t('diagnostics/dns-dmarc-check.examples.items.google.description'),
+      tooltip: $t('diagnostics/dns-dmarc-check.examples.items.google.tooltip'),
+    },
+    {
+      domain: $t('diagnostics/dns-dmarc-check.examples.items.github.domain'),
+      description: $t('diagnostics/dns-dmarc-check.examples.items.github.description'),
+      tooltip: $t('diagnostics/dns-dmarc-check.examples.items.github.tooltip'),
+    },
+    {
+      domain: $t('diagnostics/dns-dmarc-check.examples.items.microsoft.domain'),
+      description: $t('diagnostics/dns-dmarc-check.examples.items.microsoft.description'),
+      tooltip: $t('diagnostics/dns-dmarc-check.examples.items.microsoft.tooltip'),
+    },
+    {
+      domain: $t('diagnostics/dns-dmarc-check.examples.items.paypal.domain'),
+      description: $t('diagnostics/dns-dmarc-check.examples.items.paypal.description'),
+      tooltip: $t('diagnostics/dns-dmarc-check.examples.items.paypal.tooltip'),
+    },
+    {
+      domain: $t('diagnostics/dns-dmarc-check.examples.items.amazon.domain'),
+      description: $t('diagnostics/dns-dmarc-check.examples.items.amazon.description'),
+      tooltip: $t('diagnostics/dns-dmarc-check.examples.items.amazon.tooltip'),
+    },
+    {
+      domain: $t('diagnostics/dns-dmarc-check.examples.items.salesforce.domain'),
+      description: $t('diagnostics/dns-dmarc-check.examples.items.salesforce.description'),
+      tooltip: $t('diagnostics/dns-dmarc-check.examples.items.salesforce.tooltip'),
+    },
+  ]);
 
   async function checkDMARC() {
     loading = true;
@@ -35,12 +60,12 @@
       });
 
       if (!response.ok) {
-        throw new Error(`DMARC check failed: ${response.status}`);
+        throw new Error($t('diagnostics/dns-dmarc-check.error.lookupFailed', { status: response.status }));
       }
 
       results = await response.json();
     } catch (err: unknown) {
-      error = (err as Error).message;
+      error = err instanceof Error ? err.message : $t('diagnostics/dns-dmarc-check.error.unknownError');
     } finally {
       loading = false;
     }
@@ -102,7 +127,7 @@
     // Policy issues
     if (parsed.policy === 'none') {
       issues.push({
-        message: 'Policy is set to "none" - no action taken on DMARC failures',
+        message: $t('diagnostics/dns-dmarc-check.results.issues.messages.policyNone'),
         severity: 'high',
       });
     }
@@ -110,7 +135,7 @@
     // Alignment issues
     if (parsed.alignment.dkim === 'r' && parsed.alignment.spf === 'r') {
       issues.push({
-        message: 'Both DKIM and SPF alignment are relaxed - consider strict alignment',
+        message: $t('diagnostics/dns-dmarc-check.results.issues.messages.relaxedAlignment'),
         severity: 'medium',
       });
     }
@@ -118,14 +143,14 @@
     // Reporting issues
     if (!parsed.reporting.aggregate) {
       issues.push({
-        message: 'No aggregate reporting address (rua) specified',
+        message: $t('diagnostics/dns-dmarc-check.results.issues.messages.noAggregateReporting'),
         severity: 'medium',
       });
     }
 
     if (!parsed.reporting.forensic) {
       issues.push({
-        message: 'No forensic reporting address (ruf) specified',
+        message: $t('diagnostics/dns-dmarc-check.results.issues.messages.noForensicReporting'),
         severity: 'low',
       });
     }
@@ -134,7 +159,7 @@
     const percentage = parseInt(parsed.percentage);
     if (percentage < 100) {
       issues.push({
-        message: `Only ${percentage}% of messages are subject to DMARC policy`,
+        message: $t('diagnostics/dns-dmarc-check.results.issues.messages.partialCoverage', { percentage }),
         severity: percentage < 50 ? 'high' : 'medium',
       });
     }
@@ -152,34 +177,43 @@
   async function copyResults() {
     if (!results) return;
 
-    let text = `DMARC Check for ${domain}\n`;
-    text += `Generated at: ${new Date().toISOString()}\n\n`;
+    let text = $t('diagnostics/dns-dmarc-check.copy.header', { domain }) + '\n';
+    text += $t('diagnostics/dns-dmarc-check.copy.generatedAt', { timestamp: new Date().toISOString() }) + '\n\n';
 
     if (results.record) {
-      text += `DMARC Record:\n${results.record}\n\n`;
+      text += $t('diagnostics/dns-dmarc-check.copy.recordLabel') + `\n${results.record}\n\n`;
     }
 
     if (results.parsed) {
       const p = results.parsed;
-      text += `Parsed Policy:\n`;
-      text += `  Main Policy: ${p.policy}\n`;
-      if (p.subdomainPolicy) text += `  Subdomain Policy: ${p.subdomainPolicy}\n`;
-      text += `  DKIM Alignment: ${p.alignment.dkim} (${p.alignment.dkim === 's' ? 'strict' : 'relaxed'})\n`;
-      text += `  SPF Alignment: ${p.alignment.spf} (${p.alignment.spf === 's' ? 'strict' : 'relaxed'})\n`;
-      text += `  Percentage: ${p.percentage}%\n`;
-      if (p.reporting.aggregate) text += `  Aggregate Reports: ${p.reporting.aggregate}\n`;
-      if (p.reporting.forensic) text += `  Forensic Reports: ${p.reporting.forensic}\n`;
-      text += `  Failure Options: ${p.reporting.failureOptions}\n\n`;
+      text += $t('diagnostics/dns-dmarc-check.copy.parsedPolicyLabel') + `\n`;
+      text += `  ` + $t('diagnostics/dns-dmarc-check.copy.mainPolicyLabel') + ` ${p.policy}\n`;
+      if (p.subdomainPolicy)
+        text += `  ` + $t('diagnostics/dns-dmarc-check.copy.subdomainPolicyLabel') + ` ${p.subdomainPolicy}\n`;
+      text +=
+        `  ` +
+        $t('diagnostics/dns-dmarc-check.copy.dkimAlignmentLabel') +
+        ` ${p.alignment.dkim} (${p.alignment.dkim === 's' ? $t('diagnostics/dns-dmarc-check.copy.alignmentStrict') : $t('diagnostics/dns-dmarc-check.copy.alignmentRelaxed')})\n`;
+      text +=
+        `  ` +
+        $t('diagnostics/dns-dmarc-check.copy.spfAlignmentLabel') +
+        ` ${p.alignment.spf} (${p.alignment.spf === 's' ? $t('diagnostics/dns-dmarc-check.copy.alignmentStrict') : $t('diagnostics/dns-dmarc-check.copy.alignmentRelaxed')})\n`;
+      text += `  ` + $t('diagnostics/dns-dmarc-check.copy.percentageLabel') + ` ${p.percentage}%\n`;
+      if (p.reporting.aggregate)
+        text += `  ` + $t('diagnostics/dns-dmarc-check.copy.aggregateReportsLabel') + ` ${p.reporting.aggregate}\n`;
+      if (p.reporting.forensic)
+        text += `  ` + $t('diagnostics/dns-dmarc-check.copy.forensicReportsLabel') + ` ${p.reporting.forensic}\n`;
+      text += `  ` + $t('diagnostics/dns-dmarc-check.copy.failureOptionsLabel') + ` ${p.reporting.failureOptions}\n\n`;
     }
 
     const issues = getIssues();
     if (issues.length > 0) {
-      text += `Issues Found:\n`;
+      text += $t('diagnostics/dns-dmarc-check.copy.issuesFoundLabel') + `\n`;
       issues.forEach((issue) => {
         text += `  [${issue.severity.toUpperCase()}] ${issue.message}\n`;
       });
     } else {
-      text += `No issues found - DMARC configuration looks good!\n`;
+      text += $t('diagnostics/dns-dmarc-check.copy.noIssuesFound') + `\n`;
     }
 
     await navigator.clipboard.writeText(text);
@@ -190,11 +224,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>DMARC Policy Checker</h1>
-    <p>
-      Analyze DMARC (Domain-based Message Authentication, Reporting & Conformance) policies. Check policy configuration,
-      alignment settings, and identify potential security issues.
-    </p>
+    <h1>{$t('diagnostics/dns-dmarc-check.title')}</h1>
+    <p>{$t('diagnostics/dns-dmarc-check.subtitle')}</p>
   </header>
 
   <!-- Examples -->
@@ -202,7 +233,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>DMARC Examples</h4>
+        <h4>{$t('diagnostics/dns-dmarc-check.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -210,7 +241,7 @@
             class="example-card"
             class:selected={selectedExampleIndex === i}
             onclick={() => loadExample(example, i)}
-            use:tooltip={`Check DMARC policy for ${example.domain} (${example.description})`}
+            use:tooltip={example.tooltip}
           >
             <h5>{example.domain}</h5>
             <p>{example.description}</p>
@@ -223,17 +254,17 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>DMARC Policy Check</h3>
+      <h3>{$t('diagnostics/dns-dmarc-check.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-group">
-        <label for="domain" use:tooltip={'Enter the domain to check DMARC policy for'}>
-          Domain Name
+        <label for="domain" use:tooltip={$t('diagnostics/dns-dmarc-check.form.domainTooltip')}>
+          {$t('diagnostics/dns-dmarc-check.form.domainLabel')}
           <input
             id="domain"
             type="text"
             bind:value={domain}
-            placeholder="example.com"
+            placeholder={$t('diagnostics/dns-dmarc-check.form.domainPlaceholder')}
             onchange={() => {
               clearExampleSelection();
               if (domain) checkDMARC();
@@ -246,10 +277,10 @@
         <button class="check-btn lookup-btn" onclick={checkDMARC} disabled={loading || !domain.trim()}>
           {#if loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Checking DMARC...
+            {$t('diagnostics/dns-dmarc-check.form.checking')}
           {:else}
             <Icon name="shield-check" size="sm" />
-            Check DMARC Policy
+            {$t('diagnostics/dns-dmarc-check.form.checkButton')}
           {/if}
         </button>
       </div>
@@ -260,10 +291,12 @@
   {#if results && results.hasRecord}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>DMARC Policy Analysis</h3>
+        <h3>{$t('diagnostics/dns-dmarc-check.results.title')}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
           <Icon name={copiedState ? 'check' : 'copy'} size="xs" />
-          {copiedState ? 'Copied!' : 'Copy Results'}
+          {copiedState
+            ? $t('diagnostics/dns-dmarc-check.results.copied')
+            : $t('diagnostics/dns-dmarc-check.results.copy')}
         </button>
       </div>
       <div class="card-content">
@@ -290,18 +323,21 @@
               <div>
                 <h4>
                   {#if issues.length === 0}
-                    DMARC Configuration Secure
+                    {$t('diagnostics/dns-dmarc-check.results.status.secure')}
                   {:else if issues.some((i) => i.severity === 'high')}
-                    DMARC Issues Found
+                    {$t('diagnostics/dns-dmarc-check.results.status.issuesFound')}
                   {:else}
-                    DMARC Needs Improvement
+                    {$t('diagnostics/dns-dmarc-check.results.status.needsImprovement')}
                   {/if}
                 </h4>
                 <p>
                   {#if issues.length === 0}
-                    No critical issues detected
+                    {$t('diagnostics/dns-dmarc-check.results.status.noCriticalIssues')}
                   {:else}
-                    {issues.length} issue{issues.length > 1 ? 's' : ''} identified
+                    {$t('diagnostics/dns-dmarc-check.results.status.issuesIdentified', {
+                      count: issues.length,
+                      plural: issues.length > 1 ? 's' : '',
+                    })}
                   {/if}
                 </p>
               </div>
@@ -311,9 +347,11 @@
           <!-- Original Record -->
           {#if results.record}
             <div class="record-section">
-              <h4>DMARC Record</h4>
+              <h4>{$t('diagnostics/dns-dmarc-check.results.recordSection.title')}</h4>
               <div class="record-display">
-                <div class="record-location">_dmarc.{domain}</div>
+                <div class="record-location">
+                  {$t('diagnostics/dns-dmarc-check.results.recordSection.location', { domain })}
+                </div>
                 <code>{results.record}</code>
               </div>
             </div>
@@ -321,25 +359,25 @@
 
           <!-- Parsed Policy -->
           <div class="policy-section">
-            <h4>Policy Configuration</h4>
+            <h4>{$t('diagnostics/dns-dmarc-check.results.policyConfiguration.title')}</h4>
             <div class="policy-grid">
               <!-- Main Policy -->
               <div class="policy-item">
                 <div class="policy-header">
                   <Icon name="shield" size="sm" />
-                  <span>Main Policy</span>
+                  <span>{$t('diagnostics/dns-dmarc-check.results.policyConfiguration.mainPolicy')}</span>
                 </div>
                 <div class="policy-value {getPolicyColor(parsed.policy)}">
                   <span class="policy-text">{parsed.policy}</span>
                   <span class="policy-description">
                     {#if parsed.policy === 'reject'}
-                      Reject non-compliant messages
+                      {$t('diagnostics/dns-dmarc-check.results.policyConfiguration.policies.reject')}
                     {:else if parsed.policy === 'quarantine'}
-                      Quarantine suspicious messages
+                      {$t('diagnostics/dns-dmarc-check.results.policyConfiguration.policies.quarantine')}
                     {:else if parsed.policy === 'none'}
-                      Monitor only, no action
+                      {$t('diagnostics/dns-dmarc-check.results.policyConfiguration.policies.none')}
                     {:else}
-                      Unknown policy
+                      {$t('diagnostics/dns-dmarc-check.results.policyConfiguration.policies.unknown')}
                     {/if}
                   </span>
                 </div>
@@ -350,7 +388,7 @@
                 <div class="policy-item">
                   <div class="policy-header">
                     <Icon name="git-branch" size="sm" />
-                    <span>Subdomain Policy</span>
+                    <span>{$t('diagnostics/dns-dmarc-check.results.policyConfiguration.subdomainPolicy')}</span>
                   </div>
                   <div class="policy-value {getPolicyColor(parsed.subdomainPolicy)}">
                     <span class="policy-text">{parsed.subdomainPolicy}</span>
@@ -362,11 +400,13 @@
               <div class="policy-item">
                 <div class="policy-header">
                   <Icon name="percent" size="sm" />
-                  <span>Coverage</span>
+                  <span>{$t('diagnostics/dns-dmarc-check.results.policyConfiguration.coverage')}</span>
                 </div>
                 <div class="policy-value {parseInt(parsed.percentage) === 100 ? 'success' : 'warning'}">
                   <span class="policy-text">{parsed.percentage}%</span>
-                  <span class="policy-description">of messages affected</span>
+                  <span class="policy-description"
+                    >{$t('diagnostics/dns-dmarc-check.results.policyConfiguration.coverageDescription')}</span
+                  >
                 </div>
               </div>
 
@@ -374,12 +414,18 @@
               <div class="policy-item">
                 <div class="policy-header">
                   <Icon name="key" size="sm" />
-                  <span>DKIM Alignment</span>
+                  <span>{$t('diagnostics/dns-dmarc-check.results.policyConfiguration.dkimAlignment')}</span>
                 </div>
                 <div class="policy-value {getAlignmentColor(parsed.alignment.dkim)}">
-                  <span class="policy-text">{parsed.alignment.dkim === 's' ? 'Strict' : 'Relaxed'}</span>
+                  <span class="policy-text">
+                    {parsed.alignment.dkim === 's'
+                      ? $t('diagnostics/dns-dmarc-check.results.policyConfiguration.alignment.strict')
+                      : $t('diagnostics/dns-dmarc-check.results.policyConfiguration.alignment.relaxed')}
+                  </span>
                   <span class="policy-description">
-                    {parsed.alignment.dkim === 's' ? 'Exact domain match' : 'Organizational domain match'}
+                    {parsed.alignment.dkim === 's'
+                      ? $t('diagnostics/dns-dmarc-check.results.policyConfiguration.alignment.strictDescription')
+                      : $t('diagnostics/dns-dmarc-check.results.policyConfiguration.alignment.relaxedDescription')}
                   </span>
                 </div>
               </div>
@@ -388,12 +434,18 @@
               <div class="policy-item">
                 <div class="policy-header">
                   <Icon name="mail" size="sm" />
-                  <span>SPF Alignment</span>
+                  <span>{$t('diagnostics/dns-dmarc-check.results.policyConfiguration.spfAlignment')}</span>
                 </div>
                 <div class="policy-value {getAlignmentColor(parsed.alignment.spf)}">
-                  <span class="policy-text">{parsed.alignment.spf === 's' ? 'Strict' : 'Relaxed'}</span>
+                  <span class="policy-text">
+                    {parsed.alignment.spf === 's'
+                      ? $t('diagnostics/dns-dmarc-check.results.policyConfiguration.alignment.strict')
+                      : $t('diagnostics/dns-dmarc-check.results.policyConfiguration.alignment.relaxed')}
+                  </span>
                   <span class="policy-description">
-                    {parsed.alignment.spf === 's' ? 'Exact domain match' : 'Organizational domain match'}
+                    {parsed.alignment.spf === 's'
+                      ? $t('diagnostics/dns-dmarc-check.results.policyConfiguration.alignment.strictDescription')
+                      : $t('diagnostics/dns-dmarc-check.results.policyConfiguration.alignment.relaxedDescription')}
                   </span>
                 </div>
               </div>
@@ -402,21 +454,21 @@
               <div class="policy-item">
                 <div class="policy-header">
                   <Icon name="settings" size="sm" />
-                  <span>Failure Options</span>
+                  <span>{$t('diagnostics/dns-dmarc-check.results.policyConfiguration.failureOptions')}</span>
                 </div>
                 <div class="policy-value secondary">
                   <span class="policy-text">{parsed.reporting.failureOptions}</span>
                   <span class="policy-description">
                     {#if parsed.reporting.failureOptions === '0'}
-                      DKIM and SPF failure
+                      {$t('diagnostics/dns-dmarc-check.results.policyConfiguration.failureOptionsDescriptions.both')}
                     {:else if parsed.reporting.failureOptions === '1'}
-                      Any alignment failure
+                      {$t('diagnostics/dns-dmarc-check.results.policyConfiguration.failureOptionsDescriptions.any')}
                     {:else if parsed.reporting.failureOptions === 'd'}
-                      DKIM failure only
+                      {$t('diagnostics/dns-dmarc-check.results.policyConfiguration.failureOptionsDescriptions.dkim')}
                     {:else if parsed.reporting.failureOptions === 's'}
-                      SPF failure only
+                      {$t('diagnostics/dns-dmarc-check.results.policyConfiguration.failureOptionsDescriptions.spf')}
                     {:else}
-                      Custom configuration
+                      {$t('diagnostics/dns-dmarc-check.results.policyConfiguration.failureOptionsDescriptions.custom')}
                     {/if}
                   </span>
                 </div>
@@ -426,18 +478,20 @@
 
           <!-- Reporting Configuration -->
           <div class="reporting-section">
-            <h4>Reporting Configuration</h4>
+            <h4>{$t('diagnostics/dns-dmarc-check.results.reporting.title')}</h4>
             <div class="reporting-grid">
               <div class="reporting-item">
                 <div class="reporting-header">
                   <Icon name="bar-chart" size="sm" />
-                  <span>Aggregate Reports (RUA)</span>
+                  <span>{$t('diagnostics/dns-dmarc-check.results.reporting.aggregateReports')}</span>
                 </div>
                 <div class="reporting-value">
                   {#if parsed.reporting.aggregate}
                     <span class="email-address">{parsed.reporting.aggregate}</span>
                   {:else}
-                    <span class="not-configured">Not configured</span>
+                    <span class="not-configured"
+                      >{$t('diagnostics/dns-dmarc-check.results.reporting.notConfigured')}</span
+                    >
                   {/if}
                 </div>
               </div>
@@ -445,13 +499,15 @@
               <div class="reporting-item">
                 <div class="reporting-header">
                   <Icon name="search" size="sm" />
-                  <span>Forensic Reports (RUF)</span>
+                  <span>{$t('diagnostics/dns-dmarc-check.results.reporting.forensicReports')}</span>
                 </div>
                 <div class="reporting-value">
                   {#if parsed.reporting.forensic}
                     <span class="email-address">{parsed.reporting.forensic}</span>
                   {:else}
-                    <span class="not-configured">Not configured</span>
+                    <span class="not-configured"
+                      >{$t('diagnostics/dns-dmarc-check.results.reporting.notConfigured')}</span
+                    >
                   {/if}
                 </div>
               </div>
@@ -461,7 +517,7 @@
           <!-- Issues -->
           {#if issues.length > 0}
             <div class="issues-section">
-              <h4>Issues & Recommendations</h4>
+              <h4>{$t('diagnostics/dns-dmarc-check.results.issues.title')}</h4>
               <div class="issues-list">
                 {#each issues as issue, index (index)}
                   <div class="issue-item {getSeverityColor(issue.severity)}">
@@ -494,13 +550,12 @@
         <div class="warning-content">
           <Icon name="info" size="md" />
           <div>
-            <strong>No DMARC Record Found</strong>
+            <strong>{$t('diagnostics/dns-dmarc-check.noRecord.title')}</strong>
             <p>
-              Domain <code>{domain}</code> does not have a DMARC policy configured at <code>{results.domain}</code>.
+              {$t('diagnostics/dns-dmarc-check.noRecord.message', { domain, dmarcDomain: results.domain })}
             </p>
             <p class="help-text">
-              This means the domain is not protected by DMARC. Consider implementing a DMARC policy to prevent email
-              spoofing.
+              {$t('diagnostics/dns-dmarc-check.noRecord.helpText')}
             </p>
           </div>
         </div>
@@ -514,7 +569,7 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="md" />
           <div>
-            <strong>DMARC Check Failed</strong>
+            <strong>{$t('diagnostics/dns-dmarc-check.error.title')}</strong>
             <p>{error || results.error}</p>
           </div>
         </div>
@@ -525,53 +580,64 @@
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>Understanding DMARC</h3>
+      <h3>{$t('diagnostics/dns-dmarc-check.educational.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>DMARC Policies</h4>
+          <h4>{$t('diagnostics/dns-dmarc-check.educational.policies.title')}</h4>
           <div class="policy-explanations">
             <div class="explanation-item">
-              <strong>none:</strong> Monitor mode - collect data but take no action on failures
+              <strong>none:</strong>
+              {$t('diagnostics/dns-dmarc-check.educational.policies.none')}
             </div>
             <div class="explanation-item">
-              <strong>quarantine:</strong> Mark suspicious messages, often sent to spam folder
+              <strong>quarantine:</strong>
+              {$t('diagnostics/dns-dmarc-check.educational.policies.quarantine')}
             </div>
             <div class="explanation-item">
-              <strong>reject:</strong> Reject non-compliant messages outright (strongest security)
+              <strong>reject:</strong>
+              {$t('diagnostics/dns-dmarc-check.educational.policies.reject')}
             </div>
           </div>
         </div>
 
         <div class="info-section">
-          <h4>Alignment Modes</h4>
+          <h4>{$t('diagnostics/dns-dmarc-check.educational.alignmentModes.title')}</h4>
           <div class="alignment-explanations">
             <div class="explanation-item">
-              <strong>Relaxed (r):</strong> Allows organizational domain matching (default)
+              <strong>Relaxed (r):</strong>
+              {$t('diagnostics/dns-dmarc-check.educational.alignmentModes.relaxed')}
             </div>
             <div class="explanation-item">
-              <strong>Strict (s):</strong> Requires exact domain matching (more secure)
+              <strong>Strict (s):</strong>
+              {$t('diagnostics/dns-dmarc-check.educational.alignmentModes.strict')}
             </div>
           </div>
         </div>
 
         <div class="info-section">
-          <h4>Reporting Types</h4>
+          <h4>{$t('diagnostics/dns-dmarc-check.educational.reportingTypes.title')}</h4>
           <ul>
-            <li><strong>Aggregate (RUA):</strong> Daily summary reports of DMARC activity</li>
-            <li><strong>Forensic (RUF):</strong> Real-time failure reports with message samples</li>
+            <li>
+              <strong>Aggregate (RUA):</strong>
+              {$t('diagnostics/dns-dmarc-check.educational.reportingTypes.aggregate')}
+            </li>
+            <li>
+              <strong>Forensic (RUF):</strong>
+              {$t('diagnostics/dns-dmarc-check.educational.reportingTypes.forensic')}
+            </li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Best Practices</h4>
+          <h4>{$t('diagnostics/dns-dmarc-check.educational.bestPractices.title')}</h4>
           <ul>
-            <li>Start with <code>p=none</code> to monitor before enforcement</li>
-            <li>Gradually increase to <code>p=quarantine</code> then <code>p=reject</code></li>
-            <li>Set up aggregate reporting to monitor DMARC activity</li>
-            <li>Use strict alignment for enhanced security when possible</li>
-            <li>Consider subdomain policy for comprehensive coverage</li>
+            <li>{$t('diagnostics/dns-dmarc-check.educational.bestPractices.items.startMonitoring')}</li>
+            <li>{$t('diagnostics/dns-dmarc-check.educational.bestPractices.items.gradualEnforcement')}</li>
+            <li>{$t('diagnostics/dns-dmarc-check.educational.bestPractices.items.setupReporting')}</li>
+            <li>{$t('diagnostics/dns-dmarc-check.educational.bestPractices.items.strictAlignment')}</li>
+            <li>{$t('diagnostics/dns-dmarc-check.educational.bestPractices.items.subdomainPolicy')}</li>
           </ul>
         </div>
       </div>

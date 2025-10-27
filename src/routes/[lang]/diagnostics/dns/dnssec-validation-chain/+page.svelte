@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/stores/language';
   import '../../../../../styles/diagnostics-pages.scss';
 
   let domain = $state('');
@@ -9,14 +10,32 @@
   let error = $state<string | null>(null);
   let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
-    { domain: 'gov.uk', description: 'UK Government (DNSSEC Enabled)' },
-    { domain: 'cloudflare.com', description: 'Cloudflare (DNSSEC Enabled)' },
-    { domain: 'dnssec-failed.org', description: 'DNSSEC Failed Test' },
-    { domain: 'google.com', description: 'Google (DNSSEC Enabled)' },
-    { domain: 'isc.org', description: 'ISC (DNSSEC Pioneer)' },
-    { domain: 'ietf.org', description: 'IETF (DNSSEC Enabled)' },
-  ];
+  const examples = $derived([
+    {
+      domain: $t('diagnostics/dns-dnssec-validation-chain.examples.items.govuk.domain'),
+      description: $t('diagnostics/dns-dnssec-validation-chain.examples.items.govuk.description'),
+    },
+    {
+      domain: $t('diagnostics/dns-dnssec-validation-chain.examples.items.cloudflare.domain'),
+      description: $t('diagnostics/dns-dnssec-validation-chain.examples.items.cloudflare.description'),
+    },
+    {
+      domain: $t('diagnostics/dns-dnssec-validation-chain.examples.items.failed.domain'),
+      description: $t('diagnostics/dns-dnssec-validation-chain.examples.items.failed.description'),
+    },
+    {
+      domain: $t('diagnostics/dns-dnssec-validation-chain.examples.items.google.domain'),
+      description: $t('diagnostics/dns-dnssec-validation-chain.examples.items.google.description'),
+    },
+    {
+      domain: $t('diagnostics/dns-dnssec-validation-chain.examples.items.isc.domain'),
+      description: $t('diagnostics/dns-dnssec-validation-chain.examples.items.isc.description'),
+    },
+    {
+      domain: $t('diagnostics/dns-dnssec-validation-chain.examples.items.ietf.domain'),
+      description: $t('diagnostics/dns-dnssec-validation-chain.examples.items.ietf.description'),
+    },
+  ]);
 
   const isInputValid = $derived(() => {
     const trimmed = domain.trim();
@@ -29,7 +48,7 @@
 
   async function validateChain() {
     if (!isInputValid) {
-      error = 'Please enter a valid domain name';
+      error = $t('diagnostics/dns-dnssec-validation-chain.error.invalidDomain');
       return;
     }
 
@@ -47,12 +66,12 @@
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'DNSSEC validation failed');
+        throw new Error(data.message || $t('diagnostics/dns-dnssec-validation-chain.error.validationFailed'));
       }
 
       results = data;
     } catch (err) {
-      error = err instanceof Error ? err.message : 'An unexpected error occurred';
+      error = err instanceof Error ? err.message : $t('diagnostics/dns-dnssec-validation-chain.error.unexpectedError');
     } finally {
       loading = false;
     }
@@ -95,8 +114,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>DNSSEC Validation Chain Checker</h1>
-    <p>Validate DNSSEC chain from root to domain, verify DS/DNSKEY matching and RRSIG signatures</p>
+    <h1>{$t('diagnostics/dns-dnssec-validation-chain.title')}</h1>
+    <p>{$t('diagnostics/dns-dnssec-validation-chain.subtitle')}</p>
   </header>
 
   <!-- Examples -->
@@ -104,7 +123,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('diagnostics/dns-dnssec-validation-chain.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -112,7 +131,9 @@
             class="example-card"
             class:selected={selectedExampleIndex === i}
             onclick={() => loadExample(example, i)}
-            use:tooltip={`Check DNSSEC for ${example.domain}`}
+            use:tooltip={$t(
+              `diagnostics/dns-dnssec-validation-chain.examples.items.${['govuk', 'cloudflare', 'failed', 'google', 'isc', 'ietf'][i]}.tooltip`,
+            )}
           >
             <h5>{example.description}</h5>
             <p>{example.domain}</p>
@@ -125,7 +146,7 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>Domain Name</h3>
+      <h3>{$t('diagnostics/dns-dnssec-validation-chain.form.title')}</h3>
     </div>
     <div class="card-content">
       <form
@@ -136,12 +157,12 @@
         }}
       >
         <div class="form-group flex-grow">
-          <label for="domain">Domain to Validate</label>
+          <label for="domain">{$t('diagnostics/dns-dnssec-validation-chain.form.domainLabel')}</label>
           <input
             id="domain"
             type="text"
             bind:value={domain}
-            placeholder="example.com"
+            placeholder={$t('diagnostics/dns-dnssec-validation-chain.form.domainPlaceholder')}
             disabled={loading}
             onchange={() => clearExampleSelection()}
           />
@@ -150,10 +171,10 @@
         <button type="submit" disabled={loading || !isInputValid} class="primary submit-btn">
           {#if loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Validating...
+            {$t('diagnostics/dns-dnssec-validation-chain.form.validating')}
           {:else}
             <Icon name="shield" size="sm" />
-            Validate DNSSEC Chain
+            {$t('diagnostics/dns-dnssec-validation-chain.form.validateButton')}
           {/if}
         </button>
       </form>
@@ -166,7 +187,7 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="md" />
           <div>
-            <strong>Validation Failed</strong>
+            <strong>{$t('diagnostics/dns-dnssec-validation-chain.error.title')}</strong>
             <p>{error}</p>
           </div>
         </div>
@@ -180,8 +201,8 @@
         <div class="loading-state">
           <Icon name="loader" size="lg" animate="spin" />
           <div class="loading-text">
-            <h3>Validating DNSSEC Chain</h3>
-            <p>Querying DNS records from root to {domain}...</p>
+            <h3>{$t('diagnostics/dns-dnssec-validation-chain.loading.title')}</h3>
+            <p>{$t('diagnostics/dns-dnssec-validation-chain.loading.message', { domain })}</p>
           </div>
         </div>
       </div>
@@ -191,7 +212,7 @@
   {#if results}
     <div class="card results-card">
       <div class="card-header">
-        <h3>DNSSEC Validation Results</h3>
+        <h3>{$t('diagnostics/dns-dnssec-validation-chain.results.title')}</h3>
       </div>
       <div class="card-content">
         <!-- Summary -->
@@ -200,38 +221,43 @@
             <h3>
               {#if results.valid}
                 <Icon name="check-circle" size="sm" />
-                DNSSEC Valid
+                {$t('diagnostics/dns-dnssec-validation-chain.results.summary.valid')}
               {:else}
                 <Icon name="x-circle" size="sm" />
-                DNSSEC Invalid
+                {$t('diagnostics/dns-dnssec-validation-chain.results.summary.invalid')}
               {/if}
             </h3>
           </div>
           <div class="card-content">
             <div class="info-grid">
               <div class="info-item">
-                <span class="info-label">Domain:</span>
+                <span class="info-label">{$t('diagnostics/dns-dnssec-validation-chain.results.summary.domain')}</span>
                 <span class="info-value">{results.domain}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Chain Links:</span>
+                <span class="info-label"
+                  >{$t('diagnostics/dns-dnssec-validation-chain.results.summary.chainLinks')}</span
+                >
                 <span class="info-value">{results.summary.totalLinks}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Validated:</span>
+                <span class="info-label">{$t('diagnostics/dns-dnssec-validation-chain.results.summary.validated')}</span
+                >
                 <span class="info-value">{results.summary.validatedLinks}/{results.summary.totalLinks}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Status:</span>
+                <span class="info-label">{$t('diagnostics/dns-dnssec-validation-chain.results.summary.status')}</span>
                 <span class="info-value" class:success={results.valid} class:error={!results.valid}>
-                  {results.valid ? 'Secure' : 'Broken Chain'}
+                  {results.valid
+                    ? $t('diagnostics/dns-dnssec-validation-chain.results.summary.secure')
+                    : $t('diagnostics/dns-dnssec-validation-chain.results.summary.brokenChain')}
                 </span>
               </div>
             </div>
 
             {#if results.summary.errors.length > 0}
               <div class="errors-section">
-                <h4>Validation Errors:</h4>
+                <h4>{$t('diagnostics/dns-dnssec-validation-chain.results.summary.errors')}</h4>
                 <ul>
                   {#each results.summary.errors as err, i (i)}
                     <li>{err}</li>
@@ -245,7 +271,7 @@
         <!-- Chain Links -->
         <div class="chain-section">
           <div class="card-header">
-            <h3>DNSSEC Chain</h3>
+            <h3>{$t('diagnostics/dns-dnssec-validation-chain.results.chain.title')}</h3>
           </div>
           <div class="card-content">
             <div class="chain-visualization">
@@ -260,7 +286,11 @@
                       {/if}
                       <h4>
                         {link.name}
-                        <span class="level">Level {link.level}</span>
+                        <span class="level"
+                          >{$t('diagnostics/dns-dnssec-validation-chain.results.chain.level', {
+                            level: link.level,
+                          })}</span
+                        >
                       </h4>
                     </div>
                   </div>
@@ -269,32 +299,45 @@
                     <!-- DS Records -->
                     {#if link.ds && link.ds.length > 0}
                       <div class="record-section">
-                        <h5 use:tooltip={'Delegation Signer records link this zone to the parent zone'}>
+                        <h5 use:tooltip={$t('diagnostics/dns-dnssec-validation-chain.results.chain.ds.tooltip')}>
                           <Icon name="key" size="xs" />
-                          DS Records
+                          {$t('diagnostics/dns-dnssec-validation-chain.results.chain.ds.title')}
                         </h5>
                         {#each link.ds as ds, j (j)}
                           <div class="record-item">
                             <div class="record-details">
-                              <span class="label" use:tooltip={'Identifier for the DNSKEY this DS record refers to'}
-                                >Key Tag:</span
+                              <span
+                                class="label"
+                                use:tooltip={$t(
+                                  'diagnostics/dns-dnssec-validation-chain.results.chain.ds.keyTagTooltip',
+                                )}>{$t('diagnostics/dns-dnssec-validation-chain.results.chain.ds.keyTag')}</span
                               >
                               <code>{ds.keyTag}</code>
                             </div>
                             <div class="record-details">
-                              <span class="label" use:tooltip={'Cryptographic algorithm used for signing'}
-                                >Algorithm:</span
+                              <span
+                                class="label"
+                                use:tooltip={$t(
+                                  'diagnostics/dns-dnssec-validation-chain.results.chain.ds.algorithmTooltip',
+                                )}>{$t('diagnostics/dns-dnssec-validation-chain.results.chain.ds.algorithm')}</span
                               >
                               <code>{getAlgorithmName(ds.algorithm)}</code>
                             </div>
                             <div class="record-details">
-                              <span class="label" use:tooltip={'Hash algorithm used to create the digest'}
-                                >Digest Type:</span
+                              <span
+                                class="label"
+                                use:tooltip={$t(
+                                  'diagnostics/dns-dnssec-validation-chain.results.chain.ds.digestTypeTooltip',
+                                )}>{$t('diagnostics/dns-dnssec-validation-chain.results.chain.ds.digestType')}</span
                               >
                               <code>{getDigestTypeName(ds.digestType)}</code>
                             </div>
                             <div class="record-details">
-                              <span class="label" use:tooltip={'Hash of the DNSKEY record'}>Hash:</span>
+                              <span
+                                class="label"
+                                use:tooltip={$t('diagnostics/dns-dnssec-validation-chain.results.chain.ds.hashTooltip')}
+                                >{$t('diagnostics/dns-dnssec-validation-chain.results.chain.ds.hash')}</span
+                              >
                               <code class="hash">{ds.digest.substring(0, 40)}...</code>
                             </div>
                           </div>
@@ -305,36 +348,61 @@
                     <!-- DNSKEY Records -->
                     {#if link.dnskey && link.dnskey.length > 0}
                       <div class="record-section">
-                        <h5 use:tooltip={'Public keys used to verify DNSSEC signatures'}>
+                        <h5 use:tooltip={$t('diagnostics/dns-dnssec-validation-chain.results.chain.dnskey.tooltip')}>
                           <Icon name="lock" size="xs" />
-                          DNSKEY Records
+                          {$t('diagnostics/dns-dnssec-validation-chain.results.chain.dnskey.title')}
                         </h5>
                         {#each link.dnskey as key, j (j)}
                           <div class="record-item" class:matched={key.matched}>
                             <div class="record-details">
-                              <span class="label" use:tooltip={'Identifier for this DNSKEY'}>Key Tag:</span>
+                              <span
+                                class="label"
+                                use:tooltip={$t(
+                                  'diagnostics/dns-dnssec-validation-chain.results.chain.dnskey.keyTagTooltip',
+                                )}>{$t('diagnostics/dns-dnssec-validation-chain.results.chain.dnskey.keyTag')}</span
+                              >
                               <code>{key.keyTag}</code>
                               {#if key.matched}
                                 <span
                                   class="badge success"
-                                  use:tooltip={'This DNSKEY matches a DS record in the parent zone'}>Matched DS</span
+                                  use:tooltip={$t(
+                                    'diagnostics/dns-dnssec-validation-chain.results.chain.dnskey.matchedDSTooltip',
+                                  )}
+                                  >{$t('diagnostics/dns-dnssec-validation-chain.results.chain.dnskey.matchedDS')}</span
                                 >
                               {/if}
                             </div>
                             <div class="record-details">
-                              <span class="label" use:tooltip={'Key properties: 256=ZSK, 257=KSK'}>Flags:</span>
+                              <span
+                                class="label"
+                                use:tooltip={$t(
+                                  'diagnostics/dns-dnssec-validation-chain.results.chain.dnskey.flagsTooltip',
+                                )}>{$t('diagnostics/dns-dnssec-validation-chain.results.chain.dnskey.flags')}</span
+                              >
                               <code>{key.flags}</code>
                               {#if key.isKSK}
-                                <span class="badge info" use:tooltip={'Key Signing Key - signs other DNSKEYs'}>KSK</span
+                                <span
+                                  class="badge info"
+                                  use:tooltip={$t(
+                                    'diagnostics/dns-dnssec-validation-chain.results.chain.dnskey.kskTooltip',
+                                  )}>{$t('diagnostics/dns-dnssec-validation-chain.results.chain.dnskey.ksk')}</span
                                 >
                               {/if}
                               {#if key.isZSK}
-                                <span class="badge info" use:tooltip={'Zone Signing Key - signs zone data'}>ZSK</span>
+                                <span
+                                  class="badge info"
+                                  use:tooltip={$t(
+                                    'diagnostics/dns-dnssec-validation-chain.results.chain.dnskey.zskTooltip',
+                                  )}>{$t('diagnostics/dns-dnssec-validation-chain.results.chain.dnskey.zsk')}</span
+                                >
                               {/if}
                             </div>
                             <div class="record-details">
-                              <span class="label" use:tooltip={'Cryptographic algorithm used for signing'}
-                                >Algorithm:</span
+                              <span
+                                class="label"
+                                use:tooltip={$t(
+                                  'diagnostics/dns-dnssec-validation-chain.results.chain.dnskey.algorithmTooltip',
+                                )}>{$t('diagnostics/dns-dnssec-validation-chain.results.chain.dnskey.algorithm')}</span
                               >
                               <code>{getAlgorithmName(key.algorithm)}</code>
                             </div>
@@ -346,35 +414,52 @@
                     <!-- RRSIG Records -->
                     {#if link.rrsig && link.rrsig.length > 0}
                       <div class="record-section">
-                        <h5 use:tooltip={'Digital signatures created with DNSKEY to authenticate DNS data'}>
+                        <h5 use:tooltip={$t('diagnostics/dns-dnssec-validation-chain.results.chain.rrsig.tooltip')}>
                           <Icon name="signature" size="xs" />
-                          RRSIG Records
+                          {$t('diagnostics/dns-dnssec-validation-chain.results.chain.rrsig.title')}
                         </h5>
                         {#each link.rrsig as sig, j (j)}
                           <div class="record-item" class:valid={sig.valid} class:invalid={!sig.valid}>
                             <div class="record-details">
-                              <span class="label" use:tooltip={'DNS record type this signature covers'}
-                                >Type Covered:</span
+                              <span
+                                class="label"
+                                use:tooltip={$t(
+                                  'diagnostics/dns-dnssec-validation-chain.results.chain.rrsig.typeCoveredTooltip',
+                                )}>{$t('diagnostics/dns-dnssec-validation-chain.results.chain.rrsig.typeCovered')}</span
                               >
                               <code>{sig.typeCovered}</code>
                               {#if sig.valid}
-                                <span class="badge success" use:tooltip={'Signature is valid and within time window'}
-                                  >Valid</span
+                                <span
+                                  class="badge success"
+                                  use:tooltip={$t(
+                                    'diagnostics/dns-dnssec-validation-chain.results.chain.rrsig.validTooltip',
+                                  )}>{$t('diagnostics/dns-dnssec-validation-chain.results.chain.rrsig.valid')}</span
                                 >
                               {:else}
-                                <span class="badge error" use:tooltip={'Signature is expired or not yet valid'}
-                                  >Invalid</span
+                                <span
+                                  class="badge error"
+                                  use:tooltip={$t(
+                                    'diagnostics/dns-dnssec-validation-chain.results.chain.rrsig.invalidTooltip',
+                                  )}>{$t('diagnostics/dns-dnssec-validation-chain.results.chain.rrsig.invalid')}</span
                                 >
                               {/if}
                             </div>
                             <div class="record-details">
-                              <span class="label" use:tooltip={'Identifies which DNSKEY created this signature'}
-                                >Key Tag:</span
+                              <span
+                                class="label"
+                                use:tooltip={$t(
+                                  'diagnostics/dns-dnssec-validation-chain.results.chain.rrsig.keyTagTooltip',
+                                )}>{$t('diagnostics/dns-dnssec-validation-chain.results.chain.rrsig.keyTag')}</span
                               >
                               <code>{sig.keyTag}</code>
                             </div>
                             <div class="record-details">
-                              <span class="label" use:tooltip={'Zone that created this signature'}>Signer:</span>
+                              <span
+                                class="label"
+                                use:tooltip={$t(
+                                  'diagnostics/dns-dnssec-validation-chain.results.chain.rrsig.signerTooltip',
+                                )}>{$t('diagnostics/dns-dnssec-validation-chain.results.chain.rrsig.signer')}</span
+                              >
                               <code>{sig.signerName}</code>
                             </div>
                           </div>
@@ -387,7 +472,7 @@
                       <div class="record-section errors">
                         <h5>
                           <Icon name="alert-triangle" size="xs" />
-                          Errors
+                          {$t('diagnostics/dns-dnssec-validation-chain.results.chain.errors.title')}
                         </h5>
                         <ul>
                           {#each link.errors as err, j (j)}

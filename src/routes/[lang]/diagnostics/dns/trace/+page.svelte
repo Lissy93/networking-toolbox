@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/stores/language';
   import '../../../../../styles/diagnostics-pages.scss';
 
   let domainName = $state('example.com');
@@ -9,18 +10,36 @@
   let error = $state<string | null>(null);
   let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
-    { domain: 'www.cloudflare.com', description: 'Cloudflare edge network' },
-    { domain: 'www.google.com', description: 'Popular service with CDN' },
-    { domain: 'github.com', description: 'GitHub platform trace' },
-    { domain: 'bbc.co.uk', description: 'Multi-level TLD (.co.uk)' },
-    { domain: 'aws.amazon.com', description: 'AWS subdomain delegation' },
-    { domain: 'aliciasykes.com', description: 'Homepage hosted on Vercel' },
-  ];
+  const examples = $derived([
+    {
+      domain: $t('diagnostics/dns-trace.examples.items.cloudflare.domain'),
+      description: $t('diagnostics/dns-trace.examples.items.cloudflare.description'),
+    },
+    {
+      domain: $t('diagnostics/dns-trace.examples.items.google.domain'),
+      description: $t('diagnostics/dns-trace.examples.items.google.description'),
+    },
+    {
+      domain: $t('diagnostics/dns-trace.examples.items.github.domain'),
+      description: $t('diagnostics/dns-trace.examples.items.github.description'),
+    },
+    {
+      domain: $t('diagnostics/dns-trace.examples.items.bbc.domain'),
+      description: $t('diagnostics/dns-trace.examples.items.bbc.description'),
+    },
+    {
+      domain: $t('diagnostics/dns-trace.examples.items.aws.domain'),
+      description: $t('diagnostics/dns-trace.examples.items.aws.description'),
+    },
+    {
+      domain: $t('diagnostics/dns-trace.examples.items.alicia.domain'),
+      description: $t('diagnostics/dns-trace.examples.items.alicia.description'),
+    },
+  ]);
 
   async function performTrace() {
     if (!domainName?.trim()) {
-      error = 'Please enter a domain name';
+      error = $t('diagnostics/dns-trace.error.emptyDomain');
       return;
     }
 
@@ -41,12 +60,12 @@
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to trace domain');
+        throw new Error(data.message || $t('diagnostics/dns-trace.error.failed'));
       }
 
       results = data;
     } catch (err) {
-      error = err instanceof Error ? err.message : 'An error occurred';
+      error = err instanceof Error ? err.message : $t('diagnostics/dns-trace.error.general');
     } finally {
       loading = false;
     }
@@ -71,8 +90,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>DNS Trace Tool</h1>
-    <p>Iterative trace from root to authoritative nameservers via DNS over HTTPS</p>
+    <h1>{$t('diagnostics/dns-trace.title')}</h1>
+    <p>{$t('diagnostics/dns-trace.subtitle')}</p>
   </header>
 
   <!-- Examples -->
@@ -80,7 +99,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('diagnostics/dns-trace.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -88,7 +107,9 @@
             class="example-card"
             class:selected={selectedExampleIndex === i}
             onclick={() => loadExample(example, i)}
-            use:tooltip={`Trace DNS resolution path for ${example.domain}`}
+            use:tooltip={$t(
+              `diagnostics/dns-trace.examples.items.${['cloudflare', 'google', 'github', 'bbc', 'aws', 'alicia'][i]}.tooltip`,
+            )}
           >
             <h5>{example.domain}</h5>
             <p>{example.description}</p>
@@ -101,17 +122,17 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>Trace Configuration</h3>
+      <h3>{$t('diagnostics/dns-trace.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-group">
-        <label for="domain">Domain Name</label>
+        <label for="domain">{$t('diagnostics/dns-trace.form.domainLabel')}</label>
         <div class="input-flex-container">
           <input
             id="domain"
             type="text"
             bind:value={domainName}
-            placeholder="example.com"
+            placeholder={$t('diagnostics/dns-trace.form.domainPlaceholder')}
             disabled={loading}
             onchange={() => clearExampleSelection()}
             onkeydown={(e) => e.key === 'Enter' && performTrace()}
@@ -119,10 +140,10 @@
           <button onclick={performTrace} disabled={loading} class="primary">
             {#if loading}
               <Icon name="loader" size="sm" animate="spin" />
-              Tracing...
+              {$t('diagnostics/dns-trace.form.tracing')}
             {:else}
               <Icon name="search" size="sm" />
-              Trace
+              {$t('diagnostics/dns-trace.form.traceButton')}
             {/if}
           </button>
         </div>
@@ -136,7 +157,7 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="md" />
           <div>
-            <strong>Trace Failed</strong>
+            <strong>{$t('diagnostics/dns-trace.error.title')}</strong>
             <p>{error}</p>
           </div>
         </div>
@@ -150,8 +171,8 @@
         <div class="loading-state">
           <Icon name="loader" size="lg" animate="spin" />
           <div class="loading-text">
-            <h3>Performing DNS Trace</h3>
-            <p>Following the DNS resolution path from root servers to authoritative nameservers...</p>
+            <h3>{$t('diagnostics/dns-trace.loading.title')}</h3>
+            <p>{$t('diagnostics/dns-trace.loading.message')}</p>
           </div>
         </div>
       </div>
@@ -161,7 +182,7 @@
   {#if results}
     <div class="card results-card">
       <div class="card-header">
-        <h3>Trace Path</h3>
+        <h3>{$t('diagnostics/dns-trace.results.pathTitle')}</h3>
       </div>
       <div class="card-content">
         <div class="trace-timeline">
@@ -173,20 +194,30 @@
 
               <div class="step-content">
                 <div class="step-header">
-                  <span class="step-type" use:tooltip={'Type of DNS query operation'}>{step.type}</span>
-                  <span class="step-timing" use:tooltip={'Time taken for this query'}>{formatTiming(step.timing)}</span>
+                  <span class="step-type" use:tooltip={$t('diagnostics/dns-trace.results.step.typeTooltip')}
+                    >{step.type}</span
+                  >
+                  <span class="step-timing" use:tooltip={$t('diagnostics/dns-trace.results.step.timingTooltip')}
+                    >{formatTiming(step.timing)}</span
+                  >
                 </div>
 
                 <div class="step-query">
-                  <strong use:tooltip={'Domain name being queried'}>Query:</strong>
+                  <strong use:tooltip={$t('diagnostics/dns-trace.results.step.queryTooltip')}
+                    >{$t('diagnostics/dns-trace.results.step.query')}</strong
+                  >
                   {step.query}
                   {#if step.qtype}
-                    <span class="record-type" use:tooltip={'DNS record type requested'}>{step.qtype}</span>
+                    <span class="record-type" use:tooltip={$t('diagnostics/dns-trace.results.step.qtypeTooltip')}
+                      >{step.qtype}</span
+                    >
                   {/if}
                 </div>
 
                 <div class="step-server">
-                  <strong use:tooltip={'DNS server that responded to this query'}>Server:</strong>
+                  <strong use:tooltip={$t('diagnostics/dns-trace.results.step.serverTooltip')}
+                    >{$t('diagnostics/dns-trace.results.step.server')}</strong
+                  >
                   {step.server}
                   {#if step.serverName}
                     <span class="server-name">({step.serverName})</span>
@@ -195,10 +226,14 @@
 
                 {#if step.response}
                   <div class="step-response">
-                    <strong use:tooltip={'Response received from the DNS server'}>Response:</strong>
+                    <strong use:tooltip={$t('diagnostics/dns-trace.results.step.responseTooltip')}
+                      >{$t('diagnostics/dns-trace.results.step.response')}</strong
+                    >
                     {#if step.response.type === 'referral'}
                       <span class="referral">
-                        Referral to {step.response.nameservers.join(', ')}
+                        {$t('diagnostics/dns-trace.results.step.referral', {
+                          nameservers: step.response.nameservers.join(', '),
+                        })}
                       </span>
                     {:else if step.response.type === 'answer'}
                       <span class="answer">
@@ -209,9 +244,9 @@
                         {/if}
                       </span>
                     {:else if step.response.type === 'nodata'}
-                      <span class="nodata">No data for this record type</span>
+                      <span class="nodata">{$t('diagnostics/dns-trace.results.step.nodata')}</span>
                     {:else if step.response.type === 'nxdomain'}
-                      <span class="nxdomain">Domain does not exist</span>
+                      <span class="nxdomain">{$t('diagnostics/dns-trace.results.step.nxdomain')}</span>
                     {/if}
                   </div>
                 {/if}
@@ -219,16 +254,18 @@
                 {#if step.flags}
                   <div class="step-flags">
                     {#if step.flags.aa}
-                      <span class="flag authoritative" use:tooltip={'Authoritative Answer'}>AA</span>
+                      <span class="flag authoritative" use:tooltip={$t('diagnostics/dns-trace.results.flags.aa')}
+                        >AA</span
+                      >
                     {/if}
                     {#if step.flags.ad}
-                      <span class="flag dnssec" use:tooltip={'Authenticated Data (DNSSEC)'}>AD</span>
+                      <span class="flag dnssec" use:tooltip={$t('diagnostics/dns-trace.results.flags.ad')}>AD</span>
                     {/if}
                     {#if step.flags.rd}
-                      <span class="flag" use:tooltip={'Recursion Desired'}>RD</span>
+                      <span class="flag" use:tooltip={$t('diagnostics/dns-trace.results.flags.rd')}>RD</span>
                     {/if}
                     {#if step.flags.ra}
-                      <span class="flag" use:tooltip={'Recursion Available'}>RA</span>
+                      <span class="flag" use:tooltip={$t('diagnostics/dns-trace.results.flags.ra')}>RA</span>
                     {/if}
                   </div>
                 {/if}
@@ -242,53 +279,61 @@
     {#if results.summary}
       <div class="card">
         <div class="card-header">
-          <h3>Trace Summary</h3>
+          <h3>{$t('diagnostics/dns-trace.results.summary.title')}</h3>
         </div>
         <div class="card-content">
           <div class="stats-grid">
             <div class="stat-card">
-              <div class="stat-label" use:tooltip={'Total time for the complete DNS trace'}>Total Time</div>
+              <div class="stat-label" use:tooltip={$t('diagnostics/dns-trace.results.summary.totalTime.tooltip')}>
+                {$t('diagnostics/dns-trace.results.summary.totalTime.label')}
+              </div>
               <div class="stat-value">
                 <Icon name="timer" size="sm" />
                 {formatTiming(results.summary.totalTime)}
               </div>
             </div>
             <div class="stat-card">
-              <div class="stat-label" use:tooltip={'Number of DNS queries performed during trace'}>DNS Queries</div>
+              <div class="stat-label" use:tooltip={$t('diagnostics/dns-trace.results.summary.dnsQueries.tooltip')}>
+                {$t('diagnostics/dns-trace.results.summary.dnsQueries.label')}
+              </div>
               <div class="stat-value">{results.summary.queryCount}</div>
             </div>
             {#if results.summary.finalServer}
               <div class="stat-card">
-                <div class="stat-label" use:tooltip={'Final authoritative server that provided the answer'}>
-                  Final Server
+                <div class="stat-label" use:tooltip={$t('diagnostics/dns-trace.results.summary.finalServer.tooltip')}>
+                  {$t('diagnostics/dns-trace.results.summary.finalServer.label')}
                 </div>
                 <div class="stat-value mono">{results.summary.finalServer}</div>
               </div>
             {/if}
             {#if results.summary.recordType}
               <div class="stat-card">
-                <div class="stat-label" use:tooltip={'Type of DNS record that was traced'}>Record Type</div>
+                <div class="stat-label" use:tooltip={$t('diagnostics/dns-trace.results.summary.recordType.tooltip')}>
+                  {$t('diagnostics/dns-trace.results.summary.recordType.label')}
+                </div>
                 <div class="stat-value">{results.summary.recordType}</div>
               </div>
             {/if}
             {#if results.summary.totalHops}
               <div class="stat-card">
-                <div class="stat-label" use:tooltip={'Number of DNS resolution hops from root to authoritative'}>
-                  Total Hops
+                <div class="stat-label" use:tooltip={$t('diagnostics/dns-trace.results.summary.totalHops.tooltip')}>
+                  {$t('diagnostics/dns-trace.results.summary.totalHops.label')}
                 </div>
                 <div class="stat-value">{results.summary.totalHops}</div>
               </div>
             {/if}
             {#if results.summary.averageLatency}
               <div class="stat-card">
-                <div class="stat-label" use:tooltip={'Average response time per DNS query'}>Avg Latency</div>
+                <div class="stat-label" use:tooltip={$t('diagnostics/dns-trace.results.summary.avgLatency.tooltip')}>
+                  {$t('diagnostics/dns-trace.results.summary.avgLatency.label')}
+                </div>
                 <div class="stat-value">{results.summary.averageLatency}ms</div>
               </div>
             {/if}
             {#if results.summary.dnssecValid !== undefined}
               <div class="stat-card">
-                <div class="stat-label" use:tooltip={'DNSSEC validation status for the final response'}>
-                  DNSSEC Status
+                <div class="stat-label" use:tooltip={$t('diagnostics/dns-trace.results.summary.dnssecStatus.tooltip')}>
+                  {$t('diagnostics/dns-trace.results.summary.dnssecStatus.label')}
                 </div>
                 <div
                   class="stat-value"
@@ -296,14 +341,16 @@
                   class:invalid={!results.summary.dnssecValid}
                 >
                   <Icon name={results.summary.dnssecValid ? 'shield-check' : 'shield-x'} size="sm" />
-                  {results.summary.dnssecValid ? 'Valid' : 'Not Validated'}
+                  {results.summary.dnssecValid
+                    ? $t('diagnostics/dns-trace.results.summary.dnssecStatus.valid')
+                    : $t('diagnostics/dns-trace.results.summary.dnssecStatus.notValidated')}
                 </div>
               </div>
             {/if}
             {#if results.summary.authoritativeAnswer !== undefined}
               <div class="stat-card">
-                <div class="stat-label" use:tooltip={'Whether the final answer came from an authoritative server'}>
-                  Authoritative
+                <div class="stat-label" use:tooltip={$t('diagnostics/dns-trace.results.summary.authoritative.tooltip')}>
+                  {$t('diagnostics/dns-trace.results.summary.authoritative.label')}
                 </div>
                 <div
                   class="stat-value"
@@ -311,22 +358,27 @@
                   class:invalid={!results.summary.authoritativeAnswer}
                 >
                   <Icon name={results.summary.authoritativeAnswer ? 'check-circle' : 'x-circle'} size="sm" />
-                  {results.summary.authoritativeAnswer ? 'Yes' : 'No'}
+                  {results.summary.authoritativeAnswer
+                    ? $t('diagnostics/dns-trace.results.summary.authoritative.yes')
+                    : $t('diagnostics/dns-trace.results.summary.authoritative.no')}
                 </div>
               </div>
             {/if}
             {#if results.summary.resolverPath}
               <div class="stat-card double-width">
-                <div class="stat-label" use:tooltip={'The path taken through different DNS servers'}>
-                  Resolution Path
+                <div
+                  class="stat-label"
+                  use:tooltip={$t('diagnostics/dns-trace.results.summary.resolutionPath.tooltip')}
+                >
+                  {$t('diagnostics/dns-trace.results.summary.resolutionPath.label')}
                 </div>
                 <div class="stat-value mono resolver-path">{results.summary.resolverPath}</div>
               </div>
             {/if}
             {#if results.summary.finalAnswer}
               <div class="stat-card double-width">
-                <div class="stat-label" use:tooltip={'The final answer received from the authoritative server'}>
-                  Final Answer
+                <div class="stat-label" use:tooltip={$t('diagnostics/dns-trace.results.summary.finalAnswer.tooltip')}>
+                  {$t('diagnostics/dns-trace.results.summary.finalAnswer.label')}
                 </div>
                 <div class="stat-value mono">
                   {Array.isArray(results.summary.finalAnswer)

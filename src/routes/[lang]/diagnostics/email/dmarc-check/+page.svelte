@@ -3,6 +3,7 @@
   import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
+  import { t } from '$lib/stores/language';
   import '../../../../../styles/diagnostics-pages.scss';
 
   let domain = $state('gmail.com');
@@ -10,14 +11,32 @@
   const diagnosticState = useDiagnosticState<any>();
   const clipboard = useClipboard();
 
-  const examplesList = [
-    { domain: 'gmail.com', description: 'Google Gmail DMARC policy' },
-    { domain: 'outlook.com', description: 'Microsoft Outlook DMARC setup' },
-    { domain: 'github.com', description: 'GitHub enterprise DMARC' },
-    { domain: 'paypal.com', description: 'PayPal strict DMARC policy' },
-    { domain: 'amazon.com', description: 'Amazon DMARC implementation' },
-    { domain: 'salesforce.com', description: 'Salesforce DMARC configuration' },
-  ];
+  const examplesList = $derived([
+    {
+      domain: $t('diagnostics/email-dmarc-check.examples.items.gmail.domain'),
+      description: $t('diagnostics/email-dmarc-check.examples.items.gmail.description'),
+    },
+    {
+      domain: $t('diagnostics/email-dmarc-check.examples.items.outlook.domain'),
+      description: $t('diagnostics/email-dmarc-check.examples.items.outlook.description'),
+    },
+    {
+      domain: $t('diagnostics/email-dmarc-check.examples.items.github.domain'),
+      description: $t('diagnostics/email-dmarc-check.examples.items.github.description'),
+    },
+    {
+      domain: $t('diagnostics/email-dmarc-check.examples.items.paypal.domain'),
+      description: $t('diagnostics/email-dmarc-check.examples.items.paypal.description'),
+    },
+    {
+      domain: $t('diagnostics/email-dmarc-check.examples.items.amazon.domain'),
+      description: $t('diagnostics/email-dmarc-check.examples.items.amazon.description'),
+    },
+    {
+      domain: $t('diagnostics/email-dmarc-check.examples.items.salesforce.domain'),
+      description: $t('diagnostics/email-dmarc-check.examples.items.salesforce.description'),
+    },
+  ]);
 
   const examples = useExamples(examplesList);
 
@@ -41,7 +60,7 @@
       const data = await response.json();
       diagnosticState.setResults(data);
     } catch (err: unknown) {
-      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      diagnosticState.setError(err instanceof Error ? err.message : $t('common.errors.unknownError'));
     }
   }
 
@@ -129,11 +148,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>Email DMARC Policy Checker</h1>
-    <p>
-      Check DMARC (Domain-based Message Authentication, Reporting & Conformance) policies with focus on email
-      deliverability impact. Understand how DMARC affects your email delivery and reputation.
-    </p>
+    <h1>{$t('diagnostics/email-dmarc-check.title')}</h1>
+    <p>{$t('diagnostics/email-dmarc-check.subtitle')}</p>
   </header>
 
   <!-- Examples -->
@@ -141,26 +157,27 @@
     examples={examplesList}
     selectedIndex={examples.selectedIndex}
     onSelect={loadExample}
-    title="DMARC Examples"
+    title={$t('diagnostics/email-dmarc-check.examples.title')}
     getLabel={(ex) => ex.domain}
     getDescription={(ex) => ex.description}
-    getTooltip={(ex) => `Check DMARC policy for ${ex.domain}`}
+    getTooltip={(ex) =>
+      $t('diagnostics/email-dmarc-check.examples.items.gmail.tooltip').replace('gmail.com', ex.domain)}
   />
 
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>DMARC Policy Check</h3>
+      <h3>{$t('diagnostics/email-dmarc-check.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-group">
         <label for="domain">
-          Domain Name
+          {$t('diagnostics/email-dmarc-check.form.domainLabel')}
           <input
             id="domain"
             type="text"
             bind:value={domain}
-            placeholder="example.com"
+            placeholder={$t('diagnostics/email-dmarc-check.form.domainPlaceholder')}
             onchange={() => {
               examples.clear();
               if (domain) checkDMARC();
@@ -173,10 +190,10 @@
         <button class="check-btn lookup-btn" onclick={checkDMARC} disabled={diagnosticState.loading || !domain.trim()}>
           {#if diagnosticState.loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Checking DMARC...
+            {$t('diagnostics/email-dmarc-check.form.checking')}
           {:else}
             <Icon name="shield-check" size="sm" />
-            Check DMARC Policy
+            {$t('diagnostics/email-dmarc-check.form.checkButton')}
           {/if}
         </button>
       </div>
@@ -187,10 +204,12 @@
   {#if diagnosticState.results && diagnosticState.results.hasRecord}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>DMARC Policy Analysis</h3>
+        <h3>{$t('diagnostics/email-dmarc-check.results.title')}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
           <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
-          {clipboard.isCopied() ? 'Copied!' : 'Copy Results'}
+          {clipboard.isCopied()
+            ? $t('diagnostics/email-dmarc-check.results.copied')
+            : $t('diagnostics/email-dmarc-check.results.copyButton')}
         </button>
       </div>
       <div class="card-content">
@@ -200,7 +219,7 @@
             <div class="deliverability-overview {getPolicyColor(diagnosticState.results.parsed.policy)}">
               <Icon name={getPolicyIcon(diagnosticState.results.parsed.policy)} size="md" />
               <div>
-                <h4>Email Deliverability Impact</h4>
+                <h4>{$t('diagnostics/email-dmarc-check.results.deliverability.title')}</h4>
                 <p class="policy-impact">{diagnosticState.results.deliverabilityHints.policyImpact}</p>
                 {#if diagnosticState.results.deliverabilityHints.alignmentComplexity?.strict}
                   <p class="alignment-warning">
@@ -215,7 +234,7 @@
               {@const hintsData = (diagnosticState.results as { deliverabilityHints: { recommendations: string[] } })
                 .deliverabilityHints}
               <div class="recommendations-section">
-                <h5>Deliverability Recommendations</h5>
+                <h5>{$t('diagnostics/email-dmarc-check.results.deliverability.recommendations')}</h5>
                 <div class="recommendation-list">
                   {#each hintsData.recommendations as recommendation, recIndex (recIndex)}
                     <div class="recommendation-item">
@@ -230,7 +249,7 @@
 
           <!-- DMARC Record -->
           <div class="record-section">
-            <h4>DMARC Record</h4>
+            <h4>{$t('diagnostics/email-dmarc-check.results.record.title')}</h4>
             <div class="record-display">
               <div class="record-location">_dmarc.{domain}</div>
               <code>{diagnosticState.results.record}</code>
@@ -239,25 +258,25 @@
 
           <!-- Policy Configuration -->
           <div class="policy-section">
-            <h4>Policy Configuration</h4>
+            <h4>{$t('diagnostics/email-dmarc-check.results.policy.title')}</h4>
             <div class="policy-grid">
               <!-- Main Policy -->
               <div class="policy-item {getPolicyColor(diagnosticState.results.parsed.policy)}">
                 <div class="policy-header">
                   <Icon name="shield" size="sm" />
-                  <span>Main Policy</span>
+                  <span>{$t('diagnostics/email-dmarc-check.results.policy.mainPolicy')}</span>
                 </div>
                 <div class="policy-value">
                   <span class="policy-text">{diagnosticState.results.parsed.policy}</span>
                   <span class="policy-description">
                     {#if diagnosticState.results.parsed.policy === 'reject'}
-                      Reject non-compliant messages
+                      {$t('diagnostics/email-dmarc-check.results.policy.values.reject')}
                     {:else if diagnosticState.results.parsed.policy === 'quarantine'}
-                      Quarantine suspicious messages
+                      {$t('diagnostics/email-dmarc-check.results.policy.values.quarantine')}
                     {:else if diagnosticState.results.parsed.policy === 'none'}
-                      Monitor only, no action
+                      {$t('diagnostics/email-dmarc-check.results.policy.values.none')}
                     {:else}
-                      Unknown policy
+                      {$t('diagnostics/email-dmarc-check.results.policy.values.unknown')}
                     {/if}
                   </span>
                 </div>
@@ -268,7 +287,7 @@
                 <div class="policy-item {getPolicyColor(diagnosticState.results.parsed.subdomainPolicy)}">
                   <div class="policy-header">
                     <Icon name="git-branch" size="sm" />
-                    <span>Subdomain Policy</span>
+                    <span>{$t('diagnostics/email-dmarc-check.results.policy.subdomainPolicy')}</span>
                   </div>
                   <div class="policy-value">
                     <span class="policy-text">{diagnosticState.results.parsed.subdomainPolicy}</span>
@@ -284,11 +303,13 @@
               >
                 <div class="policy-header">
                   <Icon name="percent" size="sm" />
-                  <span>Coverage</span>
+                  <span>{$t('diagnostics/email-dmarc-check.results.policy.coverage')}</span>
                 </div>
                 <div class="policy-value">
                   <span class="policy-text">{diagnosticState.results.parsed.percentage}%</span>
-                  <span class="policy-description">of messages affected</span>
+                  <span class="policy-description"
+                    >{$t('diagnostics/email-dmarc-check.results.policy.coverageDescription')}</span
+                  >
                 </div>
               </div>
 
@@ -296,16 +317,18 @@
               <div class="policy-item {getAlignmentColor(diagnosticState.results.parsed.alignment.dkim)}">
                 <div class="policy-header">
                   <Icon name="key" size="sm" />
-                  <span>DKIM Alignment</span>
+                  <span>{$t('diagnostics/email-dmarc-check.results.policy.dkimAlignment')}</span>
                 </div>
                 <div class="policy-value">
                   <span class="policy-text"
-                    >{diagnosticState.results.parsed.alignment.dkim === 's' ? 'Strict' : 'Relaxed'}</span
+                    >{diagnosticState.results.parsed.alignment.dkim === 's'
+                      ? $t('diagnostics/email-dmarc-check.results.policy.values.strict')
+                      : $t('diagnostics/email-dmarc-check.results.policy.values.relaxed')}</span
                   >
                   <span class="policy-description">
                     {diagnosticState.results.parsed.alignment.dkim === 's'
-                      ? 'Exact domain match required'
-                      : 'Organizational domain match allowed'}
+                      ? $t('diagnostics/email-dmarc-check.results.policy.values.strictDescription')
+                      : $t('diagnostics/email-dmarc-check.results.policy.values.relaxedDescription')}
                   </span>
                 </div>
               </div>
@@ -314,16 +337,18 @@
               <div class="policy-item {getAlignmentColor(diagnosticState.results.parsed.alignment.spf)}">
                 <div class="policy-header">
                   <Icon name="mail" size="sm" />
-                  <span>SPF Alignment</span>
+                  <span>{$t('diagnostics/email-dmarc-check.results.policy.spfAlignment')}</span>
                 </div>
                 <div class="policy-value">
                   <span class="policy-text"
-                    >{diagnosticState.results.parsed.alignment.spf === 's' ? 'Strict' : 'Relaxed'}</span
+                    >{diagnosticState.results.parsed.alignment.spf === 's'
+                      ? $t('diagnostics/email-dmarc-check.results.policy.values.strict')
+                      : $t('diagnostics/email-dmarc-check.results.policy.values.relaxed')}</span
                   >
                   <span class="policy-description">
                     {diagnosticState.results.parsed.alignment.spf === 's'
-                      ? 'Exact domain match required'
-                      : 'Organizational domain match allowed'}
+                      ? $t('diagnostics/email-dmarc-check.results.policy.values.strictDescription')
+                      : $t('diagnostics/email-dmarc-check.results.policy.values.relaxedDescription')}
                   </span>
                 </div>
               </div>
@@ -332,21 +357,21 @@
               <div class="policy-item secondary">
                 <div class="policy-header">
                   <Icon name="settings" size="sm" />
-                  <span>Failure Options</span>
+                  <span>{$t('diagnostics/email-dmarc-check.results.policy.failureOptions')}</span>
                 </div>
                 <div class="policy-value">
                   <span class="policy-text">{diagnosticState.results.parsed.reporting.failureOptions}</span>
                   <span class="policy-description">
                     {#if diagnosticState.results.parsed.reporting.failureOptions === '0'}
-                      DKIM and SPF failure
+                      {$t('diagnostics/email-dmarc-check.results.policy.failureOptionsValues.0')}
                     {:else if diagnosticState.results.parsed.reporting.failureOptions === '1'}
-                      Any alignment failure
+                      {$t('diagnostics/email-dmarc-check.results.policy.failureOptionsValues.1')}
                     {:else if diagnosticState.results.parsed.reporting.failureOptions === 'd'}
-                      DKIM failure only
+                      {$t('diagnostics/email-dmarc-check.results.policy.failureOptionsValues.d')}
                     {:else if diagnosticState.results.parsed.reporting.failureOptions === 's'}
-                      SPF failure only
+                      {$t('diagnostics/email-dmarc-check.results.policy.failureOptionsValues.s')}
                     {:else}
-                      Custom configuration
+                      {$t('diagnostics/email-dmarc-check.results.policy.failureOptionsValues.custom')}
                     {/if}
                   </span>
                 </div>
@@ -356,20 +381,26 @@
 
           <!-- Reporting Configuration -->
           <div class="reporting-section">
-            <h4>Email Reporting Configuration</h4>
+            <h4>{$t('diagnostics/email-dmarc-check.results.reporting.title')}</h4>
             <div class="reporting-grid">
               <div class="reporting-item">
                 <div class="reporting-header">
                   <Icon name="bar-chart" size="sm" />
-                  <span>Aggregate Reports (RUA)</span>
+                  <span>{$t('diagnostics/email-dmarc-check.results.reporting.aggregateTitle')}</span>
                 </div>
                 <div class="reporting-value">
                   {#if diagnosticState.results.parsed.reporting.aggregate}
                     <span class="email-address">{diagnosticState.results.parsed.reporting.aggregate}</span>
-                    <span class="reporting-description">Daily summaries of DMARC activity</span>
+                    <span class="reporting-description"
+                      >{$t('diagnostics/email-dmarc-check.results.reporting.aggregateDescription')}</span
+                    >
                   {:else}
-                    <span class="not-configured">Not configured</span>
-                    <span class="reporting-description">Missing aggregate reporting - consider adding rua=</span>
+                    <span class="not-configured"
+                      >{$t('diagnostics/email-dmarc-check.results.reporting.aggregateNotConfigured')}</span
+                    >
+                    <span class="reporting-description"
+                      >{$t('diagnostics/email-dmarc-check.results.reporting.aggregateNotConfiguredHint')}</span
+                    >
                   {/if}
                 </div>
               </div>
@@ -377,15 +408,21 @@
               <div class="reporting-item">
                 <div class="reporting-header">
                   <Icon name="search" size="sm" />
-                  <span>Forensic Reports (RUF)</span>
+                  <span>{$t('diagnostics/email-dmarc-check.results.reporting.forensicTitle')}</span>
                 </div>
                 <div class="reporting-value">
                   {#if diagnosticState.results.parsed.reporting.forensic}
                     <span class="email-address">{diagnosticState.results.parsed.reporting.forensic}</span>
-                    <span class="reporting-description">Real-time failure reports with message samples</span>
+                    <span class="reporting-description"
+                      >{$t('diagnostics/email-dmarc-check.results.reporting.forensicDescription')}</span
+                    >
                   {:else}
-                    <span class="not-configured">Not configured</span>
-                    <span class="reporting-description">Optional - provides detailed failure analysis</span>
+                    <span class="not-configured"
+                      >{$t('diagnostics/email-dmarc-check.results.reporting.forensicNotConfigured')}</span
+                    >
+                    <span class="reporting-description"
+                      >{$t('diagnostics/email-dmarc-check.results.reporting.forensicNotConfiguredHint')}</span
+                    >
                   {/if}
                 </div>
               </div>
@@ -403,15 +440,15 @@
         <div class="warning-content">
           <Icon name="shield-x" size="md" />
           <div>
-            <strong>No DMARC Record Found</strong>
-            <p>Domain <code>{domain}</code> does not have a DMARC policy configured at <code>_dmarc.{domain}</code>.</p>
+            <strong>{$t('diagnostics/email-dmarc-check.noRecord.title')}</strong>
+            <p>{$t('diagnostics/email-dmarc-check.noRecord.message', { domain })}</p>
             <div class="deliverability-impact">
-              <h5>Email Deliverability Impact:</h5>
+              <h5>{$t('diagnostics/email-dmarc-check.noRecord.impactTitle')}</h5>
               <ul>
-                <li>No protection against email spoofing</li>
-                <li>May affect email reputation with major providers</li>
-                <li>Missing visibility into email authentication failures</li>
-                <li>Consider implementing DMARC starting with p=none for monitoring</li>
+                <li>{$t('diagnostics/email-dmarc-check.noRecord.impacts.noProtection')}</li>
+                <li>{$t('diagnostics/email-dmarc-check.noRecord.impacts.reputation')}</li>
+                <li>{$t('diagnostics/email-dmarc-check.noRecord.impacts.visibility')}</li>
+                <li>{$t('diagnostics/email-dmarc-check.noRecord.impacts.recommendation')}</li>
               </ul>
             </div>
           </div>
@@ -420,60 +457,65 @@
     </div>
   {/if}
 
-  <ErrorCard title="DMARC Check Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('diagnostics/email-dmarc-check.error.title')} error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>Understanding DMARC for Email Delivery</h3>
+      <h3>{$t('diagnostics/email-dmarc-check.education.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>DMARC Policies & Email Impact</h4>
+          <h4>{$t('diagnostics/email-dmarc-check.education.policiesTitle')}</h4>
           <div class="policy-explanations">
             <div class="explanation-item">
-              <strong>none:</strong> Monitor mode - no delivery impact, collect data only
+              <strong>none:</strong>
+              {$t('diagnostics/email-dmarc-check.education.policies.none').replace('none: ', '')}
             </div>
             <div class="explanation-item">
-              <strong>quarantine:</strong> Failed messages may go to spam/junk folder
+              <strong>quarantine:</strong>
+              {$t('diagnostics/email-dmarc-check.education.policies.quarantine').replace('quarantine: ', '')}
             </div>
             <div class="explanation-item">
-              <strong>reject:</strong> Failed messages rejected outright - strongest protection
+              <strong>reject:</strong>
+              {$t('diagnostics/email-dmarc-check.education.policies.reject').replace('reject: ', '')}
             </div>
           </div>
         </div>
 
         <div class="info-section">
-          <h4>Email Delivery Best Practices</h4>
+          <h4>{$t('diagnostics/email-dmarc-check.education.bestPracticesTitle')}</h4>
           <ul>
-            <li>Start with p=none to monitor before enforcement</li>
-            <li>Gradually increase to p=quarantine then p=reject</li>
-            <li>Set up aggregate reporting to monitor delivery</li>
-            <li>Test alignment requirements carefully</li>
-            <li>Consider subdomain policy for comprehensive coverage</li>
+            <li>{$t('diagnostics/email-dmarc-check.education.bestPractices.startNone')}</li>
+            <li>{$t('diagnostics/email-dmarc-check.education.bestPractices.gradual')}</li>
+            <li>{$t('diagnostics/email-dmarc-check.education.bestPractices.reporting')}</li>
+            <li>{$t('diagnostics/email-dmarc-check.education.bestPractices.testAlignment')}</li>
+            <li>{$t('diagnostics/email-dmarc-check.education.bestPractices.subdomain')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Alignment Modes & Delivery</h4>
+          <h4>{$t('diagnostics/email-dmarc-check.education.alignmentTitle')}</h4>
           <div class="alignment-explanations">
             <div class="explanation-item">
-              <strong>Relaxed (r):</strong> Allows organizational domain matching (safer for delivery)
+              <strong>Relaxed (r):</strong>
+              {$t('diagnostics/email-dmarc-check.education.alignment.relaxed').replace('Relaxed (r): ', '')}
             </div>
             <div class="explanation-item">
-              <strong>Strict (s):</strong> Requires exact domain matching (higher security, delivery risk)
+              <strong>Strict (s):</strong>
+              {$t('diagnostics/email-dmarc-check.education.alignment.strict').replace('Strict (s): ', '')}
             </div>
           </div>
         </div>
 
         <div class="info-section">
-          <h4>Common Delivery Issues</h4>
+          <h4>{$t('diagnostics/email-dmarc-check.education.issuesTitle')}</h4>
           <ul>
-            <li>Strict alignment with third-party senders</li>
-            <li>Forwarded emails failing DMARC checks</li>
-            <li>Mailing lists modifying message headers</li>
-            <li>Percentage rollout causing inconsistent delivery</li>
+            <li>{$t('diagnostics/email-dmarc-check.education.issues.thirdParty')}</li>
+            <li>{$t('diagnostics/email-dmarc-check.education.issues.forwarding')}</li>
+            <li>{$t('diagnostics/email-dmarc-check.education.issues.mailingLists')}</li>
+            <li>{$t('diagnostics/email-dmarc-check.education.issues.percentage')}</li>
           </ul>
         </div>
       </div>

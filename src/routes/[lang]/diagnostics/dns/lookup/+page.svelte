@@ -8,6 +8,7 @@
   import ResultsCard from '$lib/components/common/ResultsCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import WarningCard from '$lib/components/common/WarningCard.svelte';
+  import { t } from '$lib/stores/language';
   import '../../../../../styles/diagnostics-pages.scss';
 
   let domainName = $state('example.com');
@@ -25,34 +26,104 @@
     return validationResult.isValid;
   });
 
-  const recordTypes = [
-    { value: 'A', label: 'A', description: 'IPv4 address records' },
-    { value: 'AAAA', label: 'AAAA', description: 'IPv6 address records' },
-    { value: 'CNAME', label: 'CNAME', description: 'Canonical name records' },
-    { value: 'MX', label: 'MX', description: 'Mail exchange records' },
-    { value: 'TXT', label: 'TXT', description: 'Text records' },
-    { value: 'NS', label: 'NS', description: 'Name server records' },
-    { value: 'SOA', label: 'SOA', description: 'Start of authority records' },
-    { value: 'CAA', label: 'CAA', description: 'Certificate authority authorization' },
-    { value: 'PTR', label: 'PTR', description: 'Pointer records' },
-    { value: 'SRV', label: 'SRV', description: 'Service records' },
-  ];
+  const recordTypes = $derived([
+    {
+      value: 'A',
+      label: $t('diagnostics/dns-lookup.recordTypes.A.label'),
+      description: $t('diagnostics/dns-lookup.recordTypes.A.description'),
+    },
+    {
+      value: 'AAAA',
+      label: $t('diagnostics/dns-lookup.recordTypes.AAAA.label'),
+      description: $t('diagnostics/dns-lookup.recordTypes.AAAA.description'),
+    },
+    {
+      value: 'CNAME',
+      label: $t('diagnostics/dns-lookup.recordTypes.CNAME.label'),
+      description: $t('diagnostics/dns-lookup.recordTypes.CNAME.description'),
+    },
+    {
+      value: 'MX',
+      label: $t('diagnostics/dns-lookup.recordTypes.MX.label'),
+      description: $t('diagnostics/dns-lookup.recordTypes.MX.description'),
+    },
+    {
+      value: 'TXT',
+      label: $t('diagnostics/dns-lookup.recordTypes.TXT.label'),
+      description: $t('diagnostics/dns-lookup.recordTypes.TXT.description'),
+    },
+    {
+      value: 'NS',
+      label: $t('diagnostics/dns-lookup.recordTypes.NS.label'),
+      description: $t('diagnostics/dns-lookup.recordTypes.NS.description'),
+    },
+    {
+      value: 'SOA',
+      label: $t('diagnostics/dns-lookup.recordTypes.SOA.label'),
+      description: $t('diagnostics/dns-lookup.recordTypes.SOA.description'),
+    },
+    {
+      value: 'CAA',
+      label: $t('diagnostics/dns-lookup.recordTypes.CAA.label'),
+      description: $t('diagnostics/dns-lookup.recordTypes.CAA.description'),
+    },
+    {
+      value: 'PTR',
+      label: $t('diagnostics/dns-lookup.recordTypes.PTR.label'),
+      description: $t('diagnostics/dns-lookup.recordTypes.PTR.description'),
+    },
+    {
+      value: 'SRV',
+      label: $t('diagnostics/dns-lookup.recordTypes.SRV.label'),
+      description: $t('diagnostics/dns-lookup.recordTypes.SRV.description'),
+    },
+  ]);
 
-  const resolvers = [
-    { value: 'cloudflare', label: 'Cloudflare (1.1.1.1)' },
-    { value: 'google', label: 'Google (8.8.8.8)' },
-    { value: 'quad9', label: 'Quad9 (9.9.9.9)' },
-    { value: 'opendns', label: 'OpenDNS (208.67.222.222)' },
-  ];
+  const resolvers = $derived([
+    { value: 'cloudflare', label: $t('diagnostics/dns-lookup.resolvers.cloudflare') },
+    { value: 'google', label: $t('diagnostics/dns-lookup.resolvers.google') },
+    { value: 'quad9', label: $t('diagnostics/dns-lookup.resolvers.quad9') },
+    { value: 'opendns', label: $t('diagnostics/dns-lookup.resolvers.opendns') },
+  ]);
 
-  const examplesList = [
-    { domain: 'example.com', type: 'A', description: 'Basic A record lookup' },
-    { domain: 'google.com', type: 'MX', description: 'Mail server records' },
-    { domain: 'cloudflare.com', type: 'AAAA', description: 'IPv6 addresses' },
-    { domain: '_dmarc.github.com', type: 'TXT', description: 'DMARC policy record' },
-    { domain: 'microsoft.com', type: 'TXT', description: 'Multiple TXT records (SPF, verification)' },
-    { domain: 'netflix.com', type: 'NS', description: 'Name server records' },
-  ];
+  const examplesList = $derived([
+    {
+      domain: $t('diagnostics/dns-lookup.examples.items.exampleA.domain'),
+      type: $t('diagnostics/dns-lookup.examples.items.exampleA.type'),
+      description: $t('diagnostics/dns-lookup.examples.items.exampleA.description'),
+      tooltip: $t('diagnostics/dns-lookup.examples.items.exampleA.tooltip'),
+    },
+    {
+      domain: $t('diagnostics/dns-lookup.examples.items.googleMX.domain'),
+      type: $t('diagnostics/dns-lookup.examples.items.googleMX.type'),
+      description: $t('diagnostics/dns-lookup.examples.items.googleMX.description'),
+      tooltip: $t('diagnostics/dns-lookup.examples.items.googleMX.tooltip'),
+    },
+    {
+      domain: $t('diagnostics/dns-lookup.examples.items.cloudflareAAAA.domain'),
+      type: $t('diagnostics/dns-lookup.examples.items.cloudflareAAAA.type'),
+      description: $t('diagnostics/dns-lookup.examples.items.cloudflareAAAA.description'),
+      tooltip: $t('diagnostics/dns-lookup.examples.items.cloudflareAAAA.tooltip'),
+    },
+    {
+      domain: $t('diagnostics/dns-lookup.examples.items.githubDMARC.domain'),
+      type: $t('diagnostics/dns-lookup.examples.items.githubDMARC.type'),
+      description: $t('diagnostics/dns-lookup.examples.items.githubDMARC.description'),
+      tooltip: $t('diagnostics/dns-lookup.examples.items.githubDMARC.tooltip'),
+    },
+    {
+      domain: $t('diagnostics/dns-lookup.examples.items.microsoftTXT.domain'),
+      type: $t('diagnostics/dns-lookup.examples.items.microsoftTXT.type'),
+      description: $t('diagnostics/dns-lookup.examples.items.microsoftTXT.description'),
+      tooltip: $t('diagnostics/dns-lookup.examples.items.microsoftTXT.tooltip'),
+    },
+    {
+      domain: $t('diagnostics/dns-lookup.examples.items.netflixNS.domain'),
+      type: $t('diagnostics/dns-lookup.examples.items.netflixNS.type'),
+      description: $t('diagnostics/dns-lookup.examples.items.netflixNS.description'),
+      tooltip: $t('diagnostics/dns-lookup.examples.items.netflixNS.tooltip'),
+    },
+  ]);
 
   const examples = useExamples(examplesList);
 
@@ -62,7 +133,7 @@
     // Client-side validation
     const validation = validateDNSLookupInput(domainName, useCustomResolver, customResolver);
     if (!validation.isValid) {
-      diagnosticState.setError(validation.error || 'Invalid input');
+      diagnosticState.setError(validation.error || $t('diagnostics/dns-lookup.error.invalidInput'));
       return;
     }
 
@@ -121,12 +192,12 @@
 
         // Fallback to status-based messages
         if (response.status === 400) {
-          throw new Error('Invalid request. Please check your input values.');
+          throw new Error($t('diagnostics/dns-lookup.error.invalidRequest'));
         } else if (response.status === 500 || response.status === 403) {
-          throw new Error('DNS lookup service temporarily unavailable. Please try again.');
+          throw new Error($t('diagnostics/dns-lookup.error.serviceUnavailable'));
         }
 
-        throw new Error(`Lookup failed (${response.status})`);
+        throw new Error($t('diagnostics/dns-lookup.error.lookupFailed', { status: response.status }));
       }
 
       const data = await response.json();
@@ -153,11 +224,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>DNS Lookup Tool</h1>
-    <p>
-      Resolve DNS records for any domain using various public resolvers or custom DNS servers. Supports all common
-      record types with detailed response information.
-    </p>
+    <h1>{$t('diagnostics/dns-lookup.title')}</h1>
+    <p>{$t('diagnostics/dns-lookup.subtitle')}</p>
   </header>
 
   <!-- Examples -->
@@ -165,26 +233,28 @@
     examples={examplesList}
     selectedIndex={examples.selectedIndex}
     onSelect={loadExample}
-    getLabel={(ex) => `${ex.domain} (${ex.type})`}
-    getDescription={(ex) => ex.description}
-    getTooltip={(ex) => `Query ${ex.type} records for ${ex.domain}`}
+    getLabel={(ex: { domain: string; type: string }) => `${ex.domain} (${ex.type})`}
+    getDescription={(ex: { description: string }) => ex.description}
+    getTooltip={(ex: { tooltip: string }) => ex.tooltip}
   />
 
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>Lookup Configuration</h3>
+      <h3>{$t('diagnostics/dns-lookup.form.title')}</h3>
     </div>
     <div class="card-content">
       <!-- First Row: Domain Name -->
       <div class="form-row">
         <div class="form-group">
-          <label for="domain" use:tooltip={'Enter the domain name to query'}> Domain Name </label>
+          <label for="domain" use:tooltip={$t('diagnostics/dns-lookup.form.domainTooltip')}>
+            {$t('diagnostics/dns-lookup.form.domainLabel')}
+          </label>
           <input
             id="domain"
             type="text"
             bind:value={domainName}
-            placeholder="example.com"
+            placeholder={$t('diagnostics/dns-lookup.form.domainPlaceholder')}
             onchange={() => {
               examples.clear();
               if (domainName) performLookup();
@@ -196,7 +266,9 @@
       <!-- Second Row: Record Type and DNS Resolver -->
       <div class="form-row two-columns">
         <div class="form-group">
-          <label for="type" use:tooltip={'Select the DNS record type to query'}> Record Type </label>
+          <label for="type" use:tooltip={$t('diagnostics/dns-lookup.form.recordTypeTooltip')}>
+            {$t('diagnostics/dns-lookup.form.recordTypeLabel')}
+          </label>
           <select
             id="type"
             bind:value={recordType}
@@ -212,7 +284,9 @@
         </div>
 
         <div class="form-group">
-          <label for="dns-resolver" use:tooltip={'Choose a DNS resolver to use for the query'}> DNS Resolver </label>
+          <label for="dns-resolver" use:tooltip={$t('diagnostics/dns-lookup.form.dnsResolverTooltip')}>
+            {$t('diagnostics/dns-lookup.form.dnsResolverLabel')}
+          </label>
           {#if !useCustomResolver}
             <select
               id="dns-resolver"
@@ -231,7 +305,7 @@
             <input
               type="text"
               bind:value={customResolver}
-              placeholder="8.8.8.8 or custom IP"
+              placeholder={$t('diagnostics/dns-lookup.form.customResolverPlaceholder')}
               onchange={() => {
                 examples.clear();
                 if (domainName) performLookup();
@@ -247,7 +321,7 @@
                 if (domainName) performLookup();
               }}
             />
-            Use custom resolver
+            {$t('diagnostics/dns-lookup.form.useCustomResolver')}
           </label>
         </div>
       </div>
@@ -257,10 +331,10 @@
           loading={diagnosticState.loading}
           disabled={!validation.isValid}
           icon="search"
-          loadingText="Performing Lookup..."
+          loadingText={$t('diagnostics/dns-lookup.form.performing')}
           onclick={performLookup}
         >
-          Lookup DNS Records
+          {$t('diagnostics/dns-lookup.form.lookupButton')}
         </ActionButton>
       </div>
     </div>
@@ -276,9 +350,11 @@
         <div class="warning-content">
           <Icon name="info" size="md" />
           <div>
-            <strong>No Records Found</strong>
+            <strong>{$t('diagnostics/dns-lookup.noRecords.title')}</strong>
             <p>{diagnosticState.results.message}</p>
-            <p class="help-text">Using resolver: {diagnosticState.results.resolver}</p>
+            <p class="help-text">
+              {$t('diagnostics/dns-lookup.noRecords.usingResolver', { resolver: diagnosticState.results.resolver })}
+            </p>
           </div>
         </div>
       </div>
@@ -288,7 +364,7 @@
   <!-- Results -->
   {#if diagnosticState.results && !diagnosticState.results.noRecords}
     <ResultsCard
-      title="DNS Records Found"
+      title={$t('diagnostics/dns-lookup.results.title')}
       onCopy={copyResults}
       copied={clipboard.isCopied()}
       showCopyButton={diagnosticState.results.Answer?.length > 0}
@@ -299,7 +375,7 @@
             <div class="record-item">
               <div class="record-data mono">{record.data}</div>
               {#if record.TTL}
-                <div class="record-ttl" use:tooltip={'Time To Live - how long this record can be cached'}>
+                <div class="record-ttl" use:tooltip={$t('diagnostics/dns-lookup.results.ttlTooltip')}>
                   TTL: {record.TTL}s
                 </div>
               {/if}
@@ -310,14 +386,14 @@
         <div class="card warning-card no-records">
           <div class="warning-content">
             <Icon name="alert-triangle" size="md" />
-            <p>No records found for <code>{domainName}</code> ({recordType})</p>
+            <p>{$t('diagnostics/dns-lookup.results.noRecordsMessage', { domain: domainName, type: recordType })}</p>
           </div>
         </div>
       {/if}
     </ResultsCard>
   {/if}
 
-  <ErrorCard title="Lookup Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('diagnostics/dns-lookup.error.title')} error={diagnosticState.error} />
 </div>
 
 <style lang="scss">

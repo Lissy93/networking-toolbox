@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/stores/language';
   import '../../../../../styles/diagnostics-pages.scss';
 
   let domain = $state('example.com');
@@ -11,21 +12,39 @@
   let copiedState = $state(false);
   let selectedExampleIndex = $state<number | null>(null);
 
-  const resolvers = [
-    { value: 'cloudflare', label: 'Cloudflare (1.1.1.1)' },
-    { value: 'google', label: 'Google (8.8.8.8)' },
-    { value: 'quad9', label: 'Quad9 (9.9.9.9)' },
-    { value: 'opendns', label: 'OpenDNS (208.67.222.222)' },
-  ];
+  const resolvers = $derived([
+    { value: 'cloudflare', label: $t('diagnostics/dns-soa-serial.resolvers.cloudflare') },
+    { value: 'google', label: $t('diagnostics/dns-soa-serial.resolvers.google') },
+    { value: 'quad9', label: $t('diagnostics/dns-soa-serial.resolvers.quad9') },
+    { value: 'opendns', label: $t('diagnostics/dns-soa-serial.resolvers.opendns') },
+  ]);
 
-  const examples = [
-    { domain: 'google.com', description: 'High-traffic domain with frequent updates' },
-    { domain: 'github.com', description: 'Tech company with modern DNS management' },
-    { domain: 'cloudflare.com', description: 'DNS provider with optimal configurations' },
-    { domain: 'iana.org', description: 'Internet standards organization' },
-    { domain: 'rfc-editor.org', description: 'Official RFC publication site' },
-    { domain: 'example.com', description: 'Reserved example domain (RFC 2606)' },
-  ];
+  const examples = $derived([
+    {
+      domain: $t('diagnostics/dns-soa-serial.examples.items.google.domain'),
+      description: $t('diagnostics/dns-soa-serial.examples.items.google.description'),
+    },
+    {
+      domain: $t('diagnostics/dns-soa-serial.examples.items.github.domain'),
+      description: $t('diagnostics/dns-soa-serial.examples.items.github.description'),
+    },
+    {
+      domain: $t('diagnostics/dns-soa-serial.examples.items.cloudflare.domain'),
+      description: $t('diagnostics/dns-soa-serial.examples.items.cloudflare.description'),
+    },
+    {
+      domain: $t('diagnostics/dns-soa-serial.examples.items.iana.domain'),
+      description: $t('diagnostics/dns-soa-serial.examples.items.iana.description'),
+    },
+    {
+      domain: $t('diagnostics/dns-soa-serial.examples.items.rfcEditor.domain'),
+      description: $t('diagnostics/dns-soa-serial.examples.items.rfcEditor.description'),
+    },
+    {
+      domain: $t('diagnostics/dns-soa-serial.examples.items.example.domain'),
+      description: $t('diagnostics/dns-soa-serial.examples.items.example.description'),
+    },
+  ]);
 
   async function analyzeSOA() {
     loading = true;
@@ -50,7 +69,7 @@
 
       results = await response.json();
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : 'Unknown error occurred';
+      error = err instanceof Error ? err.message : $t('common.errors.unknownError');
     } finally {
       loading = false;
     }
@@ -97,19 +116,15 @@
         timeZoneName: 'short',
       });
     } catch {
-      return 'Invalid date';
+      return $t('diagnostics/dns-soa-serial.results.serialAnalysis.notAvailable');
     }
   }
 </script>
 
 <div class="card">
   <header class="card-header">
-    <h1>SOA Serial Analyzer</h1>
-    <p>
-      Analyze Start of Authority (SOA) records to interpret serial number formats and examine DNS zone timing
-      parameters. SOA records contain critical zone metadata including serial numbers for change tracking and timing
-      values for zone transfers.
-    </p>
+    <h1>{$t('diagnostics/dns-soa-serial.title')}</h1>
+    <p>{$t('diagnostics/dns-soa-serial.subtitle')}</p>
   </header>
 
   <!-- Examples -->
@@ -117,7 +132,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Domain Examples</h4>
+        <h4>{$t('diagnostics/dns-soa-serial.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -125,7 +140,7 @@
             class="example-card"
             class:selected={selectedExampleIndex === i}
             onclick={() => loadExample(example, i)}
-            use:tooltip={`Analyze SOA record for ${example.domain} (${example.description})`}
+            use:tooltip={`${$t('diagnostics/dns-soa-serial.examples.title')} - ${example.domain} (${example.description})`}
           >
             <h5>{example.domain}</h5>
             <p>{example.description}</p>
@@ -138,18 +153,18 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>SOA Analysis Configuration</h3>
+      <h3>{$t('diagnostics/dns-soa-serial.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-grid">
         <div class="form-group">
-          <label for="domain" use:tooltip={'Enter a domain name to analyze its SOA record'}>
-            Domain Name
+          <label for="domain" use:tooltip={$t('diagnostics/dns-soa-serial.form.domainTooltip')}>
+            {$t('diagnostics/dns-soa-serial.form.domainLabel')}
             <input
               id="domain"
               type="text"
               bind:value={domain}
-              placeholder="example.com"
+              placeholder={$t('diagnostics/dns-soa-serial.form.domainPlaceholder')}
               onchange={() => {
                 clearExampleSelection();
                 if (domain.trim()) analyzeSOA();
@@ -159,8 +174,8 @@
         </div>
 
         <div class="form-group">
-          <label for="resolver" use:tooltip={'Choose a DNS-over-HTTPS resolver for the query'}>
-            DoH Resolver
+          <label for="resolver" use:tooltip={$t('diagnostics/dns-soa-serial.form.resolverTooltip')}>
+            {$t('diagnostics/dns-soa-serial.form.resolverLabel')}
             <select
               id="resolver"
               bind:value={resolver}
@@ -180,10 +195,10 @@
         <button class="lookup-btn" onclick={analyzeSOA} disabled={loading || !domain.trim()}>
           {#if loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Analyzing SOA Record...
+            {$t('diagnostics/dns-soa-serial.form.analyzing')}
           {:else}
             <Icon name="search" size="sm" />
-            Analyze SOA
+            {$t('diagnostics/dns-soa-serial.form.analyzeButton')}
           {/if}
         </button>
       </div>
@@ -209,22 +224,28 @@
       .soa}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>SOA Analysis for {results.name}</h3>
+        <h3>{$t('diagnostics/dns-soa-serial.results.title', { name: results.name })}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
           <span class={copiedState ? 'text-green-500' : ''}
             ><Icon name={copiedState ? 'check' : 'copy'} size="xs" /></span
           >
-          {copiedState ? 'Copied!' : 'Copy Raw JSON'}
+          {copiedState
+            ? $t('diagnostics/dns-soa-serial.results.copied')
+            : $t('diagnostics/dns-soa-serial.results.copyButton')}
         </button>
       </div>
       <div class="card-content">
         <div class="lookup-info">
           <div class="info-item">
-            <span class="info-label" use:tooltip={'The domain that was queried'}>Domain:</span>
+            <span class="info-label" use:tooltip={$t('diagnostics/dns-soa-serial.results.domainTooltip')}
+              >{$t('diagnostics/dns-soa-serial.results.domainLabel')}</span
+            >
             <span class="info-value mono">{results.name}</span>
           </div>
           <div class="info-item">
-            <span class="info-label" use:tooltip={'DNS-over-HTTPS resolver used for the query'}>DoH Resolver:</span>
+            <span class="info-label" use:tooltip={$t('diagnostics/dns-soa-serial.results.resolverTooltip')}
+              >{$t('diagnostics/dns-soa-serial.results.resolverLabel')}</span
+            >
             <span class="info-value">{results.resolver}</span>
           </div>
         </div>
@@ -232,29 +253,54 @@
         <div class="results-grid">
           <!-- Serial Number Analysis -->
           <div class="result-section">
-            <h4>Serial Number Analysis</h4>
+            <h4>{$t('diagnostics/dns-soa-serial.results.serialAnalysis.title')}</h4>
             <div class="serial-analysis">
               <div class="serial-display">
-                <span class="serial-number">{res.soa?.serial || 'Not available'}</span>
-                <span class="serial-format {res.serialAnalysis?.format}">{res.serialAnalysis?.format || 'Unknown'}</span
+                <span class="serial-number"
+                  >{res.soa?.serial || $t('diagnostics/dns-soa-serial.results.serialAnalysis.notAvailable')}</span
+                >
+                <span class="serial-format {res.serialAnalysis?.format}"
+                  >{res.serialAnalysis?.format || $t('diagnostics/dns-soa-serial.results.serialAnalysis.unknown')}</span
                 >
               </div>
 
               <dl class="definition-list">
-                <dt>Format:</dt>
+                <dt>{$t('diagnostics/dns-soa-serial.results.serialAnalysis.formatLabel')}</dt>
                 <dd>
-                  <strong>{serialInfo?.formatDescription || 'Unknown'}</strong>
-                  <p class="format-explanation">{serialInfo?.explanation || 'No analysis available'}</p>
+                  <strong
+                    >{serialInfo?.formatDescription ||
+                      $t('diagnostics/dns-soa-serial.results.serialAnalysis.formatUnknown')}</strong
+                  >
+                  <p class="format-explanation">
+                    {serialInfo?.explanation ||
+                      $t('diagnostics/dns-soa-serial.results.serialAnalysis.formatExplanation')}
+                  </p>
                 </dd>
                 {#if serialAnalysis?.parsed}
-                  <dt>Parsed Date:</dt>
+                  <dt>{$t('diagnostics/dns-soa-serial.results.serialAnalysis.parsedDateLabel')}</dt>
                   <dd>
                     {#if serialAnalysis.format === 'YYYYMMDDNN'}
                       <div class="parsed-date">
-                        <span class="date-part">Year: {serialAnalysis.parsed.year}</span>
-                        <span class="date-part">Month: {serialAnalysis.parsed.month}</span>
-                        <span class="date-part">Day: {serialAnalysis.parsed.day}</span>
-                        <span class="date-part">Revision: {serialAnalysis.parsed.revision}</span>
+                        <span class="date-part"
+                          >{$t('diagnostics/dns-soa-serial.results.serialAnalysis.parsedYear', {
+                            year: serialAnalysis.parsed.year!,
+                          })}</span
+                        >
+                        <span class="date-part"
+                          >{$t('diagnostics/dns-soa-serial.results.serialAnalysis.parsedMonth', {
+                            month: serialAnalysis.parsed.month!,
+                          })}</span
+                        >
+                        <span class="date-part"
+                          >{$t('diagnostics/dns-soa-serial.results.serialAnalysis.parsedDay', {
+                            day: serialAnalysis.parsed.day!,
+                          })}</span
+                        >
+                        <span class="date-part"
+                          >{$t('diagnostics/dns-soa-serial.results.serialAnalysis.parsedRevision', {
+                            revision: serialAnalysis.parsed.revision!,
+                          })}</span
+                        >
                       </div>
                     {:else if serialAnalysis.format === 'Unix Timestamp'}
                       <span class="unix-date">{formatDate(serialAnalysis.parsed.timestamp!)}</span>
@@ -262,10 +308,12 @@
                   </dd>
                 {/if}
 
-                <dt>Validity:</dt>
+                <dt>{$t('diagnostics/dns-soa-serial.results.serialAnalysis.validityLabel')}</dt>
                 <dd class="validity {serialAnalysis?.valid ? 'valid' : 'invalid'}">
                   <Icon name={serialAnalysis?.valid ? 'check-circle' : 'x-circle'} size="sm" />
-                  {serialAnalysis?.valid ? 'Valid format' : 'Invalid or unusual format'}
+                  {serialAnalysis?.valid
+                    ? $t('diagnostics/dns-soa-serial.results.serialAnalysis.valid')
+                    : $t('diagnostics/dns-soa-serial.results.serialAnalysis.invalid')}
                 </dd>
               </dl>
             </div>
@@ -273,21 +321,21 @@
 
           <!-- SOA Record Details -->
           <div class="result-section">
-            <h4>SOA Record Details</h4>
+            <h4>{$t('diagnostics/dns-soa-serial.results.soaDetails.title')}</h4>
             <dl class="definition-list">
-              <dt>Primary Server:</dt>
-              <dd class="mono">{soaData?.mname || 'Not available'}</dd>
+              <dt>{$t('diagnostics/dns-soa-serial.results.soaDetails.primaryServer')}</dt>
+              <dd class="mono">{soaData?.mname || $t('diagnostics/dns-soa-serial.results.soaDetails.notAvailable')}</dd>
 
-              <dt>Contact Email:</dt>
-              <dd class="mono">{soaData?.rname || 'Not available'}</dd>
+              <dt>{$t('diagnostics/dns-soa-serial.results.soaDetails.contactEmail')}</dt>
+              <dd class="mono">{soaData?.rname || $t('diagnostics/dns-soa-serial.results.soaDetails.notAvailable')}</dd>
 
-              <dt>TTL:</dt>
+              <dt>{$t('diagnostics/dns-soa-serial.results.soaDetails.ttl')}</dt>
               <dd>
                 {#if soaData?.ttl}
                   <span class="ttl-value">{soaData.ttl}s</span>
                   <small>({formatDuration(soaData.ttl)})</small>
                 {:else}
-                  Not available
+                  {$t('diagnostics/dns-soa-serial.results.soaDetails.notAvailable')}
                 {/if}
               </dd>
             </dl>
@@ -295,41 +343,41 @@
 
           <!-- Timing Parameters -->
           <div class="result-section full-width">
-            <h4>Zone Timing Parameters</h4>
+            <h4>{$t('diagnostics/dns-soa-serial.results.timing.title')}</h4>
             <div class="timing-grid">
               <div class="timing-param">
-                <h5>Refresh</h5>
+                <h5>{$t('diagnostics/dns-soa-serial.results.timing.refresh.title')}</h5>
                 <div class="param-value">{timingData?.refresh || 0}s</div>
                 <div class="param-description">
                   <small>{formatDuration(timingData?.refresh || 0)}</small>
-                  <p>How often secondary servers check for updates</p>
+                  <p>{$t('diagnostics/dns-soa-serial.results.timing.refresh.description')}</p>
                 </div>
               </div>
 
               <div class="timing-param">
-                <h5>Retry</h5>
+                <h5>{$t('diagnostics/dns-soa-serial.results.timing.retry.title')}</h5>
                 <div class="param-value">{timingData?.retry || 0}s</div>
                 <div class="param-description">
                   <small>{formatDuration(timingData?.retry || 0)}</small>
-                  <p>Retry interval after failed refresh attempts</p>
+                  <p>{$t('diagnostics/dns-soa-serial.results.timing.retry.description')}</p>
                 </div>
               </div>
 
               <div class="timing-param">
-                <h5>Expire</h5>
+                <h5>{$t('diagnostics/dns-soa-serial.results.timing.expire.title')}</h5>
                 <div class="param-value">{timingData?.expire || 0}s</div>
                 <div class="param-description">
                   <small>{formatDuration(timingData?.expire || 0)}</small>
-                  <p>When secondary servers stop serving the zone</p>
+                  <p>{$t('diagnostics/dns-soa-serial.results.timing.expire.description')}</p>
                 </div>
               </div>
 
               <div class="timing-param">
-                <h5>Minimum</h5>
+                <h5>{$t('diagnostics/dns-soa-serial.results.timing.minimum.title')}</h5>
                 <div class="param-value">{timingData?.minimum || 0}s</div>
                 <div class="param-description">
                   <small>{formatDuration(timingData?.minimum || 0)}</small>
-                  <p>Minimum TTL for negative responses</p>
+                  <p>{$t('diagnostics/dns-soa-serial.results.timing.minimum.description')}</p>
                 </div>
               </div>
             </div>
@@ -343,7 +391,7 @@
               }
             ).assessment}
             <div class="result-section full-width">
-              <h4>Configuration Assessment</h4>
+              <h4>{$t('diagnostics/dns-soa-serial.results.assessment.title')}</h4>
               <div class="assessment-grid">
                 {#each assessmentData || [] as item, itemIndex (itemIndex)}
                   <div class="assessment-item {item.severity}">
@@ -378,15 +426,15 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="md" />
           <div>
-            <strong>SOA Analysis Failed</strong>
+            <strong>{$t('diagnostics/dns-soa-serial.error.title')}</strong>
             <p>{error}</p>
             <div class="troubleshooting">
-              <p><strong>Troubleshooting Tips:</strong></p>
+              <p><strong>{$t('diagnostics/dns-soa-serial.error.troubleshooting')}</strong></p>
               <ul>
-                <li>Ensure the domain name is valid and has a SOA record</li>
-                <li>Try a different DoH resolver if the current one fails</li>
-                <li>Some domains may not respond to certain resolvers</li>
-                <li>Check if the domain exists and is properly configured</li>
+                <li>{$t('diagnostics/dns-soa-serial.error.tips.validDomain')}</li>
+                <li>{$t('diagnostics/dns-soa-serial.error.tips.tryDifferent')}</li>
+                <li>{$t('diagnostics/dns-soa-serial.error.tips.someResolvers')}</li>
+                <li>{$t('diagnostics/dns-soa-serial.error.tips.checkDomain')}</li>
               </ul>
             </div>
           </div>
@@ -398,44 +446,62 @@
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>About SOA Records and Serial Numbers</h3>
+      <h3>{$t('diagnostics/dns-soa-serial.education.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>What is a SOA Record?</h4>
-          <p>
-            Start of Authority records contain administrative information about a DNS zone, including the primary
-            server, contact email, and timing parameters that control zone transfers and caching behavior.
-          </p>
+          <h4>{$t('diagnostics/dns-soa-serial.education.whatIsSOA.title')}</h4>
+          <p>{$t('diagnostics/dns-soa-serial.education.whatIsSOA.description')}</p>
         </div>
 
         <div class="info-section">
-          <h4>Serial Number Formats</h4>
+          <h4>{$t('diagnostics/dns-soa-serial.education.serialFormats.title')}</h4>
           <ul>
-            <li><strong>YYYYMMDDNN:</strong> Date-based format (e.g., 2024031501 = March 15, 2024, revision 01)</li>
-            <li><strong>Unix Timestamp:</strong> Seconds since epoch (e.g., 1710518400)</li>
-            <li><strong>Sequential:</strong> Simple incrementing numbers (e.g., 1, 2, 3...)</li>
+            <li>
+              <strong>YYYYMMDDNN:</strong>
+              {$t('diagnostics/dns-soa-serial.education.serialFormats.yyyymmddnn').replace('YYYYMMDDNN: ', '')}
+            </li>
+            <li>
+              <strong>Unix Timestamp:</strong>
+              {$t('diagnostics/dns-soa-serial.education.serialFormats.unixTimestamp').replace('Unix Timestamp: ', '')}
+            </li>
+            <li>
+              <strong>Sequential:</strong>
+              {$t('diagnostics/dns-soa-serial.education.serialFormats.sequential').replace('Sequential: ', '')}
+            </li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Timing Parameters</h4>
+          <h4>{$t('diagnostics/dns-soa-serial.education.timingParams.title')}</h4>
           <ul>
-            <li><strong>Refresh:</strong> How often secondaries check for updates</li>
-            <li><strong>Retry:</strong> Retry interval after failed transfers</li>
-            <li><strong>Expire:</strong> When to stop serving if updates fail</li>
-            <li><strong>Minimum:</strong> TTL for negative (NXDOMAIN) responses</li>
+            <li>
+              <strong>Refresh:</strong>
+              {$t('diagnostics/dns-soa-serial.education.timingParams.refresh').replace('Refresh: ', '')}
+            </li>
+            <li>
+              <strong>Retry:</strong>
+              {$t('diagnostics/dns-soa-serial.education.timingParams.retry').replace('Retry: ', '')}
+            </li>
+            <li>
+              <strong>Expire:</strong>
+              {$t('diagnostics/dns-soa-serial.education.timingParams.expire').replace('Expire: ', '')}
+            </li>
+            <li>
+              <strong>Minimum:</strong>
+              {$t('diagnostics/dns-soa-serial.education.timingParams.minimum').replace('Minimum: ', '')}
+            </li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Best Practices</h4>
+          <h4>{$t('diagnostics/dns-soa-serial.education.bestPractices.title')}</h4>
           <ul>
-            <li>Use YYYYMMDDNN format for predictable versioning</li>
-            <li>Set refresh to 3600-7200s for most zones</li>
-            <li>Retry should be shorter than refresh (1800-3600s)</li>
-            <li>Expire should be much longer (604800-1209600s)</li>
+            <li>{$t('diagnostics/dns-soa-serial.education.bestPractices.useYYYYMMDDNN')}</li>
+            <li>{$t('diagnostics/dns-soa-serial.education.bestPractices.setRefresh')}</li>
+            <li>{$t('diagnostics/dns-soa-serial.education.bestPractices.retryShorter')}</li>
+            <li>{$t('diagnostics/dns-soa-serial.education.bestPractices.expireLonger')}</li>
           </ul>
         </div>
       </div>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/stores/language';
   import '../../../../../styles/diagnostics-pages.scss';
 
   let asn = $state('AS15169');
@@ -10,14 +11,32 @@
   let copiedState = $state(false);
   let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
-    { asn: 'AS15169', description: 'Google LLC - Major cloud provider' },
-    { asn: 'AS13335', description: 'Cloudflare - CDN and security services' },
-    { asn: 'AS16509', description: 'Amazon.com - AWS cloud infrastructure' },
-    { asn: 'AS8075', description: 'Microsoft Corporation - Azure cloud' },
-    { asn: 'AS32934', description: 'Meta Platforms - Facebook services' },
-    { asn: 'AS396982', description: 'Google Cloud Platform - Additional ranges' },
-  ];
+  const examples = $derived([
+    {
+      asn: $t('diagnostics/rdap-asn.examples.items.google.asn'),
+      description: $t('diagnostics/rdap-asn.examples.items.google.description'),
+    },
+    {
+      asn: $t('diagnostics/rdap-asn.examples.items.cloudflare.asn'),
+      description: $t('diagnostics/rdap-asn.examples.items.cloudflare.description'),
+    },
+    {
+      asn: $t('diagnostics/rdap-asn.examples.items.amazon.asn'),
+      description: $t('diagnostics/rdap-asn.examples.items.amazon.description'),
+    },
+    {
+      asn: $t('diagnostics/rdap-asn.examples.items.microsoft.asn'),
+      description: $t('diagnostics/rdap-asn.examples.items.microsoft.description'),
+    },
+    {
+      asn: $t('diagnostics/rdap-asn.examples.items.meta.asn'),
+      description: $t('diagnostics/rdap-asn.examples.items.meta.description'),
+    },
+    {
+      asn: $t('diagnostics/rdap-asn.examples.items.googleCloud.asn'),
+      description: $t('diagnostics/rdap-asn.examples.items.googleCloud.description'),
+    },
+  ]);
 
   async function lookupASN() {
     loading = true;
@@ -36,12 +55,14 @@
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
-        throw new Error(errorData.message || `ASN RDAP lookup failed: ${response.status}`);
+        throw new Error(
+          errorData.message || $t('diagnostics/rdap-asn.error.lookupFailed', { status: response.status }),
+        );
       }
 
       results = await response.json();
     } catch (err: unknown) {
-      error = (err as Error).message;
+      error = err instanceof Error ? err.message : $t('diagnostics/rdap-asn.error.unknownError');
     } finally {
       loading = false;
     }
@@ -70,7 +91,7 @@
   }
 
   function formatDate(dateString: string | undefined): string {
-    if (!dateString) return 'Not available';
+    if (!dateString) return $t('diagnostics/rdap-asn.results.notAvailable');
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -103,11 +124,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>ASN RDAP Lookup</h1>
-    <p>
-      Query Autonomous System Number allocation and registration data using RDAP through Regional Internet Registries.
-      ASNs identify networks on the global Internet routing table and are essential for BGP routing operations.
-    </p>
+    <h1>{$t('diagnostics/rdap-asn.title')}</h1>
+    <p>{$t('diagnostics/rdap-asn.subtitle')}</p>
   </header>
 
   <!-- Examples -->
@@ -115,7 +133,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Common ASN Examples</h4>
+        <h4>{$t('diagnostics/rdap-asn.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -123,7 +141,9 @@
             class="example-card"
             class:selected={selectedExampleIndex === i}
             onclick={() => loadExample(example, i)}
-            use:tooltip={`Perform RDAP lookup for ${example.asn} (${example.description})`}
+            use:tooltip={$t(
+              `diagnostics/rdap-asn.examples.items.${['google', 'cloudflare', 'amazon', 'microsoft', 'meta', 'googleCloud'][i]}.tooltip`,
+            )}
           >
             <h5>{example.asn}</h5>
             <p>{example.description}</p>
@@ -137,24 +157,24 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>RDAP Lookup Configuration</h3>
+      <h3>{$t('diagnostics/rdap-asn.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-grid">
         <div class="form-group">
-          <label for="asn" use:tooltip={'Enter an Autonomous System Number to query allocation data via RDAP'}>
-            Autonomous System Number
+          <label for="asn" use:tooltip={$t('diagnostics/rdap-asn.form.asnTooltip')}>
+            {$t('diagnostics/rdap-asn.form.asnLabel')}
             <input
               id="asn"
               type="text"
               bind:value={asn}
-              placeholder="AS15169 or 15169"
+              placeholder={$t('diagnostics/rdap-asn.form.asnPlaceholder')}
               onchange={() => {
                 clearExampleSelection();
                 if (asn.trim()) lookupASN();
               }}
             />
-            <small>Supports both formats: AS15169 or 15169 (AS prefix is optional)</small>
+            <small>{$t('diagnostics/rdap-asn.form.asnHint')}</small>
           </label>
         </div>
       </div>
@@ -163,10 +183,10 @@
         <button class="lookup-btn" onclick={lookupASN} disabled={loading || !asn.trim()}>
           {#if loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Performing RDAP Lookup...
+            {$t('diagnostics/rdap-asn.form.performing')}
           {:else}
             <Icon name="search" size="sm" />
-            Lookup ASN
+            {$t('diagnostics/rdap-asn.form.lookupButton')}
           {/if}
         </button>
       </div>
@@ -177,24 +197,28 @@
   {#if results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>RDAP Data for {formatASN(results.asn)}</h3>
+        <h3>{$t('diagnostics/rdap-asn.results.title', { asn: formatASN(results.asn) })}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
           <span class={copiedState ? 'text-green-500' : ''}
             ><Icon name={copiedState ? 'check' : 'copy'} size="xs" /></span
           >
-          {copiedState ? 'Copied!' : 'Copy Raw JSON'}
+          {copiedState ? $t('diagnostics/rdap-asn.results.copied') : $t('diagnostics/rdap-asn.results.copy')}
         </button>
       </div>
       <div class="card-content">
         <div class="lookup-info">
           <div class="info-item">
-            <span class="info-label" use:tooltip={'The ASN that was queried'}>ASN:</span>
+            <span class="info-label" use:tooltip={$t('diagnostics/rdap-asn.results.asnTooltip')}
+              >{$t('diagnostics/rdap-asn.results.asn')}:</span
+            >
             <span class="info-value">
               <span class="asn-number">{formatASN(results.asn)}</span>
             </span>
           </div>
           <div class="info-item">
-            <span class="info-label" use:tooltip={'RDAP service used for the query'}>RDAP Service:</span>
+            <span class="info-label" use:tooltip={$t('diagnostics/rdap-asn.results.rdapServiceTooltip')}
+              >{$t('diagnostics/rdap-asn.results.rdapService')}:</span
+            >
             <span class="info-value mono">{results.serviceUrl}</span>
           </div>
         </div>
@@ -202,33 +226,33 @@
         <div class="results-grid">
           <!-- ASN Information -->
           <div class="result-section">
-            <h4>ASN Information</h4>
+            <h4>{$t('diagnostics/rdap-asn.results.asnInfo.title')}</h4>
             <dl class="definition-list">
-              <dt>Organization Name:</dt>
-              <dd>{results.data.name || 'Not available'}</dd>
+              <dt>{$t('diagnostics/rdap-asn.results.asnInfo.organizationName')}</dt>
+              <dd>{results.data.name || $t('diagnostics/rdap-asn.results.notAvailable')}</dd>
 
-              <dt>Type:</dt>
-              <dd>{results.data.type || 'Not available'}</dd>
+              <dt>{$t('diagnostics/rdap-asn.results.asnInfo.type')}</dt>
+              <dd>{results.data.type || $t('diagnostics/rdap-asn.results.notAvailable')}</dd>
 
-              <dt>Country:</dt>
+              <dt>{$t('diagnostics/rdap-asn.results.asnInfo.country')}</dt>
               <dd>
                 {#if results.data.country}
                   <span class="country-code">{results.data.country}</span>
                 {:else}
-                  Not available
+                  {$t('diagnostics/rdap-asn.results.notAvailable')}
                 {/if}
               </dd>
 
-              <dt>Registry:</dt>
-              <dd>{results.data.registry || 'Not available'}</dd>
+              <dt>{$t('diagnostics/rdap-asn.results.asnInfo.registry')}</dt>
+              <dd>{results.data.registry || $t('diagnostics/rdap-asn.results.notAvailable')}</dd>
             </dl>
           </div>
 
           <!-- Status and Dates -->
           <div class="result-section">
-            <h4>Allocation Details</h4>
+            <h4>{$t('diagnostics/rdap-asn.results.allocation.title')}</h4>
             <dl class="definition-list">
-              <dt>Status:</dt>
+              <dt>{$t('diagnostics/rdap-asn.results.allocation.status')}</dt>
               <dd>
                 {#if results.data.status?.length}
                   <div class="status-list">
@@ -237,14 +261,14 @@
                     {/each}
                   </div>
                 {:else}
-                  Not available
+                  {$t('diagnostics/rdap-asn.results.notAvailable')}
                 {/if}
               </dd>
 
-              <dt>Allocation Date:</dt>
+              <dt>{$t('diagnostics/rdap-asn.results.allocation.allocationDate')}</dt>
               <dd>{formatDate(results.data.allocation)}</dd>
 
-              <dt>Last Changed:</dt>
+              <dt>{$t('diagnostics/rdap-asn.results.allocation.lastChanged')}</dt>
               <dd>{formatDate(results.data.lastChanged)}</dd>
             </dl>
           </div>
@@ -252,26 +276,28 @@
           <!-- Contact Information -->
           {#if results.data.contacts?.length}
             <div class="result-section full-width">
-              <h4>Contact Information</h4>
+              <h4>{$t('diagnostics/rdap-asn.results.contacts.title')}</h4>
               <div class="contacts-grid">
                 {#each results.data.contacts as contact, index (index)}
                   <div class="contact-card">
                     <h5>
                       {#if contact.roles?.includes('registrant')}
-                        Registrant
+                        {$t('diagnostics/rdap-asn.results.contacts.registrant')}
                       {:else if contact.roles?.includes('administrative')}
-                        Administrative
+                        {$t('diagnostics/rdap-asn.results.contacts.administrative')}
                       {:else if contact.roles?.includes('technical')}
-                        Technical
+                        {$t('diagnostics/rdap-asn.results.contacts.technical')}
                       {:else if contact.roles?.includes('abuse')}
-                        Abuse
+                        {$t('diagnostics/rdap-asn.results.contacts.abuse')}
                       {:else}
-                        Contact
+                        {$t('diagnostics/rdap-asn.results.contacts.contact')}
                       {/if}
                     </h5>
                     <p><strong>{formatContact(contact)}</strong></p>
                     {#if contact.handle}
-                      <p><small>Handle: {contact.handle}</small></p>
+                      <p>
+                        <small>{$t('diagnostics/rdap-asn.results.contacts.handle', { handle: contact.handle })}</small>
+                      </p>
                     {/if}
                     {#if contact.roles}
                       <div class="roles-list">
@@ -296,16 +322,16 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="md" />
           <div>
-            <strong>RDAP Lookup Failed</strong>
+            <strong>{$t('diagnostics/rdap-asn.error.title')}</strong>
             <p>{error}</p>
             <div class="troubleshooting">
-              <p><strong>Troubleshooting Tips:</strong></p>
+              <p><strong>{$t('diagnostics/rdap-asn.error.troubleshooting.title')}</strong></p>
               <ul>
-                <li>Ensure the ASN format is valid (e.g., AS15169 or just 15169)</li>
-                <li>Check if the ASN exists and is currently allocated</li>
-                <li>Private ASNs (64512-65534, 4200000000-4294967294) may not have public RDAP data</li>
-                <li>Some RIRs may have rate limiting or access restrictions</li>
-                <li>Try again in a few moments if the service is temporarily unavailable</li>
+                <li>{$t('diagnostics/rdap-asn.error.troubleshooting.validFormat')}</li>
+                <li>{$t('diagnostics/rdap-asn.error.troubleshooting.asnExists')}</li>
+                <li>{$t('diagnostics/rdap-asn.error.troubleshooting.privateASN')}</li>
+                <li>{$t('diagnostics/rdap-asn.error.troubleshooting.rateLimiting')}</li>
+                <li>{$t('diagnostics/rdap-asn.error.troubleshooting.tryAgain')}</li>
               </ul>
             </div>
           </div>
@@ -317,37 +343,33 @@
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>About ASN RDAP Lookups</h3>
+      <h3>{$t('diagnostics/rdap-asn.educational.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>What is an ASN?</h4>
-          <p>
-            Autonomous System Numbers identify networks on the global Internet routing table and are essential for BGP
-            routing operations. Each ASN represents a collection of IP address blocks under unified administrative
-            control.
-          </p>
+          <h4>{$t('diagnostics/rdap-asn.educational.whatIsASN.title')}</h4>
+          <p>{$t('diagnostics/rdap-asn.educational.whatIsASN.description')}</p>
         </div>
 
         <div class="info-section">
-          <h4>ASN Ranges by Registry</h4>
+          <h4>{$t('diagnostics/rdap-asn.educational.asnRanges.title')}</h4>
           <ul>
-            <li><strong>ARIN:</strong> AS1 - AS23551, AS393216 - AS394239</li>
-            <li><strong>RIPE NCC:</strong> AS24576 - AS25599, AS34816 - AS35839</li>
-            <li><strong>APNIC:</strong> AS23552 - AS24575, AS37888 - AS38911</li>
-            <li><strong>LACNIC:</strong> AS26592 - AS27647, AS61440 - AS61951</li>
-            <li><strong>AFRINIC:</strong> AS36864 - AS37887, AS327680 - AS328703</li>
+            <li><strong>{$t('diagnostics/rdap-asn.educational.asnRanges.arin')}</strong></li>
+            <li><strong>{$t('diagnostics/rdap-asn.educational.asnRanges.ripe')}</strong></li>
+            <li><strong>{$t('diagnostics/rdap-asn.educational.asnRanges.apnic')}</strong></li>
+            <li><strong>{$t('diagnostics/rdap-asn.educational.asnRanges.lacnic')}</strong></li>
+            <li><strong>{$t('diagnostics/rdap-asn.educational.asnRanges.afrinic')}</strong></li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>What You'll Get</h4>
+          <h4>{$t('diagnostics/rdap-asn.educational.whatYouGet.title')}</h4>
           <ul>
-            <li>Organization name and type</li>
-            <li>Country of registration</li>
-            <li>Allocation date and status</li>
-            <li>Contact information (admin, technical, abuse)</li>
+            <li>{$t('diagnostics/rdap-asn.educational.whatYouGet.organization')}</li>
+            <li>{$t('diagnostics/rdap-asn.educational.whatYouGet.country')}</li>
+            <li>{$t('diagnostics/rdap-asn.educational.whatYouGet.allocation')}</li>
+            <li>{$t('diagnostics/rdap-asn.educational.whatYouGet.contacts')}</li>
           </ul>
         </div>
       </div>

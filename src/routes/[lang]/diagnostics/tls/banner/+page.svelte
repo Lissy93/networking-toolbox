@@ -3,6 +3,7 @@
   import { useDiagnosticState, useExamples } from '$lib/composables';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
+  import { t } from '$lib/stores/language';
   import '../../../../../styles/diagnostics-pages.scss';
 
   let host = $state('');
@@ -11,40 +12,85 @@
 
   const diagnosticState = useDiagnosticState<any>();
 
-  const services = {
-    custom: { port: null, description: 'Custom port' },
-    ssh: { port: 22, description: 'SSH Server' },
-    smtp: { port: 25, description: 'SMTP Mail Server' },
-    whois: { port: 43, description: 'WHOIS Service' },
-    http: { port: 80, description: 'HTTP Web Server' },
-    https: { port: 443, description: 'HTTPS Web Server' },
-    ftp: { port: 21, description: 'FTP Server' },
-    telnet: { port: 23, description: 'Telnet Server' },
-    pop3: { port: 110, description: 'POP3 Mail Server' },
-    imap: { port: 143, description: 'IMAP Mail Server' },
-    smtps: { port: 465, description: 'SMTP over TLS' },
-    submission: { port: 587, description: 'Mail Submission' },
-    imaps: { port: 993, description: 'IMAP over TLS' },
-    pop3s: { port: 995, description: 'POP3 over TLS' },
-    mysql: { port: 3306, description: 'MySQL Database' },
-    postgresql: { port: 5432, description: 'PostgreSQL Database' },
-    redis: { port: 6379, description: 'Redis Database' },
-    mongodb: { port: 27017, description: 'MongoDB Database' },
-    rdp: { port: 3389, description: 'Remote Desktop' },
-    vnc: { port: 5900, description: 'VNC Remote Desktop' },
-  };
+  const services = $derived({
+    custom: { port: null, description: $t('diagnostics/tls-banner.services.custom') },
+    ssh: { port: 22, description: $t('diagnostics/tls-banner.services.ssh') },
+    smtp: { port: 25, description: $t('diagnostics/tls-banner.services.smtp') },
+    whois: { port: 43, description: $t('diagnostics/tls-banner.services.whois') },
+    http: { port: 80, description: $t('diagnostics/tls-banner.services.http') },
+    https: { port: 443, description: $t('diagnostics/tls-banner.services.https') },
+    ftp: { port: 21, description: $t('diagnostics/tls-banner.services.ftp') },
+    telnet: { port: 23, description: $t('diagnostics/tls-banner.services.telnet') },
+    pop3: { port: 110, description: $t('diagnostics/tls-banner.services.pop3') },
+    imap: { port: 143, description: $t('diagnostics/tls-banner.services.imap') },
+    smtps: { port: 465, description: $t('diagnostics/tls-banner.services.smtps') },
+    submission: { port: 587, description: $t('diagnostics/tls-banner.services.submission') },
+    imaps: { port: 993, description: $t('diagnostics/tls-banner.services.imaps') },
+    pop3s: { port: 995, description: $t('diagnostics/tls-banner.services.pop3s') },
+    mysql: { port: 3306, description: $t('diagnostics/tls-banner.services.mysql') },
+    postgresql: { port: 5432, description: $t('diagnostics/tls-banner.services.postgresql') },
+    redis: { port: 6379, description: $t('diagnostics/tls-banner.services.redis') },
+    mongodb: { port: 27017, description: $t('diagnostics/tls-banner.services.mongodb') },
+    rdp: { port: 3389, description: $t('diagnostics/tls-banner.services.rdp') },
+    vnc: { port: 5900, description: $t('diagnostics/tls-banner.services.vnc') },
+  });
 
-  const examplesList = [
-    { host: 'scanme.nmap.org', port: 22, service: 'ssh', description: 'Nmap SSH Test' },
-    { host: 'test.rebex.net', port: 21, service: 'ftp', description: 'Rebex FTP Test' },
-    { host: 'example.com', port: 80, service: 'http', description: 'Example.com HTTP' },
-    { host: 'www.google.com', port: 80, service: 'http', description: 'Google HTTP' },
-    { host: 'aspmx.l.google.com', port: 25, service: 'smtp', description: 'Google MX Server' },
-    { host: 'whois.iana.org', port: 43, service: 'whois', description: 'IANA WHOIS' },
-    { host: 'ftp.freebsd.org', port: 21, service: 'ftp', description: 'FreeBSD FTP' },
-    { host: 'httpbin.org', port: 80, service: 'http', description: 'HTTPBin API' },
-    { host: 'whois.verisign-grs.com', port: 43, service: 'whois', description: 'Verisign WHOIS' },
-  ];
+  const examplesList = $derived([
+    {
+      host: $t('diagnostics/tls-banner.examples.items.nmapSSH.host'),
+      port: $t('diagnostics/tls-banner.examples.items.nmapSSH.port'),
+      service: 'ssh',
+      description: $t('diagnostics/tls-banner.examples.items.nmapSSH.description'),
+    },
+    {
+      host: $t('diagnostics/tls-banner.examples.items.rebexFTP.host'),
+      port: $t('diagnostics/tls-banner.examples.items.rebexFTP.port'),
+      service: 'ftp',
+      description: $t('diagnostics/tls-banner.examples.items.rebexFTP.description'),
+    },
+    {
+      host: $t('diagnostics/tls-banner.examples.items.exampleHTTP.host'),
+      port: $t('diagnostics/tls-banner.examples.items.exampleHTTP.port'),
+      service: 'http',
+      description: $t('diagnostics/tls-banner.examples.items.exampleHTTP.description'),
+    },
+    {
+      host: $t('diagnostics/tls-banner.examples.items.googleHTTP.host'),
+      port: $t('diagnostics/tls-banner.examples.items.googleHTTP.port'),
+      service: 'http',
+      description: $t('diagnostics/tls-banner.examples.items.googleHTTP.description'),
+    },
+    {
+      host: $t('diagnostics/tls-banner.examples.items.googleMX.host'),
+      port: $t('diagnostics/tls-banner.examples.items.googleMX.port'),
+      service: 'smtp',
+      description: $t('diagnostics/tls-banner.examples.items.googleMX.description'),
+    },
+    {
+      host: $t('diagnostics/tls-banner.examples.items.ianaWHOIS.host'),
+      port: $t('diagnostics/tls-banner.examples.items.ianaWHOIS.port'),
+      service: 'whois',
+      description: $t('diagnostics/tls-banner.examples.items.ianaWHOIS.description'),
+    },
+    {
+      host: $t('diagnostics/tls-banner.examples.items.freebsdFTP.host'),
+      port: $t('diagnostics/tls-banner.examples.items.freebsdFTP.port'),
+      service: 'ftp',
+      description: $t('diagnostics/tls-banner.examples.items.freebsdFTP.description'),
+    },
+    {
+      host: $t('diagnostics/tls-banner.examples.items.httpbinAPI.host'),
+      port: $t('diagnostics/tls-banner.examples.items.httpbinAPI.port'),
+      service: 'http',
+      description: $t('diagnostics/tls-banner.examples.items.httpbinAPI.description'),
+    },
+    {
+      host: $t('diagnostics/tls-banner.examples.items.verisignWHOIS.host'),
+      port: $t('diagnostics/tls-banner.examples.items.verisignWHOIS.port'),
+      service: 'whois',
+      description: $t('diagnostics/tls-banner.examples.items.verisignWHOIS.description'),
+    },
+  ]);
 
   const examples = useExamples(examplesList);
 
@@ -66,7 +112,7 @@
 
   async function grabBanner() {
     if (!isInputValid) {
-      diagnosticState.setError('Please enter a valid host and port (1-65535)');
+      diagnosticState.setError($t('diagnostics/tls-banner.error.invalidInput'));
       return;
     }
 
@@ -86,26 +132,26 @@
       const data = await response.json();
 
       if (!response.ok) {
-        const errorMessage = data.message || 'Failed to grab banner';
+        const errorMessage = data.message || $t('diagnostics/tls-banner.error.failed');
         if (errorMessage.includes('ENOTFOUND')) {
-          throw new Error('Host not found. Please check the hostname and try again.');
+          throw new Error($t('diagnostics/tls-banner.error.hostNotFound'));
         } else if (errorMessage.includes('ECONNREFUSED')) {
-          throw new Error(`Connection refused on port ${port}. The service may be down or port closed.`);
+          throw new Error($t('diagnostics/tls-banner.error.connectionRefused', { port: port || 0 }));
         } else if (errorMessage.includes('timeout') || errorMessage.includes('ETIMEDOUT')) {
-          throw new Error('Connection timed out. The host may be unreachable or port filtered.');
+          throw new Error($t('diagnostics/tls-banner.error.timeout'));
         }
         throw new Error(errorMessage);
       }
 
       diagnosticState.setResults(data);
     } catch (err) {
-      diagnosticState.setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      diagnosticState.setError(err instanceof Error ? err.message : $t('common.errors.unknownError'));
     }
   }
 
   function loadExample(example: (typeof examplesList)[0], index: number) {
     host = example.host;
-    port = example.port;
+    port = parseInt(example.port, 10);
     service = example.service;
     examples.select(index);
     grabBanner();
@@ -144,8 +190,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>Service Banner Grabber</h1>
-    <p>Retrieve service banners from SSH, SMTP, HTTP, FTP, and other network services</p>
+    <h1>{$t('diagnostics/tls-banner.title')}</h1>
+    <p>{$t('diagnostics/tls-banner.subtitle')}</p>
   </header>
 
   <!-- Examples -->
@@ -153,21 +199,21 @@
     examples={examplesList}
     selectedIndex={examples.selectedIndex}
     onSelect={loadExample}
-    title="Quick Examples"
+    title={$t('diagnostics/tls-banner.examples.title')}
     getLabel={(ex) => ex.description}
     getDescription={(ex) => `${ex.host}:${ex.port}`}
-    getTooltip={(ex) => `Grab banner from ${ex.host}:${ex.port}`}
+    getTooltip={(ex) => $t('diagnostics/tls-banner.examples.tooltip', { host: ex.host, port: ex.port })}
   />
 
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>Target Service</h3>
+      <h3>{$t('diagnostics/tls-banner.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-row">
         <div class="form-group">
-          <label for="service">Service Type</label>
+          <label for="service">{$t('diagnostics/tls-banner.form.service')}</label>
           <select
             id="service"
             bind:value={service}
@@ -183,26 +229,26 @@
 
       <div class="form-row">
         <div class="form-group flex-2">
-          <label for="host">Host / IP Address</label>
+          <label for="host">{$t('diagnostics/tls-banner.form.host')}</label>
           <input
             id="host"
             type="text"
             bind:value={host}
-            placeholder="example.com or 192.168.1.1"
+            placeholder={$t('diagnostics/tls-banner.form.hostPlaceholder')}
             disabled={diagnosticState.loading}
             onchange={() => examples.clear()}
             onkeydown={(e) => e.key === 'Enter' && grabBanner()}
           />
         </div>
         <div class="form-group flex-1">
-          <label for="port">Port</label>
+          <label for="port">{$t('diagnostics/tls-banner.form.port')}</label>
           <input
             id="port"
             type="number"
             bind:value={port}
             min="1"
             max="65535"
-            placeholder="1-65535"
+            placeholder={$t('diagnostics/tls-banner.form.portPlaceholder')}
             disabled={diagnosticState.loading}
             onchange={() => examples.clear()}
             onkeydown={(e) => e.key === 'Enter' && grabBanner()}
@@ -213,16 +259,16 @@
       <button onclick={grabBanner} disabled={diagnosticState.loading || !isInputValid} class="primary">
         {#if diagnosticState.loading}
           <Icon name="loader" size="sm" animate="spin" />
-          Connecting...
+          {$t('diagnostics/tls-banner.loading.connecting')}
         {:else}
           <Icon name="terminal" size="sm" />
-          Grab Banner
+          {$t('diagnostics/tls-banner.form.grabButton')}
         {/if}
       </button>
     </div>
   </div>
 
-  <ErrorCard title="Connection Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('diagnostics/tls-banner.error.title')} error={diagnosticState.error} />
 
   {#if diagnosticState.loading}
     <div class="card">
@@ -230,8 +276,8 @@
         <div class="loading-state">
           <Icon name="loader" size="lg" animate="spin" />
           <div class="loading-text">
-            <h3>Grabbing Banner</h3>
-            <p>Connecting to {host}:{port}...</p>
+            <h3>{$t('diagnostics/tls-banner.loading.title')}</h3>
+            <p>{$t('diagnostics/tls-banner.loading.message', { host, port: port || 0 })}</p>
           </div>
         </div>
       </div>
@@ -241,33 +287,33 @@
   {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header">
-        <h3>Banner Information</h3>
+        <h3>{$t('diagnostics/tls-banner.results.title')}</h3>
       </div>
       <div class="card-content">
         <!-- Connection Info -->
         <div class="card info-section">
           <div class="card-header">
-            <h3>Connection Details</h3>
+            <h3>{$t('diagnostics/tls-banner.results.connectionDetails.title')}</h3>
           </div>
           <div class="card-content">
             <div class="info-grid">
               <div class="info-item">
-                <span class="info-label">Host:</span>
+                <span class="info-label">{$t('diagnostics/tls-banner.results.connectionDetails.host')}</span>
                 <span class="info-value">{diagnosticState.results.host}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Port:</span>
+                <span class="info-label">{$t('diagnostics/tls-banner.results.connectionDetails.port')}</span>
                 <span class="info-value">{diagnosticState.results.port}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Protocol:</span>
+                <span class="info-label">{$t('diagnostics/tls-banner.results.connectionDetails.protocol')}</span>
                 <span class="info-value">
                   <Icon name={getProtocolIcon(diagnosticState.results.protocol)} size="xs" />
-                  {diagnosticState.results.protocol || 'Unknown'}
+                  {diagnosticState.results.protocol || $t('diagnostics/tls-banner.results.connectionDetails.unknown')}
                 </span>
               </div>
               <div class="info-item">
-                <span class="info-label">Response Time:</span>
+                <span class="info-label">{$t('diagnostics/tls-banner.results.connectionDetails.responseTime')}</span>
                 <span class="info-value">{diagnosticState.results.responseTime}ms</span>
               </div>
             </div>
@@ -277,7 +323,7 @@
         <!-- Banner Content -->
         <div class="card banner-section">
           <div class="card-header">
-            <h3>Service Banner</h3>
+            <h3>{$t('diagnostics/tls-banner.results.banner.title')}</h3>
           </div>
           <div class="card-content">
             {#if diagnosticState.results.banner}
@@ -286,8 +332,8 @@
             {:else}
               <div class="no-banner">
                 <Icon name="file-x" size="lg" />
-                <p>No banner received from service</p>
-                <small>The service may not send a banner or requires specific protocol handshake</small>
+                <p>{$t('diagnostics/tls-banner.results.banner.noBanner')}</p>
+                <small>{$t('diagnostics/tls-banner.results.banner.noBannerHint')}</small>
               </div>
             {/if}
           </div>
@@ -297,7 +343,7 @@
         {#if diagnosticState.results.analysis && (diagnosticState.results.analysis.software || diagnosticState.results.analysis.version || diagnosticState.results.analysis.os || (diagnosticState.results.analysis.security && diagnosticState.results.analysis.security.length > 0))}
           <div class="card analysis-section">
             <div class="card-header">
-              <h3>Service Analysis</h3>
+              <h3>{$t('diagnostics/tls-banner.results.analysis.title')}</h3>
             </div>
             <div class="card-content">
               <div class="analysis-grid">
@@ -305,7 +351,7 @@
                   <div class="analysis-item">
                     <Icon name="package" size="sm" />
                     <div>
-                      <h4>Software</h4>
+                      <h4>{$t('diagnostics/tls-banner.results.analysis.software')}</h4>
                       <p>{diagnosticState.results.analysis.software}</p>
                     </div>
                   </div>
@@ -314,7 +360,7 @@
                   <div class="analysis-item">
                     <Icon name="tag" size="sm" />
                     <div>
-                      <h4>Version</h4>
+                      <h4>{$t('diagnostics/tls-banner.results.analysis.version')}</h4>
                       <p>{diagnosticState.results.analysis.version}</p>
                     </div>
                   </div>
@@ -323,7 +369,7 @@
                   <div class="analysis-item">
                     <Icon name="monitor" size="sm" />
                     <div>
-                      <h4>Operating System</h4>
+                      <h4>{$t('diagnostics/tls-banner.results.analysis.os')}</h4>
                       <p>{diagnosticState.results.analysis.os}</p>
                     </div>
                   </div>
@@ -332,7 +378,7 @@
                   <div class="analysis-item full-width">
                     <Icon name="shield" size="sm" />
                     <div>
-                      <h4>Security Notes</h4>
+                      <h4>{$t('diagnostics/tls-banner.results.analysis.security')}</h4>
                       <ul>
                         {#each diagnosticState.results.analysis.security as note, i (i)}
                           <li>{note}</li>
@@ -350,21 +396,21 @@
         {#if diagnosticState.results.tls}
           <div class="card tls-section">
             <div class="card-header">
-              <h3>TLS Information</h3>
+              <h3>{$t('diagnostics/tls-banner.results.tls.title')}</h3>
             </div>
             <div class="card-content">
               <div class="tls-info">
                 <div class="tls-item">
-                  <span class="tls-label">Protocol:</span>
+                  <span class="tls-label">{$t('diagnostics/tls-banner.results.tls.protocol')}</span>
                   <span class="tls-value">{diagnosticState.results.tls.protocol}</span>
                 </div>
                 <div class="tls-item">
-                  <span class="tls-label">Cipher:</span>
+                  <span class="tls-label">{$t('diagnostics/tls-banner.results.tls.cipher')}</span>
                   <span class="tls-value">{diagnosticState.results.tls.cipher}</span>
                 </div>
                 {#if diagnosticState.results.tls.certificate}
                   <div class="tls-item">
-                    <span class="tls-label">Certificate CN:</span>
+                    <span class="tls-label">{$t('diagnostics/tls-banner.results.tls.certificateCN')}</span>
                     <span class="tls-value">{diagnosticState.results.tls.certificate.cn}</span>
                   </div>
                 {/if}

@@ -153,8 +153,9 @@ function scanDirectory(dirPath: string): HardcodedText[] {
         continue;
       }
 
-      // Validate safeName to prevent path traversal and unsafe characters
-      if (safeName.includes('..') || /[^a-zA-Z0-9._-]/.test(safeName)) {
+      // Validate safeName to prevent path traversal
+      // Allow SvelteKit file naming patterns: +page.svelte, [lang], (sections), etc.
+      if (safeName.includes('..')) {
         console.error(`Unsafe file or directory name blocked: ${safeName}`);
         continue;
       }

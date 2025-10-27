@@ -1,27 +1,124 @@
 {
-  "title": "DNSSEC Validation Chain",
-  "description": "Trace and validate the DNSSEC chain of trust for a domain",
+  "title": "DNSSEC Validation Chain Checker",
+  "subtitle": "Validate DNSSEC chain from root to domain, verify DS/DNSKEY matching and RRSIG signatures",
+
+  "examples": {
+    "title": "Quick Examples",
+    "items": {
+      "govuk": {
+        "domain": "gov.uk",
+        "description": "UK Government (DNSSEC Enabled)",
+        "tooltip": "Check DNSSEC for gov.uk"
+      },
+      "cloudflare": {
+        "domain": "cloudflare.com",
+        "description": "Cloudflare (DNSSEC Enabled)",
+        "tooltip": "Check DNSSEC for cloudflare.com"
+      },
+      "failed": {
+        "domain": "dnssec-failed.org",
+        "description": "DNSSEC Failed Test",
+        "tooltip": "Check DNSSEC for dnssec-failed.org"
+      },
+      "google": {
+        "domain": "google.com",
+        "description": "Google (DNSSEC Enabled)",
+        "tooltip": "Check DNSSEC for google.com"
+      },
+      "isc": {
+        "domain": "isc.org",
+        "description": "ISC (DNSSEC Pioneer)",
+        "tooltip": "Check DNSSEC for isc.org"
+      },
+      "ietf": {
+        "domain": "ietf.org",
+        "description": "IETF (DNSSEC Enabled)",
+        "tooltip": "Check DNSSEC for ietf.org"
+      }
+    }
+  },
 
   "form": {
-    "title": "DNSSEC Chain Validation",
-    "domain": {
-      "label": "Domain",
-      "placeholder": "example.com"
-    },
-    "validate": "Validate DNSSEC Chain",
-    "validating": "Validating...",
-    "error": "Please enter a domain"
+    "title": "Domain Name",
+    "domainLabel": "Domain to Validate",
+    "domainPlaceholder": "example.com",
+    "validateButton": "Validate DNSSEC Chain",
+    "validating": "Validating..."
+  },
+
+  "loading": {
+    "title": "Validating DNSSEC Chain",
+    "message": "Querying DNS records from root to {domain}..."
+  },
+
+  "error": {
+    "title": "Validation Failed",
+    "invalidDomain": "Please enter a valid domain name",
+    "validationFailed": "DNSSEC validation failed",
+    "unexpectedError": "An unexpected error occurred"
   },
 
   "results": {
     "title": "DNSSEC Validation Results",
-    "secure": "Secure",
-    "insecure": "Insecure",
-    "bogus": "Bogus",
-    "chain_valid": "Chain Valid",
-    "chain_broken": "Chain Broken",
-    "ds_records": "DS Records",
-    "dnskey_records": "DNSKEY Records",
-    "rrsig_records": "RRSIG Records"
+    "summary": {
+      "valid": "DNSSEC Valid",
+      "invalid": "DNSSEC Invalid",
+      "domain": "Domain:",
+      "chainLinks": "Chain Links:",
+      "validated": "Validated:",
+      "status": "Status:",
+      "secure": "Secure",
+      "brokenChain": "Broken Chain",
+      "errors": "Validation Errors:"
+    },
+    "chain": {
+      "title": "DNSSEC Chain",
+      "level": "Level {level}",
+      "ds": {
+        "title": "DS Records",
+        "tooltip": "Delegation Signer records link this zone to the parent zone",
+        "keyTag": "Key Tag:",
+        "keyTagTooltip": "Identifier for the DNSKEY this DS record refers to",
+        "algorithm": "Algorithm:",
+        "algorithmTooltip": "Cryptographic algorithm used for signing",
+        "digestType": "Digest Type:",
+        "digestTypeTooltip": "Hash algorithm used to create the digest",
+        "hash": "Hash:",
+        "hashTooltip": "Hash of the DNSKEY record"
+      },
+      "dnskey": {
+        "title": "DNSKEY Records",
+        "tooltip": "Public keys used to verify DNSSEC signatures",
+        "keyTag": "Key Tag:",
+        "keyTagTooltip": "Identifier for this DNSKEY",
+        "flags": "Flags:",
+        "flagsTooltip": "Key properties: 256=ZSK, 257=KSK",
+        "algorithm": "Algorithm:",
+        "algorithmTooltip": "Cryptographic algorithm used for signing",
+        "matchedDS": "Matched DS",
+        "matchedDSTooltip": "This DNSKEY matches a DS record in the parent zone",
+        "ksk": "KSK",
+        "kskTooltip": "Key Signing Key - signs other DNSKEYs",
+        "zsk": "ZSK",
+        "zskTooltip": "Zone Signing Key - signs zone data"
+      },
+      "rrsig": {
+        "title": "RRSIG Records",
+        "tooltip": "Digital signatures created with DNSKEY to authenticate DNS data",
+        "typeCovered": "Type Covered:",
+        "typeCoveredTooltip": "DNS record type this signature covers",
+        "keyTag": "Key Tag:",
+        "keyTagTooltip": "Identifies which DNSKEY created this signature",
+        "signer": "Signer:",
+        "signerTooltip": "Zone that created this signature",
+        "valid": "Valid",
+        "validTooltip": "Signature is valid and within time window",
+        "invalid": "Invalid",
+        "invalidTooltip": "Signature is expired or not yet valid"
+      },
+      "errors": {
+        "title": "Errors"
+      }
+    }
   }
 }
