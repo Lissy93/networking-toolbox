@@ -1,0 +1,69 @@
+{
+  "title": "IP Address Distance Calculator",
+  "description": "Calculate the numerical distance between two IP addresses in the same address family.",
+  "input": {
+    "firstIP": {
+      "label": "First IP Address",
+      "placeholder": "192.168.1.1"
+    },
+    "secondIP": {
+      "label": "Second IP Address",
+      "placeholder": "192.168.1.100"
+    },
+    "help": "Enter two IP addresses of the same type (both IPv4 or both IPv6)"
+  },
+  "examples": {
+    "title": "Quick Examples",
+    "sameSubnet": {
+      "label": "Same Subnet",
+      "description": "Adjacent addresses in same network"
+    },
+    "differentSubnets": {
+      "label": "Different Subnets",
+      "description": "Addresses across subnet boundaries"
+    },
+    "ipv6Distance": {
+      "label": "IPv6 Distance",
+      "description": "IPv6 address distance calculation"
+    },
+    "largeDistance": {
+      "label": "Large Distance",
+      "description": "Addresses with significant separation"
+    }
+  },
+  "results": {
+    "title": "Distance Calculation",
+    "distance": "Distance",
+    "addresses": "addresses apart",
+    "direction": {
+      "label": "Direction",
+      "forward": "Forward (first → second)",
+      "backward": "Backward (second → first)"
+    },
+    "details": {
+      "title": "Calculation Details",
+      "firstAddress": "First Address",
+      "secondAddress": "Second Address",
+      "numericalDifference": "Numerical Difference",
+      "addressFamily": "Address Family"
+    }
+  },
+  "actions": {
+    "calculate": "Calculate Distance",
+    "calculating": "Calculating...",
+    "swap": "Swap Addresses",
+    "copy": "Copy",
+    "copied": "Copied!"
+  },
+  "errors": {
+    "title": "Calculation Error",
+    "invalidFirstIP": "Invalid first IP address",
+    "invalidSecondIP": "Invalid second IP address",
+    "mixedFamilies": "Both addresses must be same type (IPv4 or IPv6)",
+    "calculationFailed": "Distance calculation failed"
+  },
+  "tooltips": {
+    "distance": "Number of IP addresses between the two inputs",
+    "swap": "Exchange the first and second IP addresses"
+  }
+}

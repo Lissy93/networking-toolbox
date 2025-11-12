@@ -2,6 +2,7 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { isValidDomainName, formatDNSError } from '$lib/utils/dns-validation.js';
+  import { t } from '$lib/i18n';
   import '../../../../../styles/diagnostics-pages.scss';
 
   let domainName = $state('github.com');
@@ -18,12 +19,30 @@
   });
 
   const examples = [
-    { domain: 'github.com', description: 'GitHub CAA configuration' },
-    { domain: 'www.google.com', description: 'Google subdomain CAA inheritance' },
-    { domain: 'api.stripe.com', description: 'Stripe API subdomain CAA' },
-    { domain: 'blog.cloudflare.com', description: 'Cloudflare blog CAA setup' },
-    { domain: 'microsoft.com', description: 'Microsoft CAA settings' },
-    { domain: 'amazon.com', description: 'Amazon CAA implementation' },
+    {
+      domain: t('diagnostics/dns-caa-effective.examples.items.github.domain'),
+      description: t('diagnostics/dns-caa-effective.examples.items.github.description'),
+    },
+    {
+      domain: t('diagnostics/dns-caa-effective.examples.items.google.domain'),
+      description: t('diagnostics/dns-caa-effective.examples.items.google.description'),
+    },
+    {
+      domain: t('diagnostics/dns-caa-effective.examples.items.stripe.domain'),
+      description: t('diagnostics/dns-caa-effective.examples.items.stripe.description'),
+    },
+    {
+      domain: t('diagnostics/dns-caa-effective.examples.items.cloudflare.domain'),
+      description: t('diagnostics/dns-caa-effective.examples.items.cloudflare.description'),
+    },
+    {
+      domain: t('diagnostics/dns-caa-effective.examples.items.microsoft.domain'),
+      description: t('diagnostics/dns-caa-effective.examples.items.microsoft.description'),
+    },
+    {
+      domain: t('diagnostics/dns-caa-effective.examples.items.amazon.domain'),
+      description: t('diagnostics/dns-caa-effective.examples.items.amazon.description'),
+    },
   ];
 
   async function checkCAA() {
@@ -188,10 +207,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>CAA Effective Policy Checker</h1>
+    <h1>{t('diagnostics/dns-caa-effective.title')}</h1>
     <p>
-      Check effective CAA (Certificate Authority Authorization) policies by walking up the domain label chain. Determine
-      which Certificate Authorities are authorized to issue certificates for a domain.
+      {t('diagnostics/dns-caa-effective.subtitle')}
     </p>
   </header>
 
@@ -200,7 +218,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>CAA Examples</h4>
+        <h4>{t('diagnostics/dns-caa-effective.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}

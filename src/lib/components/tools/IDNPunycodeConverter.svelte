@@ -1,7 +1,15 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import { Copy, Download, Check, Globe, Type } from 'lucide-svelte';
   import { tooltip } from '$lib/actions/tooltip.js';
   import { useClipboard } from '$lib/composables';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools/idn-punycode-converter');
+  });
 
   let inputText = $state('');
   let mode = $state('unicode-to-punycode');
@@ -9,14 +17,38 @@
 
   const clipboard = useClipboard();
 
-  const domainExamples = [
-    { unicode: 'münchen.de', punycode: 'xn--mnchen-3ya.de', description: 'German city domain' },
-    { unicode: '日本.jp', punycode: 'xn--wgbl6a.jp', description: 'Japanese domain' },
-    { unicode: 'россия.рф', punycode: 'xn--h1alffa9f.xn--p1ai', description: 'Russian domain' },
-    { unicode: 'العربية.net', punycode: 'xn--mgbah1a3hjkrd.net', description: 'Arabic domain' },
-    { unicode: '한국.kr', punycode: 'xn--3e0b707e.kr', description: 'Korean domain' },
-    { unicode: 'ελληνικά.gr', punycode: 'xn--hxajbheg2az3al.gr', description: 'Greek domain' },
-  ];
+  const domainExamples = $derived([
+    {
+      unicode: 'münchen.de',
+      punycode: 'xn--mnchen-3ya.de',
+      description: $t('tools.idn-punycode-converter.examples.german'),
+    },
+    {
+      unicode: '日本.jp',
+      punycode: 'xn--wgbl6a.jp',
+      description: $t('tools.idn-punycode-converter.examples.japanese'),
+    },
+    {
+      unicode: 'россия.рф',
+      punycode: 'xn--h1alffa9f.xn--p1ai',
+      description: $t('tools.idn-punycode-converter.examples.russian'),
+    },
+    {
+      unicode: 'العربية.net',
+      punycode: 'xn--mgbah1a3hjkrd.net',
+      description: $t('tools.idn-punycode-converter.examples.arabic'),
+    },
+    {
+      unicode: '한국.kr',
+      punycode: 'xn--3e0b707e.kr',
+      description: $t('tools.idn-punycode-converter.examples.korean'),
+    },
+    {
+      unicode: 'ελληνικά.gr',
+      punycode: 'xn--hxajbheg2az3al.gr',
+      description: $t('tools.idn-punycode-converter.examples.greek'),
+    },
+  ]);
 
   // Punycode implementation based on RFC 3492
   function punycodeDecode(input: string) {
@@ -204,12 +236,16 @@
         return convertDomain(inputText.trim(), false);
       }
     } catch {
-      return 'Error: Invalid input';
+      return $t('tools.idn-punycode-converter.conversion.error');
     }
   });
 
   let isValid = $derived.by(() => {
-    return inputText.trim() !== '' && result !== '' && !result.startsWith('Error:');
+    return (
+      inputText.trim() !== '' &&
+      result !== '' &&
+      !result.startsWith($t('tools.idn-punycode-converter.conversion.error').split(':')[0] + ':')
+    );
   });
 
   let warnings = $derived.by(() => {
@@ -217,16 +253,16 @@
 
     if (mode === 'unicode-to-punycode') {
       if (inputText && !/[\u0080-\uFFFF]/.test(inputText)) {
-        warns.push('Input contains only ASCII characters - no conversion needed');
+        warns.push($t('tools.idn-punycode-converter.warnings.asciiOnly'));
       }
     } else {
       if (inputText && !inputText.includes('xn--')) {
-        warns.push('Input does not contain punycode domains (xn-- prefix)');
+        warns.push($t('tools.idn-punycode-converter.warnings.noPunycode'));
       }
     }
 
     if (inputText.length > 253) {
-      warns.push('Domain name exceeds maximum length of 253 characters');
+      warns.push($t('tools.idn-punycode-converter.warnings.tooLong'));
     }
 
     return warns;
@@ -272,8 +308,8 @@
 <div class="idn-converter">
   <div class="card">
     <div class="card-header">
-      <h1>IDN Punycode Converter</h1>
-      <p>Convert between Unicode domain names and Punycode (ASCII-compatible encoding)</p>
+      <h1>{$t('tools.idn-punycode-converter.title')}</h1>
+      <p>{$t('tools.idn-punycode-converter.description')}</p>
     </div>
 
     <div class="card-content">
@@ -286,7 +322,7 @@
             onclick={() => (mode = 'unicode-to-punycode')}
           >
             <Globe size="16" />
-            Unicode → Punycode
+            {$t('tools.idn-punycode-converter.modes.unicodeToPunycode')}
           </button>
           <button
             class="toggle-btn"
@@ -294,7 +330,7 @@
             onclick={() => (mode = 'punycode-to-unicode')}
           >
             <Type size="16" />
-            Punycode → Unicode
+            {$t('tools.idn-punycode-converter.modes.punycodeToUnicode')}
           </button>
         </div>
       </div>
@@ -376,7 +412,7 @@
               <div class="output-display">
                 {#if isValid}
                   <pre class="result-text" class:mono-font={mode === 'unicode-to-punycode'}>{result}</pre>
-                {:else if result.startsWith('Error:')}
+                {:else if result.startsWith($t('tools.idn-punycode-converter.conversion.error').split(':')[0] + ':')}
                   <p class="error-text">{result}</p>
                 {:else}
                   <p class="placeholder-text">Enter a domain name to see the conversion result</p>

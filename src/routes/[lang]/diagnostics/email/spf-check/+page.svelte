@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/i18n';
   import '../../../../../styles/diagnostics-pages.scss';
 
   let domain = $state('gmail.com');
@@ -121,10 +122,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>Email SPF Policy Checker</h1>
+    <h1>{t('diagnostics.email-spf-check.title')}</h1>
     <p>
-      Check SPF (Sender Policy Framework) records for email authentication and deliverability. Analyze which servers are
-      authorized to send email for your domain and assess delivery risk.
+      {t('diagnostics.email-spf-check.description')}
     </p>
   </header>
 
@@ -133,7 +133,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>SPF Examples</h4>
+        <h4>{t('diagnostics.email-spf-check.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}

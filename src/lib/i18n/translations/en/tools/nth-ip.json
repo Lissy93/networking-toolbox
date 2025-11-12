@@ -1,0 +1,86 @@
+{
+  "title": "Nth IP Calculator",
+  "description": "Calculate the nth IP address from networks, ranges, or CIDR blocks using flexible indexing syntax.",
+  "input": {
+    "networks": {
+      "label": "Networks and Indices",
+      "placeholder": "192.168.1.0/24 @ 10\n10.0.0.0-10.0.0.255 [50]\n172.16.0.0/16 100\n2001:db8::/64#1000",
+      "help": "Use formats: network@index, network[index], network#index, or network+index"
+    },
+    "globalOffset": {
+      "label": "Global Offset",
+      "placeholder": "0",
+      "help": "Base offset applied to all calculations"
+    }
+  },
+  "examples": {
+    "title": "Quick Examples",
+    "items": [
+      {
+        "description": "Get 10th IP from a /24 subnet"
+      },
+      {
+        "description": "Multiple range types with different indices"
+      },
+      {
+        "description": "IPv6 networks with various formats"
+      },
+      {
+        "description": "Large networks with high indices"
+      },
+      {
+        "description": "First and last IP using positive/negative indexing"
+      },
+      {
+        "description": "Sequential IP ranges with specific indices"
+      }
+    ]
+  },
+  "actions": {
+    "calculate": "Calculate Nth IPs",
+    "calculating": "Calculating...",
+    "copyAll": "Copy All IPs",
+    "exportCsv": "Export CSV",
+    "exportJson": "Export JSON",
+    "copied": "Copied!"
+  },
+  "errors": {
+    "title": "Errors"
+  },
+  "summary": {
+    "title": "Calculation Summary",
+    "totalInputs": "Total Inputs",
+    "successfulCalculations": "Successful",
+    "failedCalculations": "Failed"
+  },
+  "results": {
+    "title": "Nth IP Results",
+    "count": "({count})",
+    "network": "Network/Range",
+    "index": "Index",
+    "calculatedIP": "Calculated IP",
+    "position": "Position",
+    "totalAddresses": "Total",
+    "copyTooltip": "Copy IP address"
+  },
+  "syntax": {
+    "title": "Supported Syntax",
+    "formats": [
+      "network @ index (e.g., 192.168.1.0/24 @ 10)",
+      "network [index] (e.g., 10.0.0.0/8 [100])",
+      "network # index (e.g., 2001:db8::/64 # 50)",
+      "network + index (e.g., 172.16.0.0/16 + 1000)",
+      "network index (e.g., 192.168.0.0/24 5)"
+    ],
+    "indexing": "Positive indices start from 0, negative indices from -1 (last)"
+  },
+  "csvHeaders": {
+    "network": "Network/Range",
+    "index": "Index",
+    "calculatedIP": "Calculated IP",
+    "position": "Position",
+    "totalAddresses": "Total Addresses",
+    "valid": "Valid",
+    "error": "Error"
+  }
+}

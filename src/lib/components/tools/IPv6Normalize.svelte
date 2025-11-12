@@ -2,6 +2,14 @@
   import { normalizeIPv6Addresses, type IPv6NormalizeResult } from '$lib/utils/ipv6-normalize.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools.ipv6-normalize');
+  });
 
   let inputText = $state(
     '2001:0db8:0000:0000:0000:ff00:0042:8329\n2001:db8:0:0:1:0:0:1\n2001:0db8:0001:0000:0000:0ab9:C0A8:0102\n2001:db8::1\nfe80::1%eth0',
@@ -25,7 +33,7 @@
       result = {
         normalizations: [],
         summary: { totalInputs: 0, validInputs: 0, invalidInputs: 0, alreadyNormalizedInputs: 0 },
-        errors: [error instanceof Error ? error.message : 'Unknown error'],
+        errors: [error instanceof Error ? error.message : $t('tools.ipv6-normalize.errors.unknownError')],
       };
     } finally {
       isLoading = false;
@@ -41,7 +49,15 @@
     let mimeType = 'text/plain';
 
     if (format === 'csv') {
-      const headers = 'Input,Normalized,Valid,Compression Applied,Leading Zeros Removed,Lowercase Applied,Error';
+      const headers = [
+        $t('tools.ipv6-normalize.csvHeaders.input'),
+        $t('tools.ipv6-normalize.csvHeaders.normalized'),
+        $t('tools.ipv6-normalize.csvHeaders.valid'),
+        $t('tools.ipv6-normalize.csvHeaders.compressionApplied'),
+        $t('tools.ipv6-normalize.csvHeaders.leadingZerosRemoved'),
+        $t('tools.ipv6-normalize.csvHeaders.lowercaseApplied'),
+        $t('tools.ipv6-normalize.csvHeaders.error'),
+      ].join(',');
       const rows = result.normalizations.map(
         (norm) =>
           `"${norm.input}","${norm.normalized}","${norm.isValid}","${norm.compressionApplied}","${norm.leadingZerosRemoved}","${norm.lowercaseApplied}","${norm.error || ''}"`,
@@ -93,34 +109,30 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>IPv6 Normalizer</h2>
+    <h2>{$t('tools.ipv6-normalize.title')}</h2>
     <p>
-      Normalize IPv6 addresses to RFC 5952 canonical form with lowercase, zero compression, and leading zero removal
+      {$t('tools.ipv6-normalize.description')}
     </p>
   </header>
 
   <div class="input-section">
     <div class="input-group">
-      <label for="inputs">IPv6 Addresses</label>
-      <textarea
-        id="inputs"
-        bind:value={inputText}
-        placeholder="2001:0db8:0000:0000:0000:ff00:0042:8329&#10;2001:db8:0:0:1:0:0:1&#10;2001:0db8:0001:0000:0000:0ab9:C0A8:0102&#10;fe80::1%eth0"
-        rows="6"
+      <label for="inputs">{$t('tools.ipv6-normalize.input.label')}</label>
+      <textarea id="inputs" bind:value={inputText} placeholder={$t('tools.ipv6-normalize.input.placeholder')} rows="6"
       ></textarea>
       <div class="input-help">
-        Enter one IPv6 address per line. Supports zone identifiers (%) and IPv4-mapped addresses
+        {$t('tools.ipv6-normalize.input.help')}
       </div>
     </div>
 
     <div class="rfc-info">
-      <h3>RFC 5952 Normalization Rules</h3>
+      <h3>{$t('tools.ipv6-normalize.rfc.title')}</h3>
+      <p>{$t('tools.ipv6-normalize.rfc.description')}</p>
       <ul>
-        <li>Convert hexadecimal to lowercase</li>
-        <li>Remove leading zeros in each group</li>
-        <li>Compress longest sequence of consecutive zero groups with ::</li>
-        <li>Preserve zone identifiers (%)</li>
-        <li>Support IPv4-mapped IPv6 addresses</li>
+        <li>{$t('tools.ipv6-normalize.rfc.rules.lowercase')}</li>
+        <li>{$t('tools.ipv6-normalize.rfc.rules.leadingZeros')}</li>
+        <li>{$t('tools.ipv6-normalize.rfc.rules.compression')}</li>
+        <li>{$t('tools.ipv6-normalize.rfc.rules.singleZero')}</li>
       </ul>
     </div>
   </div>
@@ -128,7 +140,7 @@
   {#if isLoading}
     <div class="loading">
       <Icon name="loader" />
-      Normalizing addresses...
+      {$t('tools.ipv6-normalize.actions.normalizing')}
     </div>
   {/if}
 
@@ -136,7 +148,7 @@
     <div class="results">
       {#if result.errors.length > 0}
         <div class="errors">
-          <h3><Icon name="alert-triangle" /> Errors</h3>
+          <h3><Icon name="alert-triangle" /> {$t('tools.ipv6-normalize.errors.title')}</h3>
           {#each result.errors as error (error)}
             <div class="error-item">{error}</div>
           {/each}
@@ -145,23 +157,23 @@
 
       {#if result.normalizations.length > 0}
         <div class="summary">
-          <h3>Normalization Summary</h3>
+          <h3>{$t('tools.ipv6-normalize.summary.title')}</h3>
           <div class="summary-stats">
             <div class="stat">
               <span class="stat-value">{result.summary.totalInputs}</span>
-              <span class="stat-label">Total Inputs</span>
+              <span class="stat-label">{$t('tools.ipv6-normalize.summary.totalInputs')}</span>
             </div>
             <div class="stat valid">
               <span class="stat-value">{result.summary.validInputs}</span>
-              <span class="stat-label">Valid</span>
+              <span class="stat-label">{$t('tools.ipv6-normalize.summary.validInputs')}</span>
             </div>
             <div class="stat invalid">
               <span class="stat-value">{result.summary.invalidInputs}</span>
-              <span class="stat-label">Invalid</span>
+              <span class="stat-label">{$t('tools.ipv6-normalize.summary.invalidInputs')}</span>
             </div>
             <div class="stat already-normalized">
               <span class="stat-value">{result.summary.alreadyNormalizedInputs}</span>
-              <span class="stat-label">Already Normalized</span>
+              <span class="stat-label">{$t('tools.ipv6-normalize.summary.alreadyNormalized')}</span>
             </div>
           </div>
         </div>

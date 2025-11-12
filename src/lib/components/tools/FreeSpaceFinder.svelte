@@ -4,7 +4,15 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
   import { formatNumber } from '$lib/utils/formatters';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import '../../../styles/diagnostics-pages.scss';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools.free-space-finder');
+  });
 
   let pools = $state(`192.168.0.0/16
 10.0.0.0/8`);
@@ -26,9 +34,9 @@
   let selectedExampleIndex = $state<number | null>(null);
   let _userModified = $state(false);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Office Network Gaps',
+      label: $t('tools.free-space-finder.examples.officeNetworkGaps.label'),
       pools: '192.168.0.0/16',
       allocations: `192.168.1.0/24
 192.168.10.0/24
@@ -36,7 +44,7 @@
       targetPrefix: 24,
     },
     {
-      label: 'Large Pool Analysis',
+      label: $t('tools.free-space-finder.examples.largePoolAnalysis.label'),
       pools: '10.0.0.0/8',
       allocations: `10.0.0.0/16
 10.1.0.0/16
@@ -44,7 +52,7 @@
       targetPrefix: null,
     },
     {
-      label: 'Multi-Pool Setup',
+      label: $t('tools.free-space-finder.examples.homeNetworkSpace.label'),
       pools: `172.16.0.0/12
 192.168.0.0/16`,
       allocations: `172.16.1.0/24
@@ -52,7 +60,7 @@
       targetPrefix: 28,
     },
     {
-      label: 'Campus Network Planning',
+      label: $t('tools.free-space-finder.examples.ipv6Planning.label'),
       pools: `10.10.0.0/16
 10.20.0.0/16`,
       allocations: `10.10.1.0/24
@@ -61,23 +69,14 @@
       targetPrefix: 25,
     },
     {
-      label: 'Data Center Allocation',
+      label: $t('tools.free-space-finder.examples.datacenterInventory.label'),
       pools: '172.20.0.0/14',
       allocations: `172.20.0.0/16
 172.21.0.0/16
 172.23.128.0/17`,
       targetPrefix: 20,
     },
-    {
-      label: 'Service Provider Space',
-      pools: `203.0.113.0/24
-198.51.100.0/24`,
-      allocations: `203.0.113.0/26
-203.0.113.128/25
-198.51.100.64/26`,
-      targetPrefix: 27,
-    },
-  ];
+  ]);
 
   function loadExample(example: (typeof examples)[0], index: number) {
     pools = example.pools;
@@ -148,7 +147,7 @@
     } catch (error) {
       result = {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error: error instanceof Error ? error.message : $t('tools.free-space-finder.errors.unknownError'),
         availableBlocks: [],
         totalBlocks: 0,
         totalAddresses: 0,
@@ -199,8 +198,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>Free Space Finder</h2>
-    <p>Discover all available address blocks within network pools</p>
+    <h2>{$t('tools.free-space-finder.title')}</h2>
+    <p>{$t('tools.free-space-finder.description')}</p>
   </header>
 
   <!-- Examples -->
@@ -208,7 +207,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('tools.free-space-finder.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -232,28 +231,28 @@
   <section class="input-section">
     <div class="input-grid">
       <div class="input-group">
-        <label for="pools" use:tooltip={'Enter network pools - one CIDR block per line (e.g., 192.168.0.0/16)'}>
-          Network Pools
+        <label for="pools" use:tooltip={$t('tools.free-space-finder.input.pools.tooltip')}>
+          {$t('tools.free-space-finder.input.pools.label')}
         </label>
         <textarea
           id="pools"
           bind:value={pools}
           oninput={handleInputChange}
-          placeholder="192.168.0.0/16&#10;10.0.0.0/8"
+          placeholder={$t('tools.free-space-finder.input.pools.placeholder')}
           rows="4"
           required
         ></textarea>
       </div>
 
       <div class="input-group">
-        <label for="allocations" use:tooltip={'Enter allocated/used blocks - one CIDR block per line'}>
-          Allocated Blocks
+        <label for="allocations" use:tooltip={$t('tools.free-space-finder.input.allocations.tooltip')}>
+          {$t('tools.free-space-finder.input.allocations.label')}
         </label>
         <textarea
           id="allocations"
           bind:value={allocations}
           oninput={handleInputChange}
-          placeholder="192.168.1.0/24&#10;192.168.10.0/24"
+          placeholder={$t('tools.free-space-finder.input.allocations.placeholder')}
           rows="4"
         ></textarea>
       </div>
@@ -261,11 +260,8 @@
 
     <div class="filter-section">
       <div class="input-group">
-        <label
-          for="target-prefix"
-          use:tooltip={'Filter results to show only blocks that can accommodate the target prefix length'}
-        >
-          Target Prefix Length (Optional)
+        <label for="target-prefix" use:tooltip={$t('tools.free-space-finder.input.targetPrefix.tooltip')}>
+          {$t('tools.free-space-finder.input.targetPrefix.label')}
         </label>
         <div class="prefix-input-wrapper">
           <input
@@ -275,7 +271,7 @@
             oninput={handleInputChange}
             min="1"
             max="32"
-            placeholder="e.g., 24"
+            placeholder={$t('tools.free-space-finder.input.targetPrefix.placeholder')}
           />
           <span class="prefix-hint">/{targetPrefix || 'xx'}</span>
           <button
@@ -284,7 +280,7 @@
               targetPrefix = null;
               handleInputChange();
             }}
-            aria-label="Clear filter"
+            aria-label={$t('tools.free-space-finder.actions.clearFilter')}
           >
             <Icon name="x" size="xs" />
           </button>
@@ -298,15 +294,15 @@
     <section class="results-section">
       {#if result.success}
         <div class="results-header">
-          <h3>Available Free Space</h3>
+          <h3>{$t('tools.free-space-finder.results.title')}</h3>
           <div class="results-summary">
             <span class="metric">
               <Icon name="free-blocks" size="sm" />
-              {result.totalBlocks} free blocks
+              {$t('tools.free-space-finder.results.blocks', { count: result.totalBlocks })}
             </span>
             <span class="metric">
               <Icon name="network" size="sm" />
-              {formatNumber(result.totalAddresses)} addresses
+              {$t('tools.free-space-finder.results.addresses', { count: formatNumber(result.totalAddresses) })}
             </span>
           </div>
         </div>
@@ -314,7 +310,7 @@
         <!-- Address Space Visualization -->
         {#if result.availableBlocks.length > 0 && result.visualization}
           <div class="visualization-section">
-            <h4>Address Space Visualization</h4>
+            <h4>{$t('tools.free-space-finder.visualization.title')}</h4>
             <div class="visualization-container">
               <div class="viz-legend">
                 <div class="legend-item">

@@ -1,0 +1,100 @@
+{
+  "title": "Understanding IPv6 Address Notation",
+  "conversions": {
+    "title": "Conversion Use Cases & Applications",
+    "examples": {
+      "title": "Technical Examples & Standards"
+    }
+  },
+  "formats": {
+    "expanded": {
+      "title": "Expanded (Full) Format",
+      "structure": "All 32 hexadecimal characters with colons every 4 digits",
+      "usage": "Debugging, detailed analysis, and when precision is required",
+      "benefits": "Shows complete address structure, easier to parse programmatically"
+    },
+    "compressed": {
+      "title": "Compressed (Shortened) Format",
+      "structure": "Uses :: to represent consecutive zero groups, removes leading zeros",
+      "usage": "Configuration files, user interfaces, documentation",
+      "benefits": "Shorter, more readable, standard representation"
+    },
+    "rules": {
+      "title": "Compression Rules",
+      "doubleColon": "Represents one or more consecutive zero groups",
+      "singleUse": "Only one :: allowed per address to avoid ambiguity",
+      "leadingZeros": "Remove leading zeros from each group (0001 → 1)",
+      "preference": "Compress the longest sequence of consecutive zeros"
+    }
+  },
+  "useCases": {
+    "expand": {
+      "title": "Expand IPv6 Addresses",
+      "networkAnalysis": "Compare addresses byte-by-byte",
+      "databaseStorage": "Consistent format for indexing",
+      "debugging": "See complete address structure",
+      "programming": "Easier parsing and manipulation",
+      "security": "Avoid address obfuscation issues"
+    },
+    "compress": {
+      "title": "Compress IPv6 Addresses",
+      "userInterface": "Shorter, more readable addresses",
+      "configuration": "Cleaner config files and logs",
+      "documentation": "Standard format for examples",
+      "urls": "Shorter addresses in IPv6 URLs",
+      "networkEquipment": "Standard display format"
+    },
+    "scenarios": {
+      "title": "Real-world Scenarios",
+      "networkMonitoring": "Consistent address formatting",
+      "apiIntegration": "Standardize input/output formats",
+      "dataMigration": "Convert between address formats",
+      "educationalTools": "Demonstrate IPv6 structure",
+      "qualityAssurance": "Validate address representations"
+    }
+  },
+  "examples": {
+    "commonTypes": "Common Address Types",
+    "loopback": "Loopback:",
+    "linkLocal": "Link-Local:",
+    "documentation": "Documentation:",
+    "bestPractices": {
+      "title": "Best Practices",
+      "rfc5952": "Follow standard compression guidelines",
+      "consistency": "Use same format throughout applications",
+      "validation": "Always validate both input and output",
+      "caseSensitivity": "Lowercase preferred (RFC 5952)",
+      "leadingZeros": "Always remove for compressed form"
+    }
+  },
+  "terms": {
+    "structure": "Structure:",
+    "example": "Example:",
+    "usage": "Usage:",
+    "benefits": "Benefits:",
+    "doubleColonLabel": "Double Colon (::):",
+    "singleUseLabel": "Single Use:",
+    "leadingZerosLabel": "Leading Zeros:",
+    "preferenceLabel": "Preference:",
+    "networkAnalysisLabel": "Network Analysis:",
+    "databaseStorageLabel": "Database Storage:",
+    "debuggingLabel": "Debugging:",
+    "programmingLabel": "Programming:",
+    "securityLabel": "Security:",
+    "userInterfaceLabel": "User Interface:",
+    "configurationLabel": "Configuration:",
+    "documentationLabel": "Documentation:",
+    "urlsLabel": "URLs:",
+    "networkEquipmentLabel": "Network Equipment:",
+    "networkMonitoringLabel": "Network Monitoring:",
+    "apiIntegrationLabel": "API Integration:",
+    "dataMigrationLabel": "Data Migration:",
+    "educationalToolsLabel": "Educational Tools:",
+    "qualityAssuranceLabel": "Quality Assurance:",
+    "rfc5952Label": "RFC 5952:",
+    "consistencyLabel": "Consistency:",
+    "validationLabel": "Validation:",
+    "caseSensitivityLabel": "Case Sensitivity:",
+    "leadingZerosRuleLabel": "Leading Zeros:"
+  }
+}

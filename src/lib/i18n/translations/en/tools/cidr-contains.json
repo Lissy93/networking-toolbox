@@ -36,6 +36,10 @@
     "resultsTitle": "Containment Results"
   },
 
+  "errors": {
+    "unknownError": "Unknown error occurred"
+  },
+
   "stats": {
     "containersLabel": "Containers (A)",
     "itemsCount": "{count} items",

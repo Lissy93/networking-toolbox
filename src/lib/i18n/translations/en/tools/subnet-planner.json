@@ -1,0 +1,64 @@
+{
+  "title": "Subnet Planner",
+  "description": "Plan and design subnet allocation for networks with optimal address space utilization.",
+  "input": {
+    "parentNetwork": {
+      "label": "Parent Network",
+      "placeholder": "192.168.0.0/16",
+      "help": "The main network to subdivide"
+    },
+    "requirements": {
+      "title": "Subnet Requirements",
+      "addSubnet": "Add Subnet",
+      "name": "Subnet Name",
+      "namePlaceholder": "e.g., Sales Department",
+      "hostsNeeded": "Hosts Needed",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional description"
+    }
+  },
+  "planning": {
+    "strategy": {
+      "title": "Planning Strategy",
+      "efficient": "Efficient Allocation",
+      "efficientDesc": "Minimize wasted address space",
+      "aligned": "Aligned Boundaries",
+      "alignedDesc": "Use clean subnet boundaries"
+    },
+    "growthFactor": {
+      "label": "Growth Factor",
+      "tooltip": "Reserve additional space for future expansion"
+    }
+  },
+  "results": {
+    "title": "Subnet Plan",
+    "summary": {
+      "title": "Planning Summary",
+      "totalSubnets": "Total Subnets",
+      "addressesUsed": "Addresses Used",
+      "addressesWasted": "Addresses Wasted",
+      "efficiency": "Efficiency"
+    },
+    "plan": {
+      "title": "Subnet Allocation Plan",
+      "subnet": "Subnet",
+      "network": "Network",
+      "hosts": "Hosts",
+      "size": "Size",
+      "utilization": "Utilization"
+    }
+  },
+  "actions": {
+    "plan": "Generate Plan",
+    "planning": "Planning...",
+    "export": "Export Plan",
+    "copy": "Copy",
+    "copied": "Copied!"
+  },
+  "errors": {
+    "title": "Planning Error",
+    "invalidNetwork": "Invalid parent network",
+    "insufficientSpace": "Insufficient address space",
+    "planningFailed": "Subnet planning failed"
+  }
+}

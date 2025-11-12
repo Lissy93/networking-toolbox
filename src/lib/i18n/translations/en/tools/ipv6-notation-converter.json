@@ -1,0 +1,57 @@
+{
+  "title": "IPv6 Notation Converter",
+  "description": "Convert between compressed and expanded IPv6 notation formats with validation.",
+  "modes": {
+    "expand": "Expand to Full Form",
+    "compress": "Compress to Short Form"
+  },
+  "input": {
+    "label": "IPv6 Address",
+    "placeholder": "2001:db8::1",
+    "help": "Enter IPv6 address in any valid format",
+    "tooltipExpand": "Enter compressed IPv6 address to expand",
+    "tooltipCompress": "Enter expanded IPv6 address to compress"
+  },
+  "output": {
+    "label": "Converted Address",
+    "expandedForm": "Expanded Form",
+    "compressedForm": "Compressed Form"
+  },
+  "examples": {
+    "title": "Quick Examples",
+    "documentationPrefix": "Documentation Prefix",
+    "loopbackAddress": "Loopback Address",
+    "linkLocalAddress": "Link-Local Address",
+    "globalUnicast": "Global Unicast",
+    "ipv4MappedIPv6": "IPv4-mapped IPv6",
+    "multicastAddress": "Multicast Address"
+  },
+  "actions": {
+    "convert": "Convert",
+    "copy": "Copy",
+    "copied": "Copied!"
+  },
+  "errors": {
+    "title": "Conversion Error",
+    "enterAddress": "Please enter an IPv6 address",
+    "invalidFormat": "Invalid IPv6 address format",
+    "conversionFailed": "Conversion failed"
+  },
+  "info": {
+    "title": "IPv6 Notation Formats",
+    "expanded": "Expanded: All 32 hexadecimal digits with leading zeros",
+    "compressed": "Compressed: Shortened using :: for consecutive zero groups",
+    "rules": "RFC 4291 defines the standard representation formats"
+  },
+  "comparison": {
+    "input": "Input ({format})",
+    "output": "Output ({format})"
+  },
+  "stats": {
+    "inputLength": "Input Length",
+    "outputLength": "Output Length",
+    "difference": "Difference",
+    "characters": "{count} characters",
+    "charactersChange": "{count} characters"
+  }
+}

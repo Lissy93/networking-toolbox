@@ -1,0 +1,68 @@
+{
+  "title": "IPv6 Address Normalizer",
+  "description": "Normalize IPv6 addresses to their canonical RFC 5952 format with compression and case standardization.",
+  "input": {
+    "label": "IPv6 Addresses",
+    "placeholder": "2001:0db8:0000:0000:0000:ff00:0042:8329\n2001:db8:0:0:1:0:0:1\n2001:0db8:0001:0000:0000:0ab9:C0A8:0102\n2001:db8::1\nfe80::1%eth0",
+    "help": "Enter IPv6 addresses (one per line) in any valid format. Supports compressed notation (::), mixed case, leading zeros, and zone IDs."
+  },
+  "actions": {
+    "normalize": "Normalize Addresses",
+    "normalizing": "Normalizing...",
+    "copyAll": "Copy All",
+    "copyAllNormalized": "Copy All Normalized",
+    "exportTxt": "Export TXT",
+    "exportCsv": "Export CSV",
+    "exportJson": "Export JSON",
+    "copied": "Copied!"
+  },
+  "errors": {
+    "title": "Errors",
+    "unknownError": "Unknown error"
+  },
+  "summary": {
+    "title": "Normalization Summary",
+    "totalInputs": "Total Inputs",
+    "validInputs": "Valid",
+    "invalidInputs": "Invalid",
+    "alreadyNormalized": "Already Normalized",
+    "compressionApplied": "Compression Applied",
+    "leadingZerosRemoved": "Leading Zeros Removed",
+    "lowercaseApplied": "Lowercase Applied"
+  },
+  "results": {
+    "title": "Normalized Results",
+    "count": "({count})",
+    "input": "Input",
+    "normalized": "Normalized",
+    "status": "Status",
+    "changes": "Changes Applied",
+    "valid": "Valid",
+    "invalid": "Invalid",
+    "copyTooltip": "Copy normalized address"
+  },
+  "rfc": {
+    "title": "RFC 5952 Normalization",
+    "description": "This tool normalizes IPv6 addresses according to RFC 5952 guidelines:",
+    "rules": {
+      "lowercase": "Convert all hexadecimal digits to lowercase",
+      "leadingZeros": "Remove leading zeros from each 16-bit group",
+      "compression": "Use :: to compress the longest run of consecutive zero groups",
+      "singleZero": "Represent single zero groups as '0' not '0000'"
+    }
+  },
+  "csvHeaders": {
+    "input": "Input",
+    "normalized": "Normalized",
+    "valid": "Valid",
+    "compressionApplied": "Compression Applied",
+    "leadingZerosRemoved": "Leading Zeros Removed",
+    "lowercaseApplied": "Lowercase Applied",
+    "error": "Error"
+  },
+  "tooltips": {
+    "normalizeHelp": "Convert IPv6 addresses to their canonical RFC 5952 format",
+    "copyAllHelp": "Copy all normalized addresses to clipboard",
+    "exportHelp": "Export results in various formats"
+  }
+}

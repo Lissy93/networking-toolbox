@@ -2,6 +2,14 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools.ptr-generator');
+  });
 
   let inputValue = $state('192.168.1.100');
   let inputType = $state<'single' | 'cidr'>('single');
@@ -31,44 +39,44 @@
   let _userModified = $state(false);
   let showZoneFiles = $state(true);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Single IPv4',
+      label: $t('tools.ptr-generator.examples.singleIPv4.label'),
       input: '192.168.1.100',
       type: 'single' as const,
-      description: 'Generate PTR for single IPv4 address',
+      description: $t('tools.ptr-generator.examples.singleIPv4.description'),
     },
     {
-      label: 'Single IPv6',
+      label: $t('tools.ptr-generator.examples.singleIPv6.label'),
       input: '2001:db8::1',
       type: 'single' as const,
-      description: 'Generate PTR for single IPv6 address',
+      description: $t('tools.ptr-generator.examples.singleIPv6.description'),
     },
     {
-      label: 'IPv4 /24 Subnet',
+      label: $t('tools.ptr-generator.examples.ipv4Subnet24.label'),
       input: '192.168.1.0/24',
       type: 'cidr' as const,
-      description: 'Generate PTRs for entire /24 subnet',
+      description: $t('tools.ptr-generator.examples.ipv4Subnet24.description'),
     },
     {
-      label: 'IPv4 /28 Small Block',
+      label: $t('tools.ptr-generator.examples.ipv4SmallBlock.label'),
       input: '10.0.0.16/28',
       type: 'cidr' as const,
-      description: 'Generate PTRs for /28 block (16 addresses)',
+      description: $t('tools.ptr-generator.examples.ipv4SmallBlock.description'),
     },
     {
-      label: 'IPv6 /64 Network',
+      label: $t('tools.ptr-generator.examples.ipv6Network.label'),
       input: '2001:db8::/64',
       type: 'cidr' as const,
-      description: 'Generate IPv6 PTR zone structure',
+      description: $t('tools.ptr-generator.examples.ipv6Network.description'),
     },
     {
-      label: 'IPv6 /48 Prefix',
+      label: $t('tools.ptr-generator.examples.largeBlock.label'),
       input: '2001:db8:1000::/48',
       type: 'cidr' as const,
-      description: 'Generate IPv6 /48 PTR zone',
+      description: $t('tools.ptr-generator.examples.largeBlock.description'),
     },
-  ];
+  ]);
 
   function loadExample(example: (typeof examples)[0]) {
     inputValue = example.input;
@@ -154,7 +162,7 @@
     const prefix = parseInt(prefixStr);
 
     if (!isValidIPv4(network) || prefix < 0 || prefix > 32) {
-      throw new Error('Invalid IPv4 CIDR notation');
+      throw new Error($t('tools.ptr-generator.errors.invalidIPv4CIDR'));
     }
 
     const networkParts = network.split('.').map((p) => parseInt(p));
@@ -162,7 +170,7 @@
 
     // Limit to reasonable sizes
     if (hostBits > 16) {
-      throw new Error('CIDR block too large (more than 65536 addresses). Please use a smaller block.');
+      throw new Error($t('tools.ptr-generator.errors.cidrTooLarge'));
     }
 
     const totalHosts = Math.pow(2, hostBits);
@@ -193,13 +201,13 @@
     const prefix = parseInt(prefixStr);
 
     if (!isValidIPv6(network) || prefix < 0 || prefix > 128) {
-      throw new Error('Invalid IPv6 CIDR notation');
+      throw new Error($t('tools.ptr-generator.errors.invalidIPv6CIDR'));
     }
 
     // For IPv6, we'll generate a representative set rather than all addresses
     // since IPv6 networks can be astronomically large
     if (prefix > 64) {
-      throw new Error('IPv6 CIDR blocks smaller than /64 are not supported for enumeration');
+      throw new Error($t('tools.ptr-generator.errors.ipv6CIDRTooSmall'));
     }
 
     // For demonstration, return just the network address and a few examples
@@ -282,12 +290,12 @@ $TTL 86400
           const { ptrName, zone } = generateIPv6PTR(trimmed);
           entries.push({ ip: trimmed, ptrName, type: 'IPv6', zone });
         } else {
-          throw new Error('Invalid IP address format');
+          throw new Error($t('tools.ptr-generator.errors.invalidIPFormat'));
         }
       } else {
         // CIDR notation
         if (!trimmed.includes('/')) {
-          throw new Error('CIDR notation requires a prefix length (e.g., 192.168.1.0/24)');
+          throw new Error($t('tools.ptr-generator.errors.cidrRequiresPrefix'));
         }
 
         const [network] = trimmed.split('/');
@@ -305,7 +313,7 @@ $TTL 86400
             entries.push({ ip, ptrName, type: 'IPv6', zone });
           });
         } else {
-          throw new Error('Invalid network address in CIDR notation');
+          throw new Error($t('tools.ptr-generator.errors.invalidNetworkAddress'));
         }
       }
 
@@ -339,7 +347,7 @@ $TTL 86400
     } catch (error) {
       results = {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error: error instanceof Error ? error.message : $t('tools.ptr-generator.errors.unknownError'),
         entries: [],
         zoneFiles: [],
         summary: { totalEntries: 0, ipv4Entries: 0, ipv6Entries: 0, uniqueZones: 0 },
@@ -365,8 +373,8 @@ $TTL 86400
 
 <div class="card">
   <header class="card-header">
-    <h1>PTR Record Generator</h1>
-    <p>Generate PTR record names for IPv4 and IPv6 addresses and CIDR blocks with zone file stubs</p>
+    <h1>{$t('tools.ptr-generator.title')}</h1>
+    <p>{$t('tools.ptr-generator.description')}</p>
   </header>
 
   <!-- Educational Overview Card -->
@@ -375,20 +383,22 @@ $TTL 86400
       <div class="overview-item">
         <Icon name="rotate" size="sm" />
         <div>
-          <strong>Reverse DNS:</strong> PTR records provide reverse DNS lookups, mapping IP addresses back to domain names.
+          <strong>{$t('tools.ptr-generator.overview.reverseDNS.title')}:</strong>
+          {$t('tools.ptr-generator.overview.reverseDNS.content')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="server" size="sm" />
         <div>
-          <strong>Zone Structure:</strong> IPv4 uses <code>in-addr.arpa</code> and IPv6 uses <code>ip6.arpa</code> for reverse
-          DNS zones.
+          <strong>{$t('tools.ptr-generator.overview.zoneStructure.title')}:</strong>
+          {$t('tools.ptr-generator.overview.zoneStructure.content')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="file" size="sm" />
         <div>
-          <strong>Zone Files:</strong> Generates ready-to-use DNS zone file stubs with proper SOA and NS records.
+          <strong>{$t('tools.ptr-generator.overview.zoneFiles.title')}:</strong>
+          {$t('tools.ptr-generator.overview.zoneFiles.content')}
         </div>
       </div>
     </div>
@@ -399,7 +409,7 @@ $TTL 86400
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="sm" />
-        <h3>Quick Examples</h3>
+        <h3>{$t('tools.ptr-generator.examples.title')}</h3>
       </summary>
       <div class="examples-grid">
         {#each examples as example (example.label)}
@@ -410,7 +420,9 @@ $TTL 86400
             <div class="example-header">
               <div class="example-label">{example.label}</div>
               <div class="example-type {example.type}">
-                {example.type === 'single' ? 'Single IP' : 'CIDR Block'}
+                {example.type === 'single'
+                  ? $t('tools.ptr-generator.examples.types.singleIP')
+                  : $t('tools.ptr-generator.examples.types.cidrBlock')}
               </div>
             </div>
             <code class="example-input">{example.input}</code>
@@ -425,20 +437,20 @@ $TTL 86400
   <div class="card input-card">
     <!-- Input Type Selection -->
     <div class="type-section">
-      <h3 class="type-label">Input Type</h3>
+      <h3 class="type-label">{$t('tools.ptr-generator.input.type.label')}</h3>
       <div class="type-options">
         <label class="type-option">
           <input type="radio" bind:group={inputType} value="single" onchange={handleTypeChange} />
           <div class="type-content">
             <Icon name="target" size="sm" />
-            <span>Single IP</span>
+            <span>{$t('tools.ptr-generator.input.type.singleIP')}</span>
           </div>
         </label>
         <label class="type-option">
           <input type="radio" bind:group={inputType} value="cidr" onchange={handleTypeChange} />
           <div class="type-content">
             <Icon name="network" size="sm" />
-            <span>CIDR Block</span>
+            <span>{$t('tools.ptr-generator.input.type.cidrBlock')}</span>
           </div>
         </label>
       </div>
@@ -449,18 +461,22 @@ $TTL 86400
       <label
         for="ip-input"
         use:tooltip={inputType === 'single'
-          ? 'Enter a single IPv4 or IPv6 address'
-          : 'Enter an IPv4 or IPv6 CIDR block (e.g., 192.168.1.0/24)'}
+          ? $t('tools.ptr-generator.input.address.tooltipSingle')
+          : $t('tools.ptr-generator.input.address.tooltipCIDR')}
       >
         <Icon name={inputType === 'single' ? 'target' : 'network'} size="sm" />
-        {inputType === 'single' ? 'IP Address' : 'CIDR Block'}
+        {inputType === 'single'
+          ? $t('tools.ptr-generator.input.address.labelSingle')
+          : $t('tools.ptr-generator.input.address.labelCIDR')}
       </label>
       <input
         id="ip-input"
         type="text"
         bind:value={inputValue}
         oninput={handleInputChange}
-        placeholder={inputType === 'single' ? '192.168.1.100 or 2001:db8::1' : '192.168.1.0/24 or 2001:db8::/64'}
+        placeholder={inputType === 'single'
+          ? $t('tools.ptr-generator.input.address.placeholderSingle')
+          : $t('tools.ptr-generator.input.address.placeholderCIDR')}
         class="ip-input {results?.success === true ? 'valid' : results?.success === false ? 'invalid' : ''}"
         spellcheck="false"
       />
@@ -472,8 +488,8 @@ $TTL 86400
         <input type="checkbox" bind:checked={showZoneFiles} />
         <div class="checkbox-custom"></div>
         <div class="checkbox-content">
-          <span class="checkbox-label">Generate zone file stubs</span>
-          <div class="checkbox-hint">Include DNS zone file templates with SOA and NS records</div>
+          <span class="checkbox-label">{$t('tools.ptr-generator.input.options.generateZoneFiles')}</span>
+          <div class="checkbox-hint">{$t('tools.ptr-generator.input.options.zoneFilesHint')}</div>
         </div>
       </label>
     </div>
@@ -484,27 +500,27 @@ $TTL 86400
     <div class="card results-card">
       {#if results.success}
         <div class="results-header">
-          <h3>PTR Records Generated</h3>
+          <h3>{$t('tools.ptr-generator.results.title')}</h3>
           <div class="summary-stats">
             <div class="stat-item">
               <span class="stat-value">{results.summary.totalEntries}</span>
-              <span class="stat-label">Total PTRs</span>
+              <span class="stat-label">{$t('tools.ptr-generator.results.summary.totalPTRs')}</span>
             </div>
             {#if results.summary.ipv4Entries > 0}
               <div class="stat-item">
                 <span class="stat-value">{results.summary.ipv4Entries}</span>
-                <span class="stat-label">IPv4</span>
+                <span class="stat-label">{$t('tools.ptr-generator.results.summary.ipv4')}</span>
               </div>
             {/if}
             {#if results.summary.ipv6Entries > 0}
               <div class="stat-item">
                 <span class="stat-value">{results.summary.ipv6Entries}</span>
-                <span class="stat-label">IPv6</span>
+                <span class="stat-label">{$t('tools.ptr-generator.results.summary.ipv6')}</span>
               </div>
             {/if}
             <div class="stat-item">
               <span class="stat-value">{results.summary.uniqueZones}</span>
-              <span class="stat-label">Zones</span>
+              <span class="stat-label">{$t('tools.ptr-generator.results.summary.zones')}</span>
             </div>
           </div>
         </div>
@@ -513,14 +529,14 @@ $TTL 86400
         <div class="ptr-records">
           <h4>
             <Icon name="list" size="sm" />
-            PTR Records
+            {$t('tools.ptr-generator.results.records.title')}
           </h4>
           <div class="records-table">
             <div class="table-header">
-              <div class="col-ip">IP Address</div>
-              <div class="col-ptr">PTR Record Name</div>
-              <div class="col-type">Type</div>
-              <div class="col-zone">Zone</div>
+              <div class="col-ip">{$t('tools.ptr-generator.results.records.ipAddress')}</div>
+              <div class="col-ptr">{$t('tools.ptr-generator.results.records.ptrName')}</div>
+              <div class="col-type">{$t('tools.ptr-generator.results.records.type')}</div>
+              <div class="col-zone">{$t('tools.ptr-generator.results.records.zone')}</div>
             </div>
             {#each results.entries.slice(0, 50) as entry (`${entry.ip}-${entry.ptrName}`)}
               <div class="table-row">
@@ -546,7 +562,7 @@ $TTL 86400
             {/each}
             {#if results.entries.length > 50}
               <div class="table-truncated">
-                ... and {results.entries.length - 50} more records
+                {$t('tools.ptr-generator.results.records.moreRecords', { count: results.entries.length - 50 })}
               </div>
             {/if}
           </div>
@@ -557,7 +573,7 @@ $TTL 86400
           <div class="zone-files">
             <h4>
               <Icon name="file" size="sm" />
-              Zone File Stubs
+              {$t('tools.ptr-generator.results.zoneFiles.title')}
             </h4>
             {#each results.zoneFiles as zoneFile (zoneFile.zone)}
               <div class="zone-file">
@@ -571,7 +587,7 @@ $TTL 86400
                     onclick={() => clipboard.copy(zoneFile.content, `zone-${zoneFile.zone}`)}
                   >
                     <Icon name={clipboard.isCopied(`zone-${zoneFile.zone}`) ? 'check' : 'copy'} size="sm" />
-                    Copy Zone File
+                    {$t('tools.ptr-generator.actions.copyZoneFile')}
                   </button>
                 </div>
                 <pre class="zone-content"><code>{zoneFile.content}</code></pre>
@@ -582,15 +598,15 @@ $TTL 86400
       {:else}
         <div class="error-result">
           <Icon name="alert-triangle" size="lg" />
-          <h4>Generation Error</h4>
+          <h4>{$t('tools.ptr-generator.errors.title')}</h4>
           <p>{results.error}</p>
           <div class="error-help">
-            <strong>Valid formats:</strong>
+            <strong>{$t('tools.ptr-generator.errors.validFormats')}:</strong>
             <ul>
-              <li>Single IPv4: 192.168.1.100</li>
-              <li>Single IPv6: 2001:db8::1</li>
-              <li>IPv4 CIDR: 192.168.1.0/24 (max /16)</li>
-              <li>IPv6 CIDR: 2001:db8::/64 (max /64)</li>
+              <li>{$t('tools.ptr-generator.errors.formats.singleIPv4')}</li>
+              <li>{$t('tools.ptr-generator.errors.formats.singleIPv6')}</li>
+              <li>{$t('tools.ptr-generator.errors.formats.ipv4CIDR')}</li>
+              <li>{$t('tools.ptr-generator.errors.formats.ipv6CIDR')}</li>
             </ul>
           </div>
         </div>
@@ -602,34 +618,30 @@ $TTL 86400
   <div class="education-card">
     <div class="education-grid">
       <div class="education-item info-panel">
-        <h4>What are PTR Records?</h4>
+        <h4>{$t('tools.ptr-generator.education.whatArePTRRecords.title')}</h4>
         <p>
-          PTR (Pointer) records provide reverse DNS lookups, allowing you to resolve an IP address back to a domain
-          name. They're essential for mail servers, logging, and network diagnostics.
+          {$t('tools.ptr-generator.education.whatArePTRRecords.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Zone Structure</h4>
+        <h4>{$t('tools.ptr-generator.education.zoneStructure.title')}</h4>
         <p>
-          IPv4 reverse zones use <code>in-addr.arpa</code> with octets reversed (e.g., 1.168.192.in-addr.arpa for
-          192.168.1.x). IPv6 uses <code>ip6.arpa</code> with individual hex digits reversed.
+          {$t('tools.ptr-generator.education.zoneStructure.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Zone Delegation</h4>
+        <h4>{$t('tools.ptr-generator.education.zoneDelegation.title')}</h4>
         <p>
-          PTR zones are typically delegated by your ISP or hosting provider. The zone files generated here provide
-          templates that can be customized for your specific DNS infrastructure.
+          {$t('tools.ptr-generator.education.zoneDelegation.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Best Practices</h4>
+        <h4>{$t('tools.ptr-generator.education.bestPractices.title')}</h4>
         <p>
-          Ensure PTR records match forward DNS (A/AAAA) records. Use descriptive hostnames that include the IP address
-          or subnet information for easier network management.
+          {$t('tools.ptr-generator.education.bestPractices.content')}
         </p>
       </div>
     </div>

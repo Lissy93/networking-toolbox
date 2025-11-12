@@ -1,0 +1,88 @@
+{
+  "title": "EUI-64 Converter",
+  "description": "Convert between MAC addresses and IPv6 EUI-64 interface identifiers with automatic IPv6 address generation",
+  "input": {
+    "title": "Address Conversion",
+    "addresses": {
+      "label": "MAC Addresses or EUI-64 Identifiers",
+      "tooltip": "Enter MAC addresses (48-bit) or EUI-64 identifiers (64-bit)",
+      "placeholder": "00:1A:2B:3C:4D:5E\n02:1A:2B:FF:FE:3C:4D:5F\n08:00:27:12:34:56",
+      "help": "Enter MAC addresses (48-bit) or EUI-64 identifiers (64-bit) one per line. Various formats supported: xx:xx:xx:xx:xx:xx or xx-xx-xx-xx-xx-xx"
+    },
+    "globalPrefix": {
+      "label": "IPv6 Global Prefix (Optional)",
+      "tooltip": "IPv6 network prefix for generating global addresses (e.g., 2001:db8::/64)",
+      "placeholder": "2001:db8::/64",
+      "help": "IPv6 prefix for generating global unicast addresses. Leave empty to use example prefix."
+    }
+  },
+  "info": {
+    "title": "EUI-64 Information",
+    "description": "EUI-64 (Extended Unique Identifier 64-bit) is used to generate IPv6 interface identifiers from MAC addresses:",
+    "steps": {
+      "split": "Split MAC address: OUI (24 bits) + Device ID (24 bits)",
+      "insert": "Insert FFFE between OUI and Device ID",
+      "flip": "Flip the Universal/Local bit (bit 1) in the first octet",
+      "result": "Result: 64-bit interface identifier for IPv6"
+    }
+  },
+  "processing": "Converting addresses...",
+  "results": {
+    "errors": {
+      "title": "Errors"
+    },
+    "summary": {
+      "title": "Conversion Summary",
+      "totalInputs": "Total Inputs",
+      "valid": "Valid",
+      "invalid": "Invalid",
+      "macToEUI64": "MAC → EUI-64",
+      "eui64ToMAC": "EUI-64 → MAC"
+    },
+    "conversions": {
+      "title": "Address Conversions"
+    }
+  },
+  "actions": {
+    "exportCSV": "Export CSV",
+    "exportJSON": "Export JSON",
+    "copyInput": "Copy input",
+    "copyMAC": "Copy MAC address",
+    "copyEUI64": "Copy EUI-64 address",
+    "copyLinkLocal": "Copy link-local address",
+    "copyGlobal": "Copy global address"
+  },
+  "csvHeaders": {
+    "input": "Input",
+    "type": "Type",
+    "macAddress": "MAC Address",
+    "eui64": "EUI-64",
+    "ipv6LinkLocal": "IPv6 Link-Local",
+    "ipv6Global": "IPv6 Global",
+    "universalLocal": "Universal/Local",
+    "unicastMulticast": "Unicast/Multicast",
+    "valid": "Valid",
+    "error": "Error"
+  },
+  "conversion": {
+    "details": {
+      "title": "Conversion Details",
+      "macAddress": "MAC Address",
+      "eui64Address": "EUI-64 Address",
+      "ipv6LinkLocal": "IPv6 Link-Local",
+      "ipv6Global": "IPv6 Global",
+      "universalLocal": "Universal/Local",
+      "unicastMulticast": "Unicast/Multicast",
+      "bits": {
+        "title": "Bit Analysis",
+        "universal": "Universal",
+        "local": "Local",
+        "unicast": "Unicast",
+        "multicast": "Multicast"
+      }
+    }
+  },
+  "errors": {
+    "unknownError": "Unknown error occurred during conversion"
+  }
+}

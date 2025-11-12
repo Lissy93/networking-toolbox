@@ -10,6 +10,14 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
   import { formatNumber } from '$lib/utils/formatters';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools.next-available');
+  });
 
   let pools = $state(`192.168.0.0/16
 10.0.0.0/8`);
@@ -28,9 +36,9 @@
   let userModified = $state(false);
   let showVisualization = $state(true);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Office Subnets',
+      label: $t('tools.next-available.examples.officeSubnets.label'),
       pools: '192.168.0.0/16',
       allocations: `192.168.1.0/24
 192.168.10.0/24
@@ -40,7 +48,7 @@
       policy: 'first-fit' as AllocationPolicy,
     },
     {
-      label: 'Host-based Search',
+      label: $t('tools.next-available.examples.hostBasedSearch.label'),
       pools: '10.0.0.0/8',
       allocations: `10.0.0.0/16
 10.1.0.0/16`,
@@ -49,7 +57,7 @@
       policy: 'best-fit' as AllocationPolicy,
     },
     {
-      label: 'Multiple Pools',
+      label: $t('tools.next-available.examples.multiplePools.label'),
       pools: `172.16.0.0/12
 192.168.0.0/16`,
       allocations: `172.16.1.0/24
@@ -59,7 +67,7 @@
       policy: 'first-fit' as AllocationPolicy,
     },
     {
-      label: 'IPv6 Example',
+      label: $t('tools.next-available.examples.ipv6Example.label'),
       pools: '2001:db8::/32',
       allocations: `2001:db8:1::/48
 2001:db8:10::/48`,
@@ -67,7 +75,7 @@
       prefix: 48,
       policy: 'first-fit' as AllocationPolicy,
     },
-  ];
+  ]);
 
   /* Set example */
   function setExample(example: (typeof examples)[0]) {
@@ -104,7 +112,16 @@
         2,
       );
     } else {
-      const headers = ['Rank', 'CIDR', 'Network', 'Broadcast', 'Size', 'Usable Hosts', 'Parent Pool', 'Gap Size'];
+      const headers = [
+        $t('tools.next-available.export.headers.rank'),
+        $t('tools.next-available.export.headers.cidr'),
+        $t('tools.next-available.export.headers.network'),
+        $t('tools.next-available.export.headers.broadcast'),
+        $t('tools.next-available.export.headers.size'),
+        $t('tools.next-available.export.headers.usableHosts'),
+        $t('tools.next-available.export.headers.parentPool'),
+        $t('tools.next-available.export.headers.gapSize'),
+      ];
       const rows = result.candidates.map((candidate, i) => [
         (i + 1).toString(),
         `"${candidate.cidr}"`,
@@ -171,14 +188,17 @@
     type: 'pool' | 'allocation' | 'free' | 'candidate',
   ): string {
     const labels = {
-      pool: 'Pool',
-      allocation: 'Allocation',
-      free: 'Free Space',
-      candidate: 'Candidate',
+      pool: $t('tools.next-available.visualization.pool'),
+      allocation: $t('tools.next-available.visualization.allocation'),
+      free: $t('tools.next-available.visualization.freeSpace'),
+      candidate: $t('tools.next-available.visualization.candidate'),
     };
 
-    const size = range.start && range.end ? formatNumber(Number(range.end - range.start + 1n)) : 'Unknown';
-    return `${labels[type]}\n${range.cidr}\nSize: ${size} addresses`;
+    const size =
+      range.start && range.end
+        ? formatNumber(Number(range.end - range.start + 1n))
+        : $t('tools.next-available.visualization.unknown');
+    return `${labels[type]}\n${range.cidr}\n${$t('tools.next-available.visualization.sizeLabel')}: ${size} ${$t('tools.next-available.visualization.addresses')}`;
   }
 
   // Track user modifications
@@ -209,15 +229,15 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>Next Available Subnet Finder</h2>
+    <h2>{$t('tools.next-available.title')}</h2>
     <p>
-      Find available subnets from pool CIDRs minus existing allocations with first-fit or best-fit allocation policies.
+      {$t('tools.next-available.description')}
     </p>
   </header>
 
   <!-- Search Mode -->
   <div class="mode-section">
-    <h3>Search Criteria</h3>
+    <h3>{$t('tools.next-available.searchCriteria.title')}</h3>
     <div class="tabs">
       <button
         type="button"
@@ -227,9 +247,9 @@
           searchMode = 'prefix';
           userModified = true;
         }}
-        use:tooltip={{ text: 'Search for subnets with specific prefix length (e.g., /24)', position: 'top' }}
+        use:tooltip={{ text: $t('tools.next-available.searchCriteria.byPrefix.tooltip'), position: 'top' }}
       >
-        By Prefix
+        {$t('tools.next-available.searchCriteria.byPrefix.label')}
       </button>
       <button
         type="button"
@@ -239,9 +259,9 @@
           searchMode = 'hosts';
           userModified = true;
         }}
-        use:tooltip={{ text: 'Search for subnets that can accommodate N hosts', position: 'top' }}
+        use:tooltip={{ text: $t('tools.next-available.searchCriteria.byHosts.tooltip'), position: 'top' }}
       >
-        By Host Count
+        {$t('tools.next-available.searchCriteria.byHosts.label')}
       </button>
     </div>
   </div>
@@ -250,14 +270,14 @@
   <div class="input-section">
     <div class="input-grid">
       <div class="input-group">
-        <label for="pools" use:tooltip={{ text: 'Available IP address pools (one per line)', position: 'top' }}>
-          Pool CIDRs
+        <label for="pools" use:tooltip={{ text: $t('tools.next-available.input.pools.tooltip'), position: 'top' }}>
+          {$t('tools.next-available.input.pools.label')}
         </label>
         <textarea
           id="pools"
           bind:value={pools}
           oninput={() => (userModified = true)}
-          placeholder="192.168.0.0/16&#10;10.0.0.0/8"
+          placeholder={$t('tools.next-available.input.pools.placeholder')}
           class="input-textarea pools"
           rows="4"
         ></textarea>
@@ -266,15 +286,15 @@
       <div class="input-group">
         <label
           for="allocations"
-          use:tooltip={{ text: 'Already allocated subnets/ranges (optional, one per line)', position: 'top' }}
+          use:tooltip={{ text: $t('tools.next-available.input.allocations.tooltip'), position: 'top' }}
         >
-          Existing Allocations
+          {$t('tools.next-available.input.allocations.label')}
         </label>
         <textarea
           id="allocations"
           bind:value={allocations}
           oninput={() => (userModified = true)}
-          placeholder="192.168.1.0/24&#10;10.0.0.0/16"
+          placeholder={$t('tools.next-available.input.allocations.placeholder')}
           class="input-textarea allocations"
           rows="4"
         ></textarea>
@@ -287,9 +307,9 @@
         <div class="input-group">
           <label
             for="desired-prefix"
-            use:tooltip={{ text: 'Desired subnet prefix (e.g., 24 for /24 subnets)', position: 'top' }}
+            use:tooltip={{ text: $t('tools.next-available.input.targetPrefix.tooltip'), position: 'top' }}
           >
-            Target Prefix Length
+            {$t('tools.next-available.input.targetPrefix.label')}
           </label>
           <input
             id="desired-prefix"
@@ -305,9 +325,9 @@
         <div class="input-group">
           <label
             for="desired-hosts"
-            use:tooltip={{ text: 'Minimum number of hosts the subnet must accommodate', position: 'top' }}
+            use:tooltip={{ text: $t('tools.next-available.input.requiredHosts.tooltip'), position: 'top' }}
           >
-            Required Host Count
+            {$t('tools.next-available.input.requiredHosts.label')}
           </label>
           <input
             id="desired-hosts"
@@ -321,24 +341,21 @@
       {/if}
 
       <div class="input-group">
-        <label
-          for="policy"
-          use:tooltip={{ text: 'First-fit: lowest address. Best-fit: smallest gap.', position: 'top' }}
-        >
-          Allocation Policy
+        <label for="policy" use:tooltip={{ text: $t('tools.next-available.input.policy.tooltip'), position: 'top' }}>
+          {$t('tools.next-available.input.policy.label')}
         </label>
         <select id="policy" bind:value={policy} onchange={() => (userModified = true)} class="input-field">
-          <option value="first-fit">First Fit (Lowest)</option>
-          <option value="best-fit">Best Fit (Smallest Gap)</option>
+          <option value="first-fit">{$t('tools.next-available.input.policy.options.firstFit')}</option>
+          <option value="best-fit">{$t('tools.next-available.input.policy.options.bestFit')}</option>
         </select>
       </div>
 
       <div class="input-group">
         <label
           for="max-candidates"
-          use:tooltip={{ text: 'Maximum number of subnet suggestions to return', position: 'top' }}
+          use:tooltip={{ text: $t('tools.next-available.input.maxCandidates.tooltip'), position: 'top' }}
         >
-          Max Candidates
+          {$t('tools.next-available.input.maxCandidates.label')}
         </label>
         <input
           id="max-candidates"
@@ -356,10 +373,10 @@
     <div class="options-section">
       <label
         class="checkbox-label"
-        use:tooltip={{ text: 'For IPv4, treat network and broadcast addresses as unusable', position: 'top' }}
+        use:tooltip={{ text: $t('tools.next-available.input.options.usableHosts.tooltip'), position: 'top' }}
       >
         <input type="checkbox" bind:checked={ipv4UsableHosts} onchange={() => (userModified = true)} />
-        <span class="checkbox-text"> IPv4 usable hosts (exclude network/broadcast) </span>
+        <span class="checkbox-text"> {$t('tools.next-available.input.options.usableHosts.label')} </span>
       </label>
     </div>
 
@@ -368,7 +385,7 @@
         type="button"
         class="btn btn-secondary btn-sm"
         onclick={clearInputs}
-        use:tooltip={{ text: 'Clear all inputs', position: 'top' }}
+        use:tooltip={{ text: $t('tools.next-available.actions.clearInputs'), position: 'top' }}
       >
         <Icon name="trash" size="sm" />
       </button>
@@ -376,7 +393,7 @@
 
     <!-- Examples -->
     <div class="examples-section">
-      <h4>Quick Examples</h4>
+      <h4>{$t('tools.next-available.examples.title')}</h4>
       <div class="examples-grid">
         {#each examples as example (example.label)}
           <button
@@ -398,7 +415,7 @@
       <!-- Errors -->
       {#if result.errors.length > 0}
         <div class="info-panel error">
-          <h3>Errors</h3>
+          <h3>{$t('tools.next-available.results.errors.title')}</h3>
           <ul>
             {#each result.errors as error, index (index)}
               <li>{error}</li>
@@ -410,7 +427,7 @@
       <!-- Warnings -->
       {#if result.warnings.length > 0}
         <div class="info-panel warning">
-          <h3>Warnings</h3>
+          <h3>{$t('tools.next-available.results.warnings.title')}</h3>
           <ul>
             {#each result.warnings as warning, index (index)}
               <li>{warning}</li>
@@ -423,7 +440,7 @@
         <!-- Statistics -->
         <div class="stats-section">
           <div class="summary-header">
-            <h3>Available Subnets</h3>
+            <h3>{$t('tools.next-available.results.title')}</h3>
             <div class="export-buttons">
               <button
                 type="button"

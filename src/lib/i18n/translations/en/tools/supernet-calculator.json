@@ -94,5 +94,51 @@
 
   "error": {
     "title": "Calculation Error"
+  },
+
+  "page": {
+    "aboutTitle": "About Supernetting",
+    "aboutDescription": "Supernetting (also called route aggregation or CIDR block aggregation) is the process of combining multiple smaller networks into a single larger network. This technique is essential for:",
+    "benefits": {
+      "reducedRoutingTables": {
+        "title": "Reduced Routing Tables",
+        "description": "Fewer routes mean faster lookups and reduced memory usage in routers"
+      },
+      "improvedScalability": {
+        "title": "Improved Scalability",
+        "description": "Internet routing scales better with aggregated routes instead of individual subnets"
+      },
+      "betterPerformance": {
+        "title": "Better Performance",
+        "description": "Reduced route advertisements and faster convergence in routing protocols"
+      },
+      "easierManagement": {
+        "title": "Easier Management",
+        "description": "Simplified network policies and access control lists"
+      }
+    },
+    "useCases": {
+      "title": "When to Use Supernetting",
+      "ispRouteAggregation": {
+        "title": "ISP Route Aggregation",
+        "description": "Combining customer routes for BGP advertisements"
+      },
+      "enterpriseNetworks": {
+        "title": "Enterprise Networks",
+        "description": "Summarizing branch office networks at headquarters"
+      },
+      "dataCenters": {
+        "title": "Data Centers",
+        "description": "Aggregating server farm subnets for external advertisement"
+      },
+      "networkRedesign": {
+        "title": "Network Redesign",
+        "description": "Optimizing existing IP allocations for better summarization"
+      }
+    },
+    "proTip": {
+      "title": "Pro Tip",
+      "description": "For optimal supernetting, design your IP allocation strategy from the beginning. Contiguous, power-of-2 sized networks aggregate much more efficiently than scattered allocations."
+    }
   }
 }

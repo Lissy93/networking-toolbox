@@ -10,6 +10,14 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import { useClipboard } from '$lib/composables';
   import { goto } from '$app/navigation';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools/ipv6-subnet-calculator');
+  });
 
   const versionOptions = [
     { value: 'ipv4' as const, label: 'IPv4' },
@@ -79,7 +87,7 @@
   /* Get prefix description */
   function getPrefixDescription(prefix: number): string {
     const common = commonPrefixes.find((p) => p.prefix === prefix);
-    return common?.description || `/${prefix} - Custom prefix length`;
+    return common?.description || `/${prefix} - ${$t('tools.ipv6-subnet-calculator.form.customPrefixLength')}`;
   }
 
   /* Format large numbers */
@@ -87,7 +95,7 @@
     if (num.includes('≈')) return num;
     const cleaned = num.replace(/[,\s]/g, '');
     if (cleaned.length > 15) {
-      return `${cleaned.slice(0, 6)}... (${cleaned.length} digits)`;
+      return `${cleaned.slice(0, 6)}... (${cleaned.length} ${$t('tools.ipv6-subnet-calculator.format.digits')})`;
     }
     return num;
   }
@@ -104,8 +112,8 @@
 </script>
 
 <ToolContentContainer
-  title="IPv6 Subnet Calculator"
-  description="Calculate IPv6 subnet information with 128-bit addressing and modern network prefix notation."
+  title={$t('tools.ipv6-subnet-calculator.title')}
+  description={$t('tools.ipv6-subnet-calculator.description')}
   navOptions={versionOptions}
   bind:selectedNav={selectedVersion}
   onNavChange={handleVersionChange}
@@ -113,28 +121,28 @@
 >
   <!-- Input Section -->
   <div class="input-section">
-    <h3>Network Configuration</h3>
+    <h3>{$t('tools.ipv6-subnet-calculator.sections.networkConfiguration')}</h3>
 
     <div class="input-grid">
       <div class="form-group">
-        <label for="ipv6-input">IPv6 Network Address</label>
+        <label for="ipv6-input">{$t('tools.ipv6-subnet-calculator.form.networkAddressLabel')}</label>
         <div class="input-wrapper">
           <input
             id="ipv6-input"
             type="text"
             bind:value={networkAddress}
             oninput={(e) => handleAddressInput((e.target as HTMLInputElement)?.value || '')}
-            placeholder="2001:db8::/64"
+            placeholder={$t('tools.ipv6-subnet-calculator.form.networkAddressPlaceholder')}
             class="ipv6-input"
           />
-          <Tooltip text="Enter IPv6 address with prefix (e.g., 2001:db8::/64) or address only">
+          <Tooltip text={$t('tools.ipv6-subnet-calculator.tooltips.networkAddressHelp')}>
             <Icon name="help" size="sm" />
           </Tooltip>
         </div>
       </div>
 
       <div class="form-group">
-        <label for="prefix-input">Prefix Length</label>
+        <label for="prefix-input">{$t('tools.ipv6-subnet-calculator.form.prefixLengthLabel')}</label>
         <div class="prefix-controls">
           <span class="prefix-display">/{prefixLength}</span>
           <input id="prefix-slider" type="range" min="1" max="128" bind:value={prefixLength} class="prefix-slider" />
@@ -147,49 +155,49 @@
 
   <!-- Common Presets -->
   <div class="presets-section">
-    <h3>Common IPv6 Networks</h3>
+    <h3>{$t('tools.ipv6-subnet-calculator.sections.commonNetworks')}</h3>
     <div class="presets-grid">
       <button
         type="button"
         class="preset-btn {activePreset === 'doc-48' ? 'active' : ''}"
         onclick={() => setPreset('2001:db8::', 48)}
       >
-        Documentation /48
+        {$t('tools.ipv6-subnet-calculator.presets.documentation48')}
       </button>
       <button
         type="button"
         class="preset-btn {activePreset === 'doc-64' ? 'active' : ''}"
         onclick={() => setPreset('2001:db8::', 64)}
       >
-        Standard Subnet /64
+        {$t('tools.ipv6-subnet-calculator.presets.standardSubnet64')}
       </button>
       <button
         type="button"
         class="preset-btn {activePreset === 'link-local' ? 'active' : ''}"
         onclick={() => setPreset('fe80::', 64)}
       >
-        Link-Local /64
+        {$t('tools.ipv6-subnet-calculator.presets.linkLocal64')}
       </button>
       <button
         type="button"
         class="preset-btn {activePreset === 'loopback' ? 'active' : ''}"
         onclick={() => setPreset('::1', 128)}
       >
-        Loopback /128
+        {$t('tools.ipv6-subnet-calculator.presets.loopback128')}
       </button>
       <button
         type="button"
         class="preset-btn {activePreset === 'google-dns' ? 'active' : ''}"
         onclick={() => setPreset('2001:4860:4860::', 48)}
       >
-        Google DNS /48
+        {$t('tools.ipv6-subnet-calculator.presets.googleDns48')}
       </button>
       <button
         type="button"
         class="preset-btn {activePreset === 'multicast' ? 'active' : ''}"
         onclick={() => setPreset('ff02::1', 128)}
       >
-        Multicast All Nodes
+        {$t('tools.ipv6-subnet-calculator.presets.multicastAllNodes')}
       </button>
     </div>
   </div>
@@ -199,10 +207,10 @@
     <div class="results-section">
       <!-- Network Information -->
       <div class="info-panel">
-        <h3>IPv6 Subnet Information</h3>
+        <h3>{$t('tools.ipv6-subnet-calculator.sections.subnetInfo')}</h3>
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Network</span>
+            <span class="info-label">{$t('tools.ipv6-subnet-calculator.results.network')}</span>
             <div class="value-copy">
               <span class="info-value">{subnetResult.subnet.networkCompressed}/{subnetResult.subnet.prefixLength}</span>
               <button
@@ -221,7 +229,7 @@
           </div>
 
           <div class="info-item">
-            <span class="info-label">Total Addresses</span>
+            <span class="info-label">{$t('tools.ipv6-subnet-calculator.results.totalAddresses')}</span>
             <span class="info-value large-number">{formatLargeNumber(subnetResult.subnet.totalAddresses)}</span>
           </div>
         </div>
@@ -230,11 +238,14 @@
       <!-- Detailed Information -->
       <div class="details-section">
         <div class="details-header">
-          <h3>Network Details</h3>
+          <h3>{$t('tools.ipv6-subnet-calculator.sections.networkDetails')}</h3>
           <div class="header-actions">
             <button type="button" class="btn btn-secondary btn-sm" onclick={() => (showBinaryView = !showBinaryView)}>
               <Icon name="binary" size="sm" />
-              {showBinaryView ? 'Hide' : 'Show'} Binary
+              {showBinaryView
+                ? $t('tools.ipv6-subnet-calculator.actions.hide')
+                : $t('tools.ipv6-subnet-calculator.actions.show')}
+              {$t('tools.ipv6-subnet-calculator.actions.binary')}
             </button>
           </div>
         </div>
@@ -242,8 +253,8 @@
         <div class="details-grid">
           <div class="detail-item">
             <div class="detail-label-wrapper">
-              <span class="detail-label">Network Address (Compressed)</span>
-              <Tooltip text="Compressed IPv6 notation using :: for consecutive zero groups">
+              <span class="detail-label">{$t('tools.ipv6-subnet-calculator.results.networkCompressed')}</span>
+              <Tooltip text={$t('tools.ipv6-subnet-calculator.tooltips.compressedNotation')}>
                 <Icon name="help" size="sm" />
               </Tooltip>
             </div>
@@ -262,8 +273,8 @@
 
           <div class="detail-item">
             <div class="detail-label-wrapper">
-              <span class="detail-label">Network Address (Expanded)</span>
-              <Tooltip text="Full 128-bit IPv6 representation with all zero groups shown">
+              <span class="detail-label">{$t('tools.ipv6-subnet-calculator.results.networkExpanded')}</span>
+              <Tooltip text={$t('tools.ipv6-subnet-calculator.tooltips.expandedNotation')}>
                 <Icon name="help" size="sm" />
               </Tooltip>
             </div>
@@ -281,8 +292,8 @@
 
           <div class="detail-item">
             <div class="detail-label-wrapper">
-              <span class="detail-label">Subnet Mask</span>
-              <Tooltip text="IPv6 subnet mask showing network portion (compressed format)">
+              <span class="detail-label">{$t('tools.ipv6-subnet-calculator.results.subnetMask')}</span>
+              <Tooltip text={$t('tools.ipv6-subnet-calculator.tooltips.subnetMask')}>
                 <Icon name="help" size="sm" />
               </Tooltip>
             </div>
@@ -300,8 +311,8 @@
 
           <div class="detail-item">
             <div class="detail-label-wrapper">
-              <span class="detail-label">Address Range</span>
-              <Tooltip text="First and last assignable addresses in the subnet">
+              <span class="detail-label">{$t('tools.ipv6-subnet-calculator.results.addressRange')}</span>
+              <Tooltip text={$t('tools.ipv6-subnet-calculator.tooltips.addressRange')}>
                 <Icon name="help" size="sm" />
               </Tooltip>
             </div>
@@ -323,8 +334,8 @@
 
           <div class="detail-item">
             <div class="detail-label-wrapper">
-              <span class="detail-label">Assignable Addresses</span>
-              <Tooltip text="Number of addresses available for host assignment (excluding network/broadcast concepts)">
+              <span class="detail-label">{$t('tools.ipv6-subnet-calculator.results.assignableAddresses')}</span>
+              <Tooltip text={$t('tools.ipv6-subnet-calculator.tooltips.assignableAddresses')}>
                 <Icon name="help" size="sm" />
               </Tooltip>
             </div>
@@ -343,8 +354,8 @@
 
           <div class="detail-item">
             <div class="detail-label-wrapper">
-              <span class="detail-label">Reverse DNS Zone</span>
-              <Tooltip text="PTR record zone for reverse DNS lookups">
+              <span class="detail-label">{$t('tools.ipv6-subnet-calculator.results.reverseDnsZone')}</span>
+              <Tooltip text={$t('tools.ipv6-subnet-calculator.tooltips.reverseDns')}>
                 <Icon name="help" size="sm" />
               </Tooltip>
             </div>
@@ -363,8 +374,8 @@
           {#if showBinaryView}
             <div class="detail-item full-width">
               <div class="detail-label-wrapper">
-                <span class="detail-label">Binary Prefix Representation</span>
-                <Tooltip text="128-bit binary representation showing network (1) and host (0) bits">
+                <span class="detail-label">{$t('tools.ipv6-subnet-calculator.results.binaryPrefix')}</span>
+                <Tooltip text={$t('tools.ipv6-subnet-calculator.tooltips.binaryRepresentation')}>
                   <Icon name="help" size="sm" />
                 </Tooltip>
               </div>
@@ -385,26 +396,31 @@
 
       <!-- IPv6 Address Structure Visualization -->
       <div class="visualization-section">
-        <h3>IPv6 Address Structure</h3>
+        <h3>{$t('tools.ipv6-subnet-calculator.sections.addressStructure')}</h3>
         <div class="address-structure">
           <div class="structure-header">
-            <h4>128-bit Address Breakdown</h4>
-            <p>Showing network and host portions for {subnetResult.subnet.networkCompressed}/{prefixLength}</p>
+            <h4>{$t('tools.ipv6-subnet-calculator.sections.addressBreakdown')}</h4>
+            <p>
+              {$t('tools.ipv6-subnet-calculator.visualization.showingPortionsFor')}
+              {subnetResult.subnet.networkCompressed}/{prefixLength}
+            </p>
           </div>
 
           <div class="bit-visualization">
             <div class="bit-section network-bits">
               <div class="bit-header">
-                <span class="bit-label">Network Portion</span>
-                <span class="bit-count">{prefixLength} bits</span>
+                <span class="bit-label">{$t('tools.ipv6-subnet-calculator.visualization.networkPortion')}</span>
+                <span class="bit-count">{prefixLength} {$t('tools.ipv6-subnet-calculator.visualization.bits')}</span>
               </div>
               <div class="bit-bar" style="width: {(prefixLength / 128) * 100}%"></div>
             </div>
 
             <div class="bit-section host-bits">
               <div class="bit-header">
-                <span class="bit-label">Host Portion</span>
-                <span class="bit-count">{128 - prefixLength} bits</span>
+                <span class="bit-label">{$t('tools.ipv6-subnet-calculator.visualization.hostPortion')}</span>
+                <span class="bit-count"
+                  >{128 - prefixLength} {$t('tools.ipv6-subnet-calculator.visualization.bits')}</span
+                >
               </div>
               <div class="bit-bar" style="width: {((128 - prefixLength) / 128) * 100}%"></div>
             </div>
@@ -426,7 +442,7 @@
     <!-- Error Display -->
     <div class="results-section">
       <div class="info-panel error">
-        <h3>Calculation Error</h3>
+        <h3>{$t('tools.ipv6-subnet-calculator.sections.calculationError')}</h3>
         <p class="error-message">{subnetResult.error}</p>
       </div>
     </div>

@@ -11,9 +11,16 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables/useClipboard.svelte';
-  import { t } from '$lib/stores/language';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
 
   const clipboard = useClipboard();
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools.gateway-option3');
+  });
 
   type Tab = 'build' | 'decode';
   let activeTab = $state<Tab>('build');

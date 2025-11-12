@@ -1,0 +1,106 @@
+{
+  "title": "Next Available Subnet Finder",
+  "description": "Find available subnet space in IP pools with intelligent allocation strategies and conflict detection.",
+  "input": {
+    "pools": {
+      "label": "Available IP Pools",
+      "placeholder": "192.168.0.0/16\n10.0.0.0/8",
+      "help": "Enter CIDR blocks representing available address pools"
+    },
+    "allocations": {
+      "label": "Existing Allocations",
+      "placeholder": "192.168.1.0/24\n192.168.10.0/24\n10.0.0.0/16",
+      "help": "Enter already allocated subnets to avoid conflicts"
+    },
+    "searchMode": {
+      "prefix": "Search by Prefix Length",
+      "hosts": "Search by Host Count"
+    },
+    "desiredPrefix": {
+      "label": "Desired Prefix Length",
+      "tooltip": "CIDR prefix length for the new subnet"
+    },
+    "desiredHosts": {
+      "label": "Desired Host Count",
+      "tooltip": "Number of hosts needed in the new subnet"
+    },
+    "options": {
+      "ipv4UsableHosts": "Count only usable hosts (exclude network/broadcast)",
+      "maxCandidates": "Maximum candidates to return"
+    }
+  },
+  "allocation": {
+    "policy": {
+      "label": "Allocation Policy",
+      "firstFit": "First Fit",
+      "firstFitDesc": "Use first available space that fits",
+      "bestFit": "Best Fit",
+      "bestFitDesc": "Minimize wasted space",
+      "worstFit": "Worst Fit",
+      "worstFitDesc": "Maximize remaining contiguous space"
+    }
+  },
+  "examples": {
+    "title": "Quick Examples",
+    "officeSubnets": {
+      "label": "Office Subnets",
+      "description": "Find next /24 in corporate network"
+    },
+    "vlanPlanning": {
+      "label": "VLAN Planning",
+      "description": "Plan VLAN subnets with different sizes"
+    },
+    "datacenterBlocks": {
+      "label": "Datacenter Blocks",
+      "description": "Large block allocation in datacenter"
+    },
+    "homeNetwork": {
+      "label": "Home Network",
+      "description": "Small network subdivision"
+    },
+    "ipv6Allocation": {
+      "label": "IPv6 Allocation",
+      "description": "IPv6 subnet planning"
+    }
+  },
+  "actions": {
+    "findNext": "Find Next Available",
+    "searching": "Searching...",
+    "copyCandidate": "Copy",
+    "exportResults": "Export Results",
+    "copied": "Copied!"
+  },
+  "results": {
+    "title": "Available Subnet Candidates",
+    "count": "({count})",
+    "noResults": "No available subnets found",
+    "candidate": "Candidate",
+    "subnet": "Subnet",
+    "size": "Size",
+    "utilization": "Pool Utilization",
+    "remainingSpace": "Remaining Space",
+    "pool": "Source Pool",
+    "copyTooltip": "Copy subnet"
+  },
+  "visualization": {
+    "title": "Subnet Allocation Visualization",
+    "showVisualization": "Show allocation map",
+    "allocated": "Allocated",
+    "available": "Available",
+    "candidate": "Candidate"
+  },
+  "errors": {
+    "title": "Search Errors",
+    "invalidPool": "Invalid IP pool",
+    "invalidAllocation": "Invalid allocation",
+    "noPoolSpace": "No available space in pools",
+    "searchFailed": "Subnet search failed"
+  },
+  "summary": {
+    "title": "Search Summary",
+    "totalPools": "Total Pools",
+    "totalAllocations": "Existing Allocations",
+    "candidatesFound": "Candidates Found",
+    "searchCriteria": "Search Criteria"
+  }
+}

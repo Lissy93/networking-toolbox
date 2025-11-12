@@ -15,7 +15,14 @@
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables';
   import { tooltip } from '$lib/actions/tooltip';
-  import { t } from '$lib/stores/language';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools/dhcp-duid-generator');
+  });
 
   let duidType = $state<DUIDType>('DUID-LLT');
   let macAddress = $state('');

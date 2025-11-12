@@ -1,0 +1,62 @@
+{
+  "title": "IPv6 Subnet Calculator",
+  "description": "Calculate IPv6 subnet information with 128-bit addressing and modern network prefix notation.",
+  "sections": {
+    "networkConfiguration": "Network Configuration",
+    "commonNetworks": "Common IPv6 Networks",
+    "subnetInfo": "IPv6 Subnet Information",
+    "networkDetails": "Network Details",
+    "addressStructure": "IPv6 Address Structure",
+    "addressBreakdown": "128-bit Address Breakdown",
+    "calculationError": "Calculation Error"
+  },
+  "form": {
+    "networkAddressLabel": "IPv6 Network Address",
+    "networkAddressPlaceholder": "2001:db8::/64",
+    "prefixLengthLabel": "Prefix Length",
+    "customPrefixLength": "Custom prefix length"
+  },
+  "tooltips": {
+    "networkAddressHelp": "Enter IPv6 address with prefix (e.g., 2001:db8::/64) or address only",
+    "compressedNotation": "Compressed IPv6 notation using :: for consecutive zero groups",
+    "expandedNotation": "Full 128-bit IPv6 representation with all zero groups shown",
+    "subnetMask": "IPv6 subnet mask showing network portion (compressed format)",
+    "addressRange": "First and last assignable addresses in the subnet",
+    "assignableAddresses": "Number of addresses available for host assignment (excluding network/broadcast concepts)",
+    "reverseDns": "PTR record zone for reverse DNS lookups",
+    "binaryRepresentation": "128-bit binary representation showing network (1) and host (0) bits"
+  },
+  "presets": {
+    "documentation48": "Documentation /48",
+    "standardSubnet64": "Standard Subnet /64",
+    "linkLocal64": "Link-Local /64",
+    "loopback128": "Loopback /128",
+    "googleDns48": "Google DNS /48",
+    "multicastAllNodes": "Multicast All Nodes"
+  },
+  "results": {
+    "network": "Network",
+    "totalAddresses": "Total Addresses",
+    "networkCompressed": "Network Address (Compressed)",
+    "networkExpanded": "Network Address (Expanded)",
+    "subnetMask": "Subnet Mask",
+    "addressRange": "Address Range",
+    "assignableAddresses": "Assignable Addresses",
+    "reverseDnsZone": "Reverse DNS Zone",
+    "binaryPrefix": "Binary Prefix Representation"
+  },
+  "actions": {
+    "hide": "Hide",
+    "show": "Show",
+    "binary": "Binary"
+  },
+  "visualization": {
+    "networkPortion": "Network Portion",
+    "hostPortion": "Host Portion",
+    "bits": "bits",
+    "showingPortionsFor": "Showing network and host portions for"
+  },
+  "format": {
+    "digits": "digits"
+  }
+}

@@ -29,19 +29,125 @@
     "copied": "Copied!",
 
     "deliverability": {
-      "risk": "Deliverability Risk",
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High"
+      "title": "Email Deliverability Risk",
+      "low": "Strong SPF policy with hard fail - excellent email security",
+      "medium": "Moderate SPF policy with soft fail - good but could be stronger",
+      "high": "Weak or missing SPF policy - high risk of email spoofing"
     },
 
-    "analysis": {
-      "hard_fail": "Hard Fail (-all)",
-      "soft_fail": "Soft Fail (~all)",
-      "allows_all": "Allows All (+all)",
-      "total_lookups": "Total DNS lookups",
-      "mechanisms": "Mechanisms",
-      "includes": "Includes"
+    "details": {
+      "hardFail": {
+        "label": "Hard Fail (-all)",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "enabledDesc": "Unauthorized emails will be rejected",
+        "disabledDesc": "Consider upgrading to -all for better security"
+      },
+      "softFail": {
+        "label": "Soft Fail (~all)",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "enabledDesc": "Unauthorized emails marked as suspicious",
+        "hardFailInstead": "Using stronger hard fail instead",
+        "noEnforcement": "No SPF enforcement configured"
+      },
+      "allowsAll": {
+        "label": "Allows All (+all)",
+        "enabled": "Enabled",
+        "warning": "WARNING: Any server can send email for this domain"
+      }
+    },
+
+    "record": {
+      "title": "SPF Record",
+      "location": "TXT record for {domain}"
+    },
+
+    "breakdown": {
+      "title": "SPF Policy Breakdown",
+      "lookupLimitExceeded": {
+        "title": "DNS Lookup Limit Exceeded",
+        "message": "This SPF record requires {count} DNS lookups, which exceeds the RFC limit of 10. This may cause delivery failures."
+      },
+      "highLookupCount": {
+        "title": "High DNS Lookup Count",
+        "message": "This SPF record requires {count} DNS lookups. Consider optimizing to stay well below the 10-lookup limit."
+      },
+      "directMechanisms": "Direct Mechanisms",
+      "includedPolicies": "Included SPF Policies"
+    },
+
+    "mechanisms": {
+      "spfVersion": "SPF version identifier",
+      "ipv4Address": "IPv4 address or network: {address}",
+      "ipv6Address": "IPv6 address or network: {address}",
+      "aRecordSpecific": "A record lookup for: {domain}",
+      "aRecordDomain": "A record lookup for domain itself",
+      "mxRecordSpecific": "MX record lookup for: {domain}",
+      "mxRecordDomain": "MX record lookup for domain itself",
+      "existsLookup": "DNS lookup test: {domain}",
+      "hardFail": "Hard fail - reject unauthorized emails",
+      "softFail": "Soft fail - mark unauthorized emails as suspicious",
+      "passAll": "Pass all - allow any server (dangerous)",
+      "neutral": "Neutral - no policy decision"
+    },
+
+    "noRecord": {
+      "title": "No SPF Record Found",
+      "message": "Domain {domain} does not have an SPF record configured.",
+      "warning": "This means anyone can send email claiming to be from this domain, significantly increasing spoofing risk."
+    },
+
+    "error": {
+      "title": "SPF Check Failed"
+    }
+  },
+
+  "copy": {
+    "header": "SPF Check for {domain}",
+    "generatedAt": "Generated at: {timestamp}",
+    "recordLabel": "SPF Record:",
+    "emailAnalysisLabel": "Email Deliverability Analysis:",
+    "riskLevel": "Risk Level:",
+    "hardFailLabel": "Hard Fail (-all):",
+    "softFailLabel": "Soft Fail (~all):",
+    "allowsAllLabel": "Allows All (+all):",
+    "expandedAnalysisLabel": "Expanded SPF Analysis:",
+    "totalLookupsLabel": "Total DNS lookups:",
+    "mechanismsLabel": "Mechanisms:",
+    "includesLabel": "Includes:",
+    "yes": "Yes",
+    "no": "No"
+  },
+
+  "education": {
+    "title": "Understanding SPF for Email",
+    "mechanisms": {
+      "title": "SPF Mechanisms",
+      "ip": "Authorize specific IP addresses or networks",
+      "amx": "Authorize servers from A or MX records",
+      "include": "Include another domain's SPF policy",
+      "all": "Final policy decision (+pass, ~soft fail, -hard fail)"
+    },
+    "deliverability": {
+      "title": "Email Deliverability",
+      "hardFail": "Best security, blocks unauthorized senders",
+      "softFail": "Marks suspicious, doesn't block delivery",
+      "noSpf": "High spoofing risk, may affect deliverability",
+      "tooManyLookups": "Can cause delivery failures"
+    },
+    "bestPractices": {
+      "title": "Best Practices",
+      "useHardFail": "Use -all for hard fail when possible",
+      "limitLookups": "Keep DNS lookups under 10 (preferably under 5)",
+      "testChanges": "Test SPF changes before deployment",
+      "monitorDelivery": "Monitor email delivery after SPF changes"
+    },
+    "examples": {
+      "title": "Common SPF Examples",
+      "googleWorkspace": "Use Google Workspace with soft fail",
+      "specificIp": "Only allow specific IP with hard fail",
+      "aMxRecords": "Allow A and MX record servers with hard fail"
     }
   }
 }

@@ -1,0 +1,120 @@
+{
+  "title": "RP Record Builder",
+  "subtitle": "Create RP (Responsible Person) records to specify administrative contacts for your domains",
+  "examples": {
+    "title": "Common Role Examples",
+    "roles": {
+      "systemAdmin": {
+        "name": "System Administrator",
+        "description": "Primary system administrator contact"
+      },
+      "webmaster": {
+        "name": "Webmaster",
+        "description": "Website administrator contact"
+      },
+      "security": {
+        "name": "Security Contact",
+        "description": "Security incident response contact"
+      },
+      "dnsAdmin": {
+        "name": "DNS Administrator",
+        "description": "DNS zone administrator"
+      }
+    }
+  },
+  "form": {
+    "domain": {
+      "label": "Domain Name",
+      "placeholder": "example.com",
+      "help": "The domain name for this RP record",
+      "tooltip": "The domain name for which this RP record will be created"
+    },
+    "converter": {
+      "title": "Email to Domain Name Converter",
+      "placeholder": "admin@example.com",
+      "button": "Convert",
+      "help": "Enter an email to automatically convert to domain name format"
+    },
+    "mailbox": {
+      "label": "Mailbox Domain Name",
+      "placeholder": "admin.example.com.",
+      "help": "Domain name encoding the email address (use \".\" for no contact)",
+      "tooltip": "Domain name encoding the email address. Use '.' for no contact specified.",
+      "emailPreview": "Email:"
+    },
+    "txt": {
+      "label": "TXT Domain Name",
+      "placeholder": "admin-info.example.com.",
+      "help": "Domain name where TXT record with contact info can be found (use \".\" for none)",
+      "tooltip": "Domain name where TXT record with additional contact information can be found. Use '.' for no additional info."
+    }
+  },
+  "output": {
+    "rpRecord": "Generated RP Record",
+    "txtRecord": "Suggested TXT Record",
+    "txtHelp": "This TXT record should be created at the specified domain",
+    "placeholder": "Fill in the required fields to generate the RP record",
+    "invalidFormat": "Invalid format"
+  },
+  "buttons": {
+    "copy": "Copy Records",
+    "copied": "Copied!",
+    "download": "Download",
+    "downloaded": "Downloaded!"
+  },
+  "alerts": {
+    "info": {
+      "title": "Information",
+      "noMailbox": "Using \".\" for mailbox means no mailbox is specified",
+      "noTxt": "Using \".\" for TXT means no additional text information is provided",
+      "txtRecord": "Remember to create the TXT record at {txtDname} with contact information"
+    },
+    "warnings": {
+      "title": "Configuration Warnings",
+      "mailboxFqdn": "Mailbox domain name should be a fully qualified domain name",
+      "txtFqdn": "TXT domain name should be a fully qualified domain name or \".\"",
+      "mailboxDot": "Domain names in RP records should end with a dot (.) for absolute names",
+      "txtDot": "TXT domain name should end with a dot (.) for absolute names"
+    }
+  },
+  "info": {
+    "about": {
+      "title": "About RP Records",
+      "description": "RP (Responsible Person) records identify the responsible person for a domain or host. They specify both a mailbox (encoded as a domain name) and optionally point to a TXT record with additional contact information. This allows automated discovery of administrative contacts."
+    },
+    "encoding": {
+      "title": "Email Encoding",
+      "description": "Email addresses are encoded as domain names:",
+      "examples": {
+        "simple": {
+          "email": "admin@example.com",
+          "encoded": "admin.example.com."
+        },
+        "complex": {
+          "email": "user.name@example.com",
+          "encoded": "user\\.name.example.com."
+        }
+      },
+      "note": "Dots in the local part are escaped with backslashes"
+    },
+    "useCases": {
+      "title": "Common Use Cases",
+      "items": {
+        "zone": "Zone administrator contact",
+        "server": "Server administrator contact",
+        "security": "Security incident response",
+        "automated": "Automated contact discovery",
+        "compliance": "Compliance requirements"
+      }
+    },
+    "bestPractices": {
+      "title": "Best Practices",
+      "items": {
+        "fqdn": "Always use fully qualified domain names ending with a dot",
+        "txtRecords": "Create corresponding TXT records with detailed contact information",
+        "upToDate": "Keep contact information up to date and monitored",
+        "rolesBased": "Consider creating role-based contacts rather than personal ones"
+      }
+    }
+  }
+}

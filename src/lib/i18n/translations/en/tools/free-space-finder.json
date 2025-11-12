@@ -1,0 +1,90 @@
+{
+  "title": "Free Space Finder",
+  "description": "Find available IP address space within pools by analyzing allocated blocks and identifying gaps.",
+  "input": {
+    "pools": {
+      "label": "IP Address Pools",
+      "placeholder": "192.168.0.0/16\n10.0.0.0/8",
+      "help": "Enter CIDR blocks representing total available address space"
+    },
+    "allocations": {
+      "label": "Allocated Blocks",
+      "placeholder": "192.168.1.0/24\n192.168.10.0/24\n10.0.0.0/16",
+      "help": "Enter already allocated subnets within the pools"
+    },
+    "targetPrefix": {
+      "label": "Target Prefix Length (optional)",
+      "placeholder": "24",
+      "help": "Filter results to show only blocks of specific size"
+    }
+  },
+  "examples": {
+    "title": "Quick Examples",
+    "officeNetworkGaps": {
+      "label": "Office Network Gaps",
+      "description": "Find /24 gaps in corporate network"
+    },
+    "largePoolAnalysis": {
+      "label": "Large Pool Analysis",
+      "description": "Analyze large address pool utilization"
+    },
+    "homeNetworkSpace": {
+      "label": "Home Network Space",
+      "description": "Find available space in home network"
+    },
+    "ipv6Planning": {
+      "label": "IPv6 Planning",
+      "description": "IPv6 address space analysis"
+    },
+    "datacenterInventory": {
+      "label": "Datacenter Inventory",
+      "description": "Datacenter IP space audit"
+    }
+  },
+  "actions": {
+    "findSpace": "Find Free Space",
+    "analyzing": "Analyzing...",
+    "copyAll": "Copy All Blocks",
+    "exportResults": "Export Results",
+    "copied": "Copied!"
+  },
+  "results": {
+    "title": "Available Address Space",
+    "summary": {
+      "title": "Space Analysis Summary",
+      "totalBlocks": "Available Blocks",
+      "totalAddresses": "Total Free Addresses",
+      "largestBlock": "Largest Block",
+      "utilizationRate": "Utilization Rate"
+    },
+    "blocks": {
+      "title": "Free Address Blocks",
+      "count": "({count})",
+      "block": "Block",
+      "size": "Size",
+      "addresses": "Addresses",
+      "copyTooltip": "Copy block"
+    },
+    "noResults": "No free space found matching criteria",
+    "filtered": "Showing blocks with /{prefix} prefix"
+  },
+  "visualization": {
+    "title": "Address Space Visualization",
+    "allocated": "Allocated",
+    "available": "Available",
+    "pool": "Pool Boundary"
+  },
+  "errors": {
+    "title": "Analysis Errors",
+    "invalidPool": "Invalid pool specification",
+    "invalidAllocation": "Invalid allocation",
+    "analysisError": "Space analysis failed",
+    "noPoolsDefined": "No address pools defined"
+  },
+  "stats": {
+    "poolUtilization": "Pool Utilization",
+    "fragmentationIndex": "Fragmentation Index",
+    "averageBlockSize": "Average Block Size",
+    "largestContiguousSpace": "Largest Contiguous Space"
+  }
+}

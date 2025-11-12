@@ -2,6 +2,14 @@
   import { tooltip as _tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import '../../../styles/diagnostics-pages.scss';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools.ip-validator');
+  });
 
   let inputValue = $state('');
   let selectedExampleIndex = $state<number | null>(null);
@@ -25,14 +33,18 @@
   } | null>(null);
 
   // Common test cases for quick validation
-  const testCases = [
-    { label: 'Valid IPv4', value: '192.168.1.1', valid: true },
-    { label: 'Valid IPv6', value: '2001:db8::1', valid: true },
-    { label: 'IPv4 with leading zeros', value: '192.168.001.001', valid: false },
-    { label: 'IPv4 octet too large', value: '192.168.1.256', valid: false },
-    { label: 'IPv6 with multiple ::', value: '2001::db8::1', valid: false },
-    { label: 'IPv6 too many groups', value: '2001:db8:85a3:0000:0000:8a2e:0370:7334:extra', valid: false },
-  ];
+  const testCases = $derived([
+    { label: $t('tools.ip-validator.examples.validIPv4'), value: '192.168.1.1', valid: true },
+    { label: $t('tools.ip-validator.examples.validIPv6'), value: '2001:db8::1', valid: true },
+    { label: $t('tools.ip-validator.examples.ipv4LeadingZeros'), value: '192.168.001.001', valid: false },
+    { label: $t('tools.ip-validator.examples.ipv4OctetTooLarge'), value: '192.168.1.256', valid: false },
+    { label: $t('tools.ip-validator.examples.ipv6MultipleDoubleColon'), value: '2001::db8::1', valid: false },
+    {
+      label: $t('tools.ip-validator.examples.ipv6TooManyGroups'),
+      value: '2001:db8:85a3:0000:0000:8a2e:0370:7334:extra',
+      valid: false,
+    },
+  ]);
 
   function validateIPv4(ip: string): {
     isValid: boolean;
@@ -66,31 +78,31 @@
 
       // Check if empty
       if (part === '') {
-        errors.push(`Octet ${octetNum} is empty`);
+        errors.push($t('tools.ip-validator.errors.ipv4.octetEmpty', { number: octetNum }));
         continue;
       }
 
       // Check for non-numeric characters
       if (!/^\d+$/.test(part)) {
-        errors.push(`Octet ${octetNum} contains non-numeric characters: "${part}"`);
+        errors.push($t('tools.ip-validator.errors.ipv4.nonNumericCharacters', { number: octetNum, part }));
         continue;
       }
 
       // Check for leading zeros (except for single zero)
       if (part.length > 1 && part[0] === '0') {
-        errors.push(`Octet ${octetNum} has leading zeros: "${part}" (should be "${parseInt(part)})")`);
+        errors.push($t('tools.ip-validator.errors.ipv4.leadingZeros', { number: octetNum, part }));
         continue;
       }
 
       // Parse and validate range
       const value = parseInt(part, 10);
       if (isNaN(value)) {
-        errors.push(`Octet ${octetNum} is not a valid number: "${part}"`);
+        errors.push($t('tools.ip-validator.errors.ipv4.nonNumericCharacters', { number: octetNum, part }));
         continue;
       }
 
       if (value < 0 || value > 255) {
-        errors.push(`Octet ${octetNum} out of range: ${value} (must be 0-255)`);
+        errors.push($t('tools.ip-validator.errors.ipv4.outOfRange', { number: octetNum, value }));
         continue;
       }
 
@@ -179,7 +191,7 @@
     if (ip.includes('%')) {
       const parts = ip.split('%');
       if (parts.length > 2) {
-        errors.push('Multiple % symbols found - invalid zone ID format');
+        errors.push($t('tools.ip-validator.errors.ipv6.invalidCharacter', { char: '%' }));
         return { isValid: false, errors, warnings, details };
       }
       cleanIP = parts[0];
@@ -191,7 +203,7 @@
     // Check for :: (compression)
     const doubleColonCount = (cleanIP.match(/::/g) || []).length;
     if (doubleColonCount > 1) {
-      errors.push('Multiple :: sequences found - only one :: allowed per address');
+      errors.push($t('tools.ip-validator.errors.ipv6.multipleDoubleColon'));
       return { isValid: false, errors, warnings, details };
     }
 
@@ -200,7 +212,7 @@
     if (cleanIP.includes('::')) {
       const parts = cleanIP.split('::');
       if (parts.length > 2) {
-        errors.push('Invalid :: usage - malformed compression');
+        errors.push($t('tools.ip-validator.errors.ipv6.invalidFormat'));
         return { isValid: false, errors, warnings, details };
       }
 
@@ -212,7 +224,7 @@
       const missingGroups = 8 - totalParts;
 
       if (missingGroups < 0) {
-        errors.push('Too many groups in compressed IPv6 address');
+        errors.push($t('tools.ip-validator.errors.ipv6.tooManyGroups', { count: totalParts }));
         return { isValid: false, errors, warnings, details };
       }
 
@@ -231,7 +243,7 @@
       const ipv4Result = validateIPv4(ipv4Part);
 
       if (!ipv4Result.isValid) {
-        errors.push(`Invalid embedded IPv4 address: ${ipv4Result.errors.join(', ')}`);
+        errors.push($t('tools.ip-validator.errors.ipv6.embeddedIPv4Error', { error: ipv4Result.errors.join(', ') }));
         return { isValid: false, errors, warnings, details };
       }
 
@@ -251,9 +263,9 @@
 
     if (groups.length !== 8) {
       if (!cleanIP.includes('::')) {
-        errors.push(`IPv6 addresses must have 8 groups, found ${groups.length} (use :: for compression)`);
+        errors.push($t('tools.ip-validator.errors.ipv6.tooManyGroups', { count: groups.length }));
       } else {
-        errors.push(`Invalid IPv6 compression - results in ${groups.length} groups instead of 8`);
+        errors.push($t('tools.ip-validator.errors.ipv6.tooManyGroups', { count: groups.length }));
       }
       return { isValid: false, errors, warnings, details };
     }
@@ -261,20 +273,20 @@
     // Validate each group
     for (let i = 0; i < groups.length; i++) {
       const group = groups[i];
-      const groupNum = i + 1;
+      const _groupNum = i + 1;
 
       if (group === '') {
-        errors.push(`Group ${groupNum} is empty`);
+        errors.push($t('tools.ip-validator.errors.ipv6.emptyGroup'));
         continue;
       }
 
       if (group.length > 4) {
-        errors.push(`Group ${groupNum} too long: "${group}" (max 4 hex digits)`);
+        errors.push($t('tools.ip-validator.errors.ipv6.groupTooLong', { group }));
         continue;
       }
 
       if (!/^[0-9a-fA-F]+$/.test(group)) {
-        errors.push(`Group ${groupNum} contains invalid characters: "${group}" (only 0-9, a-f, A-F allowed)`);
+        errors.push($t('tools.ip-validator.errors.ipv6.invalidHexadecimal', { group }));
         continue;
       }
     }
@@ -446,7 +458,7 @@
       result = {
         isValid: false,
         type: null,
-        errors: ['Input does not appear to be an IP address (no dots or colons found)'],
+        errors: [$t('tools.ip-validator.errors.general.unknownFormat')],
         warnings: [],
         details: {},
       };

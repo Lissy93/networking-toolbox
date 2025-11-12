@@ -15,6 +15,14 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import { SvelteSet } from 'svelte/reactivity';
   import { formatNumber } from '$lib/utils/formatters';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools.vlsm-calculator');
+  });
 
   let networkIP = $state('192.168.1.0');
   let cidr = $state(24);
@@ -36,7 +44,7 @@
   function addSubnet() {
     subnets.push({
       id: generateSubnetId(),
-      name: `Subnet ${subnets.length + 1}`,
+      name: $t('tools.vlsm-calculator.defaultSubnetName', { number: subnets.length + 1 }),
       hostsNeeded: 50,
       description: '',
     });
@@ -136,19 +144,20 @@
   });
 </script>
 
-<ToolContentContainer
-  title="VLSM Calculator"
-  description="Design efficient subnets with Variable Length Subnet Masking for optimal address space utilization."
->
+<ToolContentContainer title={$t('tools.vlsm-calculator.title')} description={$t('tools.vlsm-calculator.description')}>
   <!-- Network Configuration -->
   <div class="network-config">
-    <h3>Network Configuration</h3>
+    <h3>{$t('tools.vlsm-calculator.networkConfig.title')}</h3>
     <div class="grid grid-2">
       <div class="form-group">
-        <IPInput bind:value={networkIP} label="Network Address" placeholder="192.168.1.0" />
+        <IPInput
+          bind:value={networkIP}
+          label={$t('tools.vlsm-calculator.networkConfig.networkAddress.label')}
+          placeholder={$t('tools.vlsm-calculator.networkConfig.networkAddress.placeholder')}
+        />
       </div>
       <div class="form-group">
-        <label for="cidr-input">CIDR Notation</label>
+        <label for="cidr-input">{$t('tools.vlsm-calculator.networkConfig.cidrNotation.label')}</label>
         <div class="cidr-input">
           <span class="cidr-prefix">/{cidr}</span>
           <input id="cidr-input" type="range" min="8" max="30" bind:value={cidr} class="cidr-slider" />
@@ -161,10 +170,10 @@
   <!-- Subnet Requirements -->
   <div class="subnet-requirements">
     <div class="requirements-header">
-      <h3>Subnet Requirements</h3>
+      <h3>{$t('tools.vlsm-calculator.subnetRequirements.title')}</h3>
       <button type="button" class="btn btn-primary" onclick={addSubnet}>
         <Icon name="plus" size="sm" />
-        Add Subnet
+        {$t('tools.vlsm-calculator.subnetRequirements.addSubnet')}
       </button>
     </div>
 
@@ -176,13 +185,13 @@
             <div class="requirement-inputs">
               <input
                 type="text"
-                placeholder="Subnet name"
+                placeholder={$t('tools.vlsm-calculator.subnetRequirements.subnetName.placeholder')}
                 bind:value={subnet.name}
                 oninput={(e) => updateSubnet(subnet.id, 'name', (e.target as HTMLInputElement)?.value)}
                 class="subnet-name-input"
               />
               <div class="hosts-input">
-                <label for="hosts-{index}">Hosts needed:</label>
+                <label for="hosts-{index}">{$t('tools.vlsm-calculator.subnetRequirements.hostsNeeded')}</label>
                 <input
                   id="hosts-{index}"
                   type="number"
@@ -208,7 +217,7 @@
           <div class="requirement-description">
             <input
               type="text"
-              placeholder="Description (optional)"
+              placeholder={$t('tools.vlsm-calculator.subnetRequirements.description.placeholder')}
               bind:value={subnet.description}
               oninput={(e) => updateSubnet(subnet.id, 'description', (e.target as HTMLTextAreaElement)?.value)}
               class="description-input"
@@ -225,26 +234,26 @@
       {#if vlsmResult.success}
         <!-- Summary -->
         <div class="info-panel success">
-          <h3>VLSM Calculation Results</h3>
+          <h3>{$t('tools.vlsm-calculator.summary.title')}</h3>
           <div class="summary-stats">
             <div class="stat-item">
-              <span class="stat-label">Total Subnets</span>
+              <span class="stat-label">{$t('tools.vlsm-calculator.summary.totalSubnets')}</span>
               <span class="stat-value">{vlsmResult.subnets.length}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">Hosts Requested</span>
+              <span class="stat-label">{$t('tools.vlsm-calculator.summary.hostsRequested')}</span>
               <span class="stat-value">{formatNumber(vlsmResult.totalHostsRequested)}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">Hosts Provided</span>
+              <span class="stat-label">{$t('tools.vlsm-calculator.summary.hostsProvided')}</span>
               <span class="stat-value">{formatNumber(vlsmResult.totalHostsProvided)}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">Wasted Hosts</span>
+              <span class="stat-label">{$t('tools.vlsm-calculator.summary.wastedHosts')}</span>
               <span class="stat-value danger">{formatNumber(vlsmResult.totalWastedHosts)}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">Efficiency</span>
+              <span class="stat-label">{$t('tools.vlsm-calculator.summary.efficiency')}</span>
               <span
                 class="stat-value"
                 style="color: {getEfficiencyColor(vlsmResult.totalWastedHosts, vlsmResult.totalHostsProvided)}"
@@ -253,7 +262,7 @@
               </span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">Remaining Addresses</span>
+              <span class="stat-label">{$t('tools.vlsm-calculator.summary.remainingAddresses')}</span>
               <span class="stat-value">{formatNumber(vlsmResult.remainingAddresses)}</span>
             </div>
           </div>
@@ -261,15 +270,15 @@
 
         <!-- Subnets Table -->
         <div class="subnets-table-container">
-          <h3>Calculated Subnets</h3>
+          <h3>{$t('tools.vlsm-calculator.table.title')}</h3>
           <div class="subnets-table">
             <div class="table-header">
-              <div class="col-name">Subnet</div>
-              <div class="col-network">Network</div>
-              <div class="col-hosts">Hosts</div>
-              <div class="col-mask">Mask</div>
-              <div class="col-efficiency">Efficiency</div>
-              <div class="col-actions">Actions</div>
+              <div class="col-name">{$t('tools.vlsm-calculator.table.columns.subnet')}</div>
+              <div class="col-network">{$t('tools.vlsm-calculator.table.columns.network')}</div>
+              <div class="col-hosts">{$t('tools.vlsm-calculator.table.columns.hosts')}</div>
+              <div class="col-mask">{$t('tools.vlsm-calculator.table.columns.mask')}</div>
+              <div class="col-efficiency">{$t('tools.vlsm-calculator.table.columns.efficiency')}</div>
+              <div class="col-actions">{$t('tools.vlsm-calculator.table.columns.actions')}</div>
             </div>
 
             {#each vlsmResult.subnets as subnet (subnet.id)}
@@ -292,10 +301,16 @@
 
                 <div class="col-hosts">
                   <div class="hosts-info">
-                    <div class="hosts-needed">{subnet.hostsNeeded} needed</div>
-                    <div class="hosts-provided">{subnet.hostsProvided} provided</div>
+                    <div class="hosts-needed">
+                      {$t('tools.vlsm-calculator.table.hostsNeeded', { count: subnet.hostsNeeded })}
+                    </div>
+                    <div class="hosts-provided">
+                      {$t('tools.vlsm-calculator.table.hostsProvided', { count: subnet.hostsProvided })}
+                    </div>
                     {#if subnet.wastedHosts > 0}
-                      <div class="hosts-wasted">{subnet.wastedHosts} wasted</div>
+                      <div class="hosts-wasted">
+                        {$t('tools.vlsm-calculator.table.hostsWasted', { count: subnet.wastedHosts })}
+                      </div>
                     {/if}
                   </div>
                 </div>
@@ -324,7 +339,7 @@
                   >
                     <Icon name="chevron-down" size="sm" />
                   </button>
-                  <Tooltip text="Copy network info" position="left">
+                  <Tooltip text={$t('tools.vlsm-calculator.actions.copyNetworkInfo')} position="left">
                     <button
                       type="button"
                       class="btn btn-ghost {clipboard.isCopied(`copy-${subnet.id}`) ? 'copied' : ''}"
@@ -340,52 +355,62 @@
                 <div class="subnet-details">
                   <div class="details-grid">
                     <div class="detail-item">
-                      <span class="detail-label" use:tooltip={'First IP address in the subnet - identifies the network'}
-                        >Network Address</span
+                      <span
+                        class="detail-label"
+                        use:tooltip={$t('tools.vlsm-calculator.details.networkAddress.tooltip')}
+                        >{$t('tools.vlsm-calculator.details.networkAddress.label')}</span
                       >
                       <code class="detail-value">{subnet.networkAddress}</code>
                     </div>
                     <div class="detail-item">
-                      <span class="detail-label" use:tooltip={'Last IP address in the subnet - sends to all hosts'}
-                        >Broadcast Address</span
+                      <span
+                        class="detail-label"
+                        use:tooltip={$t('tools.vlsm-calculator.details.broadcastAddress.tooltip')}
+                        >{$t('tools.vlsm-calculator.details.broadcastAddress.label')}</span
                       >
                       <code class="detail-value">{subnet.broadcastAddress}</code>
                     </div>
                     <div class="detail-item">
-                      <span class="detail-label" use:tooltip={'First IP address available for host assignment'}
-                        >First Usable Host</span
+                      <span
+                        class="detail-label"
+                        use:tooltip={$t('tools.vlsm-calculator.details.firstUsableHost.tooltip')}
+                        >{$t('tools.vlsm-calculator.details.firstUsableHost.label')}</span
                       >
                       <code class="detail-value">{subnet.firstUsableHost}</code>
                     </div>
                     <div class="detail-item">
-                      <span class="detail-label" use:tooltip={'Last IP address available for host assignment'}
-                        >Last Usable Host</span
+                      <span
+                        class="detail-label"
+                        use:tooltip={$t('tools.vlsm-calculator.details.lastUsableHost.tooltip')}
+                        >{$t('tools.vlsm-calculator.details.lastUsableHost.label')}</span
                       >
                       <code class="detail-value">{subnet.lastUsableHost}</code>
                     </div>
                     <div class="detail-item">
-                      <span class="detail-label" use:tooltip={'Defines which portion of IP represents network vs host'}
-                        >Subnet Mask</span
+                      <span class="detail-label" use:tooltip={$t('tools.vlsm-calculator.details.subnetMask.tooltip')}
+                        >{$t('tools.vlsm-calculator.details.subnetMask.label')}</span
                       >
                       <code class="detail-value">{subnet.subnetMask}</code>
                     </div>
                     <div class="detail-item">
-                      <span class="detail-label" use:tooltip={'Inverse of subnet mask - used in access control lists'}
-                        >Wildcard Mask</span
+                      <span class="detail-label" use:tooltip={$t('tools.vlsm-calculator.details.wildcardMask.tooltip')}
+                        >{$t('tools.vlsm-calculator.details.wildcardMask.label')}</span
                       >
                       <code class="detail-value">{subnet.wildcardMask}</code>
                     </div>
                     <div class="detail-item">
-                      <span class="detail-label" use:tooltip={'Binary representation of the subnet mask'}
-                        >Binary Mask</span
+                      <span class="detail-label" use:tooltip={$t('tools.vlsm-calculator.details.binaryMask.tooltip')}
+                        >{$t('tools.vlsm-calculator.details.binaryMask.label')}</span
                       >
                       <code class="detail-value binary-mask">{subnet.binaryMask}</code>
                     </div>
                     <div class="detail-item">
-                      <span class="detail-label" use:tooltip={'Number of bits available for host addressing'}
-                        >Host Bits</span
+                      <span class="detail-label" use:tooltip={$t('tools.vlsm-calculator.details.hostBits.tooltip')}
+                        >{$t('tools.vlsm-calculator.details.hostBits.label')}</span
                       >
-                      <code class="detail-value">{subnet.actualHostBits} bits</code>
+                      <code class="detail-value"
+                        >{$t('tools.vlsm-calculator.details.hostBits.value', { count: subnet.actualHostBits })}</code
+                      >
                     </div>
                   </div>
                 </div>
@@ -407,7 +432,7 @@
       {:else}
         <!-- Error -->
         <div class="info-panel error">
-          <h3>Calculation Error</h3>
+          <h3>{$t('tools.vlsm-calculator.error.title')}</h3>
           <p class="error-message">{vlsmResult.error}</p>
         </div>
       {/if}

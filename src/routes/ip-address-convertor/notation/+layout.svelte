@@ -3,6 +3,11 @@
   import '../../../styles/converters.scss';
   import '../../../styles/components.scss';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/i18n';
+  import { ensurePageTranslations } from '$lib/i18n/page-translations';
+
+  // Load translations immediately for SSR
+  ensurePageTranslations('en');
 </script>
 
 <div class="container">
@@ -13,35 +18,46 @@
     <div class="explainer-card no-hover">
       <h3>
         <Icon name="info" size="md" />
-        Understanding IPv6 Address Notation
+        {t('ipv6Notation.title')}
       </h3>
       <div class="explainer-content">
         <div class="format-explanations">
           <!-- Expanded Form -->
           <div class="format-explanation">
-            <h4><span class="format-badge expanded">Expanded (Full) Format</span></h4>
-            <p><strong>Structure:</strong> All 32 hexadecimal characters with colons every 4 digits</p>
-            <p><strong>Example:</strong> <code>2001:0db8:85a3:0000:0000:8a2e:0370:7334</code></p>
-            <p><strong>Usage:</strong> Debugging, detailed analysis, and when precision is required</p>
-            <p><strong>Benefits:</strong> Shows complete address structure, easier to parse programmatically</p>
+            <h4><span class="format-badge expanded">{t('ipv6Notation.formats.expanded.title')}</span></h4>
+            <p><strong>{t('ipv6Notation.terms.structure')}</strong> {t('ipv6Notation.formats.expanded.structure')}</p>
+            <p>
+              <strong>{t('ipv6Notation.terms.example')}</strong> <code>2001:0db8:85a3:0000:0000:8a2e:0370:7334</code>
+            </p>
+            <p><strong>{t('ipv6Notation.terms.usage')}</strong> {t('ipv6Notation.formats.expanded.usage')}</p>
+            <p><strong>{t('ipv6Notation.terms.benefits')}</strong> {t('ipv6Notation.formats.expanded.benefits')}</p>
           </div>
 
           <!-- Compressed Form -->
           <div class="format-explanation">
-            <h4><span class="format-badge compressed">Compressed (Shortened) Format</span></h4>
-            <p><strong>Structure:</strong> Uses :: to represent consecutive zero groups, removes leading zeros</p>
-            <p><strong>Example:</strong> <code>2001:db8:85a3::8a2e:370:7334</code></p>
-            <p><strong>Usage:</strong> Configuration files, user interfaces, documentation</p>
-            <p><strong>Benefits:</strong> Shorter, more readable, standard representation</p>
+            <h4><span class="format-badge compressed">{t('ipv6Notation.formats.compressed.title')}</span></h4>
+            <p><strong>{t('ipv6Notation.terms.structure')}</strong> {t('ipv6Notation.formats.compressed.structure')}</p>
+            <p><strong>{t('ipv6Notation.terms.example')}</strong> <code>2001:db8:85a3::8a2e:370:7334</code></p>
+            <p><strong>{t('ipv6Notation.terms.usage')}</strong> {t('ipv6Notation.formats.compressed.usage')}</p>
+            <p><strong>{t('ipv6Notation.terms.benefits')}</strong> {t('ipv6Notation.formats.compressed.benefits')}</p>
           </div>
 
           <!-- Compression Rules -->
           <div class="format-explanation">
-            <h4><span class="format-badge rules">Compression Rules</span></h4>
-            <p><strong>Double Colon (::):</strong> Represents one or more consecutive zero groups</p>
-            <p><strong>Single Use:</strong> Only one :: allowed per address to avoid ambiguity</p>
-            <p><strong>Leading Zeros:</strong> Remove leading zeros from each group (0001 → 1)</p>
-            <p><strong>Preference:</strong> Compress the longest sequence of consecutive zeros</p>
+            <h4><span class="format-badge rules">{t('ipv6Notation.formats.rules.title')}</span></h4>
+            <p>
+              <strong>{t('ipv6Notation.terms.doubleColonLabel')}</strong>
+              {t('ipv6Notation.formats.rules.doubleColon')}
+            </p>
+            <p><strong>{t('ipv6Notation.terms.singleUseLabel')}</strong> {t('ipv6Notation.formats.rules.singleUse')}</p>
+            <p>
+              <strong>{t('ipv6Notation.terms.leadingZerosLabel')}</strong>
+              {t('ipv6Notation.formats.rules.leadingZeros')}
+            </p>
+            <p>
+              <strong>{t('ipv6Notation.terms.preferenceLabel')}</strong>
+              {t('ipv6Notation.formats.rules.preference')}
+            </p>
           </div>
         </div>
       </div>
@@ -50,40 +66,82 @@
     <div class="explainer-card no-hover">
       <h3>
         <Icon name="lightbulb" size="md" />
-        Conversion Use Cases & Applications
+        {t('ipv6Notation.conversions.title')}
       </h3>
       <div class="explainer-content">
         <div class="usage-scenarios">
           <div class="usage-scenario">
-            <h4>Expand IPv6 Addresses</h4>
+            <h4>{t('ipv6Notation.useCases.expand.title')}</h4>
             <ul>
-              <li><strong>Network Analysis:</strong> Compare addresses byte-by-byte</li>
-              <li><strong>Database Storage:</strong> Consistent format for indexing</li>
-              <li><strong>Debugging:</strong> See complete address structure</li>
-              <li><strong>Programming:</strong> Easier parsing and manipulation</li>
-              <li><strong>Security:</strong> Avoid address obfuscation issues</li>
+              <li>
+                <strong>{t('ipv6Notation.terms.networkAnalysisLabel')}</strong>
+                {t('ipv6Notation.useCases.expand.networkAnalysis')}
+              </li>
+              <li>
+                <strong>{t('ipv6Notation.terms.databaseStorageLabel')}</strong>
+                {t('ipv6Notation.useCases.expand.databaseStorage')}
+              </li>
+              <li>
+                <strong>{t('ipv6Notation.terms.debuggingLabel')}</strong>
+                {t('ipv6Notation.useCases.expand.debugging')}
+              </li>
+              <li>
+                <strong>{t('ipv6Notation.terms.programmingLabel')}</strong>
+                {t('ipv6Notation.useCases.expand.programming')}
+              </li>
+              <li>
+                <strong>{t('ipv6Notation.terms.securityLabel')}</strong>
+                {t('ipv6Notation.useCases.expand.security')}
+              </li>
             </ul>
           </div>
 
           <div class="usage-scenario">
-            <h4>Compress IPv6 Addresses</h4>
+            <h4>{t('ipv6Notation.useCases.compress.title')}</h4>
             <ul>
-              <li><strong>User Interface:</strong> Shorter, more readable addresses</li>
-              <li><strong>Configuration:</strong> Cleaner config files and logs</li>
-              <li><strong>Documentation:</strong> Standard format for examples</li>
-              <li><strong>URLs:</strong> Shorter addresses in IPv6 URLs</li>
-              <li><strong>Network Equipment:</strong> Standard display format</li>
+              <li>
+                <strong>{t('ipv6Notation.terms.userInterfaceLabel')}</strong>
+                {t('ipv6Notation.useCases.compress.userInterface')}
+              </li>
+              <li>
+                <strong>{t('ipv6Notation.terms.configurationLabel')}</strong>
+                {t('ipv6Notation.useCases.compress.configuration')}
+              </li>
+              <li>
+                <strong>{t('ipv6Notation.terms.documentationLabel')}</strong>
+                {t('ipv6Notation.useCases.compress.documentation')}
+              </li>
+              <li><strong>{t('ipv6Notation.terms.urlsLabel')}</strong> {t('ipv6Notation.useCases.compress.urls')}</li>
+              <li>
+                <strong>{t('ipv6Notation.terms.networkEquipmentLabel')}</strong>
+                {t('ipv6Notation.useCases.compress.networkEquipment')}
+              </li>
             </ul>
           </div>
 
           <div class="usage-scenario">
-            <h4>Real-world Scenarios</h4>
+            <h4>{t('ipv6Notation.useCases.scenarios.title')}</h4>
             <ul>
-              <li><strong>Network Monitoring:</strong> Consistent address formatting</li>
-              <li><strong>API Integration:</strong> Standardize input/output formats</li>
-              <li><strong>Data Migration:</strong> Convert between address formats</li>
-              <li><strong>Educational Tools:</strong> Demonstrate IPv6 structure</li>
-              <li><strong>Quality Assurance:</strong> Validate address representations</li>
+              <li>
+                <strong>{t('ipv6Notation.terms.networkMonitoringLabel')}</strong>
+                {t('ipv6Notation.useCases.scenarios.networkMonitoring')}
+              </li>
+              <li>
+                <strong>{t('ipv6Notation.terms.apiIntegrationLabel')}</strong>
+                {t('ipv6Notation.useCases.scenarios.apiIntegration')}
+              </li>
+              <li>
+                <strong>{t('ipv6Notation.terms.dataMigrationLabel')}</strong>
+                {t('ipv6Notation.useCases.scenarios.dataMigration')}
+              </li>
+              <li>
+                <strong>{t('ipv6Notation.terms.educationalToolsLabel')}</strong>
+                {t('ipv6Notation.useCases.scenarios.educationalTools')}
+              </li>
+              <li>
+                <strong>{t('ipv6Notation.terms.qualityAssuranceLabel')}</strong>
+                {t('ipv6Notation.useCases.scenarios.qualityAssurance')}
+              </li>
             </ul>
           </div>
         </div>
@@ -93,15 +151,15 @@
     <div class="explainer-card no-hover">
       <h3>
         <Icon name="code" size="md" />
-        Technical Examples & Standards
+        {t('ipv6Notation.conversions.examples.title')}
       </h3>
       <div class="explainer-content">
         <div class="examples-grid">
           <div class="example-item">
-            <h4>Common Address Types</h4>
+            <h4>{t('ipv6Notation.examples.commonTypes')}</h4>
             <div class="code-examples">
               <div class="code-pair">
-                <div class="code-label">Loopback:</div>
+                <div class="code-label">{t('ipv6Notation.examples.loopback')}</div>
                 <div class="code-block">
                   <code class="expanded">::1</code>
                   <span class="arrow">↔</span>
@@ -109,7 +167,7 @@
                 </div>
               </div>
               <div class="code-pair">
-                <div class="code-label">Link-Local:</div>
+                <div class="code-label">{t('ipv6Notation.examples.linkLocal')}</div>
                 <div class="code-block">
                   <code class="expanded">fe80::1</code>
                   <span class="arrow">↔</span>
@@ -117,7 +175,7 @@
                 </div>
               </div>
               <div class="code-pair">
-                <div class="code-label">Documentation:</div>
+                <div class="code-label">{t('ipv6Notation.examples.documentation')}</div>
                 <div class="code-block">
                   <code class="expanded">2001:db8::</code>
                   <span class="arrow">↔</span>
@@ -128,13 +186,28 @@
           </div>
 
           <div class="example-item">
-            <h4>Best Practices</h4>
+            <h4>{t('ipv6Notation.examples.bestPractices.title')}</h4>
             <ul>
-              <li><strong>RFC 5952:</strong> Follow standard compression guidelines</li>
-              <li><strong>Consistency:</strong> Use same format throughout applications</li>
-              <li><strong>Validation:</strong> Always validate both input and output</li>
-              <li><strong>Case Sensitivity:</strong> Lowercase preferred (RFC 5952)</li>
-              <li><strong>Leading Zeros:</strong> Always remove for compressed form</li>
+              <li>
+                <strong>{t('ipv6Notation.terms.rfc5952Label')}</strong>
+                {t('ipv6Notation.examples.bestPractices.rfc5952')}
+              </li>
+              <li>
+                <strong>{t('ipv6Notation.terms.consistencyLabel')}</strong>
+                {t('ipv6Notation.examples.bestPractices.consistency')}
+              </li>
+              <li>
+                <strong>{t('ipv6Notation.terms.validationLabel')}</strong>
+                {t('ipv6Notation.examples.bestPractices.validation')}
+              </li>
+              <li>
+                <strong>{t('ipv6Notation.terms.caseSensitivityLabel')}</strong>
+                {t('ipv6Notation.examples.bestPractices.caseSensitivity')}
+              </li>
+              <li>
+                <strong>{t('ipv6Notation.terms.leadingZerosRuleLabel')}</strong>
+                {t('ipv6Notation.examples.bestPractices.leadingZeros')}
+              </li>
             </ul>
           </div>
         </div>

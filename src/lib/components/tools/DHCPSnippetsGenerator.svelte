@@ -43,7 +43,7 @@
     }
   }
 
-  function toggleTarget(target: DhcpTarget) {
+  function toggleTarge$t(target: DhcpTarget) {
     if (config.targets.includes(target)) {
       config.targets = config.targets.filter((t) => t !== target);
     } else {
@@ -69,7 +69,7 @@
             <input
               type="checkbox"
               checked={config.targets.includes(option.value)}
-              onchange={() => toggleTarget(option.value)}
+              onchange={() => toggleTarge$t(option.value)}
             />
             {option.label}
           </label>

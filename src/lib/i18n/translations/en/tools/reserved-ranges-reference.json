@@ -1,0 +1,65 @@
+{
+  "title": "Reserved IP Ranges Reference",
+  "description": "Special-purpose IP address ranges defined by RFCs and their intended uses.",
+  "sections": {
+    "reservedRanges": "Reserved IP Ranges",
+    "explainer": "Understanding Reserved IP Ranges"
+  },
+  "rangeInfo": {
+    "address": "Address Range",
+    "description": "Description",
+    "rfc": "RFC",
+    "tooltipFormat": "{description} - Defined in {rfc}"
+  },
+  "notices": {
+    "privateNetwork": "Private Network: Not routed on the public Internet",
+    "linkLocal": "Link-Local: Used for automatic addressing",
+    "multicast": "Multicast: Used for group communication",
+    "reserved": "Reserved: Not assigned for general use"
+  },
+  "explainer": {
+    "understanding": {
+      "title": "Understanding Reserved IP Ranges",
+      "content": "IP address ranges are reserved for special purposes to ensure proper Internet operation and avoid conflicts."
+    },
+    "categories": {
+      "title": "Categories of Reserved Ranges",
+      "private": {
+        "title": "Private Networks (RFC 1918)",
+        "content": "Used in local networks, not routed on the Internet"
+      },
+      "linkLocal": {
+        "title": "Link-Local (RFC 3927)",
+        "content": "Automatic IP assignment when DHCP is unavailable"
+      },
+      "multicast": {
+        "title": "Multicast (RFC 3171)",
+        "content": "Group communication and streaming protocols"
+      },
+      "special": {
+        "title": "Special-Use (Various RFCs)",
+        "content": "Documentation, testing, and protocol functions"
+      }
+    },
+    "usage": {
+      "title": "Usage Guidelines",
+      "points": [
+        "Private ranges are safe for internal use",
+        "Link-local addresses are automatically assigned",
+        "Multicast addresses require special handling",
+        "Documentation ranges are for examples only"
+      ]
+    },
+    "planning": {
+      "title": "Network Planning",
+      "content": "Choose appropriate ranges based on your network size and routing requirements."
+    }
+  },
+  "filter": {
+    "all": "All Ranges",
+    "private": "Private",
+    "linkLocal": "Link-Local",
+    "multicast": "Multicast",
+    "special": "Special-Use"
+  }
+}

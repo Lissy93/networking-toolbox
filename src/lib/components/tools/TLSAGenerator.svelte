@@ -1,7 +1,15 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
   import { useClipboard } from '$lib/composables';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools.tlsa-generator');
+  });
 
   let domain = $state('example.com');
   let port = $state(443);
@@ -222,10 +230,9 @@
 <div class="container">
   <div class="card">
     <div class="card-header">
-      <h1>TLSA Generator</h1>
+      <h1>{$t('tools.tlsa-generator.title')}</h1>
       <p>
-        Create TLSA (DNS-based Authentication of Named Entities) records for certificate pinning and DANE
-        implementation.
+        {$t('tools.tlsa-generator.subtitle')}
       </p>
     </div>
 
@@ -235,27 +242,43 @@
         <div class="card sub-card">
           <h3 class="section-title">
             <Icon name="globe" size="sm" />
-            Service Configuration
+            {$t('tools.tlsa-generator.service.title')}
           </h3>
 
           <div class="service-grid">
             <div class="input-group">
-              <label for="domain" use:tooltip={'Domain name for the TLSA record'}>Domain:</label>
-              <input id="domain" type="text" bind:value={domain} placeholder="example.com" />
-            </div>
-
-            <div class="input-group">
-              <label for="port" use:tooltip={'Port number for the service (e.g., 443 for HTTPS, 25 for SMTP)'}
-                >Port:</label
+              <label for="domain" use:tooltip={$t('tools.tlsa-generator.service.domain.tooltip')}
+                >{$t('tools.tlsa-generator.service.domain.label')}</label
               >
-              <input id="port" type="number" bind:value={port} min="1" max="65535" placeholder="443" />
+              <input
+                id="domain"
+                type="text"
+                bind:value={domain}
+                placeholder={$t('tools.tlsa-generator.service.domain.placeholder')}
+              />
             </div>
 
             <div class="input-group">
-              <label for="protocol" use:tooltip={'Protocol type (tcp or udp)'}>Protocol:</label>
+              <label for="port" use:tooltip={$t('tools.tlsa-generator.service.port.tooltip')}
+                >{$t('tools.tlsa-generator.service.port.label')}</label
+              >
+              <input
+                id="port"
+                type="number"
+                bind:value={port}
+                min="1"
+                max="65535"
+                placeholder={$t('tools.tlsa-generator.service.port.placeholder')}
+              />
+            </div>
+
+            <div class="input-group">
+              <label for="protocol" use:tooltip={$t('tools.tlsa-generator.service.protocol.tooltip')}
+                >{$t('tools.tlsa-generator.service.protocol.label')}</label
+              >
               <select id="protocol" bind:value={protocol}>
-                <option value="tcp">TCP</option>
-                <option value="udp">UDP</option>
+                <option value="tcp">{$t('tools.tlsa-generator.service.protocol.options.tcp')}</option>
+                <option value="udp">{$t('tools.tlsa-generator.service.protocol.options.udp')}</option>
               </select>
             </div>
           </div>
@@ -265,7 +288,7 @@
         <div class="card sub-card">
           <h3 class="section-title">
             <Icon name="settings" size="sm" />
-            TLSA Parameters
+            {$t('tools.tlsa-generator.parameters.title')}
           </h3>
 
           <div class="input-group">
@@ -368,7 +391,7 @@
           <!-- Generated Record -->
           <div class="card">
             <div class="card-header-with-actions">
-              <h3>Generated TLSA Record</h3>
+              <h3>{$t('tools.tlsa-generator.output.title')}</h3>
               <div class="actions">
                 <button
                   type="button"
@@ -378,7 +401,9 @@
                   use:tooltip={'Copy TLSA record to clipboard'}
                 >
                   <Icon name={clipboard.isCopied('copy-tlsa') ? 'check' : 'copy'} size="sm" />
-                  {clipboard.isCopied('copy-tlsa') ? 'Copied!' : 'Copy'}
+                  {clipboard.isCopied('copy-tlsa')
+                    ? $t('tools.tlsa-generator.output.copy.copied')
+                    : $t('tools.tlsa-generator.output.copy.button')}
                 </button>
                 <button
                   type="button"
@@ -388,7 +413,9 @@
                   use:tooltip={'Download as zone file'}
                 >
                   <Icon name={clipboard.isCopied('export-tlsa') ? 'check' : 'download'} size="sm" />
-                  {clipboard.isCopied('export-tlsa') ? 'Downloaded!' : 'Export'}
+                  {clipboard.isCopied('export-tlsa')
+                    ? $t('tools.tlsa-generator.output.export.downloaded')
+                    : $t('tools.tlsa-generator.output.export.button')}
                 </button>
               </div>
             </div>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/i18n';
   import '../../../../styles/diagnostics-pages.scss';
 
   let domain = $state('gmail.com');
@@ -11,12 +12,12 @@
   let selectedExampleIndex = $state<number | null>(null);
 
   const examples = [
-    { domain: 'gmail.com', description: 'Google Gmail SPF policy' },
-    { domain: 'outlook.com', description: 'Microsoft Outlook SPF setup' },
-    { domain: 'salesforce.com', description: 'Salesforce SPF configuration' },
-    { domain: 'mailchimp.com', description: 'MailChimp email service SPF' },
-    { domain: 'github.com', description: 'GitHub enterprise SPF policy' },
-    { domain: 'sendgrid.com', description: 'SendGrid email platform SPF' },
+    { domain: 'gmail.com', description: t('diagnostics.email-spf-check.examples.gmail') },
+    { domain: 'outlook.com', description: t('diagnostics.email-spf-check.examples.outlook') },
+    { domain: 'salesforce.com', description: t('diagnostics.email-spf-check.examples.salesforce') },
+    { domain: 'mailchimp.com', description: t('diagnostics.email-spf-check.examples.mailchimp') },
+    { domain: 'github.com', description: t('diagnostics.email-spf-check.examples.github') },
+    { domain: 'sendgrid.com', description: t('diagnostics.email-spf-check.examples.sendgrid') },
   ];
 
   async function checkSPF() {
@@ -121,10 +122,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>Email SPF Policy Checker</h1>
+    <h1>{t('diagnostics.email-spf-check.title')}</h1>
     <p>
-      Check SPF (Sender Policy Framework) records for email authentication and deliverability. Analyze which servers are
-      authorized to send email for your domain and assess delivery risk.
+      {t('diagnostics.email-spf-check.description')}
     </p>
   </header>
 
@@ -133,7 +133,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>SPF Examples</h4>
+        <h4>{t('diagnostics.email-spf-check.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -154,17 +154,17 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>SPF Policy Check</h3>
+      <h3>{t('diagnostics.email-spf-check.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-group">
-        <label for="domain" use:tooltip={'Enter the domain to check SPF policy for'}>
-          Domain Name
+        <label for="domain" use:tooltip={t('diagnostics.email-spf-check.form.domain.tooltip')}>
+          {t('diagnostics.email-spf-check.form.domain.label')}
           <input
             id="domain"
             type="text"
             bind:value={domain}
-            placeholder="example.com"
+            placeholder={t('diagnostics.email-spf-check.form.domain.placeholder')}
             onchange={() => {
               clearExampleSelection();
               if (domain) checkSPF();
@@ -177,10 +177,10 @@
         <button class="check-btn lookup-btn" onclick={checkSPF} disabled={loading || !domain.trim()}>
           {#if loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Checking SPF...
+            {t('diagnostics.email-spf-check.form.checking')}
           {:else}
             <Icon name="mail-check" size="sm" />
-            Check SPF Policy
+            {t('diagnostics.email-spf-check.form.check')}
           {/if}
         </button>
       </div>
@@ -191,10 +191,12 @@
   {#if results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>SPF Policy Analysis</h3>
+        <h3>{t('diagnostics.email-spf-check.results.title')}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
           <Icon name={copiedState ? 'check' : 'copy'} size="xs" />
-          {copiedState ? 'Copied!' : 'Copy Results'}
+          {copiedState
+            ? t('diagnostics.email-spf-check.results.copied')
+            : t('diagnostics.email-spf-check.results.copy')}
         </button>
       </div>
       <div class="card-content">
