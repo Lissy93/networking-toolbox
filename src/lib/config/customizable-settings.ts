@@ -111,6 +111,31 @@ export const ALLOWED_DNS_SERVERS = env.NTB_ALLOWED_DNS_SERVERS
   : DEFAULT_TRUSTED_DNS_SERVERS;
 
 /**
+ * Analytics Settings
+ * Configure analytics tracking for self-hosted instances
+ */
+
+/**
+ * Analytics domain (for Plausible or similar analytics)
+ * Set to 'false' to disable analytics entirely
+ * Default: 'networking-toolbox.as93.net'
+ */
+export const ANALYTICS_DOMAIN = env.NTB_ANALYTICS_DOMAIN ?? 'networking-toolbox.as93.net';
+
+/**
+ * Analytics script URL (for Plausible or similar analytics)
+ * Set to 'false' to disable analytics entirely
+ * Default: 'https://no-track.as93.net/js/script.js'
+ */
+export const ANALYTICS_DSN = env.NTB_ANALYTICS_DSN ?? 'https://no-track.as93.net/js/script.js';
+
+/**
+ * Check if analytics is enabled
+ * Analytics is disabled if either ANALYTICS_DOMAIN or ANALYTICS_DSN is set to 'false'
+ */
+export const ANALYTICS_ENABLED = ANALYTICS_DOMAIN !== 'false' && ANALYTICS_DSN !== 'false';
+
+/**
  * Get user settings list with values prioritized as:
  * 1. User-set value from localStorage
  * 2. Environment variable value
@@ -153,5 +178,7 @@ export function getUserSettingsList(): Array<{ name: string; value: string }> {
     { name: 'NTB_ALLOW_CUSTOM_DNS', value: env.NTB_ALLOW_CUSTOM_DNS || '' },
     { name: 'NTB_BLOCK_PRIVATE_DNS_IPS', value: env.NTB_BLOCK_PRIVATE_DNS_IPS || '' },
     { name: 'NTB_ALLOWED_DNS_SERVERS', value: env.NTB_ALLOWED_DNS_SERVERS || '' },
+    { name: 'NTB_ANALYTICS_DOMAIN', value: env.NTB_ANALYTICS_DOMAIN || '' },
+    { name: 'NTB_ANALYTICS_DSN', value: env.NTB_ANALYTICS_DSN || '' },
   ];
 }

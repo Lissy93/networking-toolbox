@@ -1,0 +1,96 @@
+---
+# Codacy Configuration File
+# https://docs.codacy.com/repositories-configure/codacy-configuration-file/
+
+comment:
+  enabled: false
+
+github_checks:
+  annotations: true
+
+file_extensions:
+  - ".ts"
+  - ".js"
+  - ".svelte"
+  - ".scss"
+  - ".css"
+
+duplication:
+  exclude_paths:
+    - "tests/**"
+
+engines:
+  eslint:
+    config_file: eslintrc.config.js
+
+# Exclude patterns - ignore test files and build artifacts from analysis
+exclude_paths:
+  - "tests/**"
+  - "**/*.test.ts"
+  - "**/*.test.js"
+  - "**/*.spec.ts"
+  - "**/*.spec.js"
+  - ".svelte-kit/**"
+  - "build/**"
+  - "dist/**"
+  - "coverage/**"
+  - "playwright-report/**"
+  - "node_modules/**"
+  - "**/*.config.ts"
+  - "**/*.config.js"
+  - "**/*.d.ts"
+  - "static/**"
+  - ".github/**"
+
+# Language-specific engines configuration
+engines:
+  # ESLint configuration (if you want to customize)
+  eslint:
+    enabled: true
+    exclude_paths:
+      - "tests/**"
+
+  # TypeScript/TSLint
+  tslint:
+    enabled: true
+    exclude_paths:
+      - "tests/**"
+
+# Additional configuration
+duplication:
+  enabled: true
+  exclude_paths:
+    - "tests/**"
+
+# Complexity and code style checks
+metrics:
+  enabled: true
+  exclude_paths:
+    - "tests/**"
+
+# Coverage configuration
+coverage:
+  # Enable coverage tracking
+  enabled: true
+
+  # Exclude test files from coverage reports
+  exclude_paths:
+    - "tests/**"
+    - "**/*.test.ts"
+    - "**/*.spec.ts"
+
+  # Coverage thresholds (optional but recommended)
+  status:
+    # Project-wide coverage threshold
+    project:
+      default:
+        enabled: true
+        target: 80%
+        threshold: 10%  # Allow 5% decrease
+
+    # Diff/patch coverage threshold (new code in PRs)
+    patch:
+      default:
+        enabled: true
+        target: 80%
+        threshold: 20%  # Allow 10% decrease for patches
