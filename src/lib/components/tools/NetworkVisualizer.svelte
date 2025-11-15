@@ -14,55 +14,44 @@
    * Generates visual representation of network range
    */
   function generateNetworkBlocks() {
-    const totalHosts = subnetInfo.hostCount;
-    const _usableHosts = subnetInfo.usableHosts;
-    const cidr = subnetInfo.cidr;
-
-    // For visualization, we'll show up to 256 blocks max
+    const { hostCount, cidr } = subnetInfo;
     const maxBlocks = 256;
-    const blocksToShow = Math.min(totalHosts, maxBlocks);
-    const blockSize = totalHosts > maxBlocks ? Math.ceil(totalHosts / maxBlocks) : 1;
+    const blocksToShow = Math.min(hostCount, maxBlocks);
+    const blockSize = hostCount > maxBlocks ? Math.ceil(hostCount / maxBlocks) : 1;
 
-    const blocks = [];
+    return Array.from({ length: blocksToShow }, (_, i) => {
+      const isFirst = i === 0;
+      const isLast = i === blocksToShow - 1;
 
-    // RFC 3021: /31 networks have no network/broadcast addresses
-    const is31Subnet = cidr === 31;
-    const is32Subnet = cidr === 32;
-
-    for (let i = 0; i < blocksToShow; i++) {
-      let type: 'network' | 'broadcast' | 'usable';
-      let tooltip: string;
-
-      if (is31Subnet) {
-        // /31: Both IPs are usable hosts (point-to-point)
-        type = 'usable';
-        tooltip = i === 0 ? 'Usable Host 1 (P2P)' : 'Usable Host 2 (P2P)';
-      } else if (is32Subnet) {
-        // /32: Single host
-        type = 'usable';
-        tooltip = 'Single Host';
-      } else {
-        // Normal subnet: first is network, last is broadcast, rest are usable
-        const isNetwork = i === 0;
-        const isBroadcast = i === blocksToShow - 1 && totalHosts > 2;
-
-        type = isNetwork ? 'network' : isBroadcast ? 'broadcast' : 'usable';
-        tooltip = isNetwork
-          ? 'Network Address'
-          : isBroadcast
-            ? 'Broadcast Address'
-            : `Usable Host${blockSize > 1 ? 's' : ''}`;
+      // RFC 3021: /31 and /32 have all IPs usable
+      if (cidr === 31) {
+        return {
+          id: i,
+          type: 'usable' as const,
+          represents: blockSize,
+          tooltip: isFirst ? 'Usable Host 1 (P2P)' : 'Usable Host 2 (P2P)',
+        };
       }
 
-      blocks.push({
-        id: i,
-        type,
-        represents: blockSize,
-        tooltip,
-      });
-    }
+      if (cidr === 32) {
+        return {
+          id: i,
+          type: 'usable' as const,
+          represents: blockSize,
+          tooltip: 'Single Host',
+        };
+      }
 
-    return blocks;
+      // Normal subnets have network/broadcast reserved
+      const type = isFirst ? 'network' : isLast && hostCount > 2 ? 'broadcast' : 'usable';
+      const tooltip = isFirst
+        ? 'Network Address'
+        : isLast && hostCount > 2
+          ? 'Broadcast Address'
+          : `Usable Host${blockSize > 1 ? 's' : ''}`;
+
+      return { id: i, type, represents: blockSize, tooltip };
+    });
   }
 
   let networkBlocks = $derived(generateNetworkBlocks());

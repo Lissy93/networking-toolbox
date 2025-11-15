@@ -74,33 +74,17 @@ export function calculateSubnet(ip: string, cidr: number): SubnetInfo {
   const hostBits = 32 - cidr;
   const hostCount = Math.pow(2, hostBits);
 
-  // Calculate usable hosts based on CIDR
-  // RFC 3021: /31 has 2 usable hosts (point-to-point, no network/broadcast)
-  // /32 has 1 usable host (single host route)
-  // All others: total - 2 (excluding network and broadcast)
-  let usableHosts: number;
-  if (cidr === 32) {
-    usableHosts = 1;
-  } else if (cidr === 31) {
-    usableHosts = 2; // Both IPs are usable for point-to-point links
-  } else {
-    usableHosts = hostCount - 2;
-  }
+  // RFC 3021: /31 point-to-point has both IPs usable, /32 is single host
+  const usableHosts = cidr === 32 ? 1 : cidr === 31 ? 2 : hostCount - 2;
 
-  // Calculate first and last host based on CIDR
+  // For /31 and /32, all IPs are usable (no reserved network/broadcast)
   let firstHost: IPAddress;
   let lastHost: IPAddress;
 
-  if (cidr === 32) {
-    // Host route - first and last are the same
+  if (cidr >= 31) {
     firstHost = network;
-    lastHost = network;
-  } else if (cidr === 31) {
-    // Point-to-point - use network and broadcast as hosts (RFC 3021)
-    firstHost = network;
-    lastHost = broadcast;
+    lastHost = cidr === 32 ? network : broadcast;
   } else {
-    // Normal subnet - exclude network and broadcast
     firstHost = numberToIP(ipToNumber(network.octets.join('.')) + 1);
     lastHost = numberToIP(ipToNumber(broadcast.octets.join('.')) - 1);
   }
