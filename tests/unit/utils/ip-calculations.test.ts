@@ -186,4 +186,63 @@ describe('IP calculations core logic', () => {
       });
     });
   });
+
+  describe('/31 point-to-point subnet (RFC 3021)', () => {
+    it('reports 2 usable hosts for /31 subnet', () => {
+      const subnet = calculateSubnetInfo('192.168.1.0', 31);
+      expect(subnet.usableHosts).toBe(2);
+      expect(subnet.hostCount).toBe(2);
+    });
+
+    it('uses network address as first usable host', () => {
+      const subnet = calculateSubnetInfo('10.0.0.0', 31);
+      expect(subnet.firstHost.octets).toEqual([10, 0, 0, 0]);
+    });
+
+    it('uses broadcast address as second usable host', () => {
+      const subnet = calculateSubnetInfo('10.0.0.0', 31);
+      expect(subnet.lastHost.octets).toEqual([10, 0, 0, 1]);
+    });
+
+    it('calculates correct network and broadcast for /31', () => {
+      const subnet = calculateSubnetInfo('172.16.0.10', 31);
+      // Network should be even address
+      expect(subnet.network.octets).toEqual([172, 16, 0, 10]);
+      // Broadcast should be odd address (network + 1)
+      expect(subnet.broadcast.octets).toEqual([172, 16, 0, 11]);
+    });
+
+    it('handles multiple /31 subnets in same range', () => {
+      const subnet1 = calculateSubnetInfo('192.168.1.0', 31);
+      const subnet2 = calculateSubnetInfo('192.168.1.2', 31);
+      const subnet3 = calculateSubnetInfo('192.168.1.4', 31);
+
+      // First /31: .0 and .1
+      expect(subnet1.firstHost.octets[3]).toBe(0);
+      expect(subnet1.lastHost.octets[3]).toBe(1);
+
+      // Second /31: .2 and .3
+      expect(subnet2.firstHost.octets[3]).toBe(2);
+      expect(subnet2.lastHost.octets[3]).toBe(3);
+
+      // Third /31: .4 and .5
+      expect(subnet3.firstHost.octets[3]).toBe(4);
+      expect(subnet3.lastHost.octets[3]).toBe(5);
+    });
+
+    it('reports 100% address utilization for /31', () => {
+      const subnet = calculateSubnetInfo('192.168.1.0', 31);
+      const utilization = (subnet.usableHosts / subnet.hostCount) * 100;
+      expect(utilization).toBe(100);
+    });
+
+    it('correctly identifies both IPs as usable in /31', () => {
+      const subnet = calculateSubnetInfo('203.0.113.0', 31);
+
+      // Both the network and broadcast addresses are usable
+      expect(subnet.firstHost.octets).toEqual(subnet.network.octets);
+      expect(subnet.lastHost.octets).toEqual(subnet.broadcast.octets);
+      expect(subnet.usableHosts).toBe(2);
+    });
+  });
 });

@@ -16,6 +16,7 @@
   function generateNetworkBlocks() {
     const totalHosts = subnetInfo.hostCount;
     const _usableHosts = subnetInfo.usableHosts;
+    const cidr = subnetInfo.cidr;
 
     // For visualization, we'll show up to 256 blocks max
     const maxBlocks = 256;
@@ -24,20 +25,40 @@
 
     const blocks = [];
 
-    for (let i = 0; i < blocksToShow; i++) {
-      const isNetwork = i === 0;
-      const isBroadcast = i === blocksToShow - 1 && totalHosts > 2;
-      const _isUsable = !isNetwork && !isBroadcast;
+    // RFC 3021: /31 networks have no network/broadcast addresses
+    const is31Subnet = cidr === 31;
+    const is32Subnet = cidr === 32;
 
-      blocks.push({
-        id: i,
-        type: isNetwork ? 'network' : isBroadcast ? 'broadcast' : 'usable',
-        represents: blockSize,
-        tooltip: isNetwork
+    for (let i = 0; i < blocksToShow; i++) {
+      let type: 'network' | 'broadcast' | 'usable';
+      let tooltip: string;
+
+      if (is31Subnet) {
+        // /31: Both IPs are usable hosts (point-to-point)
+        type = 'usable';
+        tooltip = i === 0 ? 'Usable Host 1 (P2P)' : 'Usable Host 2 (P2P)';
+      } else if (is32Subnet) {
+        // /32: Single host
+        type = 'usable';
+        tooltip = 'Single Host';
+      } else {
+        // Normal subnet: first is network, last is broadcast, rest are usable
+        const isNetwork = i === 0;
+        const isBroadcast = i === blocksToShow - 1 && totalHosts > 2;
+
+        type = isNetwork ? 'network' : isBroadcast ? 'broadcast' : 'usable';
+        tooltip = isNetwork
           ? 'Network Address'
           : isBroadcast
             ? 'Broadcast Address'
-            : `Usable Host${blockSize > 1 ? 's' : ''}`,
+            : `Usable Host${blockSize > 1 ? 's' : ''}`;
+      }
+
+      blocks.push({
+        id: i,
+        type,
+        represents: blockSize,
+        tooltip,
       });
     }
 
