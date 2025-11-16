@@ -64,17 +64,7 @@ function loadCustomFont(fontConfig: { name: string; url: string; fallback?: stri
           if (fontLoaded) {
             document.documentElement.classList.remove('fonts-loading');
             document.documentElement.classList.add('fonts-loaded');
-            logger.debug(`Font loaded successfully: ${fontFamily}`, {
-              font: fontFamily,
-              component: 'ThemeStore',
-            });
           } else {
-            // Font stylesheet loaded but font not available yet
-            logger.debug(`Font stylesheet loaded, waiting for font: ${fontFamily}`, {
-              font: fontFamily,
-              component: 'ThemeStore',
-            });
-
             // Set a timeout fallback (3 seconds)
             setTimeout(() => {
               document.documentElement.classList.remove('fonts-loading');
