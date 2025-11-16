@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
+  import { t } from '$lib/stores/language';
 
   interface DMARCPolicy {
     version: 'DMARC1';
@@ -35,23 +36,23 @@
   // Button success states
   let buttonStates = $state<Record<string, boolean>>({});
 
-  const policyDescriptions = {
-    none: 'Monitor only - no action taken on failed emails',
-    quarantine: 'Failed emails sent to spam/junk folder',
-    reject: 'Failed emails rejected at SMTP level',
-  };
+  const policyDescriptions = $derived({
+    none: $t('tools/dmarc-builder.policy.types.none.description'),
+    quarantine: $t('tools/dmarc-builder.policy.types.quarantine.description'),
+    reject: $t('tools/dmarc-builder.policy.types.reject.description'),
+  });
 
-  const alignmentDescriptions = {
-    r: 'Relaxed - domain and subdomains match',
-    s: 'Strict - exact domain match only',
-  };
+  const alignmentDescriptions = $derived({
+    r: $t('tools/dmarc-builder.advanced.alignment.relaxed.description'),
+    s: $t('tools/dmarc-builder.advanced.alignment.strict.description'),
+  });
 
-  const failureOptionDescriptions = {
-    '0': 'Generate reports if both SPF and DKIM fail',
-    '1': 'Generate reports if either SPF or DKIM fail',
-    d: 'Generate reports if DKIM fails',
-    s: 'Generate reports if SPF fails',
-  };
+  const failureOptionDescriptions = $derived({
+    '0': $t('tools/dmarc-builder.advanced.failureOptions.options.0'),
+    '1': $t('tools/dmarc-builder.advanced.failureOptions.options.1'),
+    d: $t('tools/dmarc-builder.advanced.failureOptions.options.d'),
+    s: $t('tools/dmarc-builder.advanced.failureOptions.options.s'),
+  });
 
   const dmarcRecord = $derived.by(() => {
     let record = `v=${policy.version}; p=${policy.policy}`;
@@ -101,40 +102,40 @@
 
     // Check domain format
     if (!domain.trim()) {
-      errors.push('Domain is required');
+      errors.push($t('tools/dmarc-builder.validation.errors.domainRequired'));
     } else if (!domain.includes('.')) {
-      warnings.push('Domain should include TLD (e.g., .com, .org)');
+      warnings.push($t('tools/dmarc-builder.validation.warnings.domainNoTLD'));
     }
 
     // Policy progression warnings
     if (policy.policy === 'reject' && !policy.reportingURI) {
-      warnings.push('Consider adding reporting URI before using reject policy');
+      warnings.push($t('tools/dmarc-builder.validation.warnings.rejectNeedsReporting'));
     }
 
     if (policy.policy === 'none' && policy.percentage < 100) {
-      warnings.push('Percentage should be 100% for monitoring-only policy');
+      warnings.push($t('tools/dmarc-builder.validation.warnings.noneWithPercentage'));
     }
 
     // Alignment warnings
     if (policy.dkimAlignment === 's' && policy.spfAlignment === 's') {
-      warnings.push('Strict alignment for both SPF and DKIM may cause legitimate emails to fail');
+      warnings.push($t('tools/dmarc-builder.validation.warnings.strictAlignment'));
     }
 
     // Reporting warnings
     if (policy.reportingURI && !policy.reportingURI.includes('@')) {
-      errors.push('Reporting URI must be a valid email address');
+      errors.push($t('tools/dmarc-builder.validation.errors.reportingEmail'));
     }
 
     if (policy.forensicURI && !policy.forensicURI.includes('@')) {
-      errors.push('Forensic URI must be a valid email address');
+      errors.push($t('tools/dmarc-builder.validation.errors.forensicEmail'));
     }
 
     // Record length check
     const recordLength = dmarcRecord.length;
     if (recordLength > 255) {
-      errors.push(`DMARC record too long (${recordLength} chars). DNS TXT limit is 255.`);
+      errors.push($t('tools/dmarc-builder.validation.errors.recordTooLong', { length: recordLength }));
     } else if (recordLength > 200) {
-      warnings.push(`DMARC record is long (${recordLength} chars). Consider shortening.`);
+      warnings.push($t('tools/dmarc-builder.validation.warnings.recordLong', { length: recordLength }));
     }
 
     return {
@@ -179,10 +180,10 @@
     }
   }
 
-  const examplePolicies = [
+  const examplePolicies = $derived([
     {
-      name: 'Monitor Only',
-      description: 'Start monitoring without affecting email delivery',
+      name: $t('tools/dmarc-builder.examples.monitor.name'),
+      description: $t('tools/dmarc-builder.examples.monitor.description'),
       domain: 'example.com',
       config: {
         policy: 'none' as const,
@@ -194,8 +195,8 @@
       },
     },
     {
-      name: 'Quarantine Phase',
-      description: 'Move suspicious emails to spam folder',
+      name: $t('tools/dmarc-builder.examples.quarantine.name'),
+      description: $t('tools/dmarc-builder.examples.quarantine.description'),
       domain: 'mycompany.com',
       config: {
         policy: 'quarantine' as const,
@@ -207,8 +208,8 @@
       },
     },
     {
-      name: 'Full Protection',
-      description: 'Reject all failing emails with forensics',
+      name: $t('tools/dmarc-builder.examples.fullProtection.name'),
+      description: $t('tools/dmarc-builder.examples.fullProtection.description'),
       domain: 'secure.example.com',
       config: {
         policy: 'reject' as const,
@@ -221,7 +222,7 @@
         failureOptions: ['1' as const],
       },
     },
-  ];
+  ]);
 
   function loadExample(example: (typeof examplePolicies)[0]): void {
     domain = example.domain;
@@ -233,22 +234,14 @@
     selectedExample = example.name;
   }
 
-  const deploymentSteps = [
-    'Start with p=none to monitor current email authentication status',
-    'Analyze DMARC reports to identify legitimate vs malicious sources',
-    'Configure SPF and DKIM for all legitimate sending sources',
-    'Gradually increase to p=quarantine with low percentage (pct=25)',
-    'Monitor for false positives and adjust alignment if needed',
-    'Increase percentage gradually (50%, 75%, 100%)',
-    'Finally move to p=reject when confident in configuration',
-  ];
+  const deploymentSteps = $derived($t('tools/dmarc-builder.deployment.steps'));
 </script>
 
 <div class="card">
   <div class="card-header">
-    <h1>DMARC Policy Builder</h1>
+    <h1>{$t('tools/dmarc-builder.title')}</h1>
     <p class="card-subtitle">
-      Create DMARC policies with alignment options, reporting addresses, and failure handling configuration.
+      {$t('tools/dmarc-builder.description')}
     </p>
   </div>
 
@@ -258,13 +251,20 @@
         <div class="section-header">
           <h3>
             <Icon name="globe" size="sm" />
-            Domain Configuration
+            {$t('tools/dmarc-builder.domain.title')}
           </h3>
         </div>
 
         <div class="input-group">
-          <label for="domain" use:tooltip={'Domain that this DMARC policy will protect'}> Domain: </label>
-          <input id="domain" type="text" bind:value={domain} placeholder="example.com" />
+          <label for="domain" use:tooltip={$t('tools/dmarc-builder.domain.tooltip')}>
+            {$t('tools/dmarc-builder.domain.label')}
+          </label>
+          <input
+            id="domain"
+            type="text"
+            bind:value={domain}
+            placeholder={$t('tools/dmarc-builder.domain.placeholder')}
+          />
         </div>
       </div>
 
@@ -272,19 +272,19 @@
         <div class="section-header">
           <h3>
             <Icon name="shield" size="sm" />
-            Policy Configuration
+            {$t('tools/dmarc-builder.policy.title')}
           </h3>
         </div>
 
         <div class="policy-grid">
           <div class="input-group">
-            <label for="policy" use:tooltip={'Action to take for emails that fail DMARC authentication'}>
-              Policy (p):
+            <label for="policy" use:tooltip={$t('tools/dmarc-builder.policy.mainTooltip')}>
+              {$t('tools/dmarc-builder.policy.mainLabel')}
             </label>
             <select id="policy" bind:value={policy.policy}>
-              <option value="none">none - Monitor only</option>
-              <option value="quarantine">quarantine - Send to spam</option>
-              <option value="reject">reject - Block email</option>
+              <option value="none">{$t('tools/dmarc-builder.policy.types.none.label')}</option>
+              <option value="quarantine">{$t('tools/dmarc-builder.policy.types.quarantine.label')}</option>
+              <option value="reject">{$t('tools/dmarc-builder.policy.types.reject.label')}</option>
             </select>
             <div class="policy-description">
               {policyDescriptions[policy.policy]}
@@ -292,11 +292,8 @@
           </div>
 
           <div class="input-group">
-            <label
-              for="percentage"
-              use:tooltip={'Percentage of failing emails to apply policy to (useful for gradual deployment)'}
-            >
-              Percentage (pct):
+            <label for="percentage" use:tooltip={$t('tools/dmarc-builder.policy.percentageTooltip')}>
+              {$t('tools/dmarc-builder.policy.percentageLabel')}
             </label>
             <div class="percentage-input">
               <input id="percentage" type="range" bind:value={policy.percentage} min="0" max="100" step="5" />
@@ -308,33 +305,33 @@
         <details class="advanced-toggle" bind:open={showAdvanced}>
           <summary>
             <Icon name="settings" size="sm" />
-            Advanced Options
+            {$t('tools/dmarc-builder.advanced.title')}
           </summary>
 
           <div class="advanced-grid">
             <div class="input-group">
-              <label for="subdomainPolicy" use:tooltip={'Policy for subdomains (inherits main policy if not set)'}>
-                Subdomain Policy (sp):
+              <label for="subdomainPolicy" use:tooltip={$t('tools/dmarc-builder.policy.subdomainTooltip')}>
+                {$t('tools/dmarc-builder.policy.subdomainLabel')}
               </label>
               <select id="subdomainPolicy" bind:value={policy.subdomainPolicy}>
-                <option value={undefined}>Inherit from main policy</option>
-                <option value="none">none - Monitor only</option>
-                <option value="quarantine">quarantine - Send to spam</option>
-                <option value="reject">reject - Block email</option>
+                <option value={undefined}>{$t('tools/dmarc-builder.policy.subdomainInherit')}</option>
+                <option value="none">{$t('tools/dmarc-builder.policy.types.none.label')}</option>
+                <option value="quarantine">{$t('tools/dmarc-builder.policy.types.quarantine.label')}</option>
+                <option value="reject">{$t('tools/dmarc-builder.policy.types.reject.label')}</option>
               </select>
             </div>
 
             <div class="alignment-section">
-              <h4>Authentication Alignment</h4>
+              <h4>{$t('tools/dmarc-builder.advanced.alignment.title')}</h4>
 
               <div class="alignment-grid">
                 <div class="input-group">
-                  <label for="dkimAlignment" use:tooltip={'How strictly DKIM signature domain must match From domain'}>
-                    DKIM Alignment (adkim):
+                  <label for="dkimAlignment" use:tooltip={$t('tools/dmarc-builder.advanced.alignment.dkimTooltip')}>
+                    {$t('tools/dmarc-builder.advanced.alignment.dkimLabel')}
                   </label>
                   <select id="dkimAlignment" bind:value={policy.dkimAlignment}>
-                    <option value="r">r - Relaxed</option>
-                    <option value="s">s - Strict</option>
+                    <option value="r">{$t('tools/dmarc-builder.advanced.alignment.relaxed.label')}</option>
+                    <option value="s">{$t('tools/dmarc-builder.advanced.alignment.strict.label')}</option>
                   </select>
                   <div class="alignment-description">
                     {alignmentDescriptions[policy.dkimAlignment]}
@@ -342,12 +339,12 @@
                 </div>
 
                 <div class="input-group">
-                  <label for="spfAlignment" use:tooltip={'How strictly SPF domain must match From domain'}>
-                    SPF Alignment (aspf):
+                  <label for="spfAlignment" use:tooltip={$t('tools/dmarc-builder.advanced.alignment.spfTooltip')}>
+                    {$t('tools/dmarc-builder.advanced.alignment.spfLabel')}
                   </label>
                   <select id="spfAlignment" bind:value={policy.spfAlignment}>
-                    <option value="r">r - Relaxed</option>
-                    <option value="s">s - Strict</option>
+                    <option value="r">{$t('tools/dmarc-builder.advanced.alignment.relaxed.label')}</option>
+                    <option value="s">{$t('tools/dmarc-builder.advanced.alignment.strict.label')}</option>
                   </select>
                   <div class="alignment-description">
                     {alignmentDescriptions[policy.spfAlignment]}
@@ -357,51 +354,53 @@
             </div>
 
             <div class="reporting-section">
-              <h4>Reporting Configuration</h4>
+              <h4>{$t('tools/dmarc-builder.advanced.reporting.title')}</h4>
 
               <div class="reporting-grid">
                 <div class="input-group">
-                  <label for="reportingURI" use:tooltip={'Email address to receive aggregate DMARC reports'}>
-                    Reporting Email (rua):
+                  <label for="reportingURI" use:tooltip={$t('tools/dmarc-builder.advanced.reporting.aggregateTooltip')}>
+                    {$t('tools/dmarc-builder.advanced.reporting.aggregateLabel')}
                   </label>
                   <input
                     id="reportingURI"
                     type="email"
                     bind:value={policy.reportingURI}
-                    placeholder="dmarc@example.com"
+                    placeholder={$t('tools/dmarc-builder.advanced.reporting.aggregatePlaceholder')}
                   />
                 </div>
 
                 <div class="input-group">
-                  <label
-                    for="forensicURI"
-                    use:tooltip={'Email address to receive forensic failure reports (detailed samples)'}
-                  >
-                    Forensic Email (ruf):
+                  <label for="forensicURI" use:tooltip={$t('tools/dmarc-builder.advanced.reporting.forensicTooltip')}>
+                    {$t('tools/dmarc-builder.advanced.reporting.forensicLabel')}
                   </label>
                   <input
                     id="forensicURI"
                     type="email"
                     bind:value={policy.forensicURI}
-                    placeholder="forensic@example.com"
+                    placeholder={$t('tools/dmarc-builder.advanced.reporting.forensicPlaceholder')}
                   />
                 </div>
 
                 <div class="input-group">
-                  <label for="reportInterval" use:tooltip={'How often aggregate reports are sent (in seconds)'}>
-                    Report Interval (ri):
+                  <label
+                    for="reportInterval"
+                    use:tooltip={$t('tools/dmarc-builder.advanced.reporting.intervalTooltip')}
+                  >
+                    {$t('tools/dmarc-builder.advanced.reporting.intervalLabel')}
                   </label>
                   <select id="reportInterval" bind:value={policy.reportInterval}>
-                    <option value={3600}>1 hour</option>
-                    <option value={86400}>24 hours (daily)</option>
-                    <option value={604800}>7 days (weekly)</option>
+                    <option value={3600}>{$t('tools/dmarc-builder.advanced.reporting.intervals.hourly')}</option>
+                    <option value={86400}>{$t('tools/dmarc-builder.advanced.reporting.intervals.daily')}</option>
+                    <option value={604800}>{$t('tools/dmarc-builder.advanced.reporting.intervals.weekly')}</option>
                   </select>
                 </div>
               </div>
             </div>
 
             <div class="failure-options-section">
-              <h4 use:tooltip={'When to generate forensic failure reports'}>Failure Reporting Options (fo):</h4>
+              <h4 use:tooltip={$t('tools/dmarc-builder.advanced.failureOptions.tooltip')}>
+                {$t('tools/dmarc-builder.advanced.failureOptions.title')}
+              </h4>
 
               <div class="failure-options">
                 {#each Object.entries(failureOptionDescriptions) as [option, description] (option)}
@@ -425,27 +424,31 @@
     <div class="results-section">
       <div class="record-section">
         <div class="section-header">
-          <h3>Generated DMARC Record</h3>
+          <h3>{$t('tools/dmarc-builder.output.title')}</h3>
           <div class="actions">
             <button
               type="button"
               class="copy-btn"
               class:success={buttonStates['copy-dmarc']}
               onclick={() => copyToClipboard(dmarcRecord, 'copy-dmarc')}
-              use:tooltip={'Copy DMARC record to clipboard'}
+              use:tooltip={$t('tools/dmarc-builder.output.copyTooltip')}
             >
               <Icon name={buttonStates['copy-dmarc'] ? 'check' : 'copy'} size="sm" />
-              {buttonStates['copy-dmarc'] ? 'Copied!' : 'Copy'}
+              {buttonStates['copy-dmarc']
+                ? $t('tools/dmarc-builder.output.copied')
+                : $t('tools/dmarc-builder.output.copyButton')}
             </button>
             <button
               type="button"
               class="export-btn"
               class:success={buttonStates['export-zone']}
               onclick={exportAsZoneFile}
-              use:tooltip={'Download as zone file'}
+              use:tooltip={$t('tools/dmarc-builder.output.exportTooltip')}
             >
               <Icon name={buttonStates['export-zone'] ? 'check' : 'download'} size="sm" />
-              {buttonStates['export-zone'] ? 'Downloaded!' : 'Export'}
+              {buttonStates['export-zone']
+                ? $t('tools/dmarc-builder.output.downloaded')
+                : $t('tools/dmarc-builder.output.exportButton')}
             </button>
           </div>
         </div>
@@ -457,7 +460,7 @@
         </div>
 
         <div class="zone-file-output">
-          <h4>DNS TXT Record:</h4>
+          <h4>{$t('tools/dmarc-builder.output.txtRecordLabel')}</h4>
           <div class="code-block">
             <code>{txtRecord}</code>
           </div>
@@ -468,13 +471,13 @@
         <div class="section-header">
           <h3>
             <Icon name="bar-chart" size="sm" />
-            Policy Validation
+            {$t('tools/dmarc-builder.validation.title')}
           </h3>
         </div>
 
         <div class="validation-stats">
           <div class="stat-item">
-            <span class="stat-label">Record Length:</span>
+            <span class="stat-label">{$t('tools/dmarc-builder.validation.recordLengthLabel')}</span>
             <span
               class="stat-value"
               class:warning={validation.recordLength > 200}
@@ -484,9 +487,11 @@
             </span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">Status:</span>
+            <span class="stat-label">{$t('tools/dmarc-builder.validation.statusLabel')}</span>
             <span class="stat-value" class:success={validation.isValid} class:error={!validation.isValid}>
-              {validation.isValid ? 'Valid' : 'Invalid'}
+              {validation.isValid
+                ? $t('tools/dmarc-builder.validation.valid')
+                : $t('tools/dmarc-builder.validation.invalid')}
             </span>
           </div>
         </div>
@@ -516,7 +521,7 @@
         {#if validation.isValid && validation.errors.length === 0 && validation.warnings.length === 0}
           <div class="validation-messages success">
             <Icon name="check-circle" size="sm" />
-            <div class="message">DMARC policy is valid and ready to deploy!</div>
+            <div class="message">{$t('tools/dmarc-builder.validation.success')}</div>
           </div>
         {/if}
       </div>
@@ -525,7 +530,7 @@
         <div class="section-header">
           <h3>
             <Icon name="info" size="sm" />
-            Deployment Guide
+            {$t('tools/dmarc-builder.deployment.title')}
           </h3>
         </div>
 
@@ -550,7 +555,7 @@
     <details class="examples-toggle">
       <summary>
         <Icon name="lightbulb" size="sm" />
-        Example Policies
+        {$t('tools/dmarc-builder.examples.title')}
       </summary>
       <div class="examples-grid">
         {#each examplePolicies as example (example.name)}
@@ -565,10 +570,10 @@
             </div>
             <p class="example-description">{example.description}</p>
             <div class="example-config">
-              <div>Policy: <code>{example.config.policy}</code></div>
-              <div>Percentage: <code>{example.config.percentage}%</code></div>
+              <div>{$t('tools/dmarc-builder.examples.policyLabel')} <code>{example.config.policy}</code></div>
+              <div>{$t('tools/dmarc-builder.examples.percentageLabel')} <code>{example.config.percentage}%</code></div>
               {#if example.config.reportingURI}
-                <div>Reports: <code>{example.config.reportingURI}</code></div>
+                <div>{$t('tools/dmarc-builder.examples.reportsLabel')} <code>{example.config.reportingURI}</code></div>
               {/if}
             </div>
           </button>

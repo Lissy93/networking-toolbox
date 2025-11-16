@@ -13,6 +13,7 @@
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables/useClipboard.svelte';
   import { tooltip } from '$lib/actions/tooltip';
+  import { t } from '$lib/stores/language';
 
   const clipboard = useClipboard();
 
@@ -32,10 +33,10 @@
   let decodeResult = $state<any>(null);
   let decodeError = $state<string>('');
 
-  const navOptions = [
-    { value: 'build', label: 'Build Options' },
-    { value: 'decode', label: 'Decode Options' },
-  ];
+  const navOptions = $derived([
+    { value: 'build', label: $t('tools/dhcp-options-6-15.nav.build') },
+    { value: 'decode', label: $t('tools/dhcp-options-6-15.nav.decode') },
+  ]);
 
   const decodeExamples = [
     {
@@ -152,8 +153,8 @@
 </script>
 
 <ToolContentContainer
-  title="DHCP Options 6 & 15 - DNS Servers and Domain"
-  description="Option 6 specifies DNS servers for name resolution, while Option 15 provides the domain name for client hostname resolution. These options work together for complete DNS configuration."
+  title={$t('tools/dhcp-options-6-15.title')}
+  description={$t('tools/dhcp-options-6-15.subtitle')}
   {navOptions}
   bind:selectedNav={activeTab}
 >
@@ -166,30 +167,45 @@
     />
 
     <div class="card input-card">
-      <h3>DNS Configuration</h3>
+      <h3>{$t('tools/dhcp-options-6-15.build.title')}</h3>
 
       <fieldset class="form-group">
-        <legend>DNS Servers (Option 6)</legend>
+        <legend>{$t('tools/dhcp-options-6-15.build.dnsServers.legend')}</legend>
         {#each dnsServers as _server, i (i)}
           <div class="server-row">
-            <input type="text" bind:value={dnsServers[i]} placeholder="e.g., 8.8.8.8" class="input" />
+            <input
+              type="text"
+              bind:value={dnsServers[i]}
+              placeholder={$t('tools/dhcp-options-6-15.build.dnsServers.placeholder')}
+              class="input"
+            />
             {#if dnsServers.length > 1}
-              <button class="btn btn-danger btn-sm" onclick={() => removeDNSServer(i)}>Remove</button>
+              <button class="btn btn-danger btn-sm" onclick={() => removeDNSServer(i)}
+                >{$t('tools/dhcp-options-6-15.build.dnsServers.removeButton')}</button
+              >
             {/if}
           </div>
         {/each}
-        <button class="btn btn-secondary btn-sm" onclick={addDNSServer}>Add DNS Server</button>
+        <button class="btn btn-secondary btn-sm" onclick={addDNSServer}
+          >{$t('tools/dhcp-options-6-15.build.dnsServers.addButton')}</button
+        >
       </fieldset>
 
       <div class="form-group">
-        <label for="domain-name">Domain Name (Option 15)</label>
-        <input id="domain-name" type="text" bind:value={domainName} placeholder="e.g., example.com" class="input" />
-        <span class="hint">Domain name for client hostname resolution</span>
+        <label for="domain-name">{$t('tools/dhcp-options-6-15.build.domainName.label')}</label>
+        <input
+          id="domain-name"
+          type="text"
+          bind:value={domainName}
+          placeholder={$t('tools/dhcp-options-6-15.build.domainName.placeholder')}
+          class="input"
+        />
+        <span class="hint">{$t('tools/dhcp-options-6-15.build.domainName.hint')}</span>
       </div>
 
       {#if buildErrors.length > 0}
         <div class="error-card">
-          <strong>Validation Errors:</strong>
+          <strong>{$t('tools/dhcp-options-6-15.build.validationErrors')}</strong>
           <ul>
             {#each buildErrors as error, i (i)}
               <li>{error}</li>
@@ -201,14 +217,14 @@
 
     {#if buildResult}
       <div class="card result-card">
-        <h3>DHCP DNS Options</h3>
+        <h3>{$t('tools/dhcp-options-6-15.results.title')}</h3>
 
         {#if buildResult.option6}
           <div class="option-section">
-            <h4>Option 6 - DNS Servers</h4>
+            <h4>{$t('tools/dhcp-options-6-15.results.option6.title')}</h4>
             <div class="result-grid">
               <div class="result-item">
-                <span class="label">DNS Servers:</span>
+                <span class="label">{$t('tools/dhcp-options-6-15.results.option6.servers')}</span>
                 <div class="servers-list">
                   {#each buildResult.option6.servers as srv, i (i)}
                     <span class="server-badge">{srv}</span>
@@ -217,34 +233,42 @@
               </div>
 
               <div class="result-item">
-                <span class="label">Hex Encoded:</span>
+                <span class="label">{$t('tools/dhcp-options-6-15.results.option6.hexEncoded')}</span>
                 <code class="code-value">{buildResult.option6.hexEncoded}</code>
                 <button
                   class="btn-copy"
                   class:copied={clipboard.isCopied('option6-hex')}
                   onclick={() => clipboard.copy(buildResult!.option6!.hexEncoded, 'option6-hex')}
-                  aria-label="Copy hex"
+                  aria-label={$t('tools/dhcp-options-6-15.results.copyHexLabel')}
                 >
-                  {clipboard.isCopied('option6-hex') ? 'Copied' : 'Copy'}
+                  {clipboard.isCopied('option6-hex')
+                    ? $t('tools/dhcp-options-6-15.results.copiedButton')
+                    : $t('tools/dhcp-options-6-15.results.copyButton')}
                 </button>
               </div>
 
               <div class="result-item">
-                <span class="label">Wire Format:</span>
+                <span class="label">{$t('tools/dhcp-options-6-15.results.option6.wireFormat')}</span>
                 <code class="code-value">{buildResult.option6.wireFormat}</code>
                 <button
                   class="btn-copy"
                   class:copied={clipboard.isCopied('option6-wire')}
                   onclick={() => clipboard.copy(buildResult!.option6!.wireFormat, 'option6-wire')}
-                  aria-label="Copy wire format"
+                  aria-label={$t('tools/dhcp-options-6-15.results.copyWireLabel')}
                 >
-                  {clipboard.isCopied('option6-wire') ? 'Copied' : 'Copy'}
+                  {clipboard.isCopied('option6-wire')
+                    ? $t('tools/dhcp-options-6-15.results.copiedButton')
+                    : $t('tools/dhcp-options-6-15.results.copyButton')}
                 </button>
               </div>
 
               <div class="result-item">
-                <span class="label">Total Length:</span>
-                <span class="value">{buildResult.option6.totalLength} bytes</span>
+                <span class="label">{$t('tools/dhcp-options-6-15.results.option6.totalLength')}</span>
+                <span class="value"
+                  >{$t('tools/dhcp-options-6-15.results.option6.bytes', {
+                    length: buildResult.option6.totalLength,
+                  })}</span
+                >
               </div>
             </div>
           </div>
@@ -252,59 +276,69 @@
 
         {#if buildResult.option15}
           <div class="option-section">
-            <h4>Option 15 - Domain Name</h4>
+            <h4>{$t('tools/dhcp-options-6-15.results.option15.title')}</h4>
             <div class="result-grid">
               <div class="result-item">
-                <span class="label">Domain:</span>
+                <span class="label">{$t('tools/dhcp-options-6-15.results.option15.domain')}</span>
                 <span class="value">{buildResult.option15.domain}</span>
               </div>
 
               <div class="result-item">
-                <span class="label">Hex Encoded:</span>
+                <span class="label">{$t('tools/dhcp-options-6-15.results.option15.hexEncoded')}</span>
                 <code class="code-value">{buildResult.option15.hexEncoded}</code>
                 <button
                   class="btn-copy"
                   class:copied={clipboard.isCopied('option15-hex')}
                   onclick={() => clipboard.copy(buildResult!.option15!.hexEncoded, 'option15-hex')}
-                  aria-label="Copy hex"
+                  aria-label={$t('tools/dhcp-options-6-15.results.copyHexLabel')}
                 >
-                  {clipboard.isCopied('option15-hex') ? 'Copied' : 'Copy'}
+                  {clipboard.isCopied('option15-hex')
+                    ? $t('tools/dhcp-options-6-15.results.copiedButton')
+                    : $t('tools/dhcp-options-6-15.results.copyButton')}
                 </button>
               </div>
 
               <div class="result-item">
-                <span class="label">Wire Format:</span>
+                <span class="label">{$t('tools/dhcp-options-6-15.results.option15.wireFormat')}</span>
                 <code class="code-value">{buildResult.option15.wireFormat}</code>
                 <button
                   class="btn-copy"
                   class:copied={clipboard.isCopied('option15-wire')}
                   onclick={() => clipboard.copy(buildResult!.option15!.wireFormat, 'option15-wire')}
-                  aria-label="Copy wire format"
+                  aria-label={$t('tools/dhcp-options-6-15.results.copyWireLabel')}
                 >
-                  {clipboard.isCopied('option15-wire') ? 'Copied' : 'Copy'}
+                  {clipboard.isCopied('option15-wire')
+                    ? $t('tools/dhcp-options-6-15.results.copiedButton')
+                    : $t('tools/dhcp-options-6-15.results.copyButton')}
                 </button>
               </div>
 
               <div class="result-item">
-                <span class="label">Total Length:</span>
-                <span class="value">{buildResult.option15.totalLength} bytes</span>
+                <span class="label">{$t('tools/dhcp-options-6-15.results.option15.totalLength')}</span>
+                <span class="value"
+                  >{$t('tools/dhcp-options-6-15.results.option15.bytes', {
+                    length: buildResult.option15.totalLength,
+                  })}</span
+                >
               </div>
             </div>
           </div>
         {/if}
 
         <div class="config-section">
-          <h4>Configuration Examples</h4>
+          <h4>{$t('tools/dhcp-options-6-15.results.config.title')}</h4>
 
           <div class="output-group">
             <div class="output-header">
-              <h5>ISC DHCPd</h5>
+              <h5>{$t('tools/dhcp-options-6-15.results.config.iscDhcpd')}</h5>
               <button
                 class="btn-copy"
                 class:copied={clipboard.isCopied('isc')}
                 onclick={() => clipboard.copy(buildResult!.configExamples.iscDhcpd, 'isc')}
               >
-                {clipboard.isCopied('isc') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('isc')
+                  ? $t('tools/dhcp-options-6-15.results.copiedButton')
+                  : $t('tools/dhcp-options-6-15.results.copyButton')}
               </button>
             </div>
             <pre class="code-block"><code>{buildResult.configExamples.iscDhcpd}</code></pre>
@@ -312,13 +346,15 @@
 
           <div class="output-group">
             <div class="output-header">
-              <h5>Kea DHCPv4</h5>
+              <h5>{$t('tools/dhcp-options-6-15.results.config.keaDhcp4')}</h5>
               <button
                 class="btn-copy"
                 class:copied={clipboard.isCopied('kea')}
                 onclick={() => clipboard.copy(buildResult!.configExamples.keaDhcp4, 'kea')}
               >
-                {clipboard.isCopied('kea') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('kea')
+                  ? $t('tools/dhcp-options-6-15.results.copiedButton')
+                  : $t('tools/dhcp-options-6-15.results.copyButton')}
               </button>
             </div>
             <pre class="code-block"><code>{buildResult.configExamples.keaDhcp4}</code></pre>
@@ -326,13 +362,15 @@
 
           <div class="output-group">
             <div class="output-header">
-              <h5>dnsmasq</h5>
+              <h5>{$t('tools/dhcp-options-6-15.results.config.dnsmasq')}</h5>
               <button
                 class="btn-copy"
                 class:copied={clipboard.isCopied('dnsmasq')}
                 onclick={() => clipboard.copy(buildResult!.configExamples.dnsmasq, 'dnsmasq')}
               >
-                {clipboard.isCopied('dnsmasq') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('dnsmasq')
+                  ? $t('tools/dhcp-options-6-15.results.copiedButton')
+                  : $t('tools/dhcp-options-6-15.results.copyButton')}
               </button>
             </div>
             <pre class="code-block"><code>{buildResult.configExamples.dnsmasq}</code></pre>
@@ -349,47 +387,47 @@
     />
 
     <div class="card input-card">
-      <h3>Decode DNS Options</h3>
+      <h3>{$t('tools/dhcp-options-6-15.decode.title')}</h3>
 
       <fieldset class="form-group">
-        <legend>Option to Decode</legend>
+        <legend>{$t('tools/dhcp-options-6-15.decode.optionSelect.legend')}</legend>
         <div class="option-select">
           <label
             class="radio-label"
             class:selected={decodeOption === 'option6'}
-            use:tooltip={{ text: 'Decode Option 6 to extract DNS server addresses from hex' }}
+            use:tooltip={{ text: $t('tools/dhcp-options-6-15.decode.optionSelect.option6Tooltip') }}
           >
             <input type="radio" bind:group={decodeOption} value="option6" />
-            <span class="radio-text">Option 6 - DNS Servers</span>
+            <span class="radio-text">{$t('tools/dhcp-options-6-15.decode.optionSelect.option6')}</span>
           </label>
           <label
             class="radio-label"
             class:selected={decodeOption === 'option15'}
-            use:tooltip={{ text: 'Decode Option 15 to extract domain name from hex' }}
+            use:tooltip={{ text: $t('tools/dhcp-options-6-15.decode.optionSelect.option15Tooltip') }}
           >
             <input type="radio" bind:group={decodeOption} value="option15" />
-            <span class="radio-text">Option 15 - Domain Name</span>
+            <span class="radio-text">{$t('tools/dhcp-options-6-15.decode.optionSelect.option15')}</span>
           </label>
         </div>
       </fieldset>
 
       <div class="form-group">
-        <label for="hex-input">Hex String</label>
+        <label for="hex-input">{$t('tools/dhcp-options-6-15.decode.hexInput.label')}</label>
         <textarea
           id="hex-input"
           bind:value={hexInput}
           placeholder={decodeOption === 'option6'
-            ? 'e.g., 08080808 or 08 08 08 08 08 08 04 04'
-            : 'e.g., 6578616d706c6503636f6d'}
+            ? $t('tools/dhcp-options-6-15.decode.hexInput.placeholderOption6')
+            : $t('tools/dhcp-options-6-15.decode.hexInput.placeholderOption15')}
           rows="3"
           class="input"
         ></textarea>
-        <span class="hint">Enter hex bytes (spaces optional)</span>
+        <span class="hint">{$t('tools/dhcp-options-6-15.decode.hexInput.hint')}</span>
       </div>
 
       {#if decodeError}
         <div class="error-card">
-          <strong>Decode Error:</strong>
+          <strong>{$t('tools/dhcp-options-6-15.decode.error')}</strong>
           <p>{decodeError}</p>
         </div>
       {/if}
@@ -397,12 +435,16 @@
 
     {#if decodeResult}
       <div class="card result-card">
-        <h3>Decoded {decodeOption === 'option6' ? 'Option 6' : 'Option 15'}</h3>
+        <h3>
+          {$t('tools/dhcp-options-6-15.results.decodedTitle', {
+            option: decodeOption === 'option6' ? 'Option 6' : 'Option 15',
+          })}
+        </h3>
 
         {#if decodeOption === 'option6'}
           <div class="result-grid">
             <div class="result-item">
-              <span class="label">DNS Servers:</span>
+              <span class="label">{$t('tools/dhcp-options-6-15.results.option6.servers')}</span>
               <div class="servers-list">
                 {#each decodeResult.servers as srv, i (i)}
                   <span class="server-badge">{srv}</span>
@@ -411,25 +453,29 @@
             </div>
 
             <div class="result-item">
-              <span class="label">Server Count:</span>
+              <span class="label">{$t('tools/dhcp-options-6-15.results.option6.serverCount')}</span>
               <span class="value">{decodeResult.servers.length}</span>
             </div>
 
             <div class="result-item">
-              <span class="label">Total Length:</span>
-              <span class="value">{decodeResult.totalLength} bytes</span>
+              <span class="label">{$t('tools/dhcp-options-6-15.results.option6.totalLength')}</span>
+              <span class="value"
+                >{$t('tools/dhcp-options-6-15.results.option6.bytes', { length: decodeResult.totalLength })}</span
+              >
             </div>
           </div>
         {:else}
           <div class="result-grid">
             <div class="result-item">
-              <span class="label">Domain Name:</span>
+              <span class="label">{$t('tools/dhcp-options-6-15.results.option15.domainName')}</span>
               <span class="value">{decodeResult.domain}</span>
             </div>
 
             <div class="result-item">
-              <span class="label">Total Length:</span>
-              <span class="value">{decodeResult.totalLength} bytes</span>
+              <span class="label">{$t('tools/dhcp-options-6-15.results.option15.totalLength')}</span>
+              <span class="value"
+                >{$t('tools/dhcp-options-6-15.results.option15.bytes', { length: decodeResult.totalLength })}</span
+              >
             </div>
           </div>
         {/if}

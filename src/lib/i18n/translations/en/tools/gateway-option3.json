@@ -1,0 +1,87 @@
+{
+  "title": "DHCP Option 3 - Router/Default Gateway",
+  "subtitle": "Build and decode default gateway configuration. Multiple gateways can be specified for redundancy or load balancing, listed in order of preference.",
+
+  "nav": {
+    "build": "Build Option",
+    "decode": "Decode Option"
+  },
+
+  "examples": {
+    "decode": {
+      "singleGateway": {
+        "label": "Single Gateway",
+        "description": "192.168.1.1"
+      },
+      "dualGateways": {
+        "label": "Dual Gateways",
+        "description": "192.168.1.1, 192.168.1.2"
+      },
+      "googleDNS": {
+        "label": "Google DNS Primary",
+        "description": "8.8.8.8"
+      },
+      "commonRouter": {
+        "label": "Common Home Router",
+        "description": "192.168.0.10"
+      }
+    }
+  },
+
+  "build": {
+    "title": "Gateway Configuration",
+
+    "subnet": {
+      "label": "Subnet (Optional - for validation)",
+      "placeholder": "e.g., 192.168.1.0/24",
+      "hint": "If provided, gateways will be validated against this subnet"
+    },
+
+    "gateways": {
+      "label": "Gateway Addresses (in order of preference)",
+      "placeholder": "e.g., 192.168.1.1",
+      "addButton": "Add Gateway",
+      "removeButton": "Remove"
+    },
+
+    "errors": {
+      "title": "Validation Errors:"
+    }
+  },
+
+  "decode": {
+    "title": "Decode Option 3",
+
+    "hexInput": {
+      "label": "Hex String",
+      "placeholder": "e.g., c0a80101 or c0 a8 01 01",
+      "hint": "Enter hex bytes (spaces optional)"
+    },
+
+    "error": {
+      "title": "Decode Error:"
+    }
+  },
+
+  "results": {
+    "buildTitle": "Option 3 - Router",
+    "decodeTitle": "Decoded Option 3",
+
+    "gateways": "Gateways:",
+    "hexEncoded": "Hex Encoded:",
+    "wireFormat": "Wire Format:",
+    "totalLength": "Total Length:",
+    "lengthBytes": "{length} bytes",
+    "gatewayCount": "Gateway Count:",
+
+    "configExamples": "Configuration Examples",
+    "iscDhcpd": "ISC DHCPd",
+    "keaDhcp4": "Kea DHCPv4",
+    "dnsmasq": "dnsmasq"
+  },
+
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

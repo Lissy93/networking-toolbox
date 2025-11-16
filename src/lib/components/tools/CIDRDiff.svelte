@@ -5,6 +5,7 @@
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
   import { formatNumber } from '$lib/utils/formatters';
+  import { t } from '$lib/stores/language';
 
   let setA = $state(`192.168.1.0/24
 192.168.2.0/24`);
@@ -17,45 +18,45 @@
   let selectedExample = $state<string | null>(null);
   let userModified = $state(false);
 
-  const alignmentModes = [
+  const alignmentModes = $derived([
     {
       value: 'minimal' as const,
-      label: 'Minimal',
-      description: 'Generate the most efficient CIDR blocks',
+      label: $t('tools/cidr-diff.alignmentMode.minimal.label'),
+      description: $t('tools/cidr-diff.alignmentMode.minimal.description'),
     },
     {
       value: 'constrained' as const,
-      label: 'Constrained',
-      description: 'Align to specific prefix boundaries',
+      label: $t('tools/cidr-diff.alignmentMode.constrained.label'),
+      description: $t('tools/cidr-diff.alignmentMode.constrained.description'),
     },
-  ];
+  ]);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Basic IPv4 Subtraction',
+      label: $t('tools/cidr-diff.examples.basicIPv4'),
       setA: '192.168.1.0/24',
       setB: '192.168.1.128/25',
     },
     {
-      label: 'Multiple Ranges',
+      label: $t('tools/cidr-diff.examples.multipleRanges'),
       setA: `10.0.0.0/16
 172.16.0.0/16`,
       setB: `10.0.1.0/24
 172.16.50.0/24`,
     },
     {
-      label: 'IPv6 Example',
+      label: $t('tools/cidr-diff.examples.ipv6Example'),
       setA: '2001:db8::/48',
       setB: '2001:db8:1::/64',
     },
     {
-      label: 'Mixed Operations',
+      label: $t('tools/cidr-diff.examples.mixedOperations'),
       setA: `192.168.0.0/16
 2001:db8::/32`,
       setB: `192.168.100.0/24
 2001:db8:abcd::/48`,
     },
-  ];
+  ]);
 
   /* Set example */
   function setExample(example: (typeof examples)[0]) {
@@ -171,8 +172,15 @@
           ].join('.')
         : 'IPv6';
     const size = range.end - range.start + 1n;
+    const cidrPart = range.cidr ? `\nCIDR: ${range.cidr}` : '';
 
-    return `Set ${type}\nRange: ${startIP} - ${endIP}\nSize: ${formatNumber(Number(size))}${range.cidr ? `\nCIDR: ${range.cidr}` : ''}`;
+    const tooltipKey = type === 'A' ? 'setATooltip' : type === 'B' ? 'setBTooltip' : 'resultTooltip';
+    return $t(`tools/cidr-diff.visualization.${tooltipKey}`, {
+      startIP,
+      endIP,
+      size: formatNumber(Number(size)),
+      cidr: cidrPart,
+    });
   }
 
   // Track user modifications
@@ -192,7 +200,7 @@
 
 <!-- Alignment Mode -->
 <div class="mode-section">
-  <h3>Alignment Mode</h3>
+  <h3>{$t('tools/cidr-diff.alignmentMode.title')}</h3>
   <div class="tabs-container">
     <div class="tabs">
       {#each alignmentModes as mode (mode.value)}
@@ -212,9 +220,9 @@
       <div class="constraint-input">
         <label
           for="constrained-prefix"
-          use:tooltip={{ text: 'Force alignment to this prefix boundary', position: 'top' }}
+          use:tooltip={{ text: $t('tools/cidr-diff.alignmentMode.constrained.prefixTooltip'), position: 'top' }}
         >
-          Constrained prefix length
+          {$t('tools/cidr-diff.alignmentMode.constrained.prefixLabel')}
         </label>
         <input
           id="constrained-prefix"
@@ -235,14 +243,14 @@
   <div class="input-grid">
     <!-- Set A -->
     <div class="input-group">
-      <h3 use:tooltip={{ text: 'The base set of IP addresses, CIDR blocks, or ranges', position: 'top' }}>
-        Set A (Base)
+      <h3 use:tooltip={{ text: $t('tools/cidr-diff.input.setATooltip'), position: 'top' }}>
+        {$t('tools/cidr-diff.input.setALabel')}
       </h3>
       <div class="input-wrapper">
         <textarea
           bind:value={setA}
           oninput={() => (userModified = true)}
-          placeholder="192.168.1.0/24&#10;10.0.0.0-10.0.0.100"
+          placeholder={$t('tools/cidr-diff.input.setAPlaceholder')}
           class="input-textarea set-a"
           rows="6"
         ></textarea>
@@ -251,12 +259,14 @@
 
     <!-- Set B -->
     <div class="input-group">
-      <h3 use:tooltip={{ text: 'The set to subtract from Set A (can be empty)', position: 'top' }}>Set B (Subtract)</h3>
+      <h3 use:tooltip={{ text: $t('tools/cidr-diff.input.setBTooltip'), position: 'top' }}>
+        {$t('tools/cidr-diff.input.setBLabel')}
+      </h3>
       <div class="input-wrapper">
         <textarea
           bind:value={setB}
           oninput={() => (userModified = true)}
-          placeholder="192.168.1.128/25&#10;10.0.0.50-10.0.0.75"
+          placeholder={$t('tools/cidr-diff.input.setBPlaceholder')}
           class="input-textarea set-b"
           rows="6"
         ></textarea>
@@ -269,7 +279,7 @@
       type="button"
       class="btn btn-secondary btn-sm"
       onclick={clearInputs}
-      use:tooltip={{ text: 'Clear both input sets', position: 'top' }}
+      use:tooltip={{ text: $t('tools/cidr-diff.input.clearTooltip'), position: 'top' }}
     >
       <Icon name="trash" size="sm" />
     </button>
@@ -278,8 +288,8 @@
   <!-- Examples -->
   <div class="examples-section">
     <h4>
-      Quick Examples
-      <Tooltip text="Click any example to load it into the input fields">
+      {$t('tools/cidr-diff.examples.title')}
+      <Tooltip text={$t('tools/cidr-diff.examples.tooltip')}>
         <Icon name="help" size="sm" />
       </Tooltip>
     </h4>
@@ -303,7 +313,7 @@
   <div class="results-section">
     {#if result.errors.length > 0}
       <div class="info-panel error">
-        <h3>Parse Errors</h3>
+        <h3>{$t('tools/cidr-diff.results.errorsTitle')}</h3>
         <ul class="error-list">
           {#each result.errors as error (error)}
             <li>{error}</li>
@@ -316,7 +326,7 @@
       <!-- Statistics -->
       <div class="stats-section">
         <div class="summary-header">
-          <h3>Difference Results (A - B)</h3>
+          <h3>{$t('tools/cidr-diff.results.title')}</h3>
           <div class="export-buttons">
             <button
               type="button"
@@ -325,7 +335,7 @@
               onclick={() => copyAllResults('text')}
             >
               <Icon name={clipboard.isCopied('all-text') ? 'check' : 'copy'} size="sm" />
-              Text
+              {$t('tools/cidr-diff.results.exportText')}
             </button>
             <button
               type="button"
@@ -334,34 +344,50 @@
               onclick={() => copyAllResults('json')}
             >
               <Icon name={clipboard.isCopied('all-json') ? 'check' : 'download'} size="sm" />
-              JSON
+              {$t('tools/cidr-diff.results.exportJSON')}
             </button>
           </div>
         </div>
 
         <div class="stats-grid">
           <div class="stat-card input-a">
-            <span class="stat-label">Set A (Input)</span>
-            <span class="stat-value">{result.stats.inputA.count} items</span>
-            <span class="stat-detail">{result.stats.inputA.addresses} addresses</span>
+            <span class="stat-label">{$t('tools/cidr-diff.stats.setALabel')}</span>
+            <span class="stat-value"
+              >{$t('tools/cidr-diff.stats.itemsCount', { count: result.stats.inputA.count })}</span
+            >
+            <span class="stat-detail"
+              >{$t('tools/cidr-diff.stats.addressesCount', { count: result.stats.inputA.addresses })}</span
+            >
           </div>
           <div class="stat-card input-b">
-            <span class="stat-label">Set B (Subtract)</span>
-            <span class="stat-value">{result.stats.inputB.count} items</span>
-            <span class="stat-detail">{result.stats.inputB.addresses} addresses</span>
+            <span class="stat-label">{$t('tools/cidr-diff.stats.setBLabel')}</span>
+            <span class="stat-value"
+              >{$t('tools/cidr-diff.stats.itemsCount', { count: result.stats.inputB.count })}</span
+            >
+            <span class="stat-detail"
+              >{$t('tools/cidr-diff.stats.addressesCount', { count: result.stats.inputB.addresses })}</span
+            >
           </div>
           <div class="stat-card result">
-            <span class="stat-label">Result (A - B)</span>
-            <span class="stat-value">{result.stats.output.count} CIDRs</span>
-            <span class="stat-detail">{result.stats.output.addresses} addresses</span>
+            <span class="stat-label">{$t('tools/cidr-diff.stats.resultLabel')}</span>
+            <span class="stat-value"
+              >{$t('tools/cidr-diff.stats.cidrsCount', { count: result.stats.output.count })}</span
+            >
+            <span class="stat-detail"
+              >{$t('tools/cidr-diff.stats.addressesCount', { count: result.stats.output.addresses })}</span
+            >
           </div>
           <div
             class="stat-card efficiency"
             data-efficiency={result.stats.efficiency >= 80 ? 'high' : result.stats.efficiency >= 50 ? 'medium' : 'low'}
           >
-            <span class="stat-label">Efficiency</span>
-            <span class="stat-value">{result.stats.efficiency}%</span>
-            <span class="stat-detail">{result.stats.removed.addresses} removed</span>
+            <span class="stat-label">{$t('tools/cidr-diff.stats.efficiencyLabel')}</span>
+            <span class="stat-value"
+              >{$t('tools/cidr-diff.stats.efficiencyValue', { percent: result.stats.efficiency })}</span
+            >
+            <span class="stat-detail"
+              >{$t('tools/cidr-diff.stats.removedCount', { count: result.stats.removed.addresses })}</span
+            >
           </div>
         </div>
       </div>
@@ -370,23 +396,23 @@
       {#if result.visualization.setA.length > 0}
         <div class="visualization-section">
           <h4>
-            Set Operation Visualization
-            <Tooltip text="Visual representation showing the relationship between sets A, B, and the result">
+            {$t('tools/cidr-diff.visualization.title')}
+            <Tooltip text={$t('tools/cidr-diff.visualization.tooltip')}>
               <Icon name="help" size="sm" />
             </Tooltip>
           </h4>
           <div class="viz-legend">
             <div class="legend-item">
               <div class="legend-color set-a-color"></div>
-              <span>Set A (Base)</span>
+              <span>{$t('tools/cidr-diff.visualization.setALegend')}</span>
             </div>
             <div class="legend-item">
               <div class="legend-color set-b-color"></div>
-              <span>Set B (Subtract)</span>
+              <span>{$t('tools/cidr-diff.visualization.setBLegend')}</span>
             </div>
             <div class="legend-item">
               <div class="legend-color result-color"></div>
-              <span>Result (A - B)</span>
+              <span>{$t('tools/cidr-diff.visualization.resultLegend')}</span>
             </div>
           </div>
 
@@ -427,7 +453,7 @@
         {#if result.ipv4.length > 0}
           <div class="result-panel ipv4">
             <div class="panel-header">
-              <h4>IPv4 Results ({result.ipv4.length})</h4>
+              <h4>{$t('tools/cidr-diff.output.ipv4Title', { count: result.ipv4.length })}</h4>
               <button
                 type="button"
                 class="btn btn-icon"
@@ -459,7 +485,7 @@
         {#if result.ipv6.length > 0}
           <div class="result-panel ipv6">
             <div class="panel-header">
-              <h4>IPv6 Results ({result.ipv6.length})</h4>
+              <h4>{$t('tools/cidr-diff.output.ipv6Title', { count: result.ipv6.length })}</h4>
               <button
                 type="button"
                 class="btn btn-icon"
@@ -489,8 +515,8 @@
       </div>
     {:else}
       <div class="info-panel info">
-        <h3>No Results</h3>
-        <p>The difference A - B resulted in an empty set. Set B completely contains or covers Set A.</p>
+        <h3>{$t('tools/cidr-diff.results.noResultsTitle')}</h3>
+        <p>{$t('tools/cidr-diff.results.noResultsMessage')}</p>
       </div>
     {/if}
   </div>

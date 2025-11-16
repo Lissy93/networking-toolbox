@@ -1,0 +1,30 @@
+{
+  "title": "OCSP Stapling Checker",
+  "description": "Check if a server supports OCSP stapling for certificate revocation validation",
+
+  "form": {
+    "title": "OCSP Stapling Check",
+    "hostname": {
+      "label": "Hostname",
+      "placeholder": "example.com"
+    },
+    "port": {
+      "label": "Port",
+      "placeholder": "443"
+    },
+    "check": "Check OCSP Stapling",
+    "checking": "Checking...",
+    "error": "Please enter a hostname"
+  },
+
+  "results": {
+    "title": "OCSP Stapling Results",
+    "supported": "OCSP Stapling Supported",
+    "not_supported": "OCSP Stapling Not Supported",
+    "status": {
+      "good": "Good",
+      "revoked": "Revoked",
+      "unknown": "Unknown"
+    }
+  }
+}

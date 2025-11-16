@@ -1,0 +1,112 @@
+{
+  "title": "SRV Record Builder",
+  "description": "Compose SRV records with service discovery, protocol specification, priority/weight balancing, and target validation.",
+
+  "input": {
+    "ttl": {
+      "label": "Default TTL (seconds)",
+      "tooltip": "Default Time To Live in seconds for all SRV records"
+    },
+    "addRecordButton": "Add SRV Record",
+    "recordsTitle": "SRV Records",
+    "service": {
+      "label": "Service",
+      "tooltip": "The service name, typically starting with underscore (e.g., _http, _smtp)",
+      "customOption": "Custom",
+      "customPlaceholder": "_myservice"
+    },
+    "protocol": {
+      "label": "Protocol",
+      "tooltip": "Transport protocol used by the service (TCP/UDP/TLS/SCTP)",
+      "tcp": "TCP",
+      "udp": "UDP",
+      "tls": "TLS",
+      "sctp": "SCTP"
+    },
+    "domain": {
+      "label": "Domain",
+      "tooltip": "The domain name where this service is located",
+      "placeholder": "example.com"
+    },
+    "priority": {
+      "label": "Priority",
+      "tooltip": "Lower numbers = higher priority"
+    },
+    "weight": {
+      "label": "Weight",
+      "tooltip": "Load balancing weight for same priority"
+    },
+    "port": {
+      "label": "Port",
+      "tooltip": "Port number where the service is listening (1-65535)"
+    },
+    "target": {
+      "label": "Target (FQDN)",
+      "tooltip": "Fully Qualified Domain Name of the server hosting the service (must end with dot)",
+      "placeholder": "server.example.com."
+    }
+  },
+
+  "validation": {
+    "serviceEmpty": "Service name cannot be empty",
+    "serviceUnderscore": "Service name must start with underscore (_)",
+    "domainEmpty": "Domain name cannot be empty",
+    "priorityRange": "Priority must be between 0 and 65535",
+    "weightRange": "Weight must be between 0 and 65535",
+    "portRange": "Port must be between 1 and 65535",
+    "targetEmpty": "Target cannot be empty",
+    "targetFQDN": "Target should end with a dot (FQDN)"
+  },
+
+  "examples": {
+    "title": "Service Examples",
+    "webServices": "Web Services",
+    "mailServices": "Mail Services",
+    "sipServices": "SIP Services",
+    "xmppServices": "XMPP Services",
+    "recordsCount": "{count} SRV records"
+  },
+
+  "info": {
+    "title": "SRV Record Structure",
+    "format": "_service._protocol.domain. TTL IN SRV priority weight port target.",
+    "serviceLabel": "Service:",
+    "serviceDescription": "Must start with underscore (e.g., _http, _sip)",
+    "protocolLabel": "Protocol:",
+    "protocolDescription": "Usually tcp, udp, tls, or sctp",
+    "priorityLabel": "Priority:",
+    "priorityDescription": "Lower values = higher priority (0-65535)",
+    "weightLabel": "Weight:",
+    "weightDescription": "Load balancing within same priority (0-65535)",
+    "portLabel": "Port:",
+    "portDescription": "Service port number (1-65535)",
+    "targetLabel": "Target:",
+    "targetDescription": "FQDN of the server (must end with dot)"
+  },
+
+  "results": {
+    "title": "Generated SRV Records",
+    "copyButton": "Copy Records",
+    "tableHeaders": {
+      "service": "Service",
+      "serviceTooltip": "Service name and protocol",
+      "ttl": "TTL",
+      "ttlTooltip": "Time To Live - how long DNS resolvers should cache this record",
+      "type": "Type",
+      "typeTooltip": "DNS record type (always SRV for service records)",
+      "priority": "Priority",
+      "priorityTooltip": "Priority - lower values are preferred (0-65535)",
+      "weight": "Weight",
+      "weightTooltip": "Weight for load balancing among same priority records (0-65535)",
+      "port": "Port",
+      "portTooltip": "Port number where the service is available",
+      "target": "Target",
+      "targetTooltip": "Target server hostname (FQDN)",
+      "status": "Status",
+      "statusTooltip": "Validation status of this SRV record"
+    },
+    "statusValid": "Valid",
+    "statusIssues": "Issues",
+    "validationSummaryTitle": "Configuration Issues"
+  }
+}

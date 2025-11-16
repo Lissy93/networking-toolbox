@@ -1,0 +1,24 @@
+{
+  "title": "Certificate Transparency Log Search",
+  "description": "Search Certificate Transparency logs for issued certificates for a domain",
+
+  "form": {
+    "title": "CT Log Search",
+    "domain": {
+      "label": "Domain",
+      "placeholder": "example.com"
+    },
+    "search": "Search CT Logs",
+    "searching": "Searching...",
+    "error": "Please enter a domain"
+  },
+
+  "results": {
+    "title": "CT Log Results",
+    "certificates_found": "{count} certificates found",
+    "issuer": "Issuer",
+    "valid_from": "Valid From",
+    "valid_to": "Valid To",
+    "logged_at": "Logged At"
+  }
+}

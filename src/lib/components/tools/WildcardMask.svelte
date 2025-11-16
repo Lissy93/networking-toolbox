@@ -5,6 +5,7 @@
   import '../../../styles/diagnostics-pages.scss';
   import { useClipboard } from '$lib/composables';
   import { formatNumber } from '$lib/utils/formatters';
+  import { t } from '$lib/stores/language';
 
   let inputText = $state('192.168.1.0/24\n10.0.0.0 255.255.255.0\n172.16.0.0 0.0.255.255');
   let result = $state<WildcardResult | null>(null);
@@ -14,49 +15,55 @@
   let selectedExampleIndex = $state<number | null>(null);
   let _userModified = $state(false);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Basic CIDR to Wildcard',
+      label: $t('tools/wildcard-mask.examples.items.basicCidr.label'),
       input: `192.168.1.0/24
 10.0.0.0/16
 172.16.0.0/20`,
       generateACL: false,
+      preview: $t('tools/wildcard-mask.examples.items.basicCidr.preview'),
     },
     {
-      label: 'Subnet Mask Format',
+      label: $t('tools/wildcard-mask.examples.items.subnetMask.label'),
       input: `192.168.1.0 255.255.255.0
 10.0.0.0 255.255.0.0
 172.16.0.0 255.255.240.0`,
       generateACL: false,
+      preview: $t('tools/wildcard-mask.examples.items.subnetMask.preview'),
     },
     {
-      label: 'Wildcard Mask Input',
+      label: $t('tools/wildcard-mask.examples.items.wildcardInput.label'),
       input: `192.168.0.0 0.0.255.255
 10.0.0.0 0.255.255.255
 172.16.0.0 0.0.15.255`,
       generateACL: false,
+      preview: $t('tools/wildcard-mask.examples.items.wildcardInput.preview'),
     },
     {
-      label: 'Mixed Formats',
+      label: $t('tools/wildcard-mask.examples.items.mixedFormats.label'),
       input: `192.168.1.0/24
 10.0.0.0 255.255.0.0
 172.16.0.0 0.0.255.255`,
       generateACL: false,
+      preview: $t('tools/wildcard-mask.examples.items.mixedFormats.preview'),
     },
     {
-      label: 'Cisco ACL Generation',
+      label: $t('tools/wildcard-mask.examples.items.ciscoAcl.label'),
       input: `192.168.1.0/24
 10.0.0.0/16`,
       generateACL: true,
+      preview: $t('tools/wildcard-mask.examples.items.ciscoAcl.preview'),
     },
     {
-      label: 'Complex Network ACLs',
+      label: $t('tools/wildcard-mask.examples.items.complexAcl.label'),
       input: `192.168.0.0/22
 10.1.0.0/20
 172.16.100.0/24`,
       generateACL: true,
+      preview: $t('tools/wildcard-mask.examples.items.complexAcl.preview'),
     },
-  ];
+  ]);
 
   // ACL options
   let generateACL = $state(false);
@@ -163,8 +170,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>Wildcard Mask Converter</h2>
-    <p>Convert between CIDR notation, subnet masks, and wildcard masks with ACL rule generation</p>
+    <h2>{$t('tools/wildcard-mask.title')}</h2>
+    <p>{$t('tools/wildcard-mask.subtitle')}</p>
   </header>
 
   <!-- Examples -->
@@ -172,7 +179,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('tools/wildcard-mask.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (example.label)}
@@ -183,7 +190,7 @@
           >
             <div class="example-label">{example.label}</div>
             <div class="example-preview">
-              {example.generateACL ? 'With ACL' : 'Conversion only'}
+              {example.preview}
             </div>
           </button>
         {/each}
@@ -193,59 +200,72 @@
 
   <div class="input-section">
     <div class="inputs-section">
-      <h3 use:tooltip={'Enter networks in various formats for wildcard mask conversion'}>Network Inputs</h3>
+      <h3 use:tooltip={$t('tools/wildcard-mask.networkInputs.titleTooltip')}>
+        {$t('tools/wildcard-mask.networkInputs.title')}
+      </h3>
       <div class="input-group">
-        <label for="inputs" use:tooltip={'Enter networks in CIDR, subnet mask, or wildcard mask format'}>
-          IP Addresses, CIDRs, or Ranges
+        <label for="inputs" use:tooltip={$t('tools/wildcard-mask.networkInputs.labelTooltip')}>
+          {$t('tools/wildcard-mask.networkInputs.label')}
         </label>
         <textarea
           id="inputs"
           bind:value={inputText}
           oninput={handleInputChange}
-          placeholder="192.168.1.0/24&#10;10.0.0.0 255.255.255.0&#10;172.16.0.0 0.0.255.255"
+          placeholder={$t('tools/wildcard-mask.networkInputs.placeholder')}
           rows="6"
         ></textarea>
         <div class="input-help">
-          Enter one per line: CIDR (192.168.1.0/24), network + subnet mask (10.0.0.0 255.255.255.0), or network +
-          wildcard mask (172.16.0.0 0.0.255.255)
+          {$t('tools/wildcard-mask.networkInputs.help')}
         </div>
       </div>
     </div>
 
     <div class="acl-section">
-      <h3 use:tooltip={'Configure access control list rule generation for network devices'}>ACL Options</h3>
+      <h3 use:tooltip={$t('tools/wildcard-mask.aclOptions.titleTooltip')}>
+        {$t('tools/wildcard-mask.aclOptions.title')}
+      </h3>
       <div class="checkbox-group">
-        <label class="checkbox-label" use:tooltip={'Generate access control list rules for network devices'}>
+        <label class="checkbox-label" use:tooltip={$t('tools/wildcard-mask.aclOptions.generateTooltip')}>
           <input type="checkbox" bind:checked={generateACL} onchange={handleInputChange} />
-          <span class="checkbox-text">Generate ACL Rules</span>
+          <span class="checkbox-text">{$t('tools/wildcard-mask.aclOptions.generateLabel')}</span>
         </label>
       </div>
 
       {#if generateACL}
         <div class="acl-settings">
           <div class="input-group">
-            <label for="acl-type" use:tooltip={'Whether to permit or deny traffic matching this rule'}> Action </label>
+            <label for="acl-type" use:tooltip={$t('tools/wildcard-mask.aclOptions.action.tooltip')}
+              >{$t('tools/wildcard-mask.aclOptions.action.label')}</label
+            >
             <select id="acl-type" bind:value={aclType} onchange={handleInputChange}>
-              <option value="permit">Permit</option>
-              <option value="deny">Deny</option>
+              <option value="permit">{$t('tools/wildcard-mask.aclOptions.action.permit')}</option>
+              <option value="deny">{$t('tools/wildcard-mask.aclOptions.action.deny')}</option>
             </select>
           </div>
 
           <div class="input-group">
-            <label for="protocol" use:tooltip={'Network protocol (ip, tcp, udp, icmp, etc.)'}> Protocol </label>
-            <input id="protocol" type="text" bind:value={protocol} oninput={handleInputChange} placeholder="ip" />
+            <label for="protocol" use:tooltip={$t('tools/wildcard-mask.aclOptions.protocol.tooltip')}
+              >{$t('tools/wildcard-mask.aclOptions.protocol.label')}</label
+            >
+            <input
+              id="protocol"
+              type="text"
+              bind:value={protocol}
+              oninput={handleInputChange}
+              placeholder={$t('tools/wildcard-mask.aclOptions.protocol.placeholder')}
+            />
           </div>
 
           <div class="input-group">
-            <label for="destination" use:tooltip={"Destination network or 'any' for all destinations"}>
-              Destination
+            <label for="destination" use:tooltip={$t('tools/wildcard-mask.aclOptions.destination.tooltip')}>
+              {$t('tools/wildcard-mask.aclOptions.destination.label')}
             </label>
             <input
               id="destination"
               type="text"
               bind:value={destination}
               oninput={handleInputChange}
-              placeholder="any"
+              placeholder={$t('tools/wildcard-mask.aclOptions.destination.placeholder')}
             />
           </div>
         </div>
@@ -256,7 +276,7 @@
   {#if isLoading}
     <div class="loading">
       <Icon name="loader" />
-      Converting masks...
+      {$t('tools/wildcard-mask.loading')}
     </div>
   {/if}
 
@@ -264,7 +284,7 @@
     <div class="results">
       {#if result.errors.length > 0}
         <div class="errors">
-          <h3><Icon name="alert-triangle" /> Errors</h3>
+          <h3><Icon name="alert-triangle" /> {$t('tools/wildcard-mask.errors.title')}</h3>
           {#each result.errors as error, index (index)}
             <div class="error-item">{error}</div>
           {/each}
@@ -273,34 +293,44 @@
 
       {#if result.conversions.length > 0}
         <div class="summary">
-          <h3 use:tooltip={'Overview of wildcard mask conversion results'}>Conversion Summary</h3>
+          <h3 use:tooltip={$t('tools/wildcard-mask.summary.titleTooltip')}>
+            {$t('tools/wildcard-mask.summary.title')}
+          </h3>
           <div class="summary-stats">
             <div class="stat">
               <span class="stat-value">{result.summary.totalInputs}</span>
-              <span class="stat-label" use:tooltip={'Total number of network inputs processed'}>Total Inputs</span>
+              <span class="stat-label" use:tooltip={$t('tools/wildcard-mask.summary.totalInputs.tooltip')}
+                >{$t('tools/wildcard-mask.summary.totalInputs.label')}</span
+              >
             </div>
             <div class="stat aligned">
               <span class="stat-value">{result.summary.validInputs}</span>
-              <span class="stat-label" use:tooltip={'Successfully converted network inputs'}>Valid</span>
+              <span class="stat-label" use:tooltip={$t('tools/wildcard-mask.summary.valid.tooltip')}
+                >{$t('tools/wildcard-mask.summary.valid.label')}</span
+              >
             </div>
             <div class="stat misaligned">
               <span class="stat-value">{result.summary.invalidInputs}</span>
-              <span class="stat-label" use:tooltip={'Network inputs that could not be converted'}>Invalid</span>
+              <span class="stat-label" use:tooltip={$t('tools/wildcard-mask.summary.invalid.tooltip')}
+                >{$t('tools/wildcard-mask.summary.invalid.label')}</span
+              >
             </div>
           </div>
         </div>
 
         <div class="conversions">
           <div class="conversions-header">
-            <h3 use:tooltip={'Detailed conversion results for each network input'}>Mask Conversions</h3>
+            <h3 use:tooltip={$t('tools/wildcard-mask.conversions.titleTooltip')}>
+              {$t('tools/wildcard-mask.conversions.title')}
+            </h3>
             <div class="export-buttons">
               <button onclick={() => exportResults('csv')}>
                 <Icon name="csv-file" />
-                Export CSV
+                {$t('tools/wildcard-mask.conversions.exportCsv')}
               </button>
               <button onclick={() => exportResults('json')}>
                 <Icon name="json-file" />
-                Export JSON
+                {$t('tools/wildcard-mask.conversions.exportJson')}
               </button>
             </div>
           </div>
@@ -316,10 +346,10 @@
                   <div class="check-status">
                     {#if conversion.isValid}
                       <Icon name="check-circle" />
-                      Valid
+                      {$t('tools/wildcard-mask.conversions.status.valid')}
                     {:else}
                       <Icon name="x-circle" />
-                      Invalid
+                      {$t('tools/wildcard-mask.conversions.status.invalid')}
                     {/if}
                   </div>
                 </div>
@@ -327,7 +357,9 @@
                 {#if conversion.isValid}
                   <div class="conversion-details">
                     <div class="detail-row">
-                      <span class="label" use:tooltip={'Classless Inter-Domain Routing notation'}>CIDR:</span>
+                      <span class="label" use:tooltip={$t('tools/wildcard-mask.conversions.details.cidr.tooltip')}
+                        >{$t('tools/wildcard-mask.conversions.details.cidr.label')}</span
+                      >
                       <div class="code-container">
                         <code>{conversion.cidr}</code>
                         <button
@@ -335,7 +367,7 @@
                           class="btn btn-icon btn-xs"
                           class:copied={clipboard.isCopied(conversion.cidr)}
                           onclick={() => clipboard.copy(conversion.cidr, conversion.cidr)}
-                          use:tooltip={{ text: 'Copy to clipboard', position: 'top' }}
+                          use:tooltip={{ text: $t('tools/wildcard-mask.conversions.copyTooltip'), position: 'top' }}
                         >
                           <Icon name={clipboard.isCopied(conversion.cidr) ? 'check' : 'copy'} size="xs" />
                         </button>
@@ -343,8 +375,8 @@
                     </div>
 
                     <div class="detail-row">
-                      <span class="label" use:tooltip={'Standard subnet mask in dotted decimal notation'}
-                        >Subnet Mask:</span
+                      <span class="label" use:tooltip={$t('tools/wildcard-mask.conversions.details.subnetMask.tooltip')}
+                        >{$t('tools/wildcard-mask.conversions.details.subnetMask.label')}</span
                       >
                       <div class="code-container">
                         <code>{conversion.subnetMask}</code>
@@ -353,7 +385,7 @@
                           class="btn btn-icon btn-xs"
                           class:copied={clipboard.isCopied(conversion.subnetMask)}
                           onclick={() => clipboard.copy(conversion.subnetMask, conversion.subnetMask)}
-                          use:tooltip={{ text: 'Copy to clipboard', position: 'top' }}
+                          use:tooltip={{ text: $t('tools/wildcard-mask.conversions.copyTooltip'), position: 'top' }}
                         >
                           <Icon name={clipboard.isCopied(conversion.subnetMask) ? 'check' : 'copy'} size="xs" />
                         </button>
@@ -361,8 +393,10 @@
                     </div>
 
                     <div class="detail-row">
-                      <span class="label" use:tooltip={'Inverse subnet mask used in Cisco ACLs and OSPF'}
-                        >Wildcard Mask:</span
+                      <span
+                        class="label"
+                        use:tooltip={$t('tools/wildcard-mask.conversions.details.wildcardMask.tooltip')}
+                        >{$t('tools/wildcard-mask.conversions.details.wildcardMask.label')}</span
                       >
                       <div class="code-container">
                         <code>{conversion.wildcardMask}</code>
@@ -371,7 +405,7 @@
                           class="btn btn-icon btn-xs"
                           class:copied={clipboard.isCopied(conversion.wildcardMask)}
                           onclick={() => clipboard.copy(conversion.wildcardMask, conversion.wildcardMask)}
-                          use:tooltip={{ text: 'Copy to clipboard', position: 'top' }}
+                          use:tooltip={{ text: $t('tools/wildcard-mask.conversions.copyTooltip'), position: 'top' }}
                         >
                           <Icon name={clipboard.isCopied(conversion.wildcardMask) ? 'check' : 'copy'} size="xs" />
                         </button>
@@ -381,24 +415,34 @@
                     <div class="network-info">
                       <div class="info-grid">
                         <div>
-                          <span class="info-label" use:tooltip={'First address in the network range'}>Network:</span>
+                          <span
+                            class="info-label"
+                            use:tooltip={$t('tools/wildcard-mask.conversions.details.network.tooltip')}
+                            >{$t('tools/wildcard-mask.conversions.details.network.label')}</span
+                          >
                           <span class="info-value">{conversion.networkAddress}</span>
                         </div>
                         <div>
-                          <span class="info-label" use:tooltip={'Last address in the network range'}>Broadcast:</span>
+                          <span
+                            class="info-label"
+                            use:tooltip={$t('tools/wildcard-mask.conversions.details.broadcast.tooltip')}
+                            >{$t('tools/wildcard-mask.conversions.details.broadcast.label')}</span
+                          >
                           <span class="info-value">{conversion.broadcastAddress}</span>
                         </div>
                         <div>
-                          <span class="info-label" use:tooltip={'Number of bits available for host addresses'}
-                            >Host Bits:</span
+                          <span
+                            class="info-label"
+                            use:tooltip={$t('tools/wildcard-mask.conversions.details.hostBits.tooltip')}
+                            >{$t('tools/wildcard-mask.conversions.details.hostBits.label')}</span
                           >
                           <span class="info-value">{conversion.hostBits}</span>
                         </div>
                         <div>
                           <span
                             class="info-label"
-                            use:tooltip={'Total assignable host addresses (excluding network and broadcast)'}
-                            >Usable Hosts:</span
+                            use:tooltip={$t('tools/wildcard-mask.conversions.details.usableHosts.tooltip')}
+                            >{$t('tools/wildcard-mask.conversions.details.usableHosts.label')}</span
                           >
                           <span class="info-value">{formatNumber(conversion.usableHosts)}</span>
                         </div>
@@ -418,19 +462,25 @@
 
         {#if generateACL && (result.aclRules.cisco.length > 0 || result.aclRules.juniper.length > 0 || result.aclRules.generic.length > 0)}
           <div class="acl-rules-container">
-            <h3 use:tooltip={'Access control list rules generated for network devices'}>Generated ACL Rules</h3>
+            <h3 use:tooltip={$t('tools/wildcard-mask.aclRules.titleTooltip')}>
+              {$t('tools/wildcard-mask.aclRules.title')}
+            </h3>
 
             {#if result.aclRules.cisco.length > 0}
               <div class="acl-section">
                 <div class="acl-header">
-                  <h4 use:tooltip={'Cisco IOS access control list format'}>Cisco ACL</h4>
+                  <h4 use:tooltip={$t('tools/wildcard-mask.aclRules.cisco.tooltip')}>
+                    {$t('tools/wildcard-mask.aclRules.cisco.title')}
+                  </h4>
                   <button
                     onclick={() => copyACLRules('cisco')}
                     class="copy-btn {clipboard.isCopied('acl-cisco') ? 'copied' : ''}"
-                    use:tooltip={'Copy all Cisco ACL rules to clipboard'}
+                    use:tooltip={$t('tools/wildcard-mask.aclRules.cisco.copyTooltip')}
                   >
                     <Icon name={clipboard.isCopied('acl-cisco') ? 'check' : 'copy'} size="xs" />
-                    {clipboard.isCopied('acl-cisco') ? 'Copied!' : 'Copy'}
+                    {clipboard.isCopied('acl-cisco')
+                      ? $t('tools/wildcard-mask.common.copied')
+                      : $t('tools/wildcard-mask.common.copy')}
                   </button>
                 </div>
                 <div class="acl-code">
@@ -444,14 +494,18 @@
             {#if result.aclRules.juniper.length > 0}
               <div class="acl-section">
                 <div class="acl-header">
-                  <h4 use:tooltip={'Juniper JunOS firewall filter format'}>Juniper ACL</h4>
+                  <h4 use:tooltip={$t('tools/wildcard-mask.aclRules.juniper.tooltip')}>
+                    {$t('tools/wildcard-mask.aclRules.juniper.title')}
+                  </h4>
                   <button
                     onclick={() => copyACLRules('juniper')}
                     class="copy-btn {clipboard.isCopied('acl-juniper') ? 'copied' : ''}"
-                    use:tooltip={'Copy all Juniper ACL rules to clipboard'}
+                    use:tooltip={$t('tools/wildcard-mask.aclRules.juniper.copyTooltip')}
                   >
                     <Icon name={clipboard.isCopied('acl-juniper') ? 'check' : 'copy'} size="xs" />
-                    {clipboard.isCopied('acl-juniper') ? 'Copied!' : 'Copy'}
+                    {clipboard.isCopied('acl-juniper')
+                      ? $t('tools/wildcard-mask.common.copied')
+                      : $t('tools/wildcard-mask.common.copy')}
                   </button>
                 </div>
                 <div class="acl-code">
@@ -465,14 +519,18 @@
             {#if result.aclRules.generic.length > 0}
               <div class="acl-section">
                 <div class="acl-header">
-                  <h4 use:tooltip={'Generic access control list format'}>Generic ACL</h4>
+                  <h4 use:tooltip={$t('tools/wildcard-mask.aclRules.generic.tooltip')}>
+                    {$t('tools/wildcard-mask.aclRules.generic.title')}
+                  </h4>
                   <button
                     onclick={() => copyACLRules('generic')}
                     class="copy-btn {clipboard.isCopied('acl-generic') ? 'copied' : ''}"
-                    use:tooltip={'Copy all generic ACL rules to clipboard'}
+                    use:tooltip={$t('tools/wildcard-mask.aclRules.generic.copyTooltip')}
                   >
                     <Icon name={clipboard.isCopied('acl-generic') ? 'check' : 'copy'} size="xs" />
-                    {clipboard.isCopied('acl-generic') ? 'Copied!' : 'Copy'}
+                    {clipboard.isCopied('acl-generic')
+                      ? $t('tools/wildcard-mask.common.copied')
+                      : $t('tools/wildcard-mask.common.copy')}
                   </button>
                 </div>
                 <div class="acl-code">

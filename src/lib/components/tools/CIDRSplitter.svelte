@@ -2,6 +2,7 @@
   import { splitCIDRByCount, splitCIDRByPrefix, type SplitResult } from '$lib/utils/cidr-split.js';
   import { tooltip } from '$lib/actions/tooltip.js';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
   import Icon from '$lib/components/global/Icon.svelte';
   import '../../../styles/diagnostics-pages.scss';
 
@@ -13,45 +14,45 @@
   const clipboard = useClipboard();
   let selectedExampleIndex = $state<number | null>(null);
 
-  const modes = [
+  const modes = $derived([
     {
       value: 'count' as const,
-      label: 'By Count',
-      description: 'Split into N equal subnets',
+      label: $t('tools/cidr-splitter.modes.byCount.label'),
+      description: $t('tools/cidr-splitter.modes.byCount.description'),
     },
     {
       value: 'prefix' as const,
-      label: 'By Prefix',
-      description: 'Split to target prefix length',
+      label: $t('tools/cidr-splitter.modes.byPrefix.label'),
+      description: $t('tools/cidr-splitter.modes.byPrefix.description'),
     },
-  ];
+  ]);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Split /24 → 4 subnets',
+      label: $t('tools/cidr-splitter.examples.split24To4'),
       cidr: '192.168.1.0/24',
       mode: 'count' as const,
       count: 4,
     },
     {
-      label: 'Split /16 → /20',
+      label: $t('tools/cidr-splitter.examples.split16To20'),
       cidr: '10.0.0.0/16',
       mode: 'prefix' as const,
       prefix: 20,
     },
     {
-      label: 'IPv6 /48 → 16 subnets',
+      label: $t('tools/cidr-splitter.examples.splitIPv6_48To16'),
       cidr: '2001:db8::/48',
       mode: 'count' as const,
       count: 16,
     },
     {
-      label: 'IPv6 /32 → /40',
+      label: $t('tools/cidr-splitter.examples.splitIPv6_32To40'),
       cidr: '2001:db8::/32',
       mode: 'prefix' as const,
       prefix: 40,
     },
-  ];
+  ]);
 
   /* Set example */
   function setExample(example: (typeof examples)[0], index: number) {
@@ -138,7 +139,12 @@
     const subnet = result.subnets.find((s) => s.cidr === childRange.cidr);
     if (!subnet) return childRange.cidr;
 
-    return `${subnet.cidr}\nRange: ${subnet.network} - ${subnet.broadcast}\nHosts: ${subnet.totalHosts}`;
+    return $t('tools/cidr-splitter.visualization.subnetTooltip', {
+      cidr: subnet.cidr,
+      network: subnet.network,
+      broadcast: subnet.broadcast,
+      totalHosts: subnet.totalHosts,
+    });
   }
 
   // Reactive split and example selection tracking
@@ -165,13 +171,13 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>CIDR Subnet Splitter</h2>
-    <p>Split a network into equal child subnets by count or target prefix length.</p>
+    <h2>{$t('tools/cidr-splitter.title')}</h2>
+    <p>{$t('tools/cidr-splitter.description')}</p>
   </header>
 
   <!-- Mode Selection -->
   <div class="mode-section">
-    <h3>Split Mode</h3>
+    <h3>{$t('tools/cidr-splitter.modes.title')}</h3>
     <div class="tabs">
       {#each modes as modeOption (modeOption.value)}
         <button
@@ -189,18 +195,24 @@
 
   <!-- Input Section -->
   <div class="input-section">
-    <h3>Parent Network</h3>
+    <h3>{$t('tools/cidr-splitter.input.parentNetworkTitle')}</h3>
     <div class="form-group">
-      <label for="input-cidr" use:tooltip={'Enter IPv4 or IPv6 network in CIDR notation (e.g., 192.168.1.0/24)'}>
-        Parent CIDR block
+      <label for="input-cidr" use:tooltip={$t('tools/cidr-splitter.input.parentCIDRTooltip')}>
+        {$t('tools/cidr-splitter.input.parentCIDRLabel')}
       </label>
       <div class="input-wrapper">
-        <input id="input-cidr" type="text" bind:value={inputCIDR} placeholder="192.168.1.0/24" class="input-field" />
+        <input
+          id="input-cidr"
+          type="text"
+          bind:value={inputCIDR}
+          placeholder={$t('tools/cidr-splitter.input.parentCIDRPlaceholder')}
+          class="input-field"
+        />
         <button
           type="button"
           class="btn btn-secondary btn-sm clear-btn"
           onclick={clearInput}
-          use:tooltip={'Clear input'}
+          use:tooltip={$t('tools/cidr-splitter.input.clearInputTooltip')}
         >
           <Icon name="trash" size="sm" />
         </button>
@@ -210,19 +222,13 @@
     <!-- Split Parameters -->
     <div class="form-group">
       {#if splitMode === 'count'}
-        <label
-          for="subnet-count"
-          use:tooltip={'How many equal subnets to create (will be rounded to nearest power of 2)'}
-        >
-          Number of subnets
+        <label for="subnet-count" use:tooltip={$t('tools/cidr-splitter.input.subnetCountTooltip')}>
+          {$t('tools/cidr-splitter.input.subnetCountLabel')}
         </label>
         <input id="subnet-count" type="number" bind:value={subnetCount} min="1" max="1024" class="input-field" />
       {:else}
-        <label
-          for="target-prefix"
-          use:tooltip={'The prefix length for child subnets (must be larger than parent prefix)'}
-        >
-          Target prefix length
+        <label for="target-prefix" use:tooltip={$t('tools/cidr-splitter.input.targetPrefixTooltip')}>
+          {$t('tools/cidr-splitter.input.targetPrefixLabel')}
         </label>
         <input id="target-prefix" type="number" bind:value={targetPrefix} min="1" max="128" class="input-field" />
       {/if}
@@ -234,7 +240,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('tools/cidr-splitter.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (example.label)}
@@ -242,7 +248,9 @@
             class="example-card"
             class:selected={selectedExampleIndex === i}
             onclick={() => setExample(example, i)}
-            use:tooltip={`${example.mode === 'count' ? 'Split into ' + example.count + ' subnets' : 'Split to /' + example.prefix + ' prefix'}`}
+            use:tooltip={example.mode === 'count'
+              ? $t('tools/cidr-splitter.examples.splitToCount', { count: example.count })
+              : $t('tools/cidr-splitter.examples.splitToPrefix', { prefix: example.prefix })}
           >
             <h5>{example.cidr}</h5>
             <p>{example.label}</p>
@@ -257,14 +265,14 @@
     <div class="results-section">
       {#if result.error}
         <div class="info-panel error">
-          <h3>Split Error</h3>
+          <h3>{$t('tools/cidr-splitter.results.errorTitle')}</h3>
           <p>{result.error}</p>
         </div>
       {:else if result.subnets.length > 0}
         <!-- Statistics -->
         <div class="stats-section">
           <div class="summary-header">
-            <h3>Split Results</h3>
+            <h3>{$t('tools/cidr-splitter.results.title')}</h3>
             <button
               type="button"
               class="btn btn-primary btn-sm"
@@ -272,32 +280,39 @@
               onclick={copyAllSubnets}
             >
               <Icon name={clipboard.isCopied('all-subnets') ? 'check' : 'copy'} size="sm" />
-              Copy All CIDRs
+              {$t('tools/cidr-splitter.results.copyAllCIDRs')}
             </button>
           </div>
 
           <div class="stats-grid">
             <div class="stat-card">
-              <span class="stat-label" use:tooltip={'The original network that was split'}>Parent Network</span>
+              <span class="stat-label" use:tooltip={$t('tools/cidr-splitter.results.parentNetworkTooltip')}
+                >{$t('tools/cidr-splitter.results.parentNetworkLabel')}</span
+              >
               <span class="stat-value">{result.stats.parentCIDR}</span>
             </div>
             <div class="stat-card">
-              <span class="stat-label" use:tooltip={'Number of child subnets created'}>Child Subnets</span>
+              <span class="stat-label" use:tooltip={$t('tools/cidr-splitter.results.childSubnetsTooltip')}
+                >{$t('tools/cidr-splitter.results.childSubnetsLabel')}</span
+              >
               <span class="stat-value">{result.stats.childCount}</span>
             </div>
             <div class="stat-card">
-              <span class="stat-label" use:tooltip={'Prefix length of each child subnet'}>Child Prefix</span>
+              <span class="stat-label" use:tooltip={$t('tools/cidr-splitter.results.childPrefixTooltip')}
+                >{$t('tools/cidr-splitter.results.childPrefixLabel')}</span
+              >
               <span class="stat-value">/{result.stats.childPrefix}</span>
             </div>
             <div class="stat-card">
-              <span class="stat-label" use:tooltip={'Total IP addresses in each child subnet'}>Addresses per Child</span
+              <span class="stat-label" use:tooltip={$t('tools/cidr-splitter.results.addressesPerChildTooltip')}
+                >{$t('tools/cidr-splitter.results.addressesPerChildLabel')}</span
               >
               <span class="stat-value">{result.stats.addressesPerChild}</span>
             </div>
             {#if result.stats.utilizationPercent < 100}
               <div class="stat-card">
-                <span class="stat-label" use:tooltip={"Percentage of parent network's address space used"}
-                  >Utilization</span
+                <span class="stat-label" use:tooltip={$t('tools/cidr-splitter.results.utilizationTooltip')}
+                  >{$t('tools/cidr-splitter.results.utilizationLabel')}</span
                 >
                 <span class="stat-value">{result.stats.utilizationPercent}%</span>
               </div>
@@ -307,7 +322,7 @@
 
         <!-- Visualization -->
         <div class="visualization-section">
-          <h4>Address Space Visualization</h4>
+          <h4>{$t('tools/cidr-splitter.visualization.title')}</h4>
           <div class="address-bar">
             {#each result.visualization.childRanges as childRange (childRange.cidr)}
               <div
@@ -321,7 +336,7 @@
 
         <!-- Subnet List -->
         <div class="subnets-section">
-          <h4>Child Subnets</h4>
+          <h4>{$t('tools/cidr-splitter.subnets.title')}</h4>
           <div class="subnets-grid">
             {#each result.subnets as subnet (subnet.cidr)}
               <div class="subnet-card">
@@ -338,19 +353,19 @@
                 </div>
                 <div class="subnet-details">
                   <div class="detail-row">
-                    <span class="detail-label">Network:</span>
+                    <span class="detail-label">{$t('tools/cidr-splitter.subnets.networkLabel')}</span>
                     <span class="detail-value">{subnet.network}</span>
                   </div>
                   <div class="detail-row">
-                    <span class="detail-label">Broadcast:</span>
+                    <span class="detail-label">{$t('tools/cidr-splitter.subnets.broadcastLabel')}</span>
                     <span class="detail-value">{subnet.broadcast}</span>
                   </div>
                   <div class="detail-row">
-                    <span class="detail-label">Usable:</span>
+                    <span class="detail-label">{$t('tools/cidr-splitter.subnets.usableLabel')}</span>
                     <span class="detail-value">{subnet.firstHost} - {subnet.lastHost}</span>
                   </div>
                   <div class="detail-row">
-                    <span class="detail-label">Hosts:</span>
+                    <span class="detail-label">{$t('tools/cidr-splitter.subnets.hostsLabel')}</span>
                     <span class="detail-value">{subnet.usableHosts}</span>
                   </div>
                 </div>

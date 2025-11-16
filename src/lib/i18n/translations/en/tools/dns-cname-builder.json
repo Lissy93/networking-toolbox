@@ -1,0 +1,88 @@
+{
+  "title": "CNAME Builder",
+  "description": "Build valid CNAME records with loop detection, self-target checks, and FQDN validation.",
+
+  "mode": {
+    "bulkMode": "Bulk mode (multiple records)"
+  },
+
+  "examples": {
+    "title": "Quick Examples",
+    "webAliases": {
+      "label": "Web Aliases"
+    },
+    "serviceRedirects": {
+      "label": "Service Redirects"
+    },
+    "cdnConfiguration": {
+      "label": "CDN Configuration"
+    },
+    "recordsCount": "{count} records"
+  },
+
+  "input": {
+    "aliases": {
+      "label": "Alias Names",
+      "tooltip": "Enter alias names, one per line",
+      "placeholder": "www\nblog\nmail\nftp"
+    },
+    "targets": {
+      "label": "Target FQDNs",
+      "tooltip": "Enter target FQDNs, one per line. Must end with dot (.).",
+      "placeholder": "server1.example.com.\nserver2.example.com.\nmailserver.example.com.\nftpserver.example.com."
+    },
+    "alias": {
+      "label": "Alias Name",
+      "tooltip": "Enter the alias name (left side of CNAME)",
+      "placeholder": "www"
+    },
+    "target": {
+      "label": "Target FQDN",
+      "tooltip": "Enter the target FQDN (right side of CNAME). Must end with dot (.).",
+      "placeholder": "server1.example.com."
+    },
+    "ttl": {
+      "label": "TTL (seconds)",
+      "tooltip": "Time To Live in seconds"
+    }
+  },
+
+  "bestPractices": {
+    "title": "CNAME Best Practices",
+    "rules": [
+      "Target must be a Fully Qualified Domain Name (FQDN) ending with a dot",
+      "CNAME records cannot coexist with other record types",
+      "Avoid CNAME chains longer than 3-4 hops",
+      "Never point a CNAME to another CNAME if possible"
+    ]
+  },
+
+  "results": {
+    "title": "Generated CNAME Records",
+    "copyButton": "Copy Records",
+    "tableHeaders": {
+      "alias": "Alias",
+      "ttl": "TTL",
+      "type": "Type",
+      "target": "Target",
+      "status": "Status"
+    }
+  },
+
+  "validation": {
+    "title": "Validation Issues",
+    "status": {
+      "valid": "Valid",
+      "loop": "Loop Detected",
+      "selfTarget": "Self Target",
+      "invalidFormat": "Invalid Format",
+      "missingDot": "Missing FQDN Dot",
+      "unknown": "Unknown"
+    },
+    "messages": {
+      "missingDot": "Target should end with '.' to be a proper FQDN",
+      "loop": "Creates a circular reference that will cause DNS resolution to fail",
+      "selfTarget": "Points to itself, which is not allowed"
+    }
+  }
+}

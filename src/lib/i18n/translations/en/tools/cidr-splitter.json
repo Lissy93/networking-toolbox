@@ -1,0 +1,67 @@
+{
+  "title": "CIDR Subnet Splitter",
+  "description": "Split a network into equal child subnets by count or target prefix length.",
+
+  "modes": {
+    "title": "Split Mode",
+    "byCount": {
+      "label": "By Count",
+      "description": "Split into N equal subnets"
+    },
+    "byPrefix": {
+      "label": "By Prefix",
+      "description": "Split to target prefix length"
+    }
+  },
+
+  "input": {
+    "parentNetworkTitle": "Parent Network",
+    "parentCIDRLabel": "Parent CIDR block",
+    "parentCIDRTooltip": "Enter IPv4 or IPv6 network in CIDR notation (e.g., 192.168.1.0/24)",
+    "parentCIDRPlaceholder": "192.168.1.0/24",
+    "clearInputTooltip": "Clear input",
+    "subnetCountLabel": "Number of subnets",
+    "subnetCountTooltip": "How many equal subnets to create (will be rounded to nearest power of 2)",
+    "targetPrefixLabel": "Target prefix length",
+    "targetPrefixTooltip": "The prefix length for child subnets (must be larger than parent prefix)"
+  },
+
+  "examples": {
+    "title": "Quick Examples",
+    "split24To4": "Split /24 → 4 subnets",
+    "split16To20": "Split /16 → /20",
+    "splitIPv6_48To16": "IPv6 /48 → 16 subnets",
+    "splitIPv6_32To40": "IPv6 /32 → /40",
+    "splitToCount": "Split into {count} subnets",
+    "splitToPrefix": "Split to /{prefix} prefix"
+  },
+
+  "results": {
+    "title": "Split Results",
+    "copyAllCIDRs": "Copy All CIDRs",
+    "errorTitle": "Split Error",
+    "parentNetworkLabel": "Parent Network",
+    "parentNetworkTooltip": "The original network that was split",
+    "childSubnetsLabel": "Child Subnets",
+    "childSubnetsTooltip": "Number of child subnets created",
+    "childPrefixLabel": "Child Prefix",
+    "childPrefixTooltip": "Prefix length of each child subnet",
+    "addressesPerChildLabel": "Addresses per Child",
+    "addressesPerChildTooltip": "Total IP addresses in each child subnet",
+    "utilizationLabel": "Utilization",
+    "utilizationTooltip": "Percentage of parent network's address space used"
+  },
+
+  "visualization": {
+    "title": "Address Space Visualization",
+    "subnetTooltip": "{cidr}\nRange: {network} - {broadcast}\nHosts: {totalHosts}"
+  },
+
+  "subnets": {
+    "title": "Child Subnets",
+    "networkLabel": "Network:",
+    "broadcastLabel": "Broadcast:",
+    "usableLabel": "Usable:",
+    "hostsLabel": "Hosts:"
+  }
+}

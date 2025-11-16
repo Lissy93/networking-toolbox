@@ -1,0 +1,25 @@
+{
+  "title": "SPF Record Evaluator",
+  "description": "Evaluate and validate SPF records for email authentication",
+
+  "form": {
+    "title": "SPF Evaluation",
+    "domain": {
+      "label": "Domain",
+      "placeholder": "example.com"
+    },
+    "evaluate": "Evaluate SPF",
+    "evaluating": "Evaluating...",
+    "error": "Please enter a domain"
+  },
+
+  "results": {
+    "title": "SPF Evaluation Results",
+    "valid": "Valid",
+    "invalid": "Invalid",
+    "warnings": "Warnings",
+    "errors": "Errors",
+    "dns_lookups": "DNS Lookups",
+    "mechanisms": "Mechanisms"
+  }
+}

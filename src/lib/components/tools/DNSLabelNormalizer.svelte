@@ -3,6 +3,7 @@
   import { useClipboard } from '$lib/composables';
   import Icon from '$lib/components/global/Icon.svelte';
   import { normalizeLabel, type LabelAnalysis } from '$lib/utils/dns-validation';
+  import { t } from '$lib/stores/language';
 
   let input = $state('');
   let results = $state<LabelAnalysis[]>([]);
@@ -39,29 +40,29 @@
     normalizeInput();
   }
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Case Normalization',
-      value: 'Example.COM\nWWW.GOOGLE.com',
-      description: 'Mixed case domain labels',
+      label: $t('tools/dns-label-normalizer.examples.caseNormalization.label'),
+      value: $t('tools/dns-label-normalizer.examples.caseNormalization.value'),
+      description: $t('tools/dns-label-normalizer.examples.caseNormalization.description'),
     },
     {
-      label: 'IDN/Punycode',
-      value: 'москва.рф\nxn--80adxhks.xn--p1ai',
-      description: 'International domain names',
+      label: $t('tools/dns-label-normalizer.examples.idnPunycode.label'),
+      value: $t('tools/dns-label-normalizer.examples.idnPunycode.value'),
+      description: $t('tools/dns-label-normalizer.examples.idnPunycode.description'),
     },
     {
-      label: 'Homograph Attack',
-      value: 'googlе.com\nexаmple.org',
-      description: 'Cyrillic characters mixed with Latin',
+      label: $t('tools/dns-label-normalizer.examples.homographAttack.label'),
+      value: $t('tools/dns-label-normalizer.examples.homographAttack.value'),
+      description: $t('tools/dns-label-normalizer.examples.homographAttack.description'),
     },
-  ];
+  ]);
 </script>
 
 <div class="card">
   <header class="card-header">
-    <h2>DNS Label Normalizer</h2>
-    <p>Normalize domain labels with case conversion, IDN detection, and homograph attack analysis.</p>
+    <h2>{$t('tools/dns-label-normalizer.title')}</h2>
+    <p>{$t('tools/dns-label-normalizer.subtitle')}</p>
   </header>
 
   <!-- Overview Section -->
@@ -70,22 +71,22 @@
       <div class="overview-card">
         <Icon name="case" size="sm" />
         <div>
-          <strong>Case Normalization</strong>
-          <span>Converts labels to lowercase following DNS case-insensitivity</span>
+          <strong>{$t('tools/dns-label-normalizer.overview.caseNormalization.title')}</strong>
+          <span>{$t('tools/dns-label-normalizer.overview.caseNormalization.description')}</span>
         </div>
       </div>
       <div class="overview-card">
         <Icon name="globe" size="sm" />
         <div>
-          <strong>IDN Detection</strong>
-          <span>Identifies internationalized domain names and punycode encoding</span>
+          <strong>{$t('tools/dns-label-normalizer.overview.idnDetection.title')}</strong>
+          <span>{$t('tools/dns-label-normalizer.overview.idnDetection.description')}</span>
         </div>
       </div>
       <div class="overview-card">
         <Icon name="shield" size="sm" />
         <div>
-          <strong>Security Analysis</strong>
-          <span>Detects homograph attacks and mixed script vulnerabilities</span>
+          <strong>{$t('tools/dns-label-normalizer.overview.securityAnalysis.title')}</strong>
+          <span>{$t('tools/dns-label-normalizer.overview.securityAnalysis.description')}</span>
         </div>
       </div>
     </div>
@@ -96,7 +97,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="sm" />
-        <h3>Example Labels</h3>
+        <h3>{$t('tools/dns-label-normalizer.examples.title')}</h3>
       </summary>
       <div class="examples-inner">
         <div class="examples-grid">
@@ -119,19 +120,17 @@
 
   <!-- Input Section -->
   <section class="input-section">
-    <h3>Domain Labels</h3>
+    <h3>{$t('tools/dns-label-normalizer.input.title')}</h3>
     <div class="input-inner">
       <div class="form-group">
-        <label for="input" use:tooltip={'Enter domain labels separated by spaces, commas, or newlines'}>
+        <label for="input" use:tooltip={$t('tools/dns-label-normalizer.input.tooltip')}>
           <Icon name="dns-label-normalize" size="xs" />
-          Labels to Normalize
+          {$t('tools/dns-label-normalizer.input.label')}
         </label>
         <textarea
           id="input"
           bind:value={input}
-          placeholder="example.com
-xn--e1afmkfd.xn--p1ai
-mixed-script-еxample.com"
+          placeholder={$t('tools/dns-label-normalizer.input.placeholder')}
           rows="4"
           class="label-input"
         ></textarea>
@@ -142,27 +141,27 @@ mixed-script-еxample.com"
   <!-- Results Section -->
   {#if results.length > 0}
     <section class="results-section">
-      <h3>Normalization Results</h3>
+      <h3>{$t('tools/dns-label-normalizer.results.title')}</h3>
       {#each results as result, index (index)}
         <div class="result-item">
           <div class="result-header">
-            <h4>Label {index + 1}</h4>
+            <h4>{$t('tools/dns-label-normalizer.results.labelNumber', { number: index + 1 })}</h4>
             <div class="badges">
               {#if result.isIDN}
-                <span class="badge info">IDN</span>
+                <span class="badge info">{$t('tools/dns-label-normalizer.results.badges.idn')}</span>
               {/if}
               {#if result.hasHomoglyphs}
-                <span class="badge warning">Homoglyphs</span>
+                <span class="badge warning">{$t('tools/dns-label-normalizer.results.badges.homoglyphs')}</span>
               {/if}
               {#if result.scripts.length > 1}
-                <span class="badge error">Mixed Scripts</span>
+                <span class="badge error">{$t('tools/dns-label-normalizer.results.badges.mixedScripts')}</span>
               {/if}
             </div>
           </div>
 
           <div class="label-comparison">
             <div class="label-row">
-              <span class="label-type">Original:</span>
+              <span class="label-type">{$t('tools/dns-label-normalizer.results.original')}</span>
               <code class="label-value">{result.original}</code>
               <button
                 class="copy-button {clipboard.isCopied(`orig-${index}`) ? 'copied' : ''}"
@@ -173,7 +172,7 @@ mixed-script-еxample.com"
             </div>
 
             <div class="label-row">
-              <span class="label-type">Normalized:</span>
+              <span class="label-type">{$t('tools/dns-label-normalizer.results.normalized')}</span>
               <code class="label-value normalized">{result.normalized}</code>
               <button
                 class="copy-button {clipboard.isCopied(`norm-${index}`) ? 'copied' : ''}"
@@ -186,12 +185,12 @@ mixed-script-еxample.com"
             {#if result.original !== result.normalized}
               <div class="change-indicator success">
                 <Icon name="arrow-right" size="sm" />
-                Label was normalized
+                {$t('tools/dns-label-normalizer.results.labelNormalized')}
               </div>
             {:else}
               <div class="change-indicator neutral">
                 <Icon name="minus" size="sm" />
-                No changes needed
+                {$t('tools/dns-label-normalizer.results.noChanges')}
               </div>
             {/if}
           </div>
@@ -200,7 +199,7 @@ mixed-script-еxample.com"
             <div class="scripts-section">
               <h5>
                 <Icon name="globe" size="sm" />
-                Scripts Detected ({result.scripts.length})
+                {$t('tools/dns-label-normalizer.results.scriptsDetected', { count: result.scripts.length })}
               </h5>
               <div class="script-badges">
                 {#each result.scripts as script (script)}
@@ -214,7 +213,7 @@ mixed-script-еxample.com"
             <div class="validation-section warnings">
               <h5>
                 <Icon name="alert-triangle" size="sm" />
-                Security Warnings ({result.warnings.length})
+                {$t('tools/dns-label-normalizer.results.securityWarnings', { count: result.warnings.length })}
               </h5>
               <ul class="validation-list">
                 {#each result.warnings as warning, index (`warning-${index}`)}
@@ -228,7 +227,7 @@ mixed-script-еxample.com"
             <div class="validation-section errors">
               <h5>
                 <Icon name="x-circle" size="sm" />
-                Errors ({result.errors.length})
+                {$t('tools/dns-label-normalizer.results.errors', { count: result.errors.length })}
               </h5>
               <ul class="validation-list">
                 {#each result.errors as error, index (`error-${index}`)}
@@ -244,44 +243,42 @@ mixed-script-еxample.com"
 
   <!-- Educational Section -->
   <section class="education-section">
-    <h3>About DNS Label Normalization</h3>
+    <h3>{$t('tools/dns-label-normalizer.education.title')}</h3>
     <div class="education-grid">
       <div class="education-item">
-        <h4>Case Normalization</h4>
+        <h4>{$t('tools/dns-label-normalizer.education.caseNormalization.title')}</h4>
         <p>
-          DNS labels are case-insensitive. This tool converts all labels to lowercase for consistency and comparison.
+          {$t('tools/dns-label-normalizer.education.caseNormalization.description')}
         </p>
         <div class="code-example">
-          <code>Example.COM</code> → <code>example.com</code>
+          {$t('tools/dns-label-normalizer.education.caseNormalization.example')}
         </div>
       </div>
 
       <div class="education-item">
-        <h4>IDN Processing</h4>
+        <h4>{$t('tools/dns-label-normalizer.education.idnProcessing.title')}</h4>
         <p>
-          Internationalized Domain Names use punycode encoding. This tool detects IDN labels and potential encoding
-          issues.
+          {$t('tools/dns-label-normalizer.education.idnProcessing.description')}
         </p>
         <div class="code-example">
-          <code>москва.рф</code> ↔ <code>xn--80adxhks.xn--p1ai</code>
+          {$t('tools/dns-label-normalizer.education.idnProcessing.example')}
         </div>
       </div>
 
       <div class="education-item">
-        <h4>Security Analysis</h4>
-        <p>Mixed scripts in labels can indicate homograph attacks. This tool warns about potential security risks.</p>
+        <h4>{$t('tools/dns-label-normalizer.education.securityAnalysis.title')}</h4>
+        <p>{$t('tools/dns-label-normalizer.education.securityAnalysis.description')}</p>
         <div class="code-example">
-          <code>googlе.com</code> (Cyrillic 'е')
+          {$t('tools/dns-label-normalizer.education.securityAnalysis.example')}
         </div>
       </div>
 
       <div class="education-item">
-        <h4>Best Practices</h4>
+        <h4>{$t('tools/dns-label-normalizer.education.bestPractices.title')}</h4>
         <p>
-          Always normalize labels before comparison. Be cautious of mixed scripts and visually similar characters from
-          different scripts.
+          {$t('tools/dns-label-normalizer.education.bestPractices.description')}
         </p>
-        <div class="code-example">Normalize → Compare → Validate</div>
+        <div class="code-example">{$t('tools/dns-label-normalizer.education.bestPractices.example')}</div>
       </div>
     </div>
   </section>

@@ -1,0 +1,119 @@
+{
+  "title": "ASN RDAP Lookup",
+  "subtitle": "Query Autonomous System Number allocation and registration data using RDAP through Regional Internet Registries. ASNs identify networks on the global Internet routing table and are essential for BGP routing operations.",
+
+  "examples": {
+    "title": "Common ASN Examples",
+    "items": {
+      "google": {
+        "asn": "AS15169",
+        "description": "Google LLC - Major cloud provider",
+        "tooltip": "Perform RDAP lookup for AS15169 (Google LLC - Major cloud provider)"
+      },
+      "cloudflare": {
+        "asn": "AS13335",
+        "description": "Cloudflare - CDN and security services",
+        "tooltip": "Perform RDAP lookup for AS13335 (Cloudflare - CDN and security services)"
+      },
+      "amazon": {
+        "asn": "AS16509",
+        "description": "Amazon.com - AWS cloud infrastructure",
+        "tooltip": "Perform RDAP lookup for AS16509 (Amazon.com - AWS cloud infrastructure)"
+      },
+      "microsoft": {
+        "asn": "AS8075",
+        "description": "Microsoft Corporation - Azure cloud",
+        "tooltip": "Perform RDAP lookup for AS8075 (Microsoft Corporation - Azure cloud)"
+      },
+      "meta": {
+        "asn": "AS32934",
+        "description": "Meta Platforms - Facebook services",
+        "tooltip": "Perform RDAP lookup for AS32934 (Meta Platforms - Facebook services)"
+      },
+      "googleCloud": {
+        "asn": "AS396982",
+        "description": "Google Cloud Platform - Additional ranges",
+        "tooltip": "Perform RDAP lookup for AS396982 (Google Cloud Platform - Additional ranges)"
+      }
+    }
+  },
+
+  "form": {
+    "title": "RDAP Lookup Configuration",
+    "asnLabel": "Autonomous System Number",
+    "asnPlaceholder": "AS15169 or 15169",
+    "asnTooltip": "Enter an Autonomous System Number to query allocation data via RDAP",
+    "asnHint": "Supports both formats: AS15169 or 15169 (AS prefix is optional)",
+    "lookupButton": "Lookup ASN",
+    "performing": "Performing RDAP Lookup..."
+  },
+
+  "results": {
+    "title": "RDAP Data for {asn}",
+    "copy": "Copy Raw JSON",
+    "copied": "Copied!",
+    "asn": "ASN",
+    "asnTooltip": "The ASN that was queried",
+    "rdapService": "RDAP Service",
+    "rdapServiceTooltip": "RDAP service used for the query",
+    "notAvailable": "Not available",
+    "asnInfo": {
+      "title": "ASN Information",
+      "organizationName": "Organization Name:",
+      "type": "Type:",
+      "country": "Country:",
+      "registry": "Registry:"
+    },
+    "allocation": {
+      "title": "Allocation Details",
+      "status": "Status:",
+      "allocationDate": "Allocation Date:",
+      "lastChanged": "Last Changed:"
+    },
+    "contacts": {
+      "title": "Contact Information",
+      "registrant": "Registrant",
+      "administrative": "Administrative",
+      "technical": "Technical",
+      "abuse": "Abuse",
+      "contact": "Contact",
+      "handle": "Handle: {handle}"
+    }
+  },
+
+  "error": {
+    "title": "RDAP Lookup Failed",
+    "lookupFailed": "ASN RDAP lookup failed: {status}",
+    "troubleshooting": {
+      "title": "Troubleshooting Tips:",
+      "validFormat": "Ensure the ASN format is valid (e.g., AS15169 or just 15169)",
+      "asnExists": "Check if the ASN exists and is currently allocated",
+      "privateASN": "Private ASNs (64512-65534, 4200000000-4294967294) may not have public RDAP data",
+      "rateLimiting": "Some RIRs may have rate limiting or access restrictions",
+      "tryAgain": "Try again in a few moments if the service is temporarily unavailable"
+    }
+  },
+
+  "educational": {
+    "title": "About ASN RDAP Lookups",
+    "whatIsASN": {
+      "title": "What is an ASN?",
+      "description": "Autonomous System Numbers identify networks on the global Internet routing table and are essential for BGP routing operations. Each ASN represents a collection of IP address blocks under unified administrative control."
+    },
+    "asnRanges": {
+      "title": "ASN Ranges by Registry",
+      "arin": "ARIN: AS1 - AS23551, AS393216 - AS394239",
+      "ripe": "RIPE NCC: AS24576 - AS25599, AS34816 - AS35839",
+      "apnic": "APNIC: AS23552 - AS24575, AS37888 - AS38911",
+      "lacnic": "LACNIC: AS26592 - AS27647, AS61440 - AS61951",
+      "afrinic": "AFRINIC: AS36864 - AS37887, AS327680 - AS328703"
+    },
+    "whatYouGet": {
+      "title": "What You'll Get",
+      "organization": "Organization name and type",
+      "country": "Country of registration",
+      "allocation": "Allocation date and status",
+      "contacts": "Contact information (admin, technical, abuse)"
+    }
+  }
+}

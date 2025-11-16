@@ -1,0 +1,69 @@
+{
+  "title": "CIDR Summarization Tool",
+  "description": "Convert mixed IP addresses, CIDR blocks, and ranges into optimized CIDR prefixes with separate IPv4/IPv6 results.",
+
+  "modes": {
+    "title": "Summarization Mode",
+    "exactMerge": {
+      "label": "Exact Merge",
+      "description": "Merge overlapping ranges exactly without additional aggregation"
+    },
+    "minimalCover": {
+      "label": "Minimal Cover",
+      "description": "Find the smallest set of CIDR blocks that covers all inputs"
+    }
+  },
+
+  "examples": {
+    "title": "Quick Examples",
+    "mixedIPv4v6": "Mixed IPv4/IPv6",
+    "overlappingRanges": "Overlapping Ranges",
+    "singleIPs": "Single IPs",
+    "modeComparison": "Mode Comparison",
+    "complexMix": "Complex Mix"
+  },
+
+  "input": {
+    "title": "Input Data",
+    "label": "Enter IP addresses, CIDR blocks, or ranges (one per line)",
+    "tooltip": "Supports: single IPs (192.168.1.1), CIDR blocks (10.0.0.0/8), ranges (172.16.0.1-172.16.0.100)",
+    "placeholder": "192.168.1.0/24\n10.0.0.1-10.0.0.10\n2001:db8::/32",
+    "clearTooltip": "Clear input"
+  },
+
+  "results": {
+    "errorsTitle": "Parsing Errors",
+    "title": "Summarization Results",
+    "copyAllTooltip": "Copy all IPv4 and IPv6 results to clipboard",
+    "copyAll": "Copy All",
+    "ipv4Title": "IPv4 CIDR Blocks ({count})",
+    "ipv4Tooltip": "Copy all IPv4 CIDR blocks to clipboard",
+    "ipv6Title": "IPv6 CIDR Blocks ({count})",
+    "ipv6Tooltip": "Copy all IPv6 CIDR blocks to clipboard",
+    "copyCIDRTooltip": "Copy this CIDR block to clipboard"
+  },
+
+  "stats": {
+    "title": "Summarization Statistics",
+    "originalIPv4Items": {
+      "label": "Original IPv4 Items",
+      "tooltip": "Number of individual IPv4 items in the original input"
+    },
+    "summarizedIPv4Blocks": {
+      "label": "Summarized IPv4 Blocks",
+      "tooltip": "Number of CIDR blocks after IPv4 summarization"
+    },
+    "originalIPv6Items": {
+      "label": "Original IPv6 Items",
+      "tooltip": "Number of individual IPv6 items in the original input"
+    },
+    "summarizedIPv6Blocks": {
+      "label": "Summarized IPv6 Blocks",
+      "tooltip": "Number of CIDR blocks after IPv6 summarization"
+    },
+    "totalAddressesCovered": {
+      "label": "Total Addresses Covered",
+      "tooltip": "Total number of individual IP addresses covered by all summarized blocks"
+    }
+  }
+}

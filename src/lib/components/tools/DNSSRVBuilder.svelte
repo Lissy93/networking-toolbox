@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/stores/language';
 
   type SRVRecord = {
     id: string;
@@ -30,9 +31,9 @@
   ]);
   let showExamples = $state(false);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Web Services',
+      label: $t('tools/dns-srv-builder.examples.webServices'),
       records: [
         { service: '_http', protocol: 'tcp' as const, priority: 10, weight: 5, port: 80, target: 'web1.example.com.' },
         {
@@ -54,7 +55,7 @@
       ],
     },
     {
-      label: 'Mail Services',
+      label: $t('tools/dns-srv-builder.examples.mailServices'),
       records: [
         { service: '_smtp', protocol: 'tcp' as const, priority: 10, weight: 5, port: 25, target: 'mail1.example.com.' },
         {
@@ -76,7 +77,7 @@
       ],
     },
     {
-      label: 'SIP Services',
+      label: $t('tools/dns-srv-builder.examples.sipServices'),
       records: [
         { service: '_sip', protocol: 'tcp' as const, priority: 10, weight: 5, port: 5060, target: 'sip1.example.com.' },
         { service: '_sip', protocol: 'udp' as const, priority: 10, weight: 5, port: 5060, target: 'sip1.example.com.' },
@@ -91,7 +92,7 @@
       ],
     },
     {
-      label: 'XMPP Services',
+      label: $t('tools/dns-srv-builder.examples.xmppServices'),
       records: [
         {
           service: '_xmpp-server',
@@ -111,7 +112,7 @@
         },
       ],
     },
-  ];
+  ]);
 
   const commonServices = [
     { service: '_http', port: 80, protocol: 'tcp' as const },
@@ -186,31 +187,31 @@
     const issues: string[] = [];
 
     if (!record.service.trim()) {
-      issues.push('Service name cannot be empty');
+      issues.push($t('tools/dns-srv-builder.validation.serviceEmpty'));
     } else if (!record.service.startsWith('_')) {
-      issues.push('Service name must start with underscore (_)');
+      issues.push($t('tools/dns-srv-builder.validation.serviceUnderscore'));
     }
 
     if (!record.name.trim()) {
-      issues.push('Domain name cannot be empty');
+      issues.push($t('tools/dns-srv-builder.validation.domainEmpty'));
     }
 
     if (record.priority < 0 || record.priority > 65535) {
-      issues.push('Priority must be between 0 and 65535');
+      issues.push($t('tools/dns-srv-builder.validation.priorityRange'));
     }
 
     if (record.weight < 0 || record.weight > 65535) {
-      issues.push('Weight must be between 0 and 65535');
+      issues.push($t('tools/dns-srv-builder.validation.weightRange'));
     }
 
     if (record.port < 1 || record.port > 65535) {
-      issues.push('Port must be between 1 and 65535');
+      issues.push($t('tools/dns-srv-builder.validation.portRange'));
     }
 
     if (!record.target.trim()) {
-      issues.push('Target cannot be empty');
+      issues.push($t('tools/dns-srv-builder.validation.targetEmpty'));
     } else if (!record.target.endsWith('.')) {
-      issues.push('Target should end with a dot (FQDN)');
+      issues.push($t('tools/dns-srv-builder.validation.targetFQDN'));
     }
 
     return { valid: issues.length === 0, issues };
@@ -238,10 +239,9 @@
 
 <div class="card">
   <div class="card-header">
-    <h1>SRV Record Builder</h1>
+    <h1>{$t('tools/dns-srv-builder.title')}</h1>
     <p class="card-subtitle">
-      Compose SRV records with service discovery, protocol specification, priority/weight balancing, and target
-      validation.
+      {$t('tools/dns-srv-builder.description')}
     </p>
   </div>
 
@@ -249,22 +249,22 @@
     <div class="input-section">
       <div class="controls-header">
         <div class="input-group">
-          <label for="ttl" use:tooltip={'Default Time To Live in seconds for all SRV records'}>
+          <label for="ttl" use:tooltip={$t('tools/dns-srv-builder.input.ttl.tooltip')}>
             <Icon name="clock" size="sm" />
-            Default TTL (seconds)
+            {$t('tools/dns-srv-builder.input.ttl.label')}
           </label>
           <input type="number" id="ttl" bind:value={ttl} min="60" max="86400" />
         </div>
 
         <button class="add-record-btn" onclick={addSRVRecord}>
           <Icon name="plus" size="sm" />
-          Add SRV Record
+          {$t('tools/dns-srv-builder.input.addRecordButton')}
         </button>
       </div>
 
       <div class="srv-records-section">
         <div class="section-header">
-          <h3>SRV Records</h3>
+          <h3>{$t('tools/dns-srv-builder.input.recordsTitle')}</h3>
         </div>
 
         <div class="records-list">
@@ -274,11 +274,9 @@
               <div class="record-fields">
                 <div class="service-protocol-row">
                   <div class="service-input">
-                    <label
-                      for="service-{record.id}"
-                      use:tooltip={'The service name, typically starting with underscore (e.g., _http, _smtp)'}
-                      >Service</label
-                    >
+                    <label for="service-{record.id}" use:tooltip={$t('tools/dns-srv-builder.input.service.tooltip')}>
+                      {$t('tools/dns-srv-builder.input.service.label')}
+                    </label>
                     <div class="service-select-wrapper">
                       <select
                         id="service-{record.id}"
@@ -294,14 +292,14 @@
                         {#each commonServices as service (service.service)}
                           <option value={service.service}>{service.service}</option>
                         {/each}
-                        <option value="custom">Custom</option>
+                        <option value="custom">{$t('tools/dns-srv-builder.input.service.customOption')}</option>
                       </select>
                       {#if record.service === 'custom'}
                         <input
                           type="text"
                           value={record.service}
                           oninput={(e) => updateRecord(record.id, 'service', (e.target as HTMLInputElement).value)}
-                          placeholder="_myservice"
+                          placeholder={$t('tools/dns-srv-builder.input.service.customPlaceholder')}
                           class="custom-service-input"
                         />
                       {/if}
@@ -309,39 +307,40 @@
                   </div>
 
                   <div class="protocol-input">
-                    <label
-                      for="protocol-{record.id}"
-                      use:tooltip={'Transport protocol used by the service (TCP/UDP/TLS/SCTP)'}>Protocol</label
-                    >
+                    <label for="protocol-{record.id}" use:tooltip={$t('tools/dns-srv-builder.input.protocol.tooltip')}>
+                      {$t('tools/dns-srv-builder.input.protocol.label')}
+                    </label>
                     <select
                       id="protocol-{record.id}"
                       value={record.protocol}
                       onchange={(e) => updateRecord(record.id, 'protocol', (e.target as HTMLSelectElement).value)}
                     >
-                      <option value="tcp">TCP</option>
-                      <option value="udp">UDP</option>
-                      <option value="tls">TLS</option>
-                      <option value="sctp">SCTP</option>
+                      <option value="tcp">{$t('tools/dns-srv-builder.input.protocol.tcp')}</option>
+                      <option value="udp">{$t('tools/dns-srv-builder.input.protocol.udp')}</option>
+                      <option value="tls">{$t('tools/dns-srv-builder.input.protocol.tls')}</option>
+                      <option value="sctp">{$t('tools/dns-srv-builder.input.protocol.sctp')}</option>
                     </select>
                   </div>
 
                   <div class="name-input">
-                    <label for="domain-{record.id}" use:tooltip={'The domain name where this service is located'}
-                      >Domain</label
-                    >
+                    <label for="domain-{record.id}" use:tooltip={$t('tools/dns-srv-builder.input.domain.tooltip')}>
+                      {$t('tools/dns-srv-builder.input.domain.label')}
+                    </label>
                     <input
                       id="domain-{record.id}"
                       type="text"
                       value={record.name}
                       oninput={(e) => updateRecord(record.id, 'name', (e.target as HTMLInputElement).value)}
-                      placeholder="example.com"
+                      placeholder={$t('tools/dns-srv-builder.input.domain.placeholder')}
                     />
                   </div>
                 </div>
 
                 <div class="priority-weight-row">
                   <div class="priority-input">
-                    <label for="priority-{record.id}" use:tooltip={'Lower numbers = higher priority'}>Priority</label>
+                    <label for="priority-{record.id}" use:tooltip={$t('tools/dns-srv-builder.input.priority.tooltip')}>
+                      {$t('tools/dns-srv-builder.input.priority.label')}
+                    </label>
                     <input
                       id="priority-{record.id}"
                       type="number"
@@ -354,9 +353,9 @@
                   </div>
 
                   <div class="weight-input">
-                    <label for="weight-{record.id}" use:tooltip={'Load balancing weight for same priority'}
-                      >Weight</label
-                    >
+                    <label for="weight-{record.id}" use:tooltip={$t('tools/dns-srv-builder.input.weight.tooltip')}>
+                      {$t('tools/dns-srv-builder.input.weight.label')}
+                    </label>
                     <input
                       id="weight-{record.id}"
                       type="number"
@@ -368,9 +367,9 @@
                   </div>
 
                   <div class="port-input">
-                    <label for="port-{record.id}" use:tooltip={'Port number where the service is listening (1-65535)'}
-                      >Port</label
-                    >
+                    <label for="port-{record.id}" use:tooltip={$t('tools/dns-srv-builder.input.port.tooltip')}>
+                      {$t('tools/dns-srv-builder.input.port.label')}
+                    </label>
                     <input
                       id="port-{record.id}"
                       type="number"
@@ -382,17 +381,15 @@
                   </div>
 
                   <div class="target-input">
-                    <label
-                      for="target-{record.id}"
-                      use:tooltip={'Fully Qualified Domain Name of the server hosting the service (must end with dot)'}
-                      >Target (FQDN)</label
-                    >
+                    <label for="target-{record.id}" use:tooltip={$t('tools/dns-srv-builder.input.target.tooltip')}>
+                      {$t('tools/dns-srv-builder.input.target.label')}
+                    </label>
                     <input
                       id="target-{record.id}"
                       type="text"
                       value={record.target}
                       oninput={(e) => updateRecord(record.id, 'target', (e.target as HTMLInputElement).value)}
-                      placeholder="server.example.com."
+                      placeholder={$t('tools/dns-srv-builder.input.target.placeholder')}
                     />
                   </div>
                 </div>
@@ -422,30 +419,48 @@
       <details class="examples-toggle" bind:open={showExamples}>
         <summary>
           <Icon name="lightbulb" size="sm" />
-          Service Examples
+          {$t('tools/dns-srv-builder.examples.title')}
         </summary>
         <div class="examples-grid">
           {#each examples as example (example.label)}
             <button class="example-card" onclick={() => loadExample(example)}>
               <h4>{example.label}</h4>
-              <p>{example.records.length} SRV records</p>
+              <p>{$t('tools/dns-srv-builder.examples.recordsCount', { count: example.records.length })}</p>
             </button>
           {/each}
         </div>
       </details>
 
       <div class="info-panel">
-        <h4>SRV Record Structure</h4>
+        <h4>{$t('tools/dns-srv-builder.info.title')}</h4>
         <div class="srv-format">
-          <code>_service._protocol.domain. TTL IN SRV priority weight port target.</code>
+          <code>{$t('tools/dns-srv-builder.info.format')}</code>
         </div>
         <ul>
-          <li><strong>Service:</strong> Must start with underscore (e.g., _http, _sip)</li>
-          <li><strong>Protocol:</strong> Usually tcp, udp, tls, or sctp</li>
-          <li><strong>Priority:</strong> Lower values = higher priority (0-65535)</li>
-          <li><strong>Weight:</strong> Load balancing within same priority (0-65535)</li>
-          <li><strong>Port:</strong> Service port number (1-65535)</li>
-          <li><strong>Target:</strong> FQDN of the server (must end with dot)</li>
+          <li>
+            <strong>{$t('tools/dns-srv-builder.info.serviceLabel')}</strong>
+            {$t('tools/dns-srv-builder.info.serviceDescription')}
+          </li>
+          <li>
+            <strong>{$t('tools/dns-srv-builder.info.protocolLabel')}</strong>
+            {$t('tools/dns-srv-builder.info.protocolDescription')}
+          </li>
+          <li>
+            <strong>{$t('tools/dns-srv-builder.info.priorityLabel')}</strong>
+            {$t('tools/dns-srv-builder.info.priorityDescription')}
+          </li>
+          <li>
+            <strong>{$t('tools/dns-srv-builder.info.weightLabel')}</strong>
+            {$t('tools/dns-srv-builder.info.weightDescription')}
+          </li>
+          <li>
+            <strong>{$t('tools/dns-srv-builder.info.portLabel')}</strong>
+            {$t('tools/dns-srv-builder.info.portDescription')}
+          </li>
+          <li>
+            <strong>{$t('tools/dns-srv-builder.info.targetLabel')}</strong>
+            {$t('tools/dns-srv-builder.info.targetDescription')}
+          </li>
         </ul>
       </div>
     </div>
@@ -454,25 +469,41 @@
   {#if srvRecords.length > 0}
     <div class="results-section">
       <div class="results-header">
-        <h2>Generated SRV Records</h2>
+        <h2>{$t('tools/dns-srv-builder.results.title')}</h2>
         <div class="export-buttons">
           <button onclick={() => copyToClipboard(generateSRVRecords())}>
             <Icon name="copy" size="sm" />
-            Copy Records
+            {$t('tools/dns-srv-builder.results.copyButton')}
           </button>
         </div>
       </div>
 
       <div class="records-table">
         <div class="table-header">
-          <div use:tooltip={'Service name and protocol'}>Service</div>
-          <div use:tooltip={'Time To Live - how long DNS resolvers should cache this record'}>TTL</div>
-          <div use:tooltip={'DNS record type (always SRV for service records)'}>Type</div>
-          <div use:tooltip={'Priority - lower values are preferred (0-65535)'}>Priority</div>
-          <div use:tooltip={'Weight for load balancing among same priority records (0-65535)'}>Weight</div>
-          <div use:tooltip={'Port number where the service is available'}>Port</div>
-          <div use:tooltip={'Target server hostname (FQDN)'}>Target</div>
-          <div use:tooltip={'Validation status of this SRV record'}>Status</div>
+          <div use:tooltip={$t('tools/dns-srv-builder.results.tableHeaders.serviceTooltip')}>
+            {$t('tools/dns-srv-builder.results.tableHeaders.service')}
+          </div>
+          <div use:tooltip={$t('tools/dns-srv-builder.results.tableHeaders.ttlTooltip')}>
+            {$t('tools/dns-srv-builder.results.tableHeaders.ttl')}
+          </div>
+          <div use:tooltip={$t('tools/dns-srv-builder.results.tableHeaders.typeTooltip')}>
+            {$t('tools/dns-srv-builder.results.tableHeaders.type')}
+          </div>
+          <div use:tooltip={$t('tools/dns-srv-builder.results.tableHeaders.priorityTooltip')}>
+            {$t('tools/dns-srv-builder.results.tableHeaders.priority')}
+          </div>
+          <div use:tooltip={$t('tools/dns-srv-builder.results.tableHeaders.weightTooltip')}>
+            {$t('tools/dns-srv-builder.results.tableHeaders.weight')}
+          </div>
+          <div use:tooltip={$t('tools/dns-srv-builder.results.tableHeaders.portTooltip')}>
+            {$t('tools/dns-srv-builder.results.tableHeaders.port')}
+          </div>
+          <div use:tooltip={$t('tools/dns-srv-builder.results.tableHeaders.targetTooltip')}>
+            {$t('tools/dns-srv-builder.results.tableHeaders.target')}
+          </div>
+          <div use:tooltip={$t('tools/dns-srv-builder.results.tableHeaders.statusTooltip')}>
+            {$t('tools/dns-srv-builder.results.tableHeaders.status')}
+          </div>
         </div>
         {#each srvRecords as record (record.id)}
           {@const validation = validateSRVRecord(record)}
@@ -489,7 +520,9 @@
             <div class="status">
               <span class="status-badge {validation.valid ? 'success' : 'error'}">
                 <Icon name={validation.valid ? 'check-circle' : 'x-circle'} size="xs" />
-                {validation.valid ? 'Valid' : 'Issues'}
+                {validation.valid
+                  ? $t('tools/dns-srv-builder.results.statusValid')
+                  : $t('tools/dns-srv-builder.results.statusIssues')}
               </span>
             </div>
           </div>
@@ -500,7 +533,7 @@
         <div class="validation-summary">
           <h3>
             <Icon name="alert-triangle" size="sm" />
-            Configuration Issues
+            {$t('tools/dns-srv-builder.results.validationSummaryTitle')}
           </h3>
           <ul>
             {#each srvRecords.filter((r) => !validateSRVRecord(r).valid) as record (record.id)}

@@ -1,0 +1,28 @@
+{
+  "title": "TLS Handshake Analyzer",
+  "description": "Analyze TLS handshake details including cipher suites, protocols, and certificate information",
+
+  "form": {
+    "title": "TLS Handshake Analysis",
+    "hostname": {
+      "label": "Hostname",
+      "placeholder": "example.com"
+    },
+    "port": {
+      "label": "Port",
+      "placeholder": "443"
+    },
+    "analyze": "Analyze Handshake",
+    "analyzing": "Analyzing...",
+    "error": "Please enter a hostname"
+  },
+
+  "results": {
+    "title": "Handshake Analysis",
+    "protocol": "Protocol",
+    "cipher_suite": "Cipher Suite",
+    "key_exchange": "Key Exchange",
+    "server_signature": "Server Signature",
+    "perfect_forward_secrecy": "Perfect Forward Secrecy"
+  }
+}

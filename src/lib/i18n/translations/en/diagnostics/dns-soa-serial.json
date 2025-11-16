@@ -1,0 +1,156 @@
+{
+  "title": "SOA Serial Analyzer",
+  "subtitle": "Analyze Start of Authority (SOA) records to interpret serial number formats and examine DNS zone timing parameters. SOA records contain critical zone metadata including serial numbers for change tracking and timing values for zone transfers.",
+
+  "resolvers": {
+    "cloudflare": "Cloudflare (1.1.1.1)",
+    "google": "Google (8.8.8.8)",
+    "quad9": "Quad9 (9.9.9.9)",
+    "opendns": "OpenDNS (208.67.222.222)"
+  },
+
+  "examples": {
+    "title": "Domain Examples",
+    "items": {
+      "google": {
+        "domain": "google.com",
+        "description": "High-traffic domain with frequent updates",
+        "tooltip": "Analyze SOA record for google.com (High-traffic domain with frequent updates)"
+      },
+      "github": {
+        "domain": "github.com",
+        "description": "Tech company with modern DNS management",
+        "tooltip": "Analyze SOA record for github.com (Tech company with modern DNS management)"
+      },
+      "cloudflare": {
+        "domain": "cloudflare.com",
+        "description": "DNS provider with optimal configurations",
+        "tooltip": "Analyze SOA record for cloudflare.com (DNS provider with optimal configurations)"
+      },
+      "iana": {
+        "domain": "iana.org",
+        "description": "Internet standards organization",
+        "tooltip": "Analyze SOA record for iana.org (Internet standards organization)"
+      },
+      "rfcEditor": {
+        "domain": "rfc-editor.org",
+        "description": "Official RFC publication site",
+        "tooltip": "Analyze SOA record for rfc-editor.org (Official RFC publication site)"
+      },
+      "example": {
+        "domain": "example.com",
+        "description": "Reserved example domain (RFC 2606)",
+        "tooltip": "Analyze SOA record for example.com (Reserved example domain (RFC 2606))"
+      }
+    }
+  },
+
+  "form": {
+    "title": "SOA Analysis Configuration",
+    "domainLabel": "Domain Name",
+    "domainPlaceholder": "example.com",
+    "domainTooltip": "Enter a domain name to analyze its SOA record",
+    "resolverLabel": "DoH Resolver",
+    "resolverTooltip": "Choose a DNS-over-HTTPS resolver for the query",
+    "analyzing": "Analyzing SOA Record...",
+    "analyzeButton": "Analyze SOA"
+  },
+
+  "results": {
+    "title": "SOA Analysis for {name}",
+    "copyButton": "Copy Raw JSON",
+    "copied": "Copied!",
+    "domainLabel": "Domain:",
+    "domainTooltip": "The domain that was queried",
+    "resolverLabel": "DoH Resolver:",
+    "resolverTooltip": "DNS-over-HTTPS resolver used for the query",
+
+    "serialAnalysis": {
+      "title": "Serial Number Analysis",
+      "notAvailable": "Not available",
+      "unknown": "Unknown",
+      "formatLabel": "Format:",
+      "formatUnknown": "Unknown",
+      "formatExplanation": "No analysis available",
+      "parsedDateLabel": "Parsed Date:",
+      "parsedYear": "Year: {year}",
+      "parsedMonth": "Month: {month}",
+      "parsedDay": "Day: {day}",
+      "parsedRevision": "Revision: {revision}",
+      "validityLabel": "Validity:",
+      "valid": "Valid format",
+      "invalid": "Invalid or unusual format"
+    },
+
+    "soaDetails": {
+      "title": "SOA Record Details",
+      "primaryServer": "Primary Server:",
+      "contactEmail": "Contact Email:",
+      "ttl": "TTL:",
+      "notAvailable": "Not available"
+    },
+
+    "timing": {
+      "title": "Zone Timing Parameters",
+      "refresh": {
+        "title": "Refresh",
+        "description": "How often secondary servers check for updates"
+      },
+      "retry": {
+        "title": "Retry",
+        "description": "Retry interval after failed refresh attempts"
+      },
+      "expire": {
+        "title": "Expire",
+        "description": "When secondary servers stop serving the zone"
+      },
+      "minimum": {
+        "title": "Minimum",
+        "description": "Minimum TTL for negative responses"
+      }
+    },
+
+    "assessment": {
+      "title": "Configuration Assessment"
+    }
+  },
+
+  "error": {
+    "title": "SOA Analysis Failed",
+    "troubleshooting": "Troubleshooting Tips:",
+    "tips": {
+      "validDomain": "Ensure the domain name is valid and has a SOA record",
+      "tryDifferent": "Try a different DoH resolver if the current one fails",
+      "someResolvers": "Some domains may not respond to certain resolvers",
+      "checkDomain": "Check if the domain exists and is properly configured"
+    }
+  },
+
+  "education": {
+    "title": "About SOA Records and Serial Numbers",
+    "whatIsSOA": {
+      "title": "What is a SOA Record?",
+      "description": "Start of Authority records contain administrative information about a DNS zone, including the primary server, contact email, and timing parameters that control zone transfers and caching behavior."
+    },
+    "serialFormats": {
+      "title": "Serial Number Formats",
+      "yyyymmddnn": "YYYYMMDDNN: Date-based format (e.g., 2024031501 = March 15, 2024, revision 01)",
+      "unixTimestamp": "Unix Timestamp: Seconds since epoch (e.g., 1710518400)",
+      "sequential": "Sequential: Simple incrementing numbers (e.g., 1, 2, 3...)"
+    },
+    "timingParams": {
+      "title": "Timing Parameters",
+      "refresh": "Refresh: How often secondaries check for updates",
+      "retry": "Retry: Retry interval after failed transfers",
+      "expire": "Expire: When to stop serving if updates fail",
+      "minimum": "Minimum: TTL for negative (NXDOMAIN) responses"
+    },
+    "bestPractices": {
+      "title": "Best Practices",
+      "useYYYYMMDDNN": "Use YYYYMMDDNN format for predictable versioning",
+      "setRefresh": "Set refresh to 3600-7200s for most zones",
+      "retryShorter": "Retry should be shorter than refresh (1800-3600s)",
+      "expireLonger": "Expire should be much longer (604800-1209600s)"
+    }
+  }
+}

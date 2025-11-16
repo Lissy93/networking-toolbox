@@ -1,0 +1,120 @@
+{
+  "actions": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "copy": "Kopieren",
+    "copied": "Kopiert!",
+    "close": "Schließen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Vorherige",
+    "search": "Suchen",
+    "clear": "Löschen",
+    "reset": "Zurücksetzen",
+    "export": "Exportieren",
+    "import": "Importieren",
+    "download": "Herunterladen",
+    "upload": "Hochladen",
+    "refresh": "Aktualisieren",
+    "apply": "Anwenden",
+    "submit": "Absenden",
+    "confirm": "Bestätigen"
+  },
+
+  "states": {
+    "loading": "Lädt...",
+    "calculating": "Berechne...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "warning": "Warnung",
+    "info": "Info",
+    "processing": "Verarbeite...",
+    "validating": "Validiere...",
+    "saving": "Speichere...",
+    "empty": "Keine Daten verfügbar",
+    "notFound": "Nicht gefunden"
+  },
+
+  "labels": {
+    "name": "Name",
+    "description": "Beschreibung",
+    "example": "Beispiel",
+    "examples": "Beispiele",
+    "value": "Wert",
+    "type": "Typ",
+    "options": "Optionen",
+    "settings": "Einstellungen",
+    "language": "Sprache",
+    "theme": "Design",
+    "help": "Hilfe",
+    "documentation": "Dokumentation",
+    "about": "Über",
+    "version": "Version",
+    "status": "Status"
+  },
+
+  "navigation": {
+    "home": "Startseite",
+    "settings": "Einstellungen",
+    "bookmarks": "Lesezeichen",
+    "search": "Suche",
+    "sitemap": "Sitemap",
+    "about": "Über",
+    "legal": "Rechtliches",
+    "github": "GitHub"
+  },
+
+  "validation": {
+    "required": "Dieses Feld ist erforderlich",
+    "invalid": "Ungültiger Wert",
+    "invalidFormat": "Ungültiges Format",
+    "invalidIp": "Ungültige IP-Adresse",
+    "invalidCidr": "Ungültige CIDR-Notation",
+    "outOfRange": "Wert außerhalb des Bereichs",
+    "mustBePositive": "Wert muss positiv sein",
+    "tooShort": "Wert ist zu kurz",
+    "tooLong": "Wert ist zu lang"
+  },
+
+  "time": {
+    "seconds": {
+      "zero": "0 Sekunden",
+      "one": "1 Sekunde",
+      "other": "{count} Sekunden"
+    },
+    "minutes": {
+      "zero": "0 Minuten",
+      "one": "1 Minute",
+      "other": "{count} Minuten"
+    },
+    "hours": {
+      "zero": "0 Stunden",
+      "one": "1 Stunde",
+      "other": "{count} Stunden"
+    },
+    "days": {
+      "zero": "0 Tage",
+      "one": "1 Tag",
+      "other": "{count} Tage"
+    }
+  },
+
+  "clipboard": {
+    "copy": "In Zwischenablage kopieren",
+    "copySuccess": "In Zwischenablage kopiert!",
+    "copyError": "Fehler beim Kopieren in die Zwischenablage"
+  },
+
+  "errors": {
+    "generic": "Ein Fehler ist aufgetreten",
+    "networkError": "Netzwerkfehler aufgetreten",
+    "timeout": "Anfrage-Timeout",
+    "notFound": "Nicht gefunden",
+    "unauthorized": "Nicht autorisiert",
+    "forbidden": "Verboten",
+    "serverError": "Serverfehler",
+    "unknownError": "Unbekannter Fehler aufgetreten"
+  }
+}

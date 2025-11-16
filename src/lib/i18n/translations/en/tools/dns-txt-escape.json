@@ -1,0 +1,79 @@
+{
+  "title": "TXT Record Escape Tool",
+  "description": "Safely escape and split TXT record strings into DNS-compatible chunks (≤255 characters each).",
+
+  "input": {
+    "textToEscape": {
+      "label": "Text to Escape",
+      "tooltip": "The original text that will be escaped and split into chunks",
+      "placeholder": "Enter your raw text here..."
+    },
+    "maxChunkLength": {
+      "label": "Max Chunk Length",
+      "tooltip": "Maximum length for each chunk (DNS TXT record limit is 255 characters)"
+    },
+    "escapeOptions": {
+      "title": "Escape Options",
+      "tooltip": "Configure how the text should be escaped for DNS compatibility",
+      "escapeQuotes": {
+        "label": "Escape Quotes (\")",
+        "tooltip": "Escape double quote characters as \\\""
+      },
+      "escapeBackslashes": {
+        "label": "Escape Backslashes (\\)",
+        "tooltip": "Escape backslash characters as \\\\"
+      },
+      "preserveSpaces": {
+        "label": "Preserve Spacing",
+        "tooltip": "Keep original whitespace formatting instead of normalizing spaces"
+      }
+    }
+  },
+
+  "validation": {
+    "emptyText": "Please enter text to escape",
+    "invalidChunkLength": "Chunk length must be between 1 and 255 characters",
+    "oversizedChunks": "{count} chunk(s) exceed the maximum length after escaping",
+    "manyChunks": "Text split into {count} chunks (consider splitting across multiple TXT records)",
+    "success": "Text successfully split into {count} chunk(s)"
+  },
+
+  "results": {
+    "chunksTitle": "Escaped Chunks ({count})",
+    "totalLengthTooltip": "Total length after escaping",
+    "totalLengthLabel": "{length} chars",
+    "chunkNumber": "Chunk {number}",
+    "copyChunkTooltip": "Copy this chunk to clipboard",
+    "dnsRecordTitle": "DNS Record Format",
+    "copyButton": "Copy",
+    "copyButtonTooltip": "Copy single-line DNS record format",
+    "exportButton": "Export",
+    "exportButtonTooltip": "Download as zone file",
+    "singleLineFormat": "Single Line Format:",
+    "zoneFileFormat": "Zone File Format:"
+  },
+
+  "examples": {
+    "title": "Example Texts",
+    "spf": {
+      "name": "SPF Record",
+      "description": "Sender Policy Framework record for email authentication",
+      "value": "v=spf1 include:_spf.google.com include:mailgun.org include:servers.mcsv.net ~all"
+    },
+    "dkim": {
+      "name": "DKIM Key",
+      "description": "DomainKeys Identified Mail public key record",
+      "value": "k=rsa; t=s; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDGGYGqwVF6+nQKQ5R7fPqqJLmPjGYGqwVF6+nQKQ5R7fPqqJLmPjGYGqwVF6+nQKQ5R7fPqqJLmPjGYGqwVF6+nQKQ5R7fPqqJLmPjGYGqwVF6+nQKQ5R7fPqqJLmPjGYGqwVF6+nQKQ5R7fPqqJLmPjGYGqwVF6"
+    },
+    "domainVerification": {
+      "name": "Domain Verification",
+      "description": "Google domain ownership verification token",
+      "value": "google-site-verification=rXOxyZounnZasA8Z7oaD3c14JdjS9aKSWvsR1EbUSIQ"
+    },
+    "longText": {
+      "name": "Long Text Sample",
+      "description": "Text that will need to be split into multiple chunks",
+      "value": "This is a very long text string that will definitely exceed the 255 character limit for DNS TXT records and will need to be properly escaped and split into multiple chunks. The escaping tool should handle this automatically and show you exactly how many chunks are created and what the final DNS record format will look like when you publish it to your DNS provider."
+    }
+  }
+}

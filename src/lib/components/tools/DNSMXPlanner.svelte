@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/stores/language';
 
   type MXRecord = {
     id: string;
@@ -24,9 +25,9 @@
   // Derived array for display - sorted or original order based on autoSort
   const displayMxRecords = $derived(autoSort ? [...mxRecords].sort((a, b) => a.priority - b.priority) : mxRecords);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Basic Setup',
+      label: $t('tools/dns-mx-planner.examples.basicSetup'),
       domain: 'company.com',
       records: [
         { priority: 10, mailserver: 'mail.company.com.', role: 'primary' as const },
@@ -34,7 +35,7 @@
       ],
     },
     {
-      label: 'Google Workspace',
+      label: $t('tools/dns-mx-planner.examples.googleWorkspace'),
       domain: 'company.com',
       records: [
         { priority: 1, mailserver: 'aspmx.l.google.com.', role: 'primary' as const },
@@ -45,12 +46,12 @@
       ],
     },
     {
-      label: 'Microsoft 365',
+      label: $t('tools/dns-mx-planner.examples.microsoft365'),
       domain: 'company.com',
       records: [{ priority: 0, mailserver: 'company-com.mail.protection.outlook.com.', role: 'primary' as const }],
     },
     {
-      label: 'Multi-Provider Setup',
+      label: $t('tools/dns-mx-planner.examples.multiProvider'),
       domain: 'company.com',
       records: [
         { priority: 10, mailserver: 'mail1.provider1.com.', role: 'primary' as const },
@@ -58,14 +59,14 @@
         { priority: 30, mailserver: 'fallback.provider2.com.', role: 'backup' as const },
       ],
     },
-  ];
+  ]);
 
-  const priorityGuidelines = [
-    { range: '0-9', usage: 'Highest priority, primary mail servers', color: 'success' },
-    { range: '10-19', usage: 'High priority, secondary mail servers', color: 'info' },
-    { range: '20-49', usage: 'Medium priority, backup servers', color: 'warning' },
-    { range: '50+', usage: 'Low priority, fallback servers', color: 'error' },
-  ];
+  const priorityGuidelines = $derived([
+    { range: '0-9', usage: $t('tools/dns-mx-planner.guidelines.highest'), color: 'success' },
+    { range: '10-19', usage: $t('tools/dns-mx-planner.guidelines.high'), color: 'info' },
+    { range: '20-49', usage: $t('tools/dns-mx-planner.guidelines.medium'), color: 'warning' },
+    { range: '50+', usage: $t('tools/dns-mx-planner.guidelines.low'), color: 'error' },
+  ]);
 
   function addMXRecord() {
     const newId = (Math.max(...mxRecords.map((r) => parseInt(r.id)), 0) + 1).toString();
@@ -110,19 +111,19 @@
     const issues: string[] = [];
 
     if (!record.mailserver.trim()) {
-      issues.push('Mail server cannot be empty');
+      issues.push($t('tools/dns-mx-planner.validation.emptyMailserver'));
     } else if (!record.mailserver.endsWith('.')) {
-      issues.push('Mail server should end with a dot (FQDN)');
+      issues.push($t('tools/dns-mx-planner.validation.missingDot'));
     }
 
     if (record.priority < 0 || record.priority > 65535) {
-      issues.push('Priority must be between 0 and 65535');
+      issues.push($t('tools/dns-mx-planner.validation.priorityRange'));
     }
 
     // Check for duplicate priorities
     const duplicates = mxRecords.filter((r) => r.id !== record.id && r.priority === record.priority);
     if (duplicates.length > 0) {
-      issues.push('Duplicate priority values detected');
+      issues.push($t('tools/dns-mx-planner.validation.duplicatePriority'));
     }
 
     return { valid: issues.length === 0, issues };
@@ -156,44 +157,43 @@
 
 <div class="card">
   <div class="card-header">
-    <h1>MX Record Planner</h1>
-    <p class="card-subtitle">
-      Plan MX record priorities with fallback guidance, best practices, and sample configurations for popular email
-      providers.
-    </p>
+    <h1>{$t('tools/dns-mx-planner.title')}</h1>
+    <p class="card-subtitle">{$t('tools/dns-mx-planner.subtitle')}</p>
   </div>
 
   <div class="grid-layout">
     <div class="input-section">
       <div class="domain-config">
         <div class="input-group">
-          <label for="domain" use:tooltip={'Domain name for the MX records'}>
+          <label for="domain" use:tooltip={$t('tools/dns-mx-planner.input.domain.tooltip')}>
             <Icon name="globe" size="sm" />
-            Domain
+            {$t('tools/dns-mx-planner.input.domain.label')}
           </label>
           <input type="text" id="domain" bind:value={domain} placeholder="example.com" />
         </div>
 
         <div class="input-group">
-          <label for="ttl" use:tooltip={'Default Time To Live in seconds for all MX records'}>
+          <label for="ttl" use:tooltip={$t('tools/dns-mx-planner.input.ttl.tooltip')}>
             <Icon name="clock" size="sm" />
-            Default TTL (seconds)
+            {$t('tools/dns-mx-planner.input.ttl.label')}
           </label>
           <input type="number" id="ttl" bind:value={ttl} min="60" max="86400" />
         </div>
 
         <button class="add-record-btn" onclick={addMXRecord}>
           <Icon name="plus" size="sm" />
-          Add MX Record
+          {$t('tools/dns-mx-planner.input.addRecordButton')}
         </button>
       </div>
 
       <div class="mx-records-section">
         <div class="section-header">
-          <h3>MX Records</h3>
+          <h3>{$t('tools/dns-mx-planner.section.mxRecords')}</h3>
           <button class="sort-btn" onclick={sortRecords}>
             <Icon name="sort" size="sm" />
-            {autoSort ? 'Original Order' : 'Sort by Priority'}
+            {autoSort
+              ? $t('tools/dns-mx-planner.section.sortOriginal')
+              : $t('tools/dns-mx-planner.section.sortPriority')}
           </button>
         </div>
 
@@ -202,7 +202,9 @@
             {@const validation = validateMXRecord(record)}
             <div class="record-row" class:error={!validation.valid}>
               <div class="priority-input">
-                <label for="priority-{record.id}" use:tooltip={'Lower numbers = higher priority'}>Priority</label>
+                <label for="priority-{record.id}" use:tooltip={$t('tools/dns-mx-planner.input.priority.tooltip')}
+                  >{$t('tools/dns-mx-planner.input.priority.label')}</label
+                >
                 <input
                   id="priority-{record.id}"
                   type="number"
@@ -218,7 +220,7 @@
               </div>
 
               <div class="mailserver-input">
-                <label for="mailserver-{record.id}">Mail Server (FQDN)</label>
+                <label for="mailserver-{record.id}">{$t('tools/dns-mx-planner.input.mailserver')}</label>
                 <input
                   id="mailserver-{record.id}"
                   type="text"
@@ -229,15 +231,15 @@
               </div>
 
               <div class="role-select">
-                <label for="role-{record.id}">Role</label>
+                <label for="role-{record.id}">{$t('tools/dns-mx-planner.input.role.label')}</label>
                 <select
                   id="role-{record.id}"
                   value={record.role}
                   onchange={(e) => updateRecord(record.id, 'role', (e.target as HTMLSelectElement).value)}
                 >
-                  <option value="primary">Primary</option>
-                  <option value="backup">Backup</option>
-                  <option value="custom">Custom</option>
+                  <option value="primary">{$t('tools/dns-mx-planner.input.role.primary')}</option>
+                  <option value="backup">{$t('tools/dns-mx-planner.input.role.backup')}</option>
+                  <option value="custom">{$t('tools/dns-mx-planner.input.role.custom')}</option>
                 </select>
               </div>
 
@@ -265,13 +267,13 @@
       <details class="examples-toggle" bind:open={showExamples}>
         <summary>
           <Icon name="lightbulb" size="sm" />
-          Quick Examples
+          {$t('tools/dns-mx-planner.examples.title')}
         </summary>
         <div class="examples-grid">
           {#each examples as example (example.label)}
             <button class="example-card" onclick={() => loadExample(example)}>
               <h4>{example.label}</h4>
-              <p>{example.records.length} MX records</p>
+              <p>{$t('tools/dns-mx-planner.examples.recordsCount', { count: example.records.length })}</p>
             </button>
           {/each}
         </div>
@@ -280,7 +282,7 @@
       <details class="guidance-toggle" bind:open={showGuidance}>
         <summary>
           <Icon name="info" size="sm" />
-          Priority Guidelines
+          {$t('tools/dns-mx-planner.guidelines.title')}
         </summary>
         <div class="priority-guide">
           {#each priorityGuidelines as guideline (guideline.range)}
@@ -293,13 +295,13 @@
       </details>
 
       <div class="info-panel">
-        <h4>MX Best Practices</h4>
+        <h4>{$t('tools/dns-mx-planner.bestPractices.title')}</h4>
         <ul>
-          <li>Always have at least two MX records for redundancy</li>
-          <li>Use different priority values to control mail flow</li>
-          <li>Ensure all mail servers are properly configured</li>
-          <li>Test mail delivery to all configured servers</li>
-          <li>Consider geographic distribution for better performance</li>
+          <li>{$t('tools/dns-mx-planner.bestPractices.redundancy')}</li>
+          <li>{$t('tools/dns-mx-planner.bestPractices.priorities')}</li>
+          <li>{$t('tools/dns-mx-planner.bestPractices.configuration')}</li>
+          <li>{$t('tools/dns-mx-planner.bestPractices.testing')}</li>
+          <li>{$t('tools/dns-mx-planner.bestPractices.geographic')}</li>
         </ul>
       </div>
     </div>
@@ -308,23 +310,23 @@
   {#if mxRecords.length > 0}
     <div class="results-section">
       <div class="results-header">
-        <h2>Generated MX Records</h2>
+        <h2>{$t('tools/dns-mx-planner.results.title')}</h2>
         <div class="export-buttons">
           <button onclick={() => copyToClipboard(generateZoneFileRecords())}>
             <Icon name="copy" size="sm" />
-            Copy Zone Records
+            {$t('tools/dns-mx-planner.results.copyButton')}
           </button>
         </div>
       </div>
 
       <div class="records-table">
         <div class="table-header">
-          <div>Domain</div>
-          <div>TTL</div>
-          <div>Type</div>
-          <div>Priority</div>
-          <div>Mail Server</div>
-          <div>Status</div>
+          <div>{$t('tools/dns-mx-planner.results.tableHeaders.domain')}</div>
+          <div>{$t('tools/dns-mx-planner.results.tableHeaders.ttl')}</div>
+          <div>{$t('tools/dns-mx-planner.results.tableHeaders.type')}</div>
+          <div>{$t('tools/dns-mx-planner.results.tableHeaders.priority')}</div>
+          <div>{$t('tools/dns-mx-planner.results.tableHeaders.mailServer')}</div>
+          <div>{$t('tools/dns-mx-planner.results.tableHeaders.status')}</div>
         </div>
         {#each displayMxRecords as record (record.id)}
           {@const validation = validateMXRecord(record)}
@@ -343,7 +345,9 @@
             <div class="status">
               <span class="status-badge {validation.valid ? 'success' : 'error'}">
                 <Icon name={validation.valid ? 'check-circle' : 'x-circle'} size="xs" />
-                {validation.valid ? 'Valid' : 'Issues'}
+                {validation.valid
+                  ? $t('tools/dns-mx-planner.results.statusValid')
+                  : $t('tools/dns-mx-planner.results.statusIssues')}
               </span>
             </div>
           </div>
@@ -354,13 +358,18 @@
         <div class="validation-summary">
           <h3>
             <Icon name="alert-triangle" size="sm" />
-            Configuration Issues
+            {$t('tools/dns-mx-planner.results.configurationIssues')}
           </h3>
           <ul>
             {#each mxRecords.filter((r) => !validateMXRecord(r).valid) as record (record.id)}
               {@const validation = validateMXRecord(record)}
               <li>
-                <strong>Priority {record.priority}</strong>: {validation.issues.join(', ')}
+                <strong
+                  >{$t('tools/dns-mx-planner.results.priorityIssueFormat', {
+                    priority: record.priority,
+                    issues: validation.issues.join(', '),
+                  })}</strong
+                >
               </li>
             {/each}
           </ul>

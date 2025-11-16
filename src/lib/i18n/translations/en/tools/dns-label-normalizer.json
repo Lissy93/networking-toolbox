@@ -1,0 +1,86 @@
+{
+  "title": "DNS Label Normalizer",
+  "subtitle": "Normalize domain labels with case conversion, IDN detection, and homograph attack analysis.",
+
+  "overview": {
+    "caseNormalization": {
+      "title": "Case Normalization",
+      "description": "Converts labels to lowercase following DNS case-insensitivity"
+    },
+    "idnDetection": {
+      "title": "IDN Detection",
+      "description": "Identifies internationalized domain names and punycode encoding"
+    },
+    "securityAnalysis": {
+      "title": "Security Analysis",
+      "description": "Detects homograph attacks and mixed script vulnerabilities"
+    }
+  },
+
+  "examples": {
+    "title": "Example Labels",
+    "caseNormalization": {
+      "label": "Case Normalization",
+      "value": "Example.COM\nWWW.GOOGLE.com",
+      "description": "Mixed case domain labels"
+    },
+    "idnPunycode": {
+      "label": "IDN/Punycode",
+      "value": "москва.рф\nxn--80adxhks.xn--p1ai",
+      "description": "International domain names"
+    },
+    "homographAttack": {
+      "label": "Homograph Attack",
+      "value": "googlе.com\nexаmple.org",
+      "description": "Cyrillic characters mixed with Latin"
+    }
+  },
+
+  "input": {
+    "title": "Domain Labels",
+    "label": "Labels to Normalize",
+    "tooltip": "Enter domain labels separated by spaces, commas, or newlines",
+    "placeholder": "example.com\nxn--e1afmkfd.xn--p1ai\nmixed-script-еxample.com"
+  },
+
+  "results": {
+    "title": "Normalization Results",
+    "labelNumber": "Label {number}",
+    "badges": {
+      "idn": "IDN",
+      "homoglyphs": "Homoglyphs",
+      "mixedScripts": "Mixed Scripts"
+    },
+    "original": "Original:",
+    "normalized": "Normalized:",
+    "labelNormalized": "Label was normalized",
+    "noChanges": "No changes needed",
+    "scriptsDetected": "Scripts Detected ({count})",
+    "securityWarnings": "Security Warnings ({count})",
+    "errors": "Errors ({count})"
+  },
+
+  "education": {
+    "title": "About DNS Label Normalization",
+    "caseNormalization": {
+      "title": "Case Normalization",
+      "description": "DNS labels are case-insensitive. This tool converts all labels to lowercase for consistency and comparison.",
+      "example": "Example.COM → example.com"
+    },
+    "idnProcessing": {
+      "title": "IDN Processing",
+      "description": "Internationalized Domain Names use punycode encoding. This tool detects IDN labels and potential encoding issues.",
+      "example": "москва.рф ↔ xn--80adxhks.xn--p1ai"
+    },
+    "securityAnalysis": {
+      "title": "Security Analysis",
+      "description": "Mixed scripts in labels can indicate homograph attacks. This tool warns about potential security risks.",
+      "example": "googlе.com (Cyrillic 'е')"
+    },
+    "bestPractices": {
+      "title": "Best Practices",
+      "description": "Always normalize labels before comparison. Be cautious of mixed scripts and visually similar characters from different scripts.",
+      "example": "Normalize → Compare → Validate"
+    }
+  }
+}

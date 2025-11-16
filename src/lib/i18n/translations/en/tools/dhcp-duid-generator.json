@@ -1,0 +1,95 @@
+{
+  "title": "DUID Generator",
+  "subtitle": "Generate DHCP Unique Identifier (DUID) for DHCPv6 clients per RFC 8415. Supports DUID-LLT, DUID-EN, DUID-LL, and DUID-UUID types with configuration export.",
+
+  "exampleDescription": "{type} configuration example",
+
+  "input": {
+    "title": "DUID Configuration",
+    "helpText": "Configure DHCP Unique Identifier for DHCPv6 client identification",
+    "duidType": {
+      "label": "DUID Type",
+      "options": {
+        "duidLlt": "DUID-LLT (Type 1) - Link-layer address + time",
+        "duidEn": "DUID-EN (Type 2) - Enterprise number",
+        "duidLl": "DUID-LL (Type 3) - Link-layer address",
+        "duidUuid": "DUID-UUID (Type 4) - UUID"
+      }
+    },
+    "macAddress": {
+      "label": "MAC Address",
+      "placeholder": "00:1A:2B:3C:4D:5E or 001A2B3C4D5E",
+      "hint": "Enter MAC address in any common format"
+    },
+    "hardwareType": {
+      "label": "Hardware Type",
+      "options": {
+        "ethernet": "Ethernet (1)",
+        "experimentalEthernet": "Experimental Ethernet (2)",
+        "ieee802": "IEEE 802 (6)",
+        "arcnet": "ARCNET (7)",
+        "frameRelay": "Frame Relay (15)",
+        "atm": "ATM (16)",
+        "hdlc": "HDLC (17)",
+        "fibreChannel": "Fibre Channel (18)",
+        "ieee1394": "IEEE 1394 (24)",
+        "infiniband": "InfiniBand (32)"
+      }
+    },
+    "timestamp": {
+      "label": "Timestamp (seconds since Jan 1, 2000 UTC)",
+      "placeholder": "Leave empty for current time",
+      "hint": "Current: {timestamp} seconds since epoch",
+      "useCurrentTooltip": "Use current timestamp",
+      "clearTooltip": "Clear timestamp"
+    },
+    "enterpriseNumber": {
+      "label": "Enterprise Number (IANA)",
+      "placeholder": "e.g., 9 for Cisco, 311 for Microsoft",
+      "hint": "IANA Private Enterprise Number"
+    },
+    "enterpriseIdentifier": {
+      "label": "Enterprise Identifier (hex)",
+      "placeholder": "e.g., 0123456789abcdef",
+      "hint": "Custom identifier in hexadecimal format"
+    },
+    "uuid": {
+      "label": "UUID",
+      "placeholder": "e.g., 550e8400-e29b-41d4-a716-446655440000",
+      "hint": "Standard UUID format (with or without hyphens)"
+    }
+  },
+
+  "errors": {
+    "title": "Validation Errors"
+  },
+
+  "results": {
+    "title": "Generated DUID",
+    "summary": {
+      "type": "Type:",
+      "typeCode": "(Type {code})",
+      "totalLength": "Total Length:",
+      "bytes": "{length} bytes"
+    },
+    "hexEncoded": {
+      "title": "Hex Encoded DUID"
+    },
+    "wireFormat": {
+      "title": "Wire Format (Spaced)"
+    },
+    "breakdown": {
+      "title": "DUID Breakdown"
+    }
+  },
+
+  "config": {
+    "keaDhcp6": "Kea DHCPv6 Configuration",
+    "iscDhcpd": "ISC DHCPd Configuration"
+  },
+
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

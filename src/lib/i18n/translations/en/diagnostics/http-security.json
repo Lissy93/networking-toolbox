@@ -1,0 +1,110 @@
+{
+  "title": "HTTP Security Headers Analyzer",
+  "description": "Analyze and evaluate security headers to identify potential vulnerabilities and security improvements. Check for HSTS, CSP, XSS protection, and other essential security headers.",
+
+  "examples": {
+    "title": "Security Examples",
+    "github": "GitHub security headers",
+    "cloudflare": "Cloudflare security setup",
+    "hsts": "Example with HSTS",
+    "basic": "Basic site (minimal headers)"
+  },
+
+  "form": {
+    "title": "Security Analysis",
+    "url": {
+      "label": "URL",
+      "tooltip": "Enter the URL to analyze security headers for",
+      "placeholder": "https://example.com",
+      "error": "Invalid URL format",
+      "required": "URL is required"
+    },
+    "analyze": "Analyze Security Headers",
+    "analyzing": "Analyzing Security..."
+  },
+
+  "results": {
+    "title": "Security Headers Analysis",
+    "copy": "Copy Analysis",
+    "copied": "Copied!",
+
+    "score": {
+      "grade": "Grade {grade}",
+      "label": "Security Score: {score}%",
+      "headers_present": "Headers Present",
+      "headers_missing": "Headers Missing"
+    },
+
+    "analysis": {
+      "title": "Security Header Analysis"
+    },
+
+    "headers": {
+      "title": "Security Headers Found"
+    },
+
+    "none": {
+      "title": "No security headers found",
+      "message": "This site may be vulnerable to various attacks"
+    },
+
+    "status": {
+      "present": "present",
+      "weak": "weak",
+      "missing": "missing"
+    }
+  },
+
+  "error": {
+    "title": "Security Analysis Failed"
+  },
+
+  "info": {
+    "title": "About Security Headers",
+
+    "critical": {
+      "heading": "Critical Headers",
+      "hsts": {
+        "name": "Strict-Transport-Security:",
+        "description": "Forces HTTPS connections"
+      },
+      "csp": {
+        "name": "Content-Security-Policy:",
+        "description": "Prevents XSS and injection attacks"
+      },
+      "xfo": {
+        "name": "X-Frame-Options:",
+        "description": "Prevents clickjacking attacks"
+      },
+      "xcto": {
+        "name": "X-Content-Type-Options:",
+        "description": "Prevents MIME sniffing"
+      }
+    },
+
+    "additional": {
+      "heading": "Additional Protection",
+      "referrer": {
+        "name": "Referrer-Policy:",
+        "description": "Controls referrer information"
+      },
+      "permissions": {
+        "name": "Permissions-Policy:",
+        "description": "Controls browser features"
+      },
+      "cors": {
+        "name": "Cross-Origin-*:",
+        "description": "CORS and isolation policies"
+      },
+      "xss": {
+        "name": "X-XSS-Protection:",
+        "description": "Legacy XSS protection"
+      }
+    },
+
+    "tips": {
+      "heading": "Implementation Tips",
+      "content": "Start with basic headers (HSTS, CSP, X-Frame-Options) and gradually add more. Test thoroughly as some headers may break functionality if misconfigured."
+    }
+  }
+}

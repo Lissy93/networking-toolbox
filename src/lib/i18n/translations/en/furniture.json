@@ -1,0 +1,146 @@
+{
+  "header": {
+    "subtitle": "The sysadmin's Swiss Army knife",
+    "shortcuts": "Keyboard shortcuts"
+  },
+
+  "footer": {
+    "view_github": "View on GitHub"
+  },
+
+  "navigation": {
+    "primary": "Primary navigation",
+    "mobile": "Mobile navigation",
+    "cidr_tools": "CIDR Tools",
+    "untitled_tool": "Untitled Tool"
+  },
+
+  "menu": {
+    "open": "Open menu",
+    "close": "Close menu"
+  },
+
+  "search": {
+    "placeholder": "Search tools and reference...",
+    "close": "Close search",
+    "no_results": "No results found"
+  },
+
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "command_palette": "Command Palette",
+    "app_title": "Networking Toolbox",
+    "close": "Close shortcuts",
+
+    "view_options": {
+      "shortcuts": "Keyboard Shortcuts",
+      "about": "About"
+    },
+
+    "categories": {
+      "navigation": "Navigation",
+      "bookmarks": "Bookmarks",
+      "general": "General"
+    },
+
+    "actions": {
+      "open_search": "Open search",
+      "open_settings": "Open settings",
+      "toggle_menu": "Toggle menu",
+      "go_home": "Go to homepage",
+      "show_shortcuts": "Show shortcuts",
+      "jump_bookmark": "Jump to bookmarked tool",
+      "close_dialogs": "Close dialogs/clear"
+    },
+
+    "bookmarks": {
+      "your_tools": "Your bookmarked tools ({count})",
+      "homepage": "Homepage",
+      "view_all": "View all Bookmarks",
+      "empty": "You don't have any bookmarks yet.",
+      "help": "Right-click on a tool to bookmark it for quick access and offline use."
+    },
+
+    "about": {
+      "description_1": "Networking Toolbox is an open-source collection of web-based networking tools designed to make network-related tasks quicker and easier.",
+      "description_2": "With 100+ tools, it's privacy-focused and self-hostable, fully customizable, and includes a free REST API for automation.",
+      "github": "GitHub",
+      "page_listing": "Page Listing",
+      "app_settings": "App Settings",
+      "documentation": "Documentation",
+      "support": "Support",
+      "legal": "Legal",
+      "sponsor_heading": "Finding Networking Toolbox useful?",
+      "sponsor_text": "Consider sponsoring us on GitHub to support ongoing development!",
+      "license": "licensed under",
+      "version": "v{version}"
+    }
+  },
+
+  "quick_tips": {
+    "title": "Quick tips",
+    "dismiss": "Dismiss tips",
+    "previous": "Previous tip",
+    "next": "Next tip",
+
+    "tips": {
+      "customize": {
+        "title": "Customize the app in the settings",
+        "description": "Change themes, adjust accessibility, or modify the layout to suit your needs"
+      },
+      "bookmarks": {
+        "title": "Bookmark tools for easy access and offline use",
+        "description": "Right-click any tool to save it for quick access"
+      },
+      "search": {
+        "title": "Use Ctrl+K to quickly search",
+        "description": "Jump to any tool or reference page instantly"
+      },
+      "keyboard": {
+        "title": "Press Ctrl+/ for keyboard shortcuts",
+        "description": "Learn all the productivity shortcuts available"
+      }
+    }
+  },
+
+  "settings_menu": {
+    "open": "Open Settings"
+  },
+
+  "settings_panel": {
+    "aria": {
+      "theme_selection": "Theme selection",
+      "font_scale": "Font scale",
+      "select_color": "Select color {color}"
+    },
+
+    "placeholders": {
+      "site_title": "Networking Toolbox",
+      "site_description": "Your companion for all-things networking",
+      "site_icon": "/favicon.svg or https://example.com/icon.png",
+      "hex_color": "#2563eb",
+      "custom_css": "/* Enter your custom CSS here */"
+    },
+
+    "color_picker": {
+      "title": "Color Picker"
+    },
+
+    "not_found": {
+      "title": "Not found what you were looking for?",
+      "line1": "Good news! The code is open source and easy to work with.",
+      "content": "Simply fork the repo, follow our dev setup instructions, make whatever changes and customizations you like, and then deploy your own instance.",
+      "support": "We also offer enterprise support services, where we can make custom changes for you."
+    },
+
+    "export": {
+      "settings": "Export Settings",
+      "styles": "Export Styles",
+      "env_vars_title": "Environment Variables",
+      "custom_css_title": "Custom CSS",
+      "custom_css_description": "Apply your custom CSS to your self-hosted instance by mounting a CSS file.",
+      "copy_clipboard": "Copy to Clipboard",
+      "copied": "Copied!"
+    }
+  }
+}

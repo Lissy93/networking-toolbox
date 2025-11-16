@@ -1,0 +1,80 @@
+{
+  "title": "IAID Calculator",
+  "subtitle": "Calculate Identity Association Identifier (IAID) for DHCPv6 interfaces. Generate IAIDs from interface index, name, MAC address, or custom values with OS-specific conventions.",
+
+  "config": {
+    "title": "IAID Configuration",
+    "hint": "Select method to generate Identity Association Identifier",
+
+    "method": {
+      "label": "Generation Method",
+      "options": {
+        "interfaceIndex": "Interface Index",
+        "interfaceName": "Interface Name (hash)",
+        "macAddress": "MAC Address (hash)",
+        "custom": "Custom Value"
+      }
+    },
+
+    "interfaceIndex": {
+      "label": "Interface Index",
+      "placeholder": "e.g., 2 for eth0, 3 for wlan0",
+      "hint": "Network interface index (0-4294967295)"
+    },
+
+    "interfaceName": {
+      "label": "Interface Name",
+      "placeholder": "e.g., eth0, wlan0, enp3s0",
+      "hint": "Network interface name (will be hashed to generate IAID)"
+    },
+
+    "macAddress": {
+      "label": "MAC Address",
+      "placeholder": "00:0c:29:4f:a3:d2",
+      "hint": "Hardware address (last 4 bytes used for IAID)"
+    },
+
+    "customValue": {
+      "label": "Custom IAID Value",
+      "placeholder": "Enter value between 0 and 4294967295",
+      "hint": "32-bit unsigned integer (0-4294967295)"
+    }
+  },
+
+  "errors": {
+    "title": "Validation Errors"
+  },
+
+  "results": {
+    "title": "Calculated IAID",
+
+    "summary": {
+      "method": "Method:",
+      "iaid": "IAID:"
+    },
+
+    "hex": "Hexadecimal",
+    "decimal": "Decimal",
+    "binary": "Binary",
+
+    "osConventions": {
+      "title": "OS-Specific Conventions",
+      "hint": "How different operating systems typically generate IAIDs"
+    },
+
+    "configExamples": {
+      "keaDhcp6": "Kea DHCPv6 Configuration",
+      "iscDhcpd": "ISC DHCPd Configuration"
+    }
+  },
+
+  "namingGuide": {
+    "title": "Network Interface Naming Guide",
+    "hint": "Common interface naming conventions across different operating systems"
+  },
+
+  "common": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "title": "DHCPv6 Client FQDN Option (RFC 4704)",
+  "subtitle": "Configure the Client FQDN Option (Option 39) for DHCPv6, enabling dynamic DNS updates and hostname management for IPv6 clients.",
+
+  "configuration": {
+    "fqdnTitle": "FQDN Configuration",
+    "fqdnHelpText": "Fully Qualified Domain Name for the DHCPv6 client",
+    "fqdnLabel": "Fully Qualified Domain Name (FQDN)",
+    "fqdnPlaceholder": "client.example.com",
+
+    "flagsTitle": "DNS Update Flags",
+    "flagsHelpText": "Control how DNS updates are performed",
+
+    "serverUpdate": {
+      "label": "Server Should Update DNS (S Flag)",
+      "help": "Server will perform AAAA and PTR record updates"
+    },
+    "serverOverride": {
+      "label": "Server Override (O Flag)",
+      "help": "Server can override client's preferences"
+    },
+    "clientUpdate": {
+      "label": "Client Should Update DNS (N Flag = 0)",
+      "help": "Client will perform its own DNS updates"
+    }
+  },
+
+  "errors": {
+    "title": "Validation Errors"
+  },
+
+  "results": {
+    "title": "Option 39: Client FQDN",
+    "fqdn": "FQDN:",
+    "totalLength": "Total Length:",
+    "lengthBytes": "{length} bytes",
+
+    "flagsBreakdown": "Flags Breakdown",
+    "sFlag": "S Flag",
+    "oFlag": "O Flag",
+    "nFlag": "N Flag",
+    "flagSet": "Set",
+    "flagNotSet": "Not Set",
+
+    "flagsByte": "Flags Byte",
+    "hexEncoded": "Hex-Encoded (Compact)",
+    "wireFormat": "Wire Format (Spaced)",
+    "encodingBreakdown": "Encoding Breakdown",
+    "flags": "Flags:",
+    "fqdnLabel": "FQDN:",
+
+    "configExample": "Configuration Example",
+    "keaDhcpv6": "Kea DHCPv6 Configuration"
+  },
+
+  "about": {
+    "title": "About RFC 4704",
+    "intro": "RFC 4704 defines the Client FQDN Option for DHCPv6, enabling clients and servers to negotiate dynamic DNS updates for IPv6 addresses.",
+    "sFlagDescription": "Server should perform DNS updates",
+    "oFlagDescription": "Server can override client preferences",
+    "nFlagDescription": "Client requests server to perform updates (client will NOT update)",
+    "conclusion": "The FQDN is encoded using DNS wire format with length-prefixed labels, enabling automated hostname registration in DNS for IPv6 networks."
+  },
+
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

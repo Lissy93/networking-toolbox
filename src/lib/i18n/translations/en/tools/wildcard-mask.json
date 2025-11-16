@@ -1,0 +1,165 @@
+{
+  "title": "Wildcard Mask Converter",
+  "subtitle": "Convert between CIDR notation, subnet masks, and wildcard masks with ACL rule generation",
+
+  "examples": {
+    "title": "Quick Examples",
+    "items": {
+      "basicCidr": {
+        "label": "Basic CIDR to Wildcard",
+        "preview": "Conversion only"
+      },
+      "subnetMask": {
+        "label": "Subnet Mask Format",
+        "preview": "Conversion only"
+      },
+      "wildcardInput": {
+        "label": "Wildcard Mask Input",
+        "preview": "Conversion only"
+      },
+      "mixedFormats": {
+        "label": "Mixed Formats",
+        "preview": "Conversion only"
+      },
+      "ciscoAcl": {
+        "label": "Cisco ACL Generation",
+        "preview": "With ACL"
+      },
+      "complexAcl": {
+        "label": "Complex Network ACLs",
+        "preview": "With ACL"
+      }
+    }
+  },
+
+  "networkInputs": {
+    "title": "Network Inputs",
+    "titleTooltip": "Enter networks in various formats for wildcard mask conversion",
+    "label": "IP Addresses, CIDRs, or Ranges",
+    "labelTooltip": "Enter networks in CIDR, subnet mask, or wildcard mask format",
+    "placeholder": "192.168.1.0/24\n10.0.0.0 255.255.255.0\n172.16.0.0 0.0.255.255",
+    "help": "Enter one per line: CIDR (192.168.1.0/24), network + subnet mask (10.0.0.0 255.255.255.0), or network + wildcard mask (172.16.0.0 0.0.255.255)"
+  },
+
+  "aclOptions": {
+    "title": "ACL Options",
+    "titleTooltip": "Configure access control list rule generation for network devices",
+    "generateLabel": "Generate ACL Rules",
+    "generateTooltip": "Generate access control list rules for network devices",
+
+    "action": {
+      "label": "Action",
+      "tooltip": "Whether to permit or deny traffic matching this rule",
+      "permit": "Permit",
+      "deny": "Deny"
+    },
+
+    "protocol": {
+      "label": "Protocol",
+      "tooltip": "Network protocol (ip, tcp, udp, icmp, etc.)",
+      "placeholder": "ip"
+    },
+
+    "destination": {
+      "label": "Destination",
+      "tooltip": "Destination network or 'any' for all destinations",
+      "placeholder": "any"
+    }
+  },
+
+  "loading": "Converting masks...",
+
+  "errors": {
+    "title": "Errors"
+  },
+
+  "summary": {
+    "title": "Conversion Summary",
+    "titleTooltip": "Overview of wildcard mask conversion results",
+    "totalInputs": {
+      "label": "Total Inputs",
+      "tooltip": "Total number of network inputs processed"
+    },
+    "valid": {
+      "label": "Valid",
+      "tooltip": "Successfully converted network inputs"
+    },
+    "invalid": {
+      "label": "Invalid",
+      "tooltip": "Network inputs that could not be converted"
+    }
+  },
+
+  "conversions": {
+    "title": "Mask Conversions",
+    "titleTooltip": "Detailed conversion results for each network input",
+    "exportCsv": "Export CSV",
+    "exportJson": "Export JSON",
+
+    "status": {
+      "valid": "Valid",
+      "invalid": "Invalid"
+    },
+
+    "details": {
+      "cidr": {
+        "label": "CIDR:",
+        "tooltip": "Classless Inter-Domain Routing notation"
+      },
+      "subnetMask": {
+        "label": "Subnet Mask:",
+        "tooltip": "Standard subnet mask in dotted decimal notation"
+      },
+      "wildcardMask": {
+        "label": "Wildcard Mask:",
+        "tooltip": "Inverse subnet mask used in Cisco ACLs and OSPF"
+      },
+      "network": {
+        "label": "Network:",
+        "tooltip": "First address in the network range"
+      },
+      "broadcast": {
+        "label": "Broadcast:",
+        "tooltip": "Last address in the network range"
+      },
+      "hostBits": {
+        "label": "Host Bits:",
+        "tooltip": "Number of bits available for host addresses"
+      },
+      "usableHosts": {
+        "label": "Usable Hosts:",
+        "tooltip": "Total assignable host addresses (excluding network and broadcast)"
+      }
+    },
+
+    "copyTooltip": "Copy to clipboard"
+  },
+
+  "aclRules": {
+    "title": "Generated ACL Rules",
+    "titleTooltip": "Access control list rules generated for network devices",
+
+    "cisco": {
+      "title": "Cisco ACL",
+      "tooltip": "Cisco IOS access control list format",
+      "copyTooltip": "Copy all Cisco ACL rules to clipboard"
+    },
+
+    "juniper": {
+      "title": "Juniper ACL",
+      "tooltip": "Juniper JunOS firewall filter format",
+      "copyTooltip": "Copy all Juniper ACL rules to clipboard"
+    },
+
+    "generic": {
+      "title": "Generic ACL",
+      "tooltip": "Generic access control list format",
+      "copyTooltip": "Copy all generic ACL rules to clipboard"
+    }
+  },
+
+  "common": {
+    "copy": "Copy",
+    "copied": "Copied!"
+  }
+}

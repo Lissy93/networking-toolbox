@@ -2,6 +2,7 @@
   import { tooltip } from '$lib/actions/tooltip';
   import Icon from '$lib/components/global/Icon.svelte';
   import { SvelteSet } from 'svelte/reactivity';
+  import { t } from '$lib/stores/language';
 
   let aliasInput = $state('');
   let targetInput = $state('');
@@ -17,23 +18,23 @@
   >([]);
   let showExamples = $state(false);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Web Aliases',
+      label: $t('tools/dns-cname-builder.examples.webAliases.label'),
       aliases: 'www\nblog\nshop\napi',
       targets: 'server1.example.com.\nwordpress.hosting.com.\necommerce.platform.com.\napi-gateway.example.com.',
     },
     {
-      label: 'Service Redirects',
+      label: $t('tools/dns-cname-builder.examples.serviceRedirects.label'),
       aliases: 'mail\nftp\nvpn',
       targets: 'mailserver.example.com.\nftpserver.example.com.\nvpngateway.example.com.',
     },
     {
-      label: 'CDN Configuration',
+      label: $t('tools/dns-cname-builder.examples.cdnConfiguration.label'),
       aliases: 'cdn\nstatic\nassets\nimages',
       targets: 'cdn.cloudflare.com.\nstatic.fastly.com.\nassets.cloudfront.net.\nimg.amazonaws.com.',
     },
-  ];
+  ]);
 
   function isValidHostname(hostname: string): boolean {
     if (!hostname || hostname.length > 253) return false;
@@ -170,17 +171,25 @@
   function getStatusInfo(status: (typeof results)[0]['status']) {
     switch (status) {
       case 'valid':
-        return { icon: 'check-circle', class: 'success', text: 'Valid' };
+        return { icon: 'check-circle', class: 'success', text: $t('tools/dns-cname-builder.validation.status.valid') };
       case 'loop':
-        return { icon: 'alert-triangle', class: 'error', text: 'Loop Detected' };
+        return { icon: 'alert-triangle', class: 'error', text: $t('tools/dns-cname-builder.validation.status.loop') };
       case 'self-target':
-        return { icon: 'alert-triangle', class: 'error', text: 'Self Target' };
+        return {
+          icon: 'alert-triangle',
+          class: 'error',
+          text: $t('tools/dns-cname-builder.validation.status.selfTarget'),
+        };
       case 'invalid-format':
-        return { icon: 'x-circle', class: 'error', text: 'Invalid Format' };
+        return {
+          icon: 'x-circle',
+          class: 'error',
+          text: $t('tools/dns-cname-builder.validation.status.invalidFormat'),
+        };
       case 'missing-dot':
-        return { icon: 'info', class: 'warning', text: 'Missing FQDN Dot' };
+        return { icon: 'info', class: 'warning', text: $t('tools/dns-cname-builder.validation.status.missingDot') };
       default:
-        return { icon: 'help-circle', class: 'info', text: 'Unknown' };
+        return { icon: 'help-circle', class: 'info', text: $t('tools/dns-cname-builder.validation.status.unknown') };
     }
   }
 
@@ -191,8 +200,8 @@
 
 <div class="card">
   <div class="card-header">
-    <h1>CNAME Builder</h1>
-    <p class="card-subtitle">Build valid CNAME records with loop detection, self-target checks, and FQDN validation.</p>
+    <h1>{$t('tools/dns-cname-builder.title')}</h1>
+    <p class="card-subtitle">{$t('tools/dns-cname-builder.description')}</p>
   </div>
 
   <div class="grid-layout">
@@ -201,55 +210,69 @@
         <label class="checkbox-option">
           <input type="checkbox" bind:checked={generateMultiple} />
           <span class="checkmark"></span>
-          Bulk mode (multiple records)
+          {$t('tools/dns-cname-builder.mode.bulkMode')}
         </label>
       </div>
 
       {#if generateMultiple}
         <div class="input-group">
-          <label for="aliases" use:tooltip={'Enter alias names, one per line'}>
+          <label for="aliases" use:tooltip={$t('tools/dns-cname-builder.input.aliases.tooltip')}>
             <Icon name="alias" size="sm" />
-            Alias Names
+            {$t('tools/dns-cname-builder.input.aliases.label')}
           </label>
-          <textarea id="aliases" bind:value={aliasInput} placeholder="www&#10;blog&#10;mail&#10;ftp" rows="6"
+          <textarea
+            id="aliases"
+            bind:value={aliasInput}
+            placeholder={$t('tools/dns-cname-builder.input.aliases.placeholder')}
+            rows="6"
           ></textarea>
         </div>
 
         <div class="input-group">
-          <label for="targets" use:tooltip={'Enter target FQDNs, one per line. Must end with dot (.).'}>
+          <label for="targets" use:tooltip={$t('tools/dns-cname-builder.input.targets.tooltip')}>
             <Icon name="target" size="sm" />
-            Target FQDNs
+            {$t('tools/dns-cname-builder.input.targets.label')}
           </label>
           <textarea
             id="targets"
             bind:value={targetInput}
-            placeholder="server1.example.com.&#10;server2.example.com.&#10;mailserver.example.com.&#10;ftpserver.example.com."
+            placeholder={$t('tools/dns-cname-builder.input.targets.placeholder')}
             rows="6"
           ></textarea>
         </div>
       {:else}
         <div class="input-group">
-          <label for="alias" use:tooltip={'Enter the alias name (left side of CNAME)'}>
+          <label for="alias" use:tooltip={$t('tools/dns-cname-builder.input.alias.tooltip')}>
             <Icon name="alias" size="sm" />
-            Alias Name
+            {$t('tools/dns-cname-builder.input.alias.label')}
           </label>
-          <input type="text" id="alias" bind:value={aliasInput} placeholder="www" />
+          <input
+            type="text"
+            id="alias"
+            bind:value={aliasInput}
+            placeholder={$t('tools/dns-cname-builder.input.alias.placeholder')}
+          />
         </div>
 
         <div class="input-group">
-          <label for="target" use:tooltip={'Enter the target FQDN (right side of CNAME). Must end with dot (.).'}>
+          <label for="target" use:tooltip={$t('tools/dns-cname-builder.input.target.tooltip')}>
             <Icon name="target" size="sm" />
-            Target FQDN
+            {$t('tools/dns-cname-builder.input.target.label')}
           </label>
-          <input type="text" id="target" bind:value={targetInput} placeholder="server1.example.com." />
+          <input
+            type="text"
+            id="target"
+            bind:value={targetInput}
+            placeholder={$t('tools/dns-cname-builder.input.target.placeholder')}
+          />
         </div>
       {/if}
 
       <div class="controls-row">
         <div class="input-group">
-          <label for="ttl" use:tooltip={'Time To Live in seconds'}>
+          <label for="ttl" use:tooltip={$t('tools/dns-cname-builder.input.ttl.tooltip')}>
             <Icon name="clock" size="sm" />
-            TTL (seconds)
+            {$t('tools/dns-cname-builder.input.ttl.label')}
           </label>
           <input type="number" id="ttl" bind:value={ttl} min="60" max="86400" />
         </div>
@@ -260,25 +283,26 @@
       <details class="examples-toggle" bind:open={showExamples}>
         <summary>
           <Icon name="lightbulb" size="sm" />
-          Quick Examples
+          {$t('tools/dns-cname-builder.examples.title')}
         </summary>
         <div class="examples-grid">
           {#each examples as example (example.label)}
             <button class="example-card" onclick={() => loadExample(example)}>
               <h4>{example.label}</h4>
-              <p>{example.aliases.split('\n').length} records</p>
+              <p>
+                {$t('tools/dns-cname-builder.examples.recordsCount', { count: example.aliases.split('\n').length })}
+              </p>
             </button>
           {/each}
         </div>
       </details>
 
       <div class="info-panel">
-        <h4>CNAME Best Practices</h4>
+        <h4>{$t('tools/dns-cname-builder.bestPractices.title')}</h4>
         <ul>
-          <li>Target must be a Fully Qualified Domain Name (FQDN) ending with a dot</li>
-          <li>CNAME records cannot coexist with other record types</li>
-          <li>Avoid CNAME chains longer than 3-4 hops</li>
-          <li>Never point a CNAME to another CNAME if possible</li>
+          {#each $t('tools/dns-cname-builder.bestPractices.rules') as rule, index (index)}
+            <li>{rule}</li>
+          {/each}
         </ul>
       </div>
     </div>
@@ -287,24 +311,24 @@
   {#if results.length > 0}
     <div class="results-section">
       <div class="results-header">
-        <h2>Generated CNAME Records</h2>
+        <h2>{$t('tools/dns-cname-builder.results.title')}</h2>
         <div class="export-buttons">
           <button
             onclick={() => copyToClipboard(results.map((r) => `${r.alias} ${r.ttl} IN CNAME ${r.target}`).join('\n'))}
           >
             <Icon name="copy" size="sm" />
-            Copy Records
+            {$t('tools/dns-cname-builder.results.copyButton')}
           </button>
         </div>
       </div>
 
       <div class="records-table">
         <div class="table-header">
-          <div>Alias</div>
-          <div>TTL</div>
-          <div>Type</div>
-          <div>Target</div>
-          <div>Status</div>
+          <div>{$t('tools/dns-cname-builder.results.tableHeaders.alias')}</div>
+          <div>{$t('tools/dns-cname-builder.results.tableHeaders.ttl')}</div>
+          <div>{$t('tools/dns-cname-builder.results.tableHeaders.type')}</div>
+          <div>{$t('tools/dns-cname-builder.results.tableHeaders.target')}</div>
+          <div>{$t('tools/dns-cname-builder.results.tableHeaders.status')}</div>
         </div>
         {#each results as record, index (index)}
           {@const statusInfo = getStatusInfo(record.status)}
@@ -329,7 +353,7 @@
         <div class="validation-warnings">
           <h3>
             <Icon name="alert-triangle" size="sm" />
-            Validation Issues
+            {$t('tools/dns-cname-builder.validation.title')}
           </h3>
           <ul>
             {#each results.filter((r) => r.status !== 'valid') as record, index (index)}
@@ -337,13 +361,13 @@
               <li class="warning-item {statusInfo.class}">
                 <strong>{record.alias}</strong>: {statusInfo.text}
                 {#if record.status === 'missing-dot'}
-                  - Target should end with '.' to be a proper FQDN
+                  - {$t('tools/dns-cname-builder.validation.messages.missingDot')}
                 {/if}
                 {#if record.status === 'loop'}
-                  - Creates a circular reference that will cause DNS resolution to fail
+                  - {$t('tools/dns-cname-builder.validation.messages.loop')}
                 {/if}
                 {#if record.status === 'self-target'}
-                  - Points to itself, which is not allowed
+                  - {$t('tools/dns-cname-builder.validation.messages.selfTarget')}
                 {/if}
               </li>
             {/each}

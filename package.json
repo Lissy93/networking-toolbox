@@ -20,6 +20,9 @@
 		"test:coverage": "vitest run --coverage",
 		"test:api": "vitest run --config tests/vitest.api.config.ts",
 		"test:e2e": "playwright test",
+		"i18n:check": "tsx scripts/check-translations.ts",
+		"i18n:check:verbose": "tsx scripts/check-translations.ts --verbose",
+		"i18n:find-hardcoded": "tsx scripts/find-hardcoded-text.ts",
 		"hold-my-beer": "npm run format && npm run lint && npm run types && npm run check && npm run build-check && npm run test"
 	},
 	"devDependencies": {
@@ -53,6 +56,7 @@
 		"sass-embedded": "^1.91.0",
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",
+		"tsx": "^4.20.6",
 		"typescript": "^5.0.0",
 		"typescript-eslint": "^8.44.0",
 		"vite": "^7.0.4",

@@ -4,6 +4,7 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
   import {
     type TLVOption,
     type TLVResult,
@@ -37,17 +38,53 @@
     description: `Option ${ex.optionCode}: ${ex.items.length} item${ex.items.length > 1 ? 's' : ''} - ${ex.items.map((i) => i.dataType).join(', ')}`,
   }));
 
-  const dataTypeOptions: Array<{ value: TLVDataType; label: string; description: string }> = [
-    { value: 'ipv4', label: 'IPv4 Address', description: '4 bytes, e.g., 192.168.1.1' },
-    { value: 'ipv6', label: 'IPv6 Address', description: '16 bytes, e.g., 2001:db8::1' },
-    { value: 'fqdn', label: 'Domain Name (FQDN)', description: 'DNS wire format with length prefixes' },
-    { value: 'string', label: 'String (UTF-8)', description: 'Text encoded as UTF-8 bytes' },
-    { value: 'hex', label: 'Raw Hex', description: 'Direct hex bytes' },
-    { value: 'uint8', label: 'UInt8', description: '1 byte unsigned integer (0-255)' },
-    { value: 'uint16', label: 'UInt16', description: '2 byte unsigned integer (0-65535)' },
-    { value: 'uint32', label: 'UInt32', description: '4 byte unsigned integer (0-4294967295)' },
-    { value: 'boolean', label: 'Boolean', description: '1 byte (0 or 1)' },
-  ];
+  const dataTypeOptions = $derived([
+    {
+      value: 'ipv4' as const,
+      label: $t('tools/freeform-tlv-builder.dataItems.dataTypes.ipv4.label'),
+      description: $t('tools/freeform-tlv-builder.dataItems.dataTypes.ipv4.description'),
+    },
+    {
+      value: 'ipv6' as const,
+      label: $t('tools/freeform-tlv-builder.dataItems.dataTypes.ipv6.label'),
+      description: $t('tools/freeform-tlv-builder.dataItems.dataTypes.ipv6.description'),
+    },
+    {
+      value: 'fqdn' as const,
+      label: $t('tools/freeform-tlv-builder.dataItems.dataTypes.fqdn.label'),
+      description: $t('tools/freeform-tlv-builder.dataItems.dataTypes.fqdn.description'),
+    },
+    {
+      value: 'string' as const,
+      label: $t('tools/freeform-tlv-builder.dataItems.dataTypes.string.label'),
+      description: $t('tools/freeform-tlv-builder.dataItems.dataTypes.string.description'),
+    },
+    {
+      value: 'hex' as const,
+      label: $t('tools/freeform-tlv-builder.dataItems.dataTypes.hex.label'),
+      description: $t('tools/freeform-tlv-builder.dataItems.dataTypes.hex.description'),
+    },
+    {
+      value: 'uint8' as const,
+      label: $t('tools/freeform-tlv-builder.dataItems.dataTypes.uint8.label'),
+      description: $t('tools/freeform-tlv-builder.dataItems.dataTypes.uint8.description'),
+    },
+    {
+      value: 'uint16' as const,
+      label: $t('tools/freeform-tlv-builder.dataItems.dataTypes.uint16.label'),
+      description: $t('tools/freeform-tlv-builder.dataItems.dataTypes.uint16.description'),
+    },
+    {
+      value: 'uint32' as const,
+      label: $t('tools/freeform-tlv-builder.dataItems.dataTypes.uint32.label'),
+      description: $t('tools/freeform-tlv-builder.dataItems.dataTypes.uint32.description'),
+    },
+    {
+      value: 'boolean' as const,
+      label: $t('tools/freeform-tlv-builder.dataItems.dataTypes.boolean.label'),
+      description: $t('tools/freeform-tlv-builder.dataItems.dataTypes.boolean.description'),
+    },
+  ]);
 
   function loadExample(example: TLVExample, index: number): void {
     // Deep copy the option to avoid reference issues
@@ -93,23 +130,23 @@
   function getPlaceholder(dataType: TLVDataType): string {
     switch (dataType) {
       case 'ipv4':
-        return '192.168.1.1';
+        return $t('tools/freeform-tlv-builder.dataItems.dataTypes.ipv4.placeholder');
       case 'ipv6':
-        return '2001:db8::1';
+        return $t('tools/freeform-tlv-builder.dataItems.dataTypes.ipv6.placeholder');
       case 'fqdn':
-        return 'example.com';
+        return $t('tools/freeform-tlv-builder.dataItems.dataTypes.fqdn.placeholder');
       case 'string':
-        return 'Enter text';
+        return $t('tools/freeform-tlv-builder.dataItems.dataTypes.string.placeholder');
       case 'hex':
-        return 'deadbeef or DE AD BE EF';
+        return $t('tools/freeform-tlv-builder.dataItems.dataTypes.hex.placeholder');
       case 'uint8':
-        return '0-255';
+        return $t('tools/freeform-tlv-builder.dataItems.dataTypes.uint8.placeholder');
       case 'uint16':
-        return '0-65535';
+        return $t('tools/freeform-tlv-builder.dataItems.dataTypes.uint16.placeholder');
       case 'uint32':
-        return '0-4294967295';
+        return $t('tools/freeform-tlv-builder.dataItems.dataTypes.uint32.placeholder');
       case 'boolean':
-        return '0, 1, true, or false';
+        return $t('tools/freeform-tlv-builder.dataItems.dataTypes.boolean.placeholder');
       default:
         return '';
     }
@@ -159,8 +196,8 @@
 </script>
 
 <ToolContentContainer
-  title="Freeform TLV Composer"
-  description="Build custom DHCP options using Type-Length-Value encoding. Support for IPv4, IPv6, FQDN, strings, hex data, and numeric types with live hex preview."
+  title={$t('tools/freeform-tlv-builder.title')}
+  description={$t('tools/freeform-tlv-builder.subtitle')}
 >
   <ExamplesCard
     {examples}
@@ -172,28 +209,40 @@
 
   <div class="card input-card">
     <div class="card-header">
-      <h3>Option Configuration</h3>
+      <h3>{$t('tools/freeform-tlv-builder.optionConfig.title')}</h3>
     </div>
     <div class="card-content">
       <div class="input-row">
         <div class="input-group">
           <label for="option-code">
             <Icon name="hash" size="sm" />
-            Option Code
-            <span class="required">*</span>
+            {$t('tools/freeform-tlv-builder.optionConfig.optionCode.label')}
+            <span class="required">{$t('tools/freeform-tlv-builder.common.required')}</span>
           </label>
-          <input id="option-code" type="number" bind:value={option.optionCode} min="0" max="255" placeholder="224" />
-          <span class="help-text">DHCP option number (0-255, recommend 224-254 for custom)</span>
+          <input
+            id="option-code"
+            type="number"
+            bind:value={option.optionCode}
+            min="0"
+            max="255"
+            placeholder={$t('tools/freeform-tlv-builder.optionConfig.optionCode.placeholder')}
+          />
+          <span class="help-text">{$t('tools/freeform-tlv-builder.optionConfig.optionCode.hint')}</span>
         </div>
 
         <div class="input-group">
           <label for="option-name">
             <Icon name="tag" size="sm" />
-            Option Name
-            <span class="required">*</span>
+            {$t('tools/freeform-tlv-builder.optionConfig.optionName.label')}
+            <span class="required">{$t('tools/freeform-tlv-builder.common.required')}</span>
           </label>
-          <input id="option-name" type="text" bind:value={option.optionName} placeholder="e.g., Custom Server Option" />
-          <span class="help-text">Descriptive name for this option</span>
+          <input
+            id="option-name"
+            type="text"
+            bind:value={option.optionName}
+            placeholder={$t('tools/freeform-tlv-builder.optionConfig.optionName.placeholder')}
+          />
+          <span class="help-text">{$t('tools/freeform-tlv-builder.optionConfig.optionName.hint')}</span>
         </div>
       </div>
     </div>
@@ -201,16 +250,16 @@
 
   <div class="card input-card">
     <div class="card-header">
-      <h3>Data Items</h3>
+      <h3>{$t('tools/freeform-tlv-builder.dataItems.title')}</h3>
       <p class="help-text">
-        Add multiple data items to build the option payload. Each item will be encoded sequentially.
+        {$t('tools/freeform-tlv-builder.dataItems.hint')}
       </p>
     </div>
     <div class="card-content items-container">
       {#each option.items as item, i (item.id)}
         <div class="item-card">
           <div class="item-header">
-            <h4>Item {i + 1}</h4>
+            <h4>{$t('tools/freeform-tlv-builder.dataItems.item', { number: i + 1 })}</h4>
             <button
               type="button"
               class="btn-icon btn-remove"
@@ -225,7 +274,7 @@
           <div class="input-group">
             <label for="datatype-{item.id}">
               <Icon name="binary" size="sm" />
-              Data Type
+              {$t('tools/freeform-tlv-builder.dataItems.dataType')}
             </label>
             <select id="datatype-{item.id}" bind:value={item.dataType}>
               {#each dataTypeOptions as typeOption (typeOption.value)}
@@ -240,7 +289,7 @@
           <div class="input-group">
             <label for="value-{item.id}">
               <Icon name="edit" size="sm" />
-              Value
+              {$t('tools/freeform-tlv-builder.dataItems.value')}
             </label>
             <input
               id="value-{item.id}"
@@ -254,14 +303,14 @@
 
       <button type="button" class="btn-add" onclick={addItem}>
         <Icon name="plus" size="sm" />
-        Add Data Item
+        {$t('tools/freeform-tlv-builder.dataItems.addButton')}
       </button>
     </div>
   </div>
 
   {#if validationErrors.length > 0}
     <div class="card errors-card">
-      <h3>Validation Errors</h3>
+      <h3>{$t('tools/freeform-tlv-builder.errors.title')}</h3>
       {#each validationErrors as error, i (i)}
         <div class="error-message">
           <Icon name="alert-triangle" size="sm" />
@@ -273,18 +322,30 @@
 
   {#if result && validationErrors.length === 0}
     <div class="card results">
-      <h3>Encoded Option</h3>
+      <h3>{$t('tools/freeform-tlv-builder.results.title')}</h3>
 
       <div class="summary-card">
-        <div><strong>Option Code:</strong> {result.option.optionCode}</div>
-        <div><strong>Option Name:</strong> {result.option.optionName}</div>
-        <div><strong>Data Length:</strong> {result.dataLength} bytes</div>
-        <div><strong>Items:</strong> {result.option.items.length}</div>
+        <div>
+          <strong>{$t('tools/freeform-tlv-builder.results.summary.optionCode')}</strong>
+          {result.option.optionCode}
+        </div>
+        <div>
+          <strong>{$t('tools/freeform-tlv-builder.results.summary.optionName')}</strong>
+          {result.option.optionName}
+        </div>
+        <div>
+          <strong>{$t('tools/freeform-tlv-builder.results.summary.dataLength')}</strong>
+          {$t('tools/freeform-tlv-builder.results.summary.bytes', { length: result.dataLength })}
+        </div>
+        <div>
+          <strong>{$t('tools/freeform-tlv-builder.results.summary.items')}</strong>
+          {result.option.items.length}
+        </div>
       </div>
 
       <div class="output-group">
         <div class="output-header">
-          <h4>Hex-Encoded (Compact)</h4>
+          <h4>{$t('tools/freeform-tlv-builder.results.hexEncoded')}</h4>
           <button
             type="button"
             class="copy-btn"
@@ -292,7 +353,9 @@
             onclick={() => clipboard.copy(result!.hexEncoded, 'hex')}
           >
             <Icon name={clipboard.isCopied('hex') ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied('hex') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('hex')
+              ? $t('tools/freeform-tlv-builder.common.copied')
+              : $t('tools/freeform-tlv-builder.common.copy')}
           </button>
         </div>
         <pre class="output-value code-block">{result.hexEncoded}</pre>
@@ -300,7 +363,7 @@
 
       <div class="output-group">
         <div class="output-header">
-          <h4>Wire Format (Spaced)</h4>
+          <h4>{$t('tools/freeform-tlv-builder.results.wireFormat')}</h4>
           <button
             type="button"
             class="copy-btn"
@@ -308,7 +371,9 @@
             onclick={() => clipboard.copy(result!.wireFormat, 'wire')}
           >
             <Icon name={clipboard.isCopied('wire') ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied('wire') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('wire')
+              ? $t('tools/freeform-tlv-builder.common.copied')
+              : $t('tools/freeform-tlv-builder.common.copy')}
           </button>
         </div>
         <pre class="output-value code-block">{result.wireFormat}</pre>
@@ -316,7 +381,7 @@
 
       {#if result.breakdown.length > 0}
         <div class="breakdown-section">
-          <h4>Byte Breakdown</h4>
+          <h4>{$t('tools/freeform-tlv-builder.results.byteBreakdown')}</h4>
           {#each result.breakdown as item, i (i)}
             <div class="breakdown-item">
               <div class="breakdown-label">{item.label}</div>
@@ -329,12 +394,12 @@
     </div>
 
     <div class="card results">
-      <h3>Configuration Examples</h3>
+      <h3>{$t('tools/freeform-tlv-builder.results.configExamples')}</h3>
 
       {#if result.examples.iscDhcpd}
         <div class="output-group">
           <div class="output-header">
-            <h4>ISC dhcpd Configuration</h4>
+            <h4>{$t('tools/freeform-tlv-builder.results.iscDhcpd')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -342,7 +407,9 @@
               onclick={() => clipboard.copy(result!.examples.iscDhcpd!, 'isc')}
             >
               <Icon name={clipboard.isCopied('isc') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('isc') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('isc')
+                ? $t('tools/freeform-tlv-builder.common.copied')
+                : $t('tools/freeform-tlv-builder.common.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.examples.iscDhcpd}</pre>
@@ -352,7 +419,7 @@
       {#if result.examples.keaDhcp4}
         <div class="output-group">
           <div class="output-header">
-            <h4>Kea DHCPv4 Configuration</h4>
+            <h4>{$t('tools/freeform-tlv-builder.results.keaDhcp4')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -360,7 +427,9 @@
               onclick={() => clipboard.copy(result!.examples.keaDhcp4!, 'kea')}
             >
               <Icon name={clipboard.isCopied('kea') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('kea') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('kea')
+                ? $t('tools/freeform-tlv-builder.common.copied')
+                : $t('tools/freeform-tlv-builder.common.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.examples.keaDhcp4}</pre>
@@ -369,22 +438,38 @@
     </div>
 
     <div class="card results info-card">
-      <h3>About TLV Encoding</h3>
+      <h3>{$t('tools/freeform-tlv-builder.about.title')}</h3>
       <p>
-        Type-Length-Value (TLV) is a common encoding scheme used in DHCP options. This tool allows you to compose custom
-        DHCP options by combining multiple data items of different types.
+        {$t('tools/freeform-tlv-builder.about.intro')}
       </p>
       <ul>
-        <li><strong>IPv4/IPv6:</strong> Network addresses encoded as raw bytes</li>
-        <li><strong>FQDN:</strong> Domain names in DNS wire format (length-prefixed labels)</li>
-        <li><strong>String:</strong> UTF-8 encoded text</li>
-        <li><strong>UInt8/16/32:</strong> Unsigned integers of various sizes</li>
-        <li><strong>Boolean:</strong> Single byte (0x00 or 0x01)</li>
-        <li><strong>Hex:</strong> Raw hexadecimal bytes for custom data</li>
+        <li>
+          <strong>{$t('tools/freeform-tlv-builder.about.types.ipv4Ipv6')}</strong>
+          {$t('tools/freeform-tlv-builder.about.types.ipv4Ipv6Desc')}
+        </li>
+        <li>
+          <strong>{$t('tools/freeform-tlv-builder.about.types.fqdn')}</strong>
+          {$t('tools/freeform-tlv-builder.about.types.fqdnDesc')}
+        </li>
+        <li>
+          <strong>{$t('tools/freeform-tlv-builder.about.types.string')}</strong>
+          {$t('tools/freeform-tlv-builder.about.types.stringDesc')}
+        </li>
+        <li>
+          <strong>{$t('tools/freeform-tlv-builder.about.types.uintTypes')}</strong>
+          {$t('tools/freeform-tlv-builder.about.types.uintTypesDesc')}
+        </li>
+        <li>
+          <strong>{$t('tools/freeform-tlv-builder.about.types.boolean')}</strong>
+          {$t('tools/freeform-tlv-builder.about.types.booleanDesc')}
+        </li>
+        <li>
+          <strong>{$t('tools/freeform-tlv-builder.about.types.hex')}</strong>
+          {$t('tools/freeform-tlv-builder.about.types.hexDesc')}
+        </li>
       </ul>
       <p>
-        The generated hex output represents the option data only. DHCP servers will automatically add the option code
-        and length fields when sending the option to clients.
+        {$t('tools/freeform-tlv-builder.about.outro')}
       </p>
     </div>
   {/if}

@@ -4,6 +4,7 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { SvelteSet } from 'svelte/reactivity';
   import '../../../styles/diagnostics-pages.scss';
+  import { t } from '$lib/stores/language';
 
   let listA = $state(`192.168.0.0/16
 10.0.0.0/8
@@ -33,65 +34,65 @@
   let selectedExampleIndex = $state<number | null>(null);
   let _userModified = $state(false);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Network Addition',
+      label: $t('tools/cidr-compare.examples.networkAddition'),
       listA: `192.168.1.0/24
 10.0.0.0/16`,
       listB: `192.168.1.0/24
 10.0.0.0/16
 172.16.0.0/24`,
-      description: 'Added 172.16.0.0/24',
+      description: $t('tools/cidr-compare.examples.networkAdditionDesc'),
     },
     {
-      label: 'Network Removal',
+      label: $t('tools/cidr-compare.examples.networkRemoval'),
       listA: `192.168.0.0/16
 10.0.0.0/8
 172.16.0.0/12`,
       listB: `192.168.0.0/16
 10.0.0.0/8`,
-      description: 'Removed 172.16.0.0/12',
+      description: $t('tools/cidr-compare.examples.networkRemovalDesc'),
     },
     {
-      label: 'Mixed Changes',
+      label: $t('tools/cidr-compare.examples.mixedChanges'),
       listA: `192.168.1.0/24
 10.0.0.0/16
 172.16.1.0/24`,
       listB: `192.168.1.0/24
 10.0.1.0/24
 172.16.2.0/24`,
-      description: 'Swapped subnets',
+      description: $t('tools/cidr-compare.examples.mixedChangesDesc'),
     },
     {
-      label: 'VLAN Reconfiguration',
+      label: $t('tools/cidr-compare.examples.vlanReconfig'),
       listA: `192.168.10.0/24
 192.168.20.0/24
 192.168.30.0/24`,
       listB: `192.168.10.0/24
 192.168.25.0/24
 192.168.35.0/24`,
-      description: 'Replaced VLANs 20,30 with 25,35',
+      description: $t('tools/cidr-compare.examples.vlanReconfigDesc'),
     },
     {
-      label: 'Network Consolidation',
+      label: $t('tools/cidr-compare.examples.networkConsolidation'),
       listA: `10.1.0.0/24
 10.1.1.0/24
 10.1.2.0/24
 10.1.3.0/24`,
       listB: `10.1.0.0/22`,
-      description: 'Merged 4 /24s into 1 /22',
+      description: $t('tools/cidr-compare.examples.networkConsolidationDesc'),
     },
     {
-      label: 'Branch Office Migration',
+      label: $t('tools/cidr-compare.examples.branchOfficeMigration'),
       listA: `172.16.1.0/24
 172.16.2.0/24
 192.168.100.0/24`,
       listB: `10.10.1.0/24
 10.10.2.0/24
 192.168.100.0/24`,
-      description: 'Migrated 172.16.x.x to 10.10.x.x',
+      description: $t('tools/cidr-compare.examples.branchOfficeMigrationDesc'),
     },
-  ];
+  ]);
 
   function loadExample(example: (typeof examples)[0], index: number) {
     listA = example.listA;
@@ -278,8 +279,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>CIDR Compare</h2>
-    <p>Compare two lists of networks to identify changes for auditing</p>
+    <h2>{$t('tools/cidr-compare.title')}</h2>
+    <p>{$t('tools/cidr-compare.description')}</p>
   </header>
 
   <!-- Examples -->
@@ -287,7 +288,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('tools/cidr-compare.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (example.label)}
@@ -307,40 +308,40 @@
   <!-- Input Section -->
   <section class="input-section">
     <div class="input-header">
-      <h3 use:tooltip={'Compare two network lists to identify additions, removals, and unchanged items'}>
-        Network Lists
+      <h3 use:tooltip={$t('tools/cidr-compare.input.networkListsTooltip')}>
+        {$t('tools/cidr-compare.input.networkListsHeading')}
       </h3>
-      <button class="swap-button" onclick={swapLists} use:tooltip={'Swap List A and List B'}>
+      <button class="swap-button" onclick={swapLists} use:tooltip={$t('tools/cidr-compare.input.swapTooltip')}>
         <Icon name="swap" size="sm" />
-        Swap
+        {$t('tools/cidr-compare.input.swapButton')}
       </button>
     </div>
 
     <div class="input-grid">
       <div class="input-group">
-        <label for="list-a" use:tooltip={"Original or 'before' state - CIDR blocks, IP ranges, or individual IPs"}>
+        <label for="list-a" use:tooltip={$t('tools/cidr-compare.input.listATooltip')}>
           <Icon name="list" size="sm" />
-          List A (Before)
+          {$t('tools/cidr-compare.input.listALabel')}
         </label>
         <textarea
           id="list-a"
           bind:value={listA}
           oninput={handleInputChange}
-          placeholder="192.168.0.0/16&#10;10.0.0.0/8&#10;172.16.1.0-172.16.1.255"
+          placeholder={$t('tools/cidr-compare.input.listAPlaceholder')}
           rows="8"
         ></textarea>
       </div>
 
       <div class="input-group">
-        <label for="list-b" use:tooltip={"Updated or 'after' state - CIDR blocks, IP ranges, or individual IPs"}>
+        <label for="list-b" use:tooltip={$t('tools/cidr-compare.input.listBTooltip')}>
           <Icon name="list-check" size="sm" />
-          List B (After)
+          {$t('tools/cidr-compare.input.listBLabel')}
         </label>
         <textarea
           id="list-b"
           bind:value={listB}
           oninput={handleInputChange}
-          placeholder="192.168.0.0/16&#10;10.0.0.0/8&#10;192.168.100.0/24"
+          placeholder={$t('tools/cidr-compare.input.listBPlaceholder')}
           rows="8"
         ></textarea>
       </div>
@@ -353,7 +354,7 @@
       {#if result.success}
         <!-- Summary -->
         <div class="comparison-summary">
-          <h3 use:tooltip={'Overview of changes between the two network lists'}>Comparison Summary</h3>
+          <h3 use:tooltip={$t('tools/cidr-compare.summary.titleTooltip')}>{$t('tools/cidr-compare.summary.title')}</h3>
           <div class="summary-grid">
             <div class="summary-card">
               <div class="summary-icon added">
@@ -361,7 +362,7 @@
               </div>
               <div class="summary-content">
                 <div class="summary-number">{result.summary.addedCount}</div>
-                <div class="summary-label">Added</div>
+                <div class="summary-label">{$t('tools/cidr-compare.summary.addedLabel')}</div>
               </div>
             </div>
 
@@ -371,7 +372,7 @@
               </div>
               <div class="summary-content">
                 <div class="summary-number">{result.summary.removedCount}</div>
-                <div class="summary-label">Removed</div>
+                <div class="summary-label">{$t('tools/cidr-compare.summary.removedLabel')}</div>
               </div>
             </div>
 
@@ -381,17 +382,17 @@
               </div>
               <div class="summary-content">
                 <div class="summary-number">{result.summary.unchangedCount}</div>
-                <div class="summary-label">Unchanged</div>
+                <div class="summary-label">{$t('tools/cidr-compare.summary.unchangedLabel')}</div>
               </div>
             </div>
           </div>
 
           <div class="list-totals">
             <span class="total-item">
-              List A: {result.summary.totalA} items
+              {$t('tools/cidr-compare.summary.listATotal', { count: result.summary.totalA })}
             </span>
             <span class="total-item">
-              List B: {result.summary.totalB} items
+              {$t('tools/cidr-compare.summary.listBTotal', { count: result.summary.totalB })}
             </span>
           </div>
         </div>
@@ -401,9 +402,9 @@
           <!-- Added -->
           <div class="change-category added">
             <div class="category-header">
-              <h4 use:tooltip={'Networks present in List B but not in List A'}>
+              <h4 use:tooltip={$t('tools/cidr-compare.categories.addedTooltip')}>
                 <Icon name="plus-circle" size="sm" />
-                Added Networks ({result.added.length})
+                {$t('tools/cidr-compare.categories.addedTitle', { count: result.added.length })}
               </h4>
               {#if result.added.length > 0}
                 <button
@@ -432,7 +433,7 @@
             {:else}
               <div class="empty-category">
                 <Icon name="check" />
-                <span>No networks added</span>
+                <span>{$t('tools/cidr-compare.empty.noAdded')}</span>
               </div>
             {/if}
           </div>
@@ -440,9 +441,9 @@
           <!-- Removed -->
           <div class="change-category removed">
             <div class="category-header">
-              <h4 use:tooltip={'Networks present in List A but not in List B'}>
+              <h4 use:tooltip={$t('tools/cidr-compare.categories.removedTooltip')}>
                 <Icon name="minus-circle" size="sm" />
-                Removed Networks ({result.removed.length})
+                {$t('tools/cidr-compare.categories.removedTitle', { count: result.removed.length })}
               </h4>
               {#if result.removed.length > 0}
                 <button
@@ -471,7 +472,7 @@
             {:else}
               <div class="empty-category">
                 <Icon name="check" />
-                <span>No networks removed</span>
+                <span>{$t('tools/cidr-compare.empty.noRemoved')}</span>
               </div>
             {/if}
           </div>
@@ -479,9 +480,9 @@
           <!-- Unchanged -->
           <div class="change-category unchanged">
             <div class="category-header">
-              <h4 use:tooltip={'Networks present in both List A and List B'}>
+              <h4 use:tooltip={$t('tools/cidr-compare.categories.unchangedTooltip')}>
                 <Icon name="check-circle" size="sm" />
-                Unchanged Networks ({result.unchanged.length})
+                {$t('tools/cidr-compare.categories.unchangedTitle', { count: result.unchanged.length })}
               </h4>
               {#if result.unchanged.length > 0}
                 <button
@@ -510,7 +511,7 @@
             {:else}
               <div class="empty-category">
                 <Icon name="alert-circle" />
-                <span>No networks remained unchanged</span>
+                <span>{$t('tools/cidr-compare.empty.noUnchanged')}</span>
               </div>
             {/if}
           </div>
@@ -518,8 +519,8 @@
       {:else}
         <div class="error-message">
           <Icon name="alert-triangle" />
-          <h4>Comparison Error</h4>
-          <p>{result.error || 'Unknown error occurred'}</p>
+          <h4>{$t('tools/cidr-compare.error.title')}</h4>
+          <p>{result.error || $t('tools/cidr-compare.error.unknown')}</p>
         </div>
       {/if}
     </section>
