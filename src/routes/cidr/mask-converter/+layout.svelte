@@ -32,13 +32,17 @@
 
   function getSubnetInfo(c: number) {
     const subnet = COMMON_SUBNETS.find((s) => s.cidr === c);
-    return (
-      subnet || {
-        cidr: c,
-        mask: cidrToMask(c).octets.join('.'),
-        hosts: Math.pow(2, 32 - c) - 2,
-      }
-    );
+    if (subnet) return subnet;
+
+    // Calculate usable hosts per RFC 3021
+    const totalAddresses = Math.pow(2, 32 - c);
+    const hosts = c === 32 ? 1 : c === 31 ? 2 : totalAddresses - 2;
+
+    return {
+      cidr: c,
+      mask: cidrToMask(c).octets.join('.'),
+      hosts,
+    };
   }
 
   const subnetInfo = derived(cidr, ($c) => getSubnetInfo($c));
@@ -121,7 +125,7 @@
         <div class="info-metric">
           <span class="info-label">Usable Hosts</span>
           <span class="metric-value success">
-            {get(subnetInfo).hosts.toLocaleString()}
+            {$subnetInfo.hosts.toLocaleString()}
           </span>
         </div>
       </Tooltip>
