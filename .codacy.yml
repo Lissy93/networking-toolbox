@@ -19,10 +19,6 @@ duplication:
   exclude_paths:
     - "tests/**"
 
-engines:
-  eslint:
-    config_file: eslintrc.config.js
-
 # Exclude patterns - ignore test files and build artifacts from analysis
 exclude_paths:
   - "tests/**"
@@ -47,6 +43,7 @@ engines:
   # ESLint configuration (if you want to customize)
   eslint:
     enabled: true
+    config_file: eslintrc.config.js
     exclude_paths:
       - "tests/**"
 
@@ -55,12 +52,6 @@ engines:
     enabled: true
     exclude_paths:
       - "tests/**"
-
-# Additional configuration
-duplication:
-  enabled: true
-  exclude_paths:
-    - "tests/**"
 
 # Complexity and code style checks
 metrics:
