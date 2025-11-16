@@ -52,13 +52,15 @@
   <h2>Customizing</h2>
   <p>You can customize the branding of your instance, by setting a few environment variables. All are optional.</p>
   <ul>
-    <li><code>NTB_SITE_NAME</code> - Change sitename</li>
+    <li><code>NTB_SITE_TITLE</code> - Change site name</li>
     <li><code>NTB_SITE_DESCRIPTION</code> - Change site tagline</li>
     <li><code>NTB_SITE_ICON</code> - Set site icon</li>
     <li><code>NTB_HOMEPAGE_LAYOUT</code> - Set homepage layout</li>
     <li><code>NTB_NAVBAR_DISPLAY</code> - Set navbar display option</li>
     <li><code>NTB_DEFAULT_THEME</code> - Set default theme</li>
-    <li><code>NTB_DEFAULT_LANGUAGE</code> - Set default lang</li>
+    <li><code>NTB_DEFAULT_LANGUAGE</code> - Set default language</li>
+    <li><code>NTB_ANALYTICS_DOMAIN</code> - Analytics domain (or set to <code>false</code> to disable)</li>
+    <li><code>NTB_ANALYTICS_DSN</code> - Analytics script URL (or set to <code>false</code> to disable)</li>
   </ul>
 
   <p>

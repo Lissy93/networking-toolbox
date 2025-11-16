@@ -51,10 +51,10 @@ describe('IPv4 Subnet Calculator Route Functionality', () => {
       expect(result.wildcardMask.octets).toEqual([0, 0, 0, 0]);
       expect(result.cidr).toBe(32);
       expect(result.hostCount).toBe(1);
-      expect(result.usableHosts).toBe(0);
+      expect(result.usableHosts).toBe(1); // Single host route
     });
 
-    it('handles /31 point-to-point link correctly', () => {
+    it('handles /31 point-to-point link correctly (RFC 3021)', () => {
       const result = calculateSubnet('192.168.1.0', 31);
 
       expect(result.network.octets).toEqual([192, 168, 1, 0]);
@@ -63,7 +63,7 @@ describe('IPv4 Subnet Calculator Route Functionality', () => {
       expect(result.wildcardMask.octets).toEqual([0, 0, 0, 1]);
       expect(result.cidr).toBe(31);
       expect(result.hostCount).toBe(2);
-      expect(result.usableHosts).toBe(0); // Traditional calculation: 2 hosts = 0 usable
+      expect(result.usableHosts).toBe(2); // RFC 3021: both IPs usable for point-to-point
     });
 
     it('handles /28 network correctly', () => {

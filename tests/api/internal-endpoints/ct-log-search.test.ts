@@ -33,7 +33,7 @@ describe('CT Log Search API', () => {
 			expect(data.expiringSoon).toBeGreaterThanOrEqual(0);
 			expect(data.wildcardCertificates).toBeGreaterThanOrEqual(0);
 			expect(data.timestamp).toBeDefined();
-		});
+		}, 60000); // Increase timeout to 60s for slow external API
 
 		it('should include required certificate fields', async () => {
 			const { status, data } = await makeRequest('example.com');
@@ -123,6 +123,6 @@ describe('CT Log Search API', () => {
 			expect(data.totalCertificates).toBe(0);
 			expect(data.certificates).toHaveLength(0);
 			expect(data.discoveredHostnames).toHaveLength(0);
-		});
+		}, 60000); // Increase timeout to 60s for slow external API
 	});
 });

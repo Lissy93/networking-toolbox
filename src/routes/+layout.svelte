@@ -25,6 +25,7 @@
   import { initializeOfflineSupport } from '$lib/stores/offline';
   import { bookmarks } from '$lib/stores/bookmarks';
   import { initLanguage, loadNamespaces, locale } from '$lib/stores/language';
+  import { ANALYTICS_ENABLED, ANALYTICS_DOMAIN, ANALYTICS_DSN } from '$lib/config/customizable-settings';
 
   import Header from '$lib/components/furniture/Header.svelte';
   import SubHeader from '$lib/components/furniture/SubHeader.svelte';
@@ -408,8 +409,10 @@
     })}
   {/if}
 
-  <!-- Plausible Analytics -->
-  <script defer data-domain="networking-toolbox.as93.net" src="https://no-track.as93.net/js/script.js"></script>
+  <!-- Analytics (Plausible or custom) -->
+  {#if ANALYTICS_ENABLED}
+    <script defer data-domain={ANALYTICS_DOMAIN} src={ANALYTICS_DSN}></script>
+  {/if}
 
   <!-- Custom Styles for Self-Hosted Instances -->
   <!-- This loads last to ensure custom styles can override defaults -->
