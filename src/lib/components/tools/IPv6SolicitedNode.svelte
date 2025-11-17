@@ -108,7 +108,7 @@
     const lastGroup = groups[7]; // e.g., "5678"
 
     // Take last digit of second-last group and all digits of last group
-    const last24Bits = secondLastGroup.slice(-1) + lastGroup; // "45678"
+    const last24Bits = secondLastGroup.slice(-2) + lastGroup; // "45678"
 
     // Solicited-node multicast prefix is ff02::1:ff00:0/104
     const solicitedNodePrefix = 'ff02:0000:0000:0000:0000:0001:ff';
@@ -149,7 +149,7 @@
       const normalizedUnicast = expandIPv6(trimmed);
       const solicitedNodeAddress = calculateSolicitedNodeMulticast(trimmed);
       const groups = normalizedUnicast.split(':');
-      const last24Bits = groups[6].slice(-1) + groups[7];
+      const last24Bits = groups[6].slice(-2) + groups[7];
 
       const explanation = [
         `1. Take the last 24 bits of the unicast address: ${groups[6]}:${groups[7]} → ${last24Bits}`,
