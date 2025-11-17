@@ -33,9 +33,3 @@
 
   <ToolsGrid tools={dhcpTools} />
 </div>
-
-<style>
-  header {
-    margin-bottom: var(--spacing-md);
-  }
-</style>
