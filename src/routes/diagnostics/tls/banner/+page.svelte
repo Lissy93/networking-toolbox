@@ -7,6 +7,8 @@
 
   let host = $state('');
   let port = $state<number | null>(null);
+  let servername = $state('');
+  let useCustomServername = $state(false);
   let service = $state('custom');
 
   const diagnosticState = useDiagnosticState<any>();
@@ -79,6 +81,7 @@
         body: JSON.stringify({
           action: 'banner',
           host: host.trim(),
+          servername: useCustomServername && servername ? servername.trim() : undefined,
           port: port,
         }),
       });
@@ -210,15 +213,45 @@
         </div>
       </div>
 
-      <button onclick={grabBanner} disabled={diagnosticState.loading || !isInputValid} class="primary">
-        {#if diagnosticState.loading}
-          <Icon name="loader" size="sm" animate="spin" />
-          Connecting...
-        {:else}
-          <Icon name="terminal" size="sm" />
-          Grab Banner
-        {/if}
-      </button>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="checkbox-group">
+            <input
+              type="checkbox"
+              bind:checked={useCustomServername}
+              onchange={() => {
+                examples.clear();
+                if (isInputValid()) grabBanner();
+              }}
+            />
+            Use custom SNI servername
+          </label>
+          {#if useCustomServername}
+            <input
+              type="text"
+              bind:value={servername}
+              placeholder="example.com"
+              use:tooltip={'Custom servername for SNI (Server Name Indication)'}
+              onchange={() => {
+                examples.clear();
+                if (isInputValid()) grabBanner();
+              }}
+            />
+          {/if}
+        </div>
+      </div>
+
+      <div class="action-section">
+        <button onclick={grabBanner} disabled={diagnosticState.loading || !isInputValid} class="primary">
+          {#if diagnosticState.loading}
+            <Icon name="loader" size="sm" animate="spin" />
+            Connecting...
+          {:else}
+            <Icon name="terminal" size="sm" />
+            Grab Banner
+          {/if}
+        </button>
+      </div>
     </div>
   </div>
 
