@@ -4,6 +4,7 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
   import {
     type PXEProfile,
     type PXEResult,
@@ -44,14 +45,14 @@
     description: `${preset.architecture === 'auto' ? 'Auto-detect UEFI/BIOS' : preset.architecture.toUpperCase()} - ${preset.tftpServer}`,
   }));
 
-  const architectureOptions = [
-    { value: 'auto', label: 'Auto-detect' },
-    { value: 'bios', label: 'BIOS only' },
-    { value: 'uefi-x64', label: 'UEFI x64' },
-    { value: 'uefi-x86', label: 'UEFI x86' },
-    { value: 'uefi-arm64', label: 'UEFI ARM64' },
-    { value: 'uefi-arm32', label: 'UEFI ARM32' },
-  ];
+  const architectureOptions = $derived([
+    { value: 'auto', label: $t('tools/pxe-profile-builder.profile.architecture.options.auto') },
+    { value: 'bios', label: $t('tools/pxe-profile-builder.profile.architecture.options.bios') },
+    { value: 'uefi-x64', label: $t('tools/pxe-profile-builder.profile.architecture.options.uefiX64') },
+    { value: 'uefi-x86', label: $t('tools/pxe-profile-builder.profile.architecture.options.uefiX86') },
+    { value: 'uefi-arm64', label: $t('tools/pxe-profile-builder.profile.architecture.options.uefiArm64') },
+    { value: 'uefi-arm32', label: $t('tools/pxe-profile-builder.profile.architecture.options.uefiArm32') },
+  ]);
 
   function validateAndGenerate(currentProfile: PXEProfile): void {
     validationErrors = validatePXEProfile(currentProfile);
@@ -115,8 +116,8 @@
 </script>
 
 <ToolContentContainer
-  title="PXE Profile Generator"
-  description="Generate PXE boot profiles with automatic UEFI/BIOS detection using DHCP Options 93/94. Configure bootfiles for different architectures and generate dhcpd/Kea configuration snippets."
+  title={$t('tools/pxe-profile-builder.title')}
+  description={$t('tools/pxe-profile-builder.subtitle')}
 >
   <ExamplesCard
     examples={presetExamples}
@@ -128,37 +129,42 @@
 
   <div class="card input-card">
     <div class="card-header">
-      <h3>Profile Configuration</h3>
+      <h3>{$t('tools/pxe-profile-builder.profile.title')}</h3>
     </div>
     <div class="card-content">
       <div class="input-group">
         <label for="profile-name">
           <Icon name="tag" size="sm" />
-          Profile Name
-          <span class="required">*</span>
+          {$t('tools/pxe-profile-builder.profile.name.label')}
+          <span class="required">{$t('tools/pxe-profile-builder.common.required')}</span>
         </label>
-        <input id="profile-name" type="text" bind:value={profile.name} placeholder="e.g., Production PXE" />
+        <input
+          id="profile-name"
+          type="text"
+          bind:value={profile.name}
+          placeholder={$t('tools/pxe-profile-builder.profile.name.placeholder')}
+        />
       </div>
 
       <div class="input-group">
         <label for="tftp-server">
           <Icon name="server" size="sm" />
-          TFTP Server (Option 66)
-          <span class="required">*</span>
+          {$t('tools/pxe-profile-builder.profile.tftpServer.label')}
+          <span class="required">{$t('tools/pxe-profile-builder.common.required')}</span>
         </label>
         <input
           id="tftp-server"
           type="text"
           bind:value={profile.tftpServer}
-          placeholder="e.g., pxe.example.com or 192.168.1.10"
+          placeholder={$t('tools/pxe-profile-builder.profile.tftpServer.placeholder')}
         />
-        <span class="help-text">Hostname or IP address of the TFTP server</span>
+        <span class="help-text">{$t('tools/pxe-profile-builder.profile.tftpServer.hint')}</span>
       </div>
 
       <div class="input-group">
         <label for="architecture">
           <Icon name="cpu" size="sm" />
-          Architecture Mode
+          {$t('tools/pxe-profile-builder.profile.architecture.label')}
         </label>
         <select id="architecture" bind:value={profile.architecture}>
           {#each architectureOptions as option (option.value)}
@@ -166,7 +172,7 @@
           {/each}
         </select>
         <span class="help-text">
-          Auto-detect uses Option 93 to serve different bootfiles based on client firmware
+          {$t('tools/pxe-profile-builder.profile.architecture.hint')}
         </span>
       </div>
     </div>
@@ -174,9 +180,9 @@
 
   <div class="card input-card">
     <div class="card-header">
-      <h3>Bootfiles (Option 67)</h3>
+      <h3>{$t('tools/pxe-profile-builder.bootfiles.title')}</h3>
       <p class="help-text">
-        Configure bootfile names for different client architectures. At least one bootfile is required.
+        {$t('tools/pxe-profile-builder.bootfiles.hint')}
       </p>
     </div>
     <div class="card-content">
@@ -184,18 +190,18 @@
         <div class="input-group">
           <label for="bios-bootfile">
             <Icon name="hard-drive" size="sm" />
-            BIOS Bootfile
+            {$t('tools/pxe-profile-builder.bootfiles.bios.label')}
             {#if profile.architecture === 'bios' || profile.architecture === 'auto'}
-              <span class="recommended">(recommended)</span>
+              <span class="recommended">{$t('tools/pxe-profile-builder.common.recommended')}</span>
             {/if}
           </label>
           <input
             id="bios-bootfile"
             type="text"
             bind:value={profile.biosBootfile}
-            placeholder="e.g., pxelinux.0 or undionly.kpxe"
+            placeholder={$t('tools/pxe-profile-builder.bootfiles.bios.placeholder')}
           />
-          <span class="help-text">For legacy BIOS systems (Arch Type 0x0000)</span>
+          <span class="help-text">{$t('tools/pxe-profile-builder.bootfiles.bios.hint')}</span>
         </div>
       {/if}
 
@@ -203,18 +209,18 @@
         <div class="input-group">
           <label for="uefi-x64-bootfile">
             <Icon name="hard-drive" size="sm" />
-            UEFI x64 Bootfile
+            {$t('tools/pxe-profile-builder.bootfiles.uefiX64.label')}
             {#if profile.architecture === 'uefi-x64' || profile.architecture === 'auto'}
-              <span class="recommended">(recommended)</span>
+              <span class="recommended">{$t('tools/pxe-profile-builder.common.recommended')}</span>
             {/if}
           </label>
           <input
             id="uefi-x64-bootfile"
             type="text"
             bind:value={profile.uefiX64Bootfile}
-            placeholder="e.g., bootx64.efi or ipxe-x64.efi"
+            placeholder={$t('tools/pxe-profile-builder.bootfiles.uefiX64.placeholder')}
           />
-          <span class="help-text">For UEFI x86-64 systems (Arch Type 0x0007)</span>
+          <span class="help-text">{$t('tools/pxe-profile-builder.bootfiles.uefiX64.hint')}</span>
         </div>
       {/if}
 
@@ -222,15 +228,15 @@
         <div class="input-group">
           <label for="uefi-x86-bootfile">
             <Icon name="hard-drive" size="sm" />
-            UEFI x86 Bootfile
+            {$t('tools/pxe-profile-builder.bootfiles.uefiX86.label')}
           </label>
           <input
             id="uefi-x86-bootfile"
             type="text"
             bind:value={profile.uefiX86Bootfile}
-            placeholder="e.g., bootia32.efi"
+            placeholder={$t('tools/pxe-profile-builder.bootfiles.uefiX86.placeholder')}
           />
-          <span class="help-text">For UEFI IA32 systems (Arch Type 0x0006)</span>
+          <span class="help-text">{$t('tools/pxe-profile-builder.bootfiles.uefiX86.hint')}</span>
         </div>
       {/if}
 
@@ -238,15 +244,15 @@
         <div class="input-group">
           <label for="uefi-arm64-bootfile">
             <Icon name="hard-drive" size="sm" />
-            UEFI ARM64 Bootfile
+            {$t('tools/pxe-profile-builder.bootfiles.uefiArm64.label')}
           </label>
           <input
             id="uefi-arm64-bootfile"
             type="text"
             bind:value={profile.uefiArm64Bootfile}
-            placeholder="e.g., bootaa64.efi"
+            placeholder={$t('tools/pxe-profile-builder.bootfiles.uefiArm64.placeholder')}
           />
-          <span class="help-text">For UEFI ARM 64-bit systems (Arch Type 0x000b)</span>
+          <span class="help-text">{$t('tools/pxe-profile-builder.bootfiles.uefiArm64.hint')}</span>
         </div>
       {/if}
 
@@ -254,15 +260,15 @@
         <div class="input-group">
           <label for="uefi-arm32-bootfile">
             <Icon name="hard-drive" size="sm" />
-            UEFI ARM32 Bootfile
+            {$t('tools/pxe-profile-builder.bootfiles.uefiArm32.label')}
           </label>
           <input
             id="uefi-arm32-bootfile"
             type="text"
             bind:value={profile.uefiArm32Bootfile}
-            placeholder="e.g., bootarm.efi"
+            placeholder={$t('tools/pxe-profile-builder.bootfiles.uefiArm32.placeholder')}
           />
-          <span class="help-text">For UEFI ARM 32-bit systems (Arch Type 0x000a)</span>
+          <span class="help-text">{$t('tools/pxe-profile-builder.bootfiles.uefiArm32.hint')}</span>
         </div>
       {/if}
     </div>
@@ -270,7 +276,7 @@
 
   {#if validationErrors.length > 0}
     <div class="card errors-card">
-      <h3>Validation Errors</h3>
+      <h3>{$t('tools/pxe-profile-builder.errors.validation')}</h3>
       {#each validationErrors as error, i (i)}
         <div class="error-message">
           <Icon name="alert-triangle" size="sm" />
@@ -285,25 +291,35 @@
 
     <div class="card input-card">
       <div class="card-header">
-        <h3>Network Settings (Optional)</h3>
-        <p class="help-text">Customize network values for configuration examples below</p>
+        <h3>{$t('tools/pxe-profile-builder.network.title')}</h3>
+        <p class="help-text">{$t('tools/pxe-profile-builder.network.hint')}</p>
       </div>
       <div class="card-content">
         <div class="input-row">
           <div class="input-group">
             <label for="subnet">
               <Icon name="network" size="sm" />
-              Subnet
+              {$t('tools/pxe-profile-builder.network.subnet.label')}
             </label>
-            <input id="subnet" type="text" bind:value={profile.network!.subnet} placeholder="192.168.1.0" />
+            <input
+              id="subnet"
+              type="text"
+              bind:value={profile.network!.subnet}
+              placeholder={$t('tools/pxe-profile-builder.network.subnet.placeholder')}
+            />
           </div>
 
           <div class="input-group">
             <label for="netmask">
               <Icon name="network" size="sm" />
-              Netmask
+              {$t('tools/pxe-profile-builder.network.netmask.label')}
             </label>
-            <input id="netmask" type="text" bind:value={profile.network!.netmask} placeholder="255.255.255.0" />
+            <input
+              id="netmask"
+              type="text"
+              bind:value={profile.network!.netmask}
+              placeholder={$t('tools/pxe-profile-builder.network.netmask.placeholder')}
+            />
           </div>
         </div>
 
@@ -311,17 +327,27 @@
           <div class="input-group">
             <label for="range-start">
               <Icon name="arrow-right" size="sm" />
-              Range Start
+              {$t('tools/pxe-profile-builder.network.rangeStart.label')}
             </label>
-            <input id="range-start" type="text" bind:value={profile.network!.rangeStart} placeholder="192.168.1.100" />
+            <input
+              id="range-start"
+              type="text"
+              bind:value={profile.network!.rangeStart}
+              placeholder={$t('tools/pxe-profile-builder.network.rangeStart.placeholder')}
+            />
           </div>
 
           <div class="input-group">
             <label for="range-end">
               <Icon name="arrow-right" size="sm" />
-              Range End
+              {$t('tools/pxe-profile-builder.network.rangeEnd.label')}
             </label>
-            <input id="range-end" type="text" bind:value={profile.network!.rangeEnd} placeholder="192.168.1.200" />
+            <input
+              id="range-end"
+              type="text"
+              bind:value={profile.network!.rangeEnd}
+              placeholder={$t('tools/pxe-profile-builder.network.rangeEnd.placeholder')}
+            />
           </div>
         </div>
 
@@ -329,24 +355,34 @@
           <div class="input-group">
             <label for="gateway">
               <Icon name="arrow-right" size="sm" />
-              Gateway
+              {$t('tools/pxe-profile-builder.network.gateway.label')}
             </label>
-            <input id="gateway" type="text" bind:value={profile.network!.gateway} placeholder="192.168.1.1" />
+            <input
+              id="gateway"
+              type="text"
+              bind:value={profile.network!.gateway}
+              placeholder={$t('tools/pxe-profile-builder.network.gateway.placeholder')}
+            />
           </div>
 
           <div class="input-group">
             <label for="dns">
               <Icon name="globe" size="sm" />
-              DNS Server
+              {$t('tools/pxe-profile-builder.network.dns.label')}
             </label>
-            <input id="dns" type="text" bind:value={profile.network!.dns} placeholder="8.8.8.8" />
+            <input
+              id="dns"
+              type="text"
+              bind:value={profile.network!.dns}
+              placeholder={$t('tools/pxe-profile-builder.network.dns.placeholder')}
+            />
           </div>
         </div>
       </div>
 
       {#if networkValidationErrors.length > 0}
         <div class="network-errors">
-          <h4>Network Settings Errors</h4>
+          <h4>{$t('tools/pxe-profile-builder.errors.network')}</h4>
           {#each networkValidationErrors as error, i (i)}
             <div class="network-error-item">
               <Icon name="alert-triangle" size="sm" />
@@ -360,36 +396,57 @@
 
   {#if result && networkValidationErrors.length === 0}
     <div class="card results">
-      <h3>Profile Summary</h3>
+      <h3>{$t('tools/pxe-profile-builder.results.summary.title')}</h3>
       <div class="summary-card">
-        <div><strong>Profile Name:</strong> {result.profile.name}</div>
-        <div><strong>Architecture Mode:</strong> {result.profile.architecture}</div>
-        <div><strong>TFTP Server:</strong> {result.profile.tftpServer}</div>
+        <div><strong>{$t('tools/pxe-profile-builder.results.summary.profileName')}</strong> {result.profile.name}</div>
+        <div>
+          <strong>{$t('tools/pxe-profile-builder.results.summary.architecture')}</strong>
+          {result.profile.architecture}
+        </div>
+        <div>
+          <strong>{$t('tools/pxe-profile-builder.results.summary.tftpServer')}</strong>
+          {result.profile.tftpServer}
+        </div>
         {#if result.profile.biosBootfile}
-          <div><strong>BIOS Bootfile:</strong> {result.profile.biosBootfile}</div>
+          <div>
+            <strong>{$t('tools/pxe-profile-builder.results.summary.biosBootfile')}</strong>
+            {result.profile.biosBootfile}
+          </div>
         {/if}
         {#if result.profile.uefiX64Bootfile}
-          <div><strong>UEFI x64 Bootfile:</strong> {result.profile.uefiX64Bootfile}</div>
+          <div>
+            <strong>{$t('tools/pxe-profile-builder.results.summary.uefiX64Bootfile')}</strong>
+            {result.profile.uefiX64Bootfile}
+          </div>
         {/if}
         {#if result.profile.uefiX86Bootfile}
-          <div><strong>UEFI x86 Bootfile:</strong> {result.profile.uefiX86Bootfile}</div>
+          <div>
+            <strong>{$t('tools/pxe-profile-builder.results.summary.uefiX86Bootfile')}</strong>
+            {result.profile.uefiX86Bootfile}
+          </div>
         {/if}
         {#if result.profile.uefiArm64Bootfile}
-          <div><strong>UEFI ARM64 Bootfile:</strong> {result.profile.uefiArm64Bootfile}</div>
+          <div>
+            <strong>{$t('tools/pxe-profile-builder.results.summary.uefiArm64Bootfile')}</strong>
+            {result.profile.uefiArm64Bootfile}
+          </div>
         {/if}
         {#if result.profile.uefiArm32Bootfile}
-          <div><strong>UEFI ARM32 Bootfile:</strong> {result.profile.uefiArm32Bootfile}</div>
+          <div>
+            <strong>{$t('tools/pxe-profile-builder.results.summary.uefiArm32Bootfile')}</strong>
+            {result.profile.uefiArm32Bootfile}
+          </div>
         {/if}
       </div>
     </div>
 
     <div class="card results">
-      <h3>DHCP Server Configuration</h3>
+      <h3>{$t('tools/pxe-profile-builder.results.config.title')}</h3>
 
       {#if result.examples.iscDhcpd}
         <div class="output-group">
           <div class="output-header">
-            <h4>ISC dhcpd Configuration</h4>
+            <h4>{$t('tools/pxe-profile-builder.results.config.iscDhcpd')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -397,7 +454,9 @@
               onclick={() => clipboard.copy(result!.examples.iscDhcpd!, 'isc')}
             >
               <Icon name={clipboard.isCopied('isc') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('isc') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('isc')
+                ? $t('tools/pxe-profile-builder.common.copied')
+                : $t('tools/pxe-profile-builder.common.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.examples.iscDhcpd}</pre>
@@ -407,7 +466,7 @@
       {#if result.examples.keaDhcp4}
         <div class="output-group">
           <div class="output-header">
-            <h4>Kea DHCPv4 Configuration</h4>
+            <h4>{$t('tools/pxe-profile-builder.results.config.keaDhcp4')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -415,7 +474,9 @@
               onclick={() => clipboard.copy(result!.examples.keaDhcp4!, 'kea')}
             >
               <Icon name={clipboard.isCopied('kea') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('kea') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('kea')
+                ? $t('tools/pxe-profile-builder.common.copied')
+                : $t('tools/pxe-profile-builder.common.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.examples.keaDhcp4}</pre>
@@ -424,21 +485,19 @@
     </div>
 
     <div class="card results">
-      <h3>PXE Boot Architecture Detection</h3>
+      <h3>{$t('tools/pxe-profile-builder.results.archDetection.title')}</h3>
       <p>
-        DHCP Option 93 (Client System Architecture Type) allows the DHCP server to detect the client's firmware type and
-        serve the appropriate bootfile. Common architecture types:
+        {$t('tools/pxe-profile-builder.results.archDetection.intro')}
       </p>
       <ul>
-        <li><strong>0x0000</strong> - Intel x86PC (Legacy BIOS)</li>
-        <li><strong>0x0006</strong> - EFI IA32 (32-bit UEFI)</li>
-        <li><strong>0x0007</strong> - EFI BC (64-bit UEFI, most common)</li>
-        <li><strong>0x000a</strong> - EFI ARM 32-bit</li>
-        <li><strong>0x000b</strong> - EFI ARM 64-bit</li>
+        <li><strong>0x0000</strong> - {$t('tools/pxe-profile-builder.results.archDetection.types.bios')}</li>
+        <li><strong>0x0006</strong> - {$t('tools/pxe-profile-builder.results.archDetection.types.efiIa32')}</li>
+        <li><strong>0x0007</strong> - {$t('tools/pxe-profile-builder.results.archDetection.types.efiBC')}</li>
+        <li><strong>0x000a</strong> - {$t('tools/pxe-profile-builder.results.archDetection.types.efiArm32')}</li>
+        <li><strong>0x000b</strong> - {$t('tools/pxe-profile-builder.results.archDetection.types.efiArm64')}</li>
       </ul>
       <p>
-        When using auto-detect mode, the DHCP server will examine Option 93 in the client's DHCPDISCOVER message and
-        respond with the appropriate bootfile for that architecture.
+        {$t('tools/pxe-profile-builder.results.archDetection.autoDetectInfo')}
       </p>
     </div>
   {/if}

@@ -1,0 +1,159 @@
+{
+  "title": "DMARC Policy Builder",
+  "description": "Create DMARC policies with alignment options, reporting addresses, and failure handling configuration.",
+
+  "domain": {
+    "title": "Domain Configuration",
+    "label": "Domain:",
+    "tooltip": "Domain that this DMARC policy will protect",
+    "placeholder": "example.com"
+  },
+
+  "policy": {
+    "title": "Policy Configuration",
+    "mainLabel": "Policy (p):",
+    "mainTooltip": "Action to take for emails that fail DMARC authentication",
+    "subdomainLabel": "Subdomain Policy (sp):",
+    "subdomainTooltip": "Policy for subdomains (inherits main policy if not set)",
+
+    "types": {
+      "none": {
+        "label": "none - Monitor only",
+        "description": "Monitor only - no action taken on failed emails"
+      },
+      "quarantine": {
+        "label": "quarantine - Send to spam",
+        "description": "Failed emails sent to spam/junk folder"
+      },
+      "reject": {
+        "label": "reject - Block email",
+        "description": "Failed emails rejected at SMTP level"
+      }
+    },
+
+    "subdomainInherit": "Inherit from main policy",
+
+    "percentageLabel": "Percentage (pct):",
+    "percentageTooltip": "Percentage of failing emails to apply policy to (useful for gradual deployment)"
+  },
+
+  "advanced": {
+    "title": "Advanced Options",
+
+    "alignment": {
+      "title": "Authentication Alignment",
+      "dkimLabel": "DKIM Alignment (adkim):",
+      "dkimTooltip": "How strictly DKIM signature domain must match From domain",
+      "spfLabel": "SPF Alignment (aspf):",
+      "spfTooltip": "How strictly SPF domain must match From domain",
+
+      "relaxed": {
+        "label": "r - Relaxed",
+        "description": "Relaxed - domain and subdomains match"
+      },
+      "strict": {
+        "label": "s - Strict",
+        "description": "Strict - exact domain match only"
+      }
+    },
+
+    "reporting": {
+      "title": "Reporting Configuration",
+      "aggregateLabel": "Reporting Email (rua):",
+      "aggregateTooltip": "Email address to receive aggregate DMARC reports",
+      "aggregatePlaceholder": "dmarc@example.com",
+      "forensicLabel": "Forensic Email (ruf):",
+      "forensicTooltip": "Email address to receive forensic failure reports (detailed samples)",
+      "forensicPlaceholder": "forensic@example.com",
+      "intervalLabel": "Report Interval (ri):",
+      "intervalTooltip": "How often aggregate reports are sent (in seconds)",
+
+      "intervals": {
+        "hourly": "1 hour",
+        "daily": "24 hours (daily)",
+        "weekly": "7 days (weekly)"
+      }
+    },
+
+    "failureOptions": {
+      "title": "Failure Reporting Options (fo):",
+      "tooltip": "When to generate forensic failure reports",
+
+      "options": {
+        "0": "Generate reports if both SPF and DKIM fail",
+        "1": "Generate reports if either SPF or DKIM fail",
+        "d": "Generate reports if DKIM fails",
+        "s": "Generate reports if SPF fails"
+      }
+    }
+  },
+
+  "output": {
+    "title": "Generated DMARC Record",
+    "copyButton": "Copy",
+    "copyTooltip": "Copy DMARC record to clipboard",
+    "copied": "Copied!",
+    "exportButton": "Export",
+    "exportTooltip": "Download as zone file",
+    "downloaded": "Downloaded!",
+    "txtRecordLabel": "DNS TXT Record:"
+  },
+
+  "validation": {
+    "title": "Policy Validation",
+    "recordLengthLabel": "Record Length:",
+    "statusLabel": "Status:",
+    "valid": "Valid",
+    "invalid": "Invalid",
+    "success": "DMARC policy is valid and ready to deploy!",
+
+    "errors": {
+      "domainRequired": "Domain is required",
+      "reportingEmail": "Reporting URI must be a valid email address",
+      "forensicEmail": "Forensic URI must be a valid email address",
+      "recordTooLong": "DMARC record too long ({length} chars). DNS TXT limit is 255."
+    },
+
+    "warnings": {
+      "domainNoTLD": "Domain should include TLD (e.g., .com, .org)",
+      "rejectNeedsReporting": "Consider adding reporting URI before using reject policy",
+      "noneWithPercentage": "Percentage should be 100% for monitoring-only policy",
+      "strictAlignment": "Strict alignment for both SPF and DKIM may cause legitimate emails to fail",
+      "recordLong": "DMARC record is long ({length} chars). Consider shortening."
+    }
+  },
+
+  "deployment": {
+    "title": "Deployment Guide",
+    "steps": [
+      "Start with p=none to monitor current email authentication status",
+      "Analyze DMARC reports to identify legitimate vs malicious sources",
+      "Configure SPF and DKIM for all legitimate sending sources",
+      "Gradually increase to p=quarantine with low percentage (pct=25)",
+      "Monitor for false positives and adjust alignment if needed",
+      "Increase percentage gradually (50%, 75%, 100%)",
+      "Finally move to p=reject when confident in configuration"
+    ]
+  },
+
+  "examples": {
+    "title": "Example Policies",
+
+    "monitor": {
+      "name": "Monitor Only",
+      "description": "Start monitoring without affecting email delivery"
+    },
+    "quarantine": {
+      "name": "Quarantine Phase",
+      "description": "Move suspicious emails to spam folder"
+    },
+    "fullProtection": {
+      "name": "Full Protection",
+      "description": "Reject all failing emails with forensics"
+    },
+
+    "policyLabel": "Policy:",
+    "percentageLabel": "Percentage:",
+    "reportsLabel": "Reports:"
+  }
+}

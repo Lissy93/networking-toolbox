@@ -4,6 +4,7 @@
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
   import SvgIcon from '$lib/components/global/SvgIcon.svelte';
+  import { t } from '$lib/stores/language';
 
   let inputText = $state(`192.168.1.1
 192.168.1.0/24
@@ -15,42 +16,42 @@
   const clipboard = useClipboard();
   let selectedExample = $state<string | null>(null);
 
-  const modes = [
+  const modes = $derived([
     {
       value: 'exact-merge' as const,
-      label: 'Exact Merge',
-      description: 'Merge overlapping ranges exactly without additional aggregation',
+      label: $t('tools/cidr-summarizer.modes.exactMerge.label'),
+      description: $t('tools/cidr-summarizer.modes.exactMerge.description'),
     },
     {
       value: 'minimal-cover' as const,
-      label: 'Minimal Cover',
-      description: 'Find the smallest set of CIDR blocks that covers all inputs',
+      label: $t('tools/cidr-summarizer.modes.minimalCover.label'),
+      description: $t('tools/cidr-summarizer.modes.minimalCover.description'),
     },
-  ];
+  ]);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Mixed IPv4/IPv6',
+      label: $t('tools/cidr-summarizer.examples.mixedIPv4v6'),
       content: `192.168.1.0/24
 10.0.0.0/16
 2001:db8::/32
 ::1`,
     },
     {
-      label: 'Overlapping Ranges',
+      label: $t('tools/cidr-summarizer.examples.overlappingRanges'),
       content: `192.168.1.0-192.168.1.100
 192.168.1.50-192.168.1.200
 192.168.2.0/24`,
     },
     {
-      label: 'Single IPs',
+      label: $t('tools/cidr-summarizer.examples.singleIPs'),
       content: `10.0.0.1
 10.0.0.2
 10.0.0.3
 10.0.0.4`,
     },
     {
-      label: 'Mode Comparison',
+      label: $t('tools/cidr-summarizer.examples.modeComparison'),
       content: `192.168.1.1
 192.168.1.3
 192.168.1.5
@@ -58,7 +59,7 @@
 192.168.1.9-192.168.1.12`,
     },
     {
-      label: 'Complex Mix',
+      label: $t('tools/cidr-summarizer.examples.complexMix'),
       content: `172.16.0.0/12
 192.168.1.1
 192.168.1.5-192.168.1.10
@@ -66,7 +67,7 @@
 2001:db8::/48
 fe80::/10`,
     },
-  ];
+  ]);
 
   /* Set example content */
   function setExample(content: string) {
@@ -138,15 +139,15 @@ fe80::/10`,
 
 <div class="card">
   <header class="card-header">
-    <h2>CIDR Summarization Tool</h2>
+    <h2>{$t('tools/cidr-summarizer.title')}</h2>
     <p>
-      Convert mixed IP addresses, CIDR blocks, and ranges into optimized CIDR prefixes with separate IPv4/IPv6 results.
+      {$t('tools/cidr-summarizer.description')}
     </p>
   </header>
 
   <!-- Mode Selection -->
   <div class="mode-section">
-    <h3>Summarization Mode</h3>
+    <h3>{$t('tools/cidr-summarizer.modes.title')}</h3>
     <div class="tabs">
       {#each modes as modeOption (modeOption.value)}
         <button
@@ -166,11 +167,11 @@ fe80::/10`,
 
   <!-- Input Section -->
   <div class="input-section">
-    <h3>Input Data</h3>
+    <h3>{$t('tools/cidr-summarizer.input.title')}</h3>
     <div class="form-group">
       <label for="input-text">
-        Enter IP addresses, CIDR blocks, or ranges (one per line)
-        <Tooltip text="Supports: single IPs (192.168.1.1), CIDR blocks (10.0.0.0/8), ranges (172.16.0.1-172.16.0.100)">
+        {$t('tools/cidr-summarizer.input.label')}
+        <Tooltip text={$t('tools/cidr-summarizer.input.tooltip')}>
           <Icon name="help" size="sm" />
         </Tooltip>
       </label>
@@ -178,20 +179,20 @@ fe80::/10`,
         <textarea
           id="input-text"
           bind:value={inputText}
-          placeholder="192.168.1.0/24&#10;10.0.0.1-10.0.0.10&#10;2001:db8::/32"
+          placeholder={$t('tools/cidr-summarizer.input.placeholder')}
           class="input-textarea"
           rows="8"
         ></textarea>
 
         <button type="button" class="btn btn-secondary btn-sm clear-btn" onclick={clearInput}>
-          <Tooltip text="Clear input"><Icon name="trash" size="sm" /></Tooltip>
+          <Tooltip text={$t('tools/cidr-summarizer.input.clearTooltip')}><Icon name="trash" size="sm" /></Tooltip>
         </button>
       </div>
     </div>
 
     <!-- Examples -->
     <div class="examples-section">
-      <h4>Quick Examples</h4>
+      <h4>{$t('tools/cidr-summarizer.examples.title')}</h4>
       <div class="examples-grid">
         {#each examples as example (example.label)}
           <button
@@ -212,7 +213,7 @@ fe80::/10`,
     <div class="results-section">
       {#if result.errors.length > 0}
         <div class="info-panel error">
-          <h3>Parsing Errors</h3>
+          <h3>{$t('tools/cidr-summarizer.results.errorsTitle')}</h3>
           <ul class="error-list">
             {#each result.errors as error (error)}
               <li>{error}</li>
@@ -223,8 +224,8 @@ fe80::/10`,
 
       {#if result.ipv4.length > 0 || result.ipv6.length > 0}
         <div class="summary-header">
-          <h3>Summarization Results</h3>
-          <Tooltip text="Copy all IPv4 and IPv6 results to clipboard">
+          <h3>{$t('tools/cidr-summarizer.results.title')}</h3>
+          <Tooltip text={$t('tools/cidr-summarizer.results.copyAllTooltip')}>
             <button
               type="button"
               class="btn btn-primary btn-sm"
@@ -232,7 +233,7 @@ fe80::/10`,
               onclick={copyAllResults}
             >
               <SvgIcon icon={clipboard.isCopied('all-results') ? 'check' : 'clipboard'} size="md" />
-              Copy All
+              {$t('tools/cidr-summarizer.results.copyAll')}
             </button>
           </Tooltip>
         </div>
@@ -242,8 +243,8 @@ fe80::/10`,
           {#if result.ipv4.length > 0}
             <div class="result-panel ipv4">
               <div class="panel-header">
-                <h4>IPv4 CIDR Blocks ({result.ipv4.length})</h4>
-                <Tooltip text="Copy all IPv4 CIDR blocks to clipboard">
+                <h4>{$t('tools/cidr-summarizer.results.ipv4Title', { count: result.ipv4.length })}</h4>
+                <Tooltip text={$t('tools/cidr-summarizer.results.ipv4Tooltip')}>
                   <button
                     type="button"
                     class="btn btn-icon"
@@ -258,7 +259,7 @@ fe80::/10`,
                 {#each result.ipv4 as cidr (cidr)}
                   <div class="cidr-item">
                     <code class="cidr-block">{cidr}</code>
-                    <Tooltip text="Copy this CIDR block to clipboard">
+                    <Tooltip text={$t('tools/cidr-summarizer.results.copyCIDRTooltip')}>
                       <button
                         type="button"
                         class="btn btn-icon btn-xs"
@@ -278,8 +279,8 @@ fe80::/10`,
           {#if result.ipv6.length > 0}
             <div class="result-panel ipv6">
               <div class="panel-header">
-                <h4>IPv6 CIDR Blocks ({result.ipv6.length})</h4>
-                <Tooltip text="Copy all IPv6 CIDR blocks to clipboard">
+                <h4>{$t('tools/cidr-summarizer.results.ipv6Title', { count: result.ipv6.length })}</h4>
+                <Tooltip text={$t('tools/cidr-summarizer.results.ipv6Tooltip')}>
                   <button
                     type="button"
                     class="btn btn-icon"
@@ -294,7 +295,7 @@ fe80::/10`,
                 {#each result.ipv6 as cidr (cidr)}
                   <div class="cidr-item">
                     <code class="cidr-block">{cidr}</code>
-                    <Tooltip text="Copy this CIDR block to clipboard">
+                    <Tooltip text={$t('tools/cidr-summarizer.results.copyCIDRTooltip')}>
                       <button
                         type="button"
                         class="btn btn-icon btn-xs"
@@ -313,35 +314,35 @@ fe80::/10`,
 
         <!-- Statistics -->
         <div class="stats-section">
-          <h4>Summarization Statistics</h4>
+          <h4>{$t('tools/cidr-summarizer.stats.title')}</h4>
           <div class="stats-grid">
             <div class="stat-card">
-              <Tooltip text="Number of individual IPv4 items in the original input">
-                <span class="stat-label">Original IPv4 Items</span>
+              <Tooltip text={$t('tools/cidr-summarizer.stats.originalIPv4Items.tooltip')}>
+                <span class="stat-label">{$t('tools/cidr-summarizer.stats.originalIPv4Items.label')}</span>
               </Tooltip>
               <span class="stat-value">{result.stats.originalIpv4Count}</span>
             </div>
             <div class="stat-card">
-              <Tooltip text="Number of CIDR blocks after IPv4 summarization">
-                <span class="stat-label">Summarized IPv4 Blocks</span>
+              <Tooltip text={$t('tools/cidr-summarizer.stats.summarizedIPv4Blocks.tooltip')}>
+                <span class="stat-label">{$t('tools/cidr-summarizer.stats.summarizedIPv4Blocks.label')}</span>
               </Tooltip>
               <span class="stat-value">{result.stats.summarizedIpv4Count}</span>
             </div>
             <div class="stat-card">
-              <Tooltip text="Number of individual IPv6 items in the original input">
-                <span class="stat-label">Original IPv6 Items</span>
+              <Tooltip text={$t('tools/cidr-summarizer.stats.originalIPv6Items.tooltip')}>
+                <span class="stat-label">{$t('tools/cidr-summarizer.stats.originalIPv6Items.label')}</span>
               </Tooltip>
               <span class="stat-value">{result.stats.originalIpv6Count}</span>
             </div>
             <div class="stat-card">
-              <Tooltip text="Number of CIDR blocks after IPv6 summarization">
-                <span class="stat-label">Summarized IPv6 Blocks</span>
+              <Tooltip text={$t('tools/cidr-summarizer.stats.summarizedIPv6Blocks.tooltip')}>
+                <span class="stat-label">{$t('tools/cidr-summarizer.stats.summarizedIPv6Blocks.label')}</span>
               </Tooltip>
               <span class="stat-value">{result.stats.summarizedIpv6Count}</span>
             </div>
             <div class="stat-card">
-              <Tooltip text="Total number of individual IP addresses covered by all summarized blocks">
-                <span class="stat-label">Total Addresses Covered</span>
+              <Tooltip text={$t('tools/cidr-summarizer.stats.totalAddressesCovered.tooltip')}>
+                <span class="stat-label">{$t('tools/cidr-summarizer.stats.totalAddressesCovered.label')}</span>
               </Tooltip>
               <span class="stat-value large">{result.stats.totalAddressesCovered}</span>
             </div>

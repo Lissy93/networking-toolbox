@@ -2,6 +2,7 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
 
   let domain = $state('');
   let order = $state('100');
@@ -14,32 +15,76 @@
   const clipboard = useClipboard();
   let showExamples = $state(false);
 
-  const flagOptions = [
-    { value: 'U', label: 'U - Terminal rule (URI)', description: 'The Rule is terminal and the result is a URI' },
+  const flagOptions = $derived([
+    {
+      value: 'U',
+      label: $t('tools/naptr-builder.flags.uFlag.label'),
+      description: $t('tools/naptr-builder.flags.uFlag.description'),
+    },
     {
       value: 'S',
-      label: 'S - Terminal rule (SRV)',
-      description: 'The Rule is terminal and the result is for SRV lookup',
+      label: $t('tools/naptr-builder.flags.sFlag.label'),
+      description: $t('tools/naptr-builder.flags.sFlag.description'),
     },
     {
       value: 'A',
-      label: 'A - Terminal rule (Address)',
-      description: 'The Rule is terminal and the result is an address record',
+      label: $t('tools/naptr-builder.flags.aFlag.label'),
+      description: $t('tools/naptr-builder.flags.aFlag.description'),
     },
-    { value: 'P', label: 'P - Protocol specific', description: 'Protocol-specific flags' },
-    { value: '', label: 'Empty - Non-terminal', description: 'The Rule is not terminal (continue processing)' },
-  ];
+    {
+      value: 'P',
+      label: $t('tools/naptr-builder.flags.pFlag.label'),
+      description: $t('tools/naptr-builder.flags.pFlag.description'),
+    },
+    {
+      value: '',
+      label: $t('tools/naptr-builder.flags.emptyFlag.label'),
+      description: $t('tools/naptr-builder.flags.emptyFlag.description'),
+    },
+  ]);
 
-  const serviceExamples = [
-    { value: 'E2U+sip', label: 'SIP Service', description: 'Session Initiation Protocol' },
-    { value: 'E2U+email', label: 'Email Service', description: 'Electronic mail service' },
-    { value: 'E2U+web+http', label: 'HTTP Web Service', description: 'Web service over HTTP' },
-    { value: 'E2U+web+https', label: 'HTTPS Web Service', description: 'Secure web service over HTTPS' },
-    { value: 'E2U+tel', label: 'Telephone Service', description: 'Telephone number mapping' },
-    { value: 'E2U+fax', label: 'Fax Service', description: 'Facsimile service' },
-    { value: 'E2U+h323', label: 'H.323 Service', description: 'H.323 multimedia protocol' },
-    { value: 'E2U+im', label: 'Instant Messaging', description: 'Instant messaging service' },
-  ];
+  const serviceExamples = $derived([
+    {
+      value: 'E2U+sip',
+      label: $t('tools/naptr-builder.services.sip.label'),
+      description: $t('tools/naptr-builder.services.sip.description'),
+    },
+    {
+      value: 'E2U+email',
+      label: $t('tools/naptr-builder.services.email.label'),
+      description: $t('tools/naptr-builder.services.email.description'),
+    },
+    {
+      value: 'E2U+web+http',
+      label: $t('tools/naptr-builder.services.webHttp.label'),
+      description: $t('tools/naptr-builder.services.webHttp.description'),
+    },
+    {
+      value: 'E2U+web+https',
+      label: $t('tools/naptr-builder.services.webHttps.label'),
+      description: $t('tools/naptr-builder.services.webHttps.description'),
+    },
+    {
+      value: 'E2U+tel',
+      label: $t('tools/naptr-builder.services.tel.label'),
+      description: $t('tools/naptr-builder.services.tel.description'),
+    },
+    {
+      value: 'E2U+fax',
+      label: $t('tools/naptr-builder.services.fax.label'),
+      description: $t('tools/naptr-builder.services.fax.description'),
+    },
+    {
+      value: 'E2U+h323',
+      label: $t('tools/naptr-builder.services.h323.label'),
+      description: $t('tools/naptr-builder.services.h323.description'),
+    },
+    {
+      value: 'E2U+im',
+      label: $t('tools/naptr-builder.services.im.label'),
+      description: $t('tools/naptr-builder.services.im.description'),
+    },
+  ]);
 
   let naptrRecord = $derived.by(() => {
     if (!domain.trim()) return '';
@@ -64,23 +109,23 @@
     const warns = [];
 
     if (flags === 'U' && !regexp.includes('!')) {
-      warns.push('URI flag requires a valid substitution expression with delimiters');
+      warns.push($t('tools/naptr-builder.warnings.uriFlag'));
     }
 
     if (flags === 'S' && replacement === '.') {
-      warns.push('SRV flag typically requires a replacement domain, not "."');
+      warns.push($t('tools/naptr-builder.warnings.srvFlag'));
     }
 
     if (flags === '' && replacement === '.') {
-      warns.push('Non-terminal rules should have a replacement domain for continued processing');
+      warns.push($t('tools/naptr-builder.warnings.nonTerminal'));
     }
 
     if (regexp && !regexp.match(/^!.*!.*!$/)) {
-      warns.push('Regular expressions should follow the format: !pattern!replacement!');
+      warns.push($t('tools/naptr-builder.warnings.regexpFormat'));
     }
 
     if (parseInt(order) === parseInt(preference)) {
-      warns.push('Order and Preference should typically be different values');
+      warns.push($t('tools/naptr-builder.warnings.orderPreference'));
     }
 
     return warns;
@@ -148,8 +193,8 @@
 <div class="container">
   <div class="card">
     <div class="card-header">
-      <h1>NAPTR Record Builder</h1>
-      <p>Construct NAPTR (Naming Authority Pointer) records for dynamic delegation and service mapping</p>
+      <h1>{$t('tools/naptr-builder.title')}</h1>
+      <p>{$t('tools/naptr-builder.description')}</p>
     </div>
 
     <div class="content">
@@ -158,14 +203,22 @@
         <details bind:open={showExamples}>
           <summary class="examples-summary">
             <Icon name="lightbulb" size="sm" />
-            Quick Examples
+            {$t('tools/naptr-builder.examples.title')}
             <span class="chevron"><Icon name="chevron-down" size="sm" /></span>
           </summary>
           <div class="examples-grid">
-            <button class="example-btn" onclick={() => loadExample('sip')}> SIP Service </button>
-            <button class="example-btn" onclick={() => loadExample('email')}> Email Service </button>
-            <button class="example-btn" onclick={() => loadExample('web')}> Web Service </button>
-            <button class="example-btn" onclick={() => loadExample('srv')}> SRV Delegation </button>
+            <button class="example-btn" onclick={() => loadExample('sip')}
+              >{$t('tools/naptr-builder.examples.sipService')}</button
+            >
+            <button class="example-btn" onclick={() => loadExample('email')}
+              >{$t('tools/naptr-builder.examples.emailService')}</button
+            >
+            <button class="example-btn" onclick={() => loadExample('web')}
+              >{$t('tools/naptr-builder.examples.webService')}</button
+            >
+            <button class="example-btn" onclick={() => loadExample('srv')}
+              >{$t('tools/naptr-builder.examples.srvDelegation')}</button
+            >
           </div>
         </details>
       </div>
@@ -174,32 +227,39 @@
         <!-- Input Form -->
         <div class="input-section">
           <div class="input-group">
-            <label for="domain" use:tooltip={'The domain name for this NAPTR record'}>Domain Name *</label>
-            <input id="domain" type="text" bind:value={domain} placeholder="example.com" />
-            <p class="description">The domain name for this NAPTR record</p>
+            <label for="domain" use:tooltip={$t('tools/naptr-builder.input.domainTooltip')}
+              >{$t('tools/naptr-builder.input.domainLabel')}</label
+            >
+            <input
+              id="domain"
+              type="text"
+              bind:value={domain}
+              placeholder={$t('tools/naptr-builder.input.domainPlaceholder')}
+            />
+            <p class="description">{$t('tools/naptr-builder.input.domainDescription')}</p>
           </div>
 
           <div class="order-grid">
             <div class="input-group">
-              <label for="order" use:tooltip={'Processing order - lower values are processed first (0-65535)'}
-                >Order *</label
+              <label for="order" use:tooltip={$t('tools/naptr-builder.input.orderTooltip')}
+                >{$t('tools/naptr-builder.input.orderLabel')}</label
               >
               <input id="order" type="number" bind:value={order} min="0" max="65535" />
-              <p class="description">Processing order (0-65535)</p>
+              <p class="description">{$t('tools/naptr-builder.input.orderDescription')}</p>
             </div>
 
             <div class="input-group">
-              <label for="preference" use:tooltip={'Preference within the same order value (0-65535)'}
-                >Preference *</label
+              <label for="preference" use:tooltip={$t('tools/naptr-builder.input.preferenceTooltip')}
+                >{$t('tools/naptr-builder.input.preferenceLabel')}</label
               >
               <input id="preference" type="number" bind:value={preference} min="0" max="65535" />
-              <p class="description">Preference within order (0-65535)</p>
+              <p class="description">{$t('tools/naptr-builder.input.preferenceDescription')}</p>
             </div>
           </div>
 
           <div class="input-group">
-            <label for="flags" use:tooltip={'Control processing behavior - affects how the result is interpreted'}
-              >Flags</label
+            <label for="flags" use:tooltip={$t('tools/naptr-builder.input.flagsTooltip')}
+              >{$t('tools/naptr-builder.input.flagsLabel')}</label
             >
             <select id="flags" bind:value={flags}>
               {#each flagOptions as option (option.value)}
@@ -207,17 +267,23 @@
               {/each}
             </select>
             <p class="description">
-              {flagOptions.find((opt) => opt.value === flags)?.description || 'Select flag type'}
+              {flagOptions.find((opt) => opt.value === flags)?.description ||
+                $t('tools/naptr-builder.flags.selectPlaceholder')}
             </p>
           </div>
 
           <div class="input-group">
-            <label for="service" use:tooltip={'Service identifier or protocol (e.g., E2U+sip for SIP services)'}
-              >Service</label
+            <label for="service" use:tooltip={$t('tools/naptr-builder.input.serviceTooltip')}
+              >{$t('tools/naptr-builder.input.serviceLabel')}</label
             >
-            <input id="service" type="text" bind:value={service} placeholder="E2U+sip" />
+            <input
+              id="service"
+              type="text"
+              bind:value={service}
+              placeholder={$t('tools/naptr-builder.input.servicePlaceholder')}
+            />
             <details class="service-examples">
-              <summary>Show service examples</summary>
+              <summary>{$t('tools/naptr-builder.services.showExamples')}</summary>
               <div class="service-list">
                 {#each serviceExamples as example (example.value)}
                   <button class="service-item" onclick={() => (service = example.value)}>
@@ -229,31 +295,42 @@
           </div>
 
           <div class="input-group">
-            <label
-              for="regexp"
-              use:tooltip={'Regular expression for pattern matching and substitution (format: !pattern!replacement!)'}
-              >Regular Expression</label
+            <label for="regexp" use:tooltip={$t('tools/naptr-builder.input.regexpTooltip')}
+              >{$t('tools/naptr-builder.input.regexpLabel')}</label
             >
-            <input id="regexp" type="text" bind:value={regexp} placeholder="!^.*$!sip:info@example.com!" class="mono" />
-            <p class="description">Substitution expression (format: !pattern!replacement!)</p>
+            <input
+              id="regexp"
+              type="text"
+              bind:value={regexp}
+              placeholder={$t('tools/naptr-builder.input.regexpPlaceholder')}
+              class="mono"
+            />
+            <p class="description">{$t('tools/naptr-builder.input.regexpDescription')}</p>
           </div>
 
           <div class="input-group">
-            <label for="replacement" use:tooltip={"Next domain to query, or '.' for terminal rules"}>Replacement</label>
-            <input id="replacement" type="text" bind:value={replacement} placeholder="." />
-            <p class="description">Domain name for next lookup, or "." for terminal rules</p>
+            <label for="replacement" use:tooltip={$t('tools/naptr-builder.input.replacementTooltip')}
+              >{$t('tools/naptr-builder.input.replacementLabel')}</label
+            >
+            <input
+              id="replacement"
+              type="text"
+              bind:value={replacement}
+              placeholder={$t('tools/naptr-builder.input.replacementPlaceholder')}
+            />
+            <p class="description">{$t('tools/naptr-builder.input.replacementDescription')}</p>
           </div>
         </div>
 
         <!-- Output -->
         <div class="output-section">
           <div class="card">
-            <h3 class="section-title">Generated NAPTR Record</h3>
+            <h3 class="section-title">{$t('tools/naptr-builder.output.title')}</h3>
             <div class="code-block">
               {#if isValid}
                 <code>{naptrRecord}</code>
               {:else}
-                <p class="placeholder">Fill in the required fields to generate the NAPTR record</p>
+                <p class="placeholder">{$t('tools/naptr-builder.output.placeholder')}</p>
               {/if}
             </div>
           </div>
@@ -262,7 +339,7 @@
             <div class="message warning">
               <Icon name="alert-triangle" size="sm" />
               <div>
-                <h4>Configuration Warnings</h4>
+                <h4>{$t('tools/naptr-builder.warnings.title')}</h4>
                 <ul>
                   {#each warnings as warning, index (index)}
                     <li>{warning}</li>
@@ -276,11 +353,15 @@
             <div class="actions">
               <button onclick={copyToClipboard} class="btn btn-primary" class:success={clipboard.isCopied('copy')}>
                 <Icon name={clipboard.isCopied('copy') ? 'check' : 'copy'} size="sm" />
-                {clipboard.isCopied('copy') ? 'Copied!' : 'Copy Record'}
+                {clipboard.isCopied('copy')
+                  ? $t('tools/naptr-builder.output.copied')
+                  : $t('tools/naptr-builder.output.copyButton')}
               </button>
               <button onclick={downloadRecord} class="btn btn-success" class:success={clipboard.isCopied('download')}>
                 <Icon name={clipboard.isCopied('download') ? 'check' : 'download'} size="sm" />
-                {clipboard.isCopied('download') ? 'Downloaded!' : 'Download'}
+                {clipboard.isCopied('download')
+                  ? $t('tools/naptr-builder.output.downloaded')
+                  : $t('tools/naptr-builder.output.downloadButton')}
               </button>
             </div>
           {/if}
@@ -290,41 +371,37 @@
       <!-- Information Section -->
       <div class="info-section">
         <div class="card info-card">
-          <h3 class="section-title">About NAPTR Records</h3>
-          <p>
-            NAPTR (Naming Authority Pointer) records provide a way to map domain names to URIs or other domain names
-            through regular expression-based rewriting. They're commonly used in telecommunications for ENUM (E.164
-            Number Mapping) and SIP services, allowing dynamic delegation and service discovery.
-          </p>
+          <h3 class="section-title">{$t('tools/naptr-builder.info.aboutTitle')}</h3>
+          <p>{$t('tools/naptr-builder.info.aboutDescription')}</p>
         </div>
 
         <div class="info-grid">
           <div class="card info-card">
-            <h4>Field Descriptions</h4>
+            <h4>{$t('tools/naptr-builder.info.fieldsTitle')}</h4>
             <dl class="field-list">
               <dt>Order:</dt>
-              <dd>Processing order (lower values first)</dd>
+              <dd>{$t('tools/naptr-builder.info.fields.order')}</dd>
               <dt>Preference:</dt>
-              <dd>Preference within same order</dd>
+              <dd>{$t('tools/naptr-builder.info.fields.preference')}</dd>
               <dt>Flags:</dt>
-              <dd>Control processing behavior</dd>
+              <dd>{$t('tools/naptr-builder.info.fields.flags')}</dd>
               <dt>Service:</dt>
-              <dd>Service identifier or protocol</dd>
+              <dd>{$t('tools/naptr-builder.info.fields.service')}</dd>
               <dt>RegExp:</dt>
-              <dd>Pattern matching and substitution</dd>
+              <dd>{$t('tools/naptr-builder.info.fields.regexp')}</dd>
               <dt>Replacement:</dt>
-              <dd>Next domain to query</dd>
+              <dd>{$t('tools/naptr-builder.info.fields.replacement')}</dd>
             </dl>
           </div>
 
           <div class="card info-card">
-            <h4>Common Use Cases</h4>
+            <h4>{$t('tools/naptr-builder.info.useCasesTitle')}</h4>
             <ul class="use-case-list">
-              <li>ENUM telephone number mapping</li>
-              <li>SIP service discovery</li>
-              <li>Dynamic delegation</li>
-              <li>Protocol mapping</li>
-              <li>Service location</li>
+              <li>{$t('tools/naptr-builder.info.useCases.enum')}</li>
+              <li>{$t('tools/naptr-builder.info.useCases.sip')}</li>
+              <li>{$t('tools/naptr-builder.info.useCases.delegation')}</li>
+              <li>{$t('tools/naptr-builder.info.useCases.protocol')}</li>
+              <li>{$t('tools/naptr-builder.info.useCases.location')}</li>
             </ul>
           </div>
         </div>

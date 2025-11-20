@@ -9,6 +9,7 @@
   import ShortcutsDialog from '$lib/components/furniture/ShortcutsDialog.svelte';
   import { tooltip } from '$lib/actions/tooltip';
   import { formatShortcut } from '$lib/utils/keyboard';
+  import { t } from '$lib/stores/language';
 
   let globalSearchRef: GlobalSearch;
   let shortcutsDialogRef: ShortcutsDialog;
@@ -31,7 +32,7 @@
         </div>
         <div>
           <h1><a href="/">{site.title}</a></h1>
-          <p class="subtitle">{SITE_DESCRIPTION || "The sysadmin's Swiss Army knife"}</p>
+          <p class="subtitle">{SITE_DESCRIPTION || $t('furniture.header.subtitle')}</p>
         </div>
       </div>
 
@@ -44,7 +45,7 @@
           <button
             class="action-button shortcuts-trigger"
             onclick={() => shortcutsDialogRef?.showDialog()}
-            aria-label="Keyboard shortcuts"
+            aria-label={$t('furniture.header.shortcuts')}
             use:tooltip={`Shortcuts (${formatShortcut('^/')})`}
           >
             <Icon name="cli" size="sm" />

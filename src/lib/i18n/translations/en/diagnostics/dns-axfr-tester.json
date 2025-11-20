@@ -1,0 +1,29 @@
+{
+  "title": "DNS Zone Transfer (AXFR) Tester",
+  "description": "Test if DNS zone transfers are allowed (potential security vulnerability)",
+
+  "form": {
+    "title": "AXFR Test",
+    "domain": {
+      "label": "Domain",
+      "placeholder": "example.com"
+    },
+    "nameserver": {
+      "label": "Nameserver (optional)",
+      "placeholder": "ns1.example.com"
+    },
+    "test": "Test Zone Transfer",
+    "testing": "Testing...",
+    "error": "Please enter a domain"
+  },
+
+  "results": {
+    "title": "Zone Transfer Results",
+    "allowed": "Zone Transfer Allowed",
+    "denied": "Zone Transfer Denied",
+    "vulnerable": "Vulnerable",
+    "secure": "Secure",
+    "records_found": "{count} records retrieved",
+    "security_risk": "Security Risk"
+  }
+}

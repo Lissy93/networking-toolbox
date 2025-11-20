@@ -1,0 +1,108 @@
+{
+  "title": "DHCPv4 Client Identifier (Option 61)",
+  "subtitle": "Build and decode DHCPv4 Client Identifier (Option 61) with hardware type + MAC address or arbitrary opaque data per RFC 2132.",
+
+  "nav": {
+    "build": "Build",
+    "decode": "Decode"
+  },
+
+  "build": {
+    "title": "Build Client Identifier",
+    "helpText": "Configure DHCPv4 Client Identifier for device identification",
+
+    "mode": {
+      "label": "Mode",
+      "hardware": "Hardware Type + MAC Address",
+      "opaque": "Opaque Data (Text or Hex)"
+    },
+
+    "hardwareType": {
+      "label": "Hardware Type",
+      "options": {
+        "ethernet": "Ethernet (1)",
+        "experimentalEthernet": "Experimental Ethernet (2)",
+        "ieee802": "IEEE 802 (6)",
+        "arcnet": "ARCNET (7)",
+        "frameRelay": "Frame Relay (15)",
+        "atm": "ATM (16)",
+        "hdlc": "HDLC (17)",
+        "fibreChannel": "Fibre Channel (18)",
+        "ieee1394": "IEEE 1394 (24)",
+        "infiniband": "InfiniBand (32)"
+      }
+    },
+
+    "macAddress": {
+      "label": "MAC Address",
+      "placeholder": "00:0c:29:4f:a3:d2",
+      "helpText": "Hardware address in any common format"
+    },
+
+    "dataFormat": {
+      "label": "Data Format",
+      "text": "Text (ASCII)",
+      "hex": "Hexadecimal"
+    },
+
+    "opaqueData": {
+      "labelHex": "Hex Data",
+      "labelText": "Text Data",
+      "placeholderHex": "0123456789abcdef",
+      "placeholderText": "client-device-001",
+      "helpTextHex": "Hexadecimal string (even length)",
+      "helpTextText": "Plain text identifier"
+    }
+  },
+
+  "decode": {
+    "title": "Decode Client Identifier",
+    "helpText": "Decode hex-encoded Client Identifier back to fields",
+
+    "hexData": {
+      "label": "Hex Data",
+      "placeholder": "01000c294fa3d2",
+      "helpText": "Paste hex-encoded Client Identifier to decode"
+    }
+  },
+
+  "errors": {
+    "title": "Validation Errors"
+  },
+
+  "results": {
+    "buildTitle": "Generated Client Identifier",
+    "decodeTitle": "Decoded Client Identifier",
+
+    "mode": "Mode:",
+    "modeHardware": "Hardware Type + MAC",
+    "modeOpaque": "Opaque Data",
+    "detectedMode": "Detected Mode:",
+    "length": "Length:",
+    "lengthBytes": "{length} bytes",
+
+    "outputs": {
+      "hexadecimal": "Hexadecimal",
+      "wireFormat": "Wire Format (Spaced)"
+    },
+
+    "breakdown": "Breakdown",
+
+    "configs": {
+      "iscDhcpd": "ISC DHCPd Configuration",
+      "keaDhcp4": "Kea DHCPv4 Configuration"
+    },
+
+    "fields": {
+      "hardwareType": "Hardware Type",
+      "hardwareTypeUnknown": "Unknown",
+      "macAddress": "MAC Address",
+      "opaqueData": "Opaque Data"
+    }
+  },
+
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

@@ -12,6 +12,7 @@
     type ValidationResult,
   } from '$lib/utils/dns-validation.js';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
 
   let recordType = $state('A');
   let recordName = $state('example.com');
@@ -30,47 +31,75 @@
   let results = $state<ValidationResult | null>(null);
   const clipboard = useClipboard();
 
-  const recordTypes = [
-    { value: 'A', label: 'A (IPv4 Address)', description: 'Maps domain to IPv4 address' },
-    { value: 'AAAA', label: 'AAAA (IPv6 Address)', description: 'Maps domain to IPv6 address' },
-    { value: 'CNAME', label: 'CNAME (Canonical Name)', description: 'Alias to another domain' },
-    { value: 'MX', label: 'MX (Mail Exchange)', description: 'Mail server for domain' },
-    { value: 'TXT', label: 'TXT (Text)', description: 'Arbitrary text data' },
-    { value: 'SRV', label: 'SRV (Service)', description: 'Service location and port' },
-    { value: 'CAA', label: 'CAA (Certificate Authority)', description: 'Certificate authority authorization' },
-  ];
+  const recordTypes = $derived([
+    {
+      value: 'A',
+      label: $t('tools/dns-record-validator.recordTypes.a.label'),
+      description: $t('tools/dns-record-validator.recordTypes.a.description'),
+    },
+    {
+      value: 'AAAA',
+      label: $t('tools/dns-record-validator.recordTypes.aaaa.label'),
+      description: $t('tools/dns-record-validator.recordTypes.aaaa.description'),
+    },
+    {
+      value: 'CNAME',
+      label: $t('tools/dns-record-validator.recordTypes.cname.label'),
+      description: $t('tools/dns-record-validator.recordTypes.cname.description'),
+    },
+    {
+      value: 'MX',
+      label: $t('tools/dns-record-validator.recordTypes.mx.label'),
+      description: $t('tools/dns-record-validator.recordTypes.mx.description'),
+    },
+    {
+      value: 'TXT',
+      label: $t('tools/dns-record-validator.recordTypes.txt.label'),
+      description: $t('tools/dns-record-validator.recordTypes.txt.description'),
+    },
+    {
+      value: 'SRV',
+      label: $t('tools/dns-record-validator.recordTypes.srv.label'),
+      description: $t('tools/dns-record-validator.recordTypes.srv.description'),
+    },
+    {
+      value: 'CAA',
+      label: $t('tools/dns-record-validator.recordTypes.caa.label'),
+      description: $t('tools/dns-record-validator.recordTypes.caa.description'),
+    },
+  ]);
 
-  const examples = [
+  const examples = $derived([
     {
       type: 'A',
       name: 'www.example.com',
       value: '192.0.2.1',
-      description: 'Basic web server A record',
+      description: $t('tools/dns-record-validator.examples.a'),
     },
     {
       type: 'AAAA',
       name: 'www.example.com',
       value: '2001:db8::1',
-      description: 'IPv6 web server record',
+      description: $t('tools/dns-record-validator.examples.aaaa'),
     },
     {
       type: 'CNAME',
       name: 'blog.example.com',
       value: 'www.example.com.',
-      description: 'Blog subdomain alias',
+      description: $t('tools/dns-record-validator.examples.cname'),
     },
     {
       type: 'MX',
       name: 'example.com',
       value: 'mail.example.com.',
       priority: 10,
-      description: 'Primary mail server',
+      description: $t('tools/dns-record-validator.examples.mx'),
     },
     {
       type: 'TXT',
       name: 'example.com',
       value: 'v=spf1 include:_spf.google.com ~all',
-      description: 'SPF policy record',
+      description: $t('tools/dns-record-validator.examples.txt'),
     },
     {
       type: 'SRV',
@@ -79,9 +108,9 @@
       priority: 0,
       weight: 5,
       port: 443,
-      description: 'HTTPS service record',
+      description: $t('tools/dns-record-validator.examples.srv'),
     },
-  ];
+  ]);
 
   function loadExample(example: (typeof examples)[0]) {
     recordType = example.type;
@@ -173,8 +202,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>DNS Record Validator</h1>
-    <p>Validate individual DNS resource record syntax for proper formatting and common issues</p>
+    <h1>{$t('tools/dns-record-validator.title')}</h1>
+    <p>{$t('tools/dns-record-validator.subtitle')}</p>
   </header>
 
   <!-- Educational Overview -->
@@ -183,19 +212,22 @@
       <div class="overview-item">
         <Icon name="check-circle" size="sm" />
         <div>
-          <strong>Syntax Validation:</strong> Verify record values match RFC specifications for format and constraints.
+          <strong>{$t('tools/dns-record-validator.overview.syntaxValidation.title')}</strong>
+          {$t('tools/dns-record-validator.overview.syntaxValidation.description')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="alert-triangle" size="sm" />
         <div>
-          <strong>Error Detection:</strong> Identify format errors, range violations, and protocol mismatches.
+          <strong>{$t('tools/dns-record-validator.overview.errorDetection.title')}</strong>
+          {$t('tools/dns-record-validator.overview.errorDetection.description')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="lightbulb" size="sm" />
         <div>
-          <strong>Best Practices:</strong> Get warnings about potential issues and optimization suggestions.
+          <strong>{$t('tools/dns-record-validator.overview.bestPractices.title')}</strong>
+          {$t('tools/dns-record-validator.overview.bestPractices.description')}
         </div>
       </div>
     </div>
@@ -206,7 +238,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="sm" />
-        <h3>Quick Examples</h3>
+        <h3>{$t('tools/dns-record-validator.examples.title')}</h3>
       </summary>
       <div class="examples-grid">
         {#each examples as example (example.type + example.name)}
@@ -227,9 +259,9 @@
   <div class="card input-card">
     <!-- Record Type Selection -->
     <div class="input-group">
-      <label for="record-type" use:tooltip={'Select the DNS record type to validate'}>
+      <label for="record-type" use:tooltip={$t('tools/dns-record-validator.input.recordType.tooltip')}>
         <Icon name="tag" size="sm" />
-        Record Type
+        {$t('tools/dns-record-validator.input.recordType.label')}
       </label>
       <select id="record-type" bind:value={recordType} onchange={handleInputChange} class="record-type-select">
         {#each recordTypes as type (type.value)}
@@ -243,16 +275,16 @@
 
     <!-- Record Name -->
     <div class="input-group">
-      <label for="record-name" use:tooltip={'The domain name for this DNS record'}>
+      <label for="record-name" use:tooltip={$t('tools/dns-record-validator.input.recordName.tooltip')}>
         <Icon name="globe" size="sm" />
-        Record Name
+        {$t('tools/dns-record-validator.input.recordName.label')}
       </label>
       <input
         id="record-name"
         type="text"
         bind:value={recordName}
         oninput={handleInputChange}
-        placeholder="example.com"
+        placeholder={$t('tools/dns-record-validator.input.recordName.placeholder')}
         class="record-name-input"
         spellcheck="false"
       />
@@ -260,16 +292,16 @@
 
     <!-- Record Value -->
     <div class="input-group">
-      <label for="record-value" use:tooltip={'The value/data for this DNS record'}>
+      <label for="record-value" use:tooltip={$t('tools/dns-record-validator.input.recordValue.tooltip')}>
         <Icon name="edit" size="sm" />
-        Record Value
+        {$t('tools/dns-record-validator.input.recordValue.label')}
       </label>
       {#if recordType === 'TXT'}
         <textarea
           id="record-value"
           bind:value={recordValue}
           oninput={handleInputChange}
-          placeholder="Enter TXT record content..."
+          placeholder={$t('tools/dns-record-validator.input.recordValue.placeholderTxt')}
           class="record-value-textarea"
           rows="3"
           spellcheck="false"
@@ -280,7 +312,11 @@
           type="text"
           bind:value={recordValue}
           oninput={handleInputChange}
-          placeholder={recordType === 'A' ? '192.0.2.1' : recordType === 'AAAA' ? '2001:db8::1' : 'Record value...'}
+          placeholder={recordType === 'A'
+            ? $t('tools/dns-record-validator.input.recordValue.placeholderA')
+            : recordType === 'AAAA'
+              ? $t('tools/dns-record-validator.input.recordValue.placeholderAAAA')
+              : $t('tools/dns-record-validator.input.recordValue.placeholderDefault')}
           class="record-value-input {results?.valid === true ? 'valid' : results?.valid === false ? 'invalid' : ''}"
           spellcheck="false"
         />
@@ -291,7 +327,7 @@
     {#if recordType === 'MX'}
       <div class="additional-fields">
         <div class="field-group">
-          <label for="priority">Priority</label>
+          <label for="priority">{$t('tools/dns-record-validator.input.priority')}</label>
           <input
             id="priority"
             type="number"
@@ -308,7 +344,7 @@
     {#if recordType === 'SRV'}
       <div class="additional-fields">
         <div class="field-group">
-          <label for="service">Service</label>
+          <label for="service">{$t('tools/dns-record-validator.input.service')}</label>
           <input
             id="service"
             type="text"
@@ -319,14 +355,14 @@
           />
         </div>
         <div class="field-group">
-          <label for="protocol">Protocol</label>
+          <label for="protocol">{$t('tools/dns-record-validator.input.protocol')}</label>
           <select id="protocol" bind:value={protocol} onchange={handleInputChange} class="protocol-select">
             <option value="_tcp">_tcp</option>
             <option value="_udp">_udp</option>
           </select>
         </div>
         <div class="field-group">
-          <label for="srv-priority">Priority</label>
+          <label for="srv-priority">{$t('tools/dns-record-validator.input.priority')}</label>
           <input
             id="srv-priority"
             type="number"
@@ -338,7 +374,7 @@
           />
         </div>
         <div class="field-group">
-          <label for="weight">Weight</label>
+          <label for="weight">{$t('tools/dns-record-validator.input.weight')}</label>
           <input
             id="weight"
             type="number"
@@ -350,7 +386,7 @@
           />
         </div>
         <div class="field-group">
-          <label for="port">Port</label>
+          <label for="port">{$t('tools/dns-record-validator.input.port')}</label>
           <input
             id="port"
             type="number"
@@ -367,7 +403,7 @@
     {#if recordType === 'CAA'}
       <div class="additional-fields">
         <div class="field-group">
-          <label for="flags">Flags</label>
+          <label for="flags">{$t('tools/dns-record-validator.input.flags')}</label>
           <input
             id="flags"
             type="number"
@@ -379,7 +415,7 @@
           />
         </div>
         <div class="field-group">
-          <label for="tag">Tag</label>
+          <label for="tag">{$t('tools/dns-record-validator.input.tag')}</label>
           <select id="tag" bind:value={tag} onchange={handleInputChange} class="tag-select">
             <option value="issue">issue</option>
             <option value="issuewild">issuewild</option>
@@ -391,9 +427,9 @@
 
     <!-- TTL -->
     <div class="input-group">
-      <label for="ttl" use:tooltip={'Time To Live in seconds (how long record should be cached)'}>
+      <label for="ttl" use:tooltip={$t('tools/dns-record-validator.input.ttl.tooltip')}>
         <Icon name="clock" size="sm" />
-        TTL (seconds)
+        {$t('tools/dns-record-validator.input.ttl.label')}
       </label>
       <input
         id="ttl"
@@ -402,7 +438,7 @@
         oninput={handleInputChange}
         min="0"
         max="2147483647"
-        placeholder="3600"
+        placeholder={$t('tools/dns-record-validator.input.ttl.placeholder')}
         class="ttl-input"
       />
     </div>
@@ -414,20 +450,25 @@
       <div class="results-header">
         <div class="validation-status {results.valid ? 'valid' : 'invalid'}">
           <Icon name={results.valid ? 'check-circle' : 'x-circle'} size="sm" />
-          <span>{results.valid ? 'Valid' : 'Invalid'} DNS Record</span>
+          <span
+            >{results.valid
+              ? $t('tools/dns-record-validator.results.validStatus')
+              : $t('tools/dns-record-validator.results.invalidStatus')}
+            {$t('tools/dns-record-validator.results.dnsRecord')}</span
+          >
         </div>
         <button
           class="copy-button {clipboard.isCopied() ? 'copied' : ''}"
           onclick={() => clipboard.copy(formatRecord())}
         >
           <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="sm" />
-          Copy Zone Line
+          {$t('tools/dns-record-validator.results.copyButton')}
         </button>
       </div>
 
       <!-- Formatted Record -->
       <div class="formatted-record">
-        <h4>Zone File Format:</h4>
+        <h4>{$t('tools/dns-record-validator.results.zoneFileFormat')}</h4>
         <pre><code>{formatRecord()}</code></pre>
       </div>
 
@@ -436,7 +477,7 @@
         <div class="validation-section errors">
           <h4>
             <Icon name="x-circle" size="sm" />
-            Errors ({results.errors.length})
+            {$t('tools/dns-record-validator.results.errors', { count: results.errors.length })}
           </h4>
           <ul class="validation-list">
             {#each results.errors as error, index (index)}
@@ -451,7 +492,7 @@
         <div class="validation-section warnings">
           <h4>
             <Icon name="alert-triangle" size="sm" />
-            Warnings ({results.warnings.length})
+            {$t('tools/dns-record-validator.results.warnings', { count: results.warnings.length })}
           </h4>
           <ul class="validation-list">
             {#each results.warnings as warning, index (index)}
@@ -466,7 +507,7 @@
         <div class="validation-section normalized">
           <h4>
             <Icon name="check" size="sm" />
-            Normalized Value
+            {$t('tools/dns-record-validator.results.normalizedValue')}
           </h4>
           <code class="normalized-value">{results.normalized}</code>
         </div>
@@ -478,35 +519,23 @@
   <div class="education-card">
     <div class="education-grid">
       <div class="education-item info-panel">
-        <h4>Common Record Types</h4>
-        <p>
-          A/AAAA records map domains to IP addresses. CNAME creates aliases. MX directs email. TXT stores arbitrary data
-          like SPF policies. SRV specifies service locations.
-        </p>
+        <h4>{$t('tools/dns-record-validator.education.commonRecordTypes.title')}</h4>
+        <p>{$t('tools/dns-record-validator.education.commonRecordTypes.description')}</p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Validation Scope</h4>
-        <p>
-          This validator checks syntax, format, and common configuration issues. It doesn't verify that targets exist or
-          are reachable - use DNS lookup tools for connectivity testing.
-        </p>
+        <h4>{$t('tools/dns-record-validator.education.validationScope.title')}</h4>
+        <p>{$t('tools/dns-record-validator.education.validationScope.description')}</p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>TTL Guidelines</h4>
-        <p>
-          Use shorter TTLs (300-3600s) for records that change frequently. Longer TTLs (3600-86400s) reduce DNS queries
-          but slow propagation of changes. Balance based on your needs.
-        </p>
+        <h4>{$t('tools/dns-record-validator.education.ttlGuidelines.title')}</h4>
+        <p>{$t('tools/dns-record-validator.education.ttlGuidelines.description')}</p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Best Practices</h4>
-        <p>
-          Always use fully qualified domain names (ending with .) in record values. Validate SPF/DMARC policies
-          carefully. Keep MX priorities consistent. Use descriptive TXT record formatting.
-        </p>
+        <h4>{$t('tools/dns-record-validator.education.bestPractices.title')}</h4>
+        <p>{$t('tools/dns-record-validator.education.bestPractices.description')}</p>
       </div>
     </div>
   </div>

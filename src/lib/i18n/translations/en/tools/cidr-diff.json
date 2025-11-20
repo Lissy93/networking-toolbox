@@ -1,0 +1,74 @@
+{
+  "title": "CIDR Set Difference",
+  "description": "Calculate the difference between two sets of IP addresses and CIDR blocks (A - B)",
+
+  "alignmentMode": {
+    "title": "Alignment Mode",
+    "minimal": {
+      "label": "Minimal",
+      "description": "Generate the most efficient CIDR blocks"
+    },
+    "constrained": {
+      "label": "Constrained",
+      "description": "Align to specific prefix boundaries",
+      "prefixLabel": "Constrained prefix length",
+      "prefixTooltip": "Force alignment to this prefix boundary"
+    }
+  },
+
+  "input": {
+    "setALabel": "Set A (Base)",
+    "setATooltip": "The base set of IP addresses, CIDR blocks, or ranges",
+    "setAPlaceholder": "192.168.1.0/24\n10.0.0.0-10.0.0.100",
+    "setBLabel": "Set B (Subtract)",
+    "setBTooltip": "The set to subtract from Set A (can be empty)",
+    "setBPlaceholder": "192.168.1.128/25\n10.0.0.50-10.0.0.75",
+    "clearTooltip": "Clear both input sets"
+  },
+
+  "examples": {
+    "title": "Quick Examples",
+    "tooltip": "Click any example to load it into the input fields",
+    "basicIPv4": "Basic IPv4 Subtraction",
+    "multipleRanges": "Multiple Ranges",
+    "ipv6Example": "IPv6 Example",
+    "mixedOperations": "Mixed Operations"
+  },
+
+  "results": {
+    "errorsTitle": "Parse Errors",
+    "title": "Difference Results (A - B)",
+    "exportText": "Text",
+    "exportJSON": "JSON",
+    "noResultsTitle": "No Results",
+    "noResultsMessage": "The difference A - B resulted in an empty set. Set B completely contains or covers Set A."
+  },
+
+  "stats": {
+    "setALabel": "Set A (Input)",
+    "itemsCount": "{count} items",
+    "addressesCount": "{count} addresses",
+    "setBLabel": "Set B (Subtract)",
+    "resultLabel": "Result (A - B)",
+    "cidrsCount": "{count} CIDRs",
+    "efficiencyLabel": "Efficiency",
+    "efficiencyValue": "{percent}%",
+    "removedCount": "{count} removed"
+  },
+
+  "visualization": {
+    "title": "Set Operation Visualization",
+    "tooltip": "Visual representation showing the relationship between sets A, B, and the result",
+    "setALegend": "Set A (Base)",
+    "setBLegend": "Set B (Subtract)",
+    "resultLegend": "Result (A - B)",
+    "setATooltip": "Set A\nRange: {startIP} - {endIP}\nSize: {size}{cidr}",
+    "setBTooltip": "Set B\nRange: {startIP} - {endIP}\nSize: {size}{cidr}",
+    "resultTooltip": "Set result\nRange: {startIP} - {endIP}\nSize: {size}{cidr}"
+  },
+
+  "output": {
+    "ipv4Title": "IPv4 Results ({count})",
+    "ipv6Title": "IPv6 Results ({count})"
+  }
+}

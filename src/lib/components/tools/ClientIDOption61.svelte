@@ -15,13 +15,14 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
 
   let activeTab = $state<'build' | 'decode'>('build');
 
-  const navOptions = [
-    { value: 'build' as const, label: 'Build', icon: 'settings' },
-    { value: 'decode' as const, label: 'Decode', icon: 'code' },
-  ];
+  const navOptions = $derived([
+    { value: 'build' as const, label: $t('tools/clientid-option61.nav.build'), icon: 'settings' },
+    { value: 'decode' as const, label: $t('tools/clientid-option61.nav.decode'), icon: 'code' },
+  ]);
 
   let mode = $state<'hardware' | 'opaque'>('hardware');
   let hardwareType = $state<number>(HARDWARE_TYPES.ETHERNET);
@@ -159,8 +160,8 @@
 </script>
 
 <ToolContentContainer
-  title="DHCPv4 Client Identifier (Option 61)"
-  description="Build and decode DHCPv4 Client Identifier (Option 61) with hardware type + MAC address or arbitrary opaque data per RFC 2132."
+  title={$t('tools/clientid-option61.title')}
+  description={$t('tools/clientid-option61.subtitle')}
   {navOptions}
   bind:selectedNav={activeTab}
 >
@@ -185,18 +186,18 @@
   {#if activeTab === 'build'}
     <div class="card input-card">
       <div class="card-header">
-        <h3>Build Client Identifier</h3>
-        <p class="help-text">Configure DHCPv4 Client Identifier for device identification</p>
+        <h3>{$t('tools/clientid-option61.build.title')}</h3>
+        <p class="help-text">{$t('tools/clientid-option61.build.helpText')}</p>
       </div>
       <div class="card-content">
         <div class="input-group">
           <label for="mode">
             <Icon name="settings" size="sm" />
-            Mode
+            {$t('tools/clientid-option61.build.mode.label')}
           </label>
           <select id="mode" bind:value={mode}>
-            <option value="hardware">Hardware Type + MAC Address</option>
-            <option value="opaque">Opaque Data (Text or Hex)</option>
+            <option value="hardware">{$t('tools/clientid-option61.build.mode.hardware')}</option>
+            <option value="opaque">{$t('tools/clientid-option61.build.mode.opaque')}</option>
           </select>
         </div>
 
@@ -204,29 +205,52 @@
           <div class="input-group">
             <label for="hardware-type">
               <Icon name="cpu" size="sm" />
-              Hardware Type
+              {$t('tools/clientid-option61.build.hardwareType.label')}
             </label>
             <select id="hardware-type" bind:value={hardwareType}>
-              <option value={HARDWARE_TYPES.ETHERNET}>Ethernet (1)</option>
-              <option value={HARDWARE_TYPES.EXPERIMENTAL_ETHERNET}>Experimental Ethernet (2)</option>
-              <option value={HARDWARE_TYPES.IEEE_802}>IEEE 802 (6)</option>
-              <option value={HARDWARE_TYPES.ARCNET}>ARCNET (7)</option>
-              <option value={HARDWARE_TYPES.FRAME_RELAY}>Frame Relay (15)</option>
-              <option value={HARDWARE_TYPES.ATM}>ATM (16)</option>
-              <option value={HARDWARE_TYPES.HDLC}>HDLC (17)</option>
-              <option value={HARDWARE_TYPES.FIBRE_CHANNEL}>Fibre Channel (18)</option>
-              <option value={HARDWARE_TYPES.IEEE_1394}>IEEE 1394 (24)</option>
-              <option value={HARDWARE_TYPES.INFINIBAND}>InfiniBand (32)</option>
+              <option value={HARDWARE_TYPES.ETHERNET}
+                >{$t('tools/clientid-option61.build.hardwareType.options.ethernet')}</option
+              >
+              <option value={HARDWARE_TYPES.EXPERIMENTAL_ETHERNET}
+                >{$t('tools/clientid-option61.build.hardwareType.options.experimentalEthernet')}</option
+              >
+              <option value={HARDWARE_TYPES.IEEE_802}
+                >{$t('tools/clientid-option61.build.hardwareType.options.ieee802')}</option
+              >
+              <option value={HARDWARE_TYPES.ARCNET}
+                >{$t('tools/clientid-option61.build.hardwareType.options.arcnet')}</option
+              >
+              <option value={HARDWARE_TYPES.FRAME_RELAY}
+                >{$t('tools/clientid-option61.build.hardwareType.options.frameRelay')}</option
+              >
+              <option value={HARDWARE_TYPES.ATM}>{$t('tools/clientid-option61.build.hardwareType.options.atm')}</option>
+              <option value={HARDWARE_TYPES.HDLC}
+                >{$t('tools/clientid-option61.build.hardwareType.options.hdlc')}</option
+              >
+              <option value={HARDWARE_TYPES.FIBRE_CHANNEL}
+                >{$t('tools/clientid-option61.build.hardwareType.options.fibreChannel')}</option
+              >
+              <option value={HARDWARE_TYPES.IEEE_1394}
+                >{$t('tools/clientid-option61.build.hardwareType.options.ieee1394')}</option
+              >
+              <option value={HARDWARE_TYPES.INFINIBAND}
+                >{$t('tools/clientid-option61.build.hardwareType.options.infiniband')}</option
+              >
             </select>
           </div>
 
           <div class="input-group">
             <label for="mac-address">
               <Icon name="hash" size="sm" />
-              MAC Address
+              {$t('tools/clientid-option61.build.macAddress.label')}
             </label>
-            <input id="mac-address" type="text" bind:value={macAddress} placeholder="00:0c:29:4f:a3:d2" />
-            <small>Hardware address in any common format</small>
+            <input
+              id="mac-address"
+              type="text"
+              bind:value={macAddress}
+              placeholder={$t('tools/clientid-option61.build.macAddress.placeholder')}
+            />
+            <small>{$t('tools/clientid-option61.build.macAddress.helpText')}</small>
           </div>
         {/if}
 
@@ -234,26 +258,34 @@
           <div class="input-group">
             <label for="opaque-format">
               <Icon name="code" size="sm" />
-              Data Format
+              {$t('tools/clientid-option61.build.dataFormat.label')}
             </label>
             <select id="opaque-format" bind:value={opaqueFormat}>
-              <option value="text">Text (ASCII)</option>
-              <option value="hex">Hexadecimal</option>
+              <option value="text">{$t('tools/clientid-option61.build.dataFormat.text')}</option>
+              <option value="hex">{$t('tools/clientid-option61.build.dataFormat.hex')}</option>
             </select>
           </div>
 
           <div class="input-group">
             <label for="opaque-data">
               <Icon name="edit" size="sm" />
-              {opaqueFormat === 'hex' ? 'Hex Data' : 'Text Data'}
+              {opaqueFormat === 'hex'
+                ? $t('tools/clientid-option61.build.opaqueData.labelHex')
+                : $t('tools/clientid-option61.build.opaqueData.labelText')}
             </label>
             <input
               id="opaque-data"
               type="text"
               bind:value={opaqueData}
-              placeholder={opaqueFormat === 'hex' ? '0123456789abcdef' : 'client-device-001'}
+              placeholder={opaqueFormat === 'hex'
+                ? $t('tools/clientid-option61.build.opaqueData.placeholderHex')
+                : $t('tools/clientid-option61.build.opaqueData.placeholderText')}
             />
-            <small>{opaqueFormat === 'hex' ? 'Hexadecimal string (even length)' : 'Plain text identifier'}</small>
+            <small
+              >{opaqueFormat === 'hex'
+                ? $t('tools/clientid-option61.build.opaqueData.helpTextHex')
+                : $t('tools/clientid-option61.build.opaqueData.helpTextText')}</small
+            >
           </div>
         {/if}
       </div>
@@ -261,17 +293,22 @@
   {:else}
     <div class="card input-card">
       <div class="card-header">
-        <h3>Decode Client Identifier</h3>
-        <p class="help-text">Decode hex-encoded Client Identifier back to fields</p>
+        <h3>{$t('tools/clientid-option61.decode.title')}</h3>
+        <p class="help-text">{$t('tools/clientid-option61.decode.helpText')}</p>
       </div>
       <div class="card-content">
         <div class="input-group">
           <label for="decode-hex">
             <Icon name="code" size="sm" />
-            Hex Data
+            {$t('tools/clientid-option61.decode.hexData.label')}
           </label>
-          <input id="decode-hex" type="text" bind:value={decodeHex} placeholder="01000c294fa3d2" />
-          <small>Paste hex-encoded Client Identifier to decode</small>
+          <input
+            id="decode-hex"
+            type="text"
+            bind:value={decodeHex}
+            placeholder={$t('tools/clientid-option61.decode.hexData.placeholder')}
+          />
+          <small>{$t('tools/clientid-option61.decode.hexData.helpText')}</small>
         </div>
       </div>
     </div>
@@ -279,7 +316,7 @@
 
   {#if validationErrors.length > 0}
     <div class="card errors-card">
-      <h3>Validation Errors</h3>
+      <h3>{$t('tools/clientid-option61.errors.title')}</h3>
       {#each validationErrors as error, i (i)}
         <div class="error-message">
           <Icon name="alert-triangle" size="sm" />
@@ -291,14 +328,22 @@
 
   {#if activeTab === 'build' && buildResult && validationErrors.length === 0}
     <div class="card results">
-      <h3>Generated Client Identifier</h3>
+      <h3>{$t('tools/clientid-option61.results.buildTitle')}</h3>
 
       <div class="summary-card">
-        <div><strong>Mode:</strong> {buildResult.mode === 'hardware' ? 'Hardware Type + MAC' : 'Opaque Data'}</div>
-        <div><strong>Length:</strong> {buildResult.length} bytes</div>
+        <div>
+          <strong>{$t('tools/clientid-option61.results.mode')}</strong>
+          {buildResult.mode === 'hardware'
+            ? $t('tools/clientid-option61.results.modeHardware')
+            : $t('tools/clientid-option61.results.modeOpaque')}
+        </div>
+        <div>
+          <strong>{$t('tools/clientid-option61.results.length')}</strong>
+          {$t('tools/clientid-option61.results.lengthBytes', { length: buildResult.length })}
+        </div>
       </div>
 
-      {#each [{ title: 'Hexadecimal', content: buildResult.hex, key: 'hex' }, { title: 'Wire Format (Spaced)', content: buildResult.wireFormat, key: 'wire' }] as output (output.key)}
+      {#each [{ title: $t('tools/clientid-option61.results.outputs.hexadecimal'), content: buildResult.hex, key: 'hex' }, { title: $t('tools/clientid-option61.results.outputs.wireFormat'), content: buildResult.wireFormat, key: 'wire' }] as output (output.key)}
         <div class="output-group">
           <div class="output-header">
             <h4>{output.title}</h4>
@@ -309,7 +354,9 @@
               onclick={() => clipboard.copy(output.content, output.key)}
             >
               <Icon name={clipboard.isCopied(output.key) ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied(output.key) ? 'Copied' : 'Copy'}
+              {clipboard.isCopied(output.key)
+                ? $t('tools/clientid-option61.buttons.copied')
+                : $t('tools/clientid-option61.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{output.content}</pre>
@@ -318,7 +365,7 @@
 
       {#if buildResult.breakdown && buildResult.breakdown.length > 0}
         <div class="breakdown-section">
-          <h4>Breakdown</h4>
+          <h4>{$t('tools/clientid-option61.results.breakdown')}</h4>
           {#each buildResult.breakdown as item, i (i)}
             <div class="breakdown-item">
               <div class="breakdown-label">{item.field}</div>
@@ -334,7 +381,7 @@
       {/if}
     </div>
 
-    {#each [{ title: 'ISC DHCPd Configuration', content: buildResult.configExamples?.iscDhcpd, key: 'isc' }, { title: 'Kea DHCPv4 Configuration', content: buildResult.configExamples?.keaDhcp4, key: 'kea' }] as config (config.key)}
+    {#each [{ title: $t('tools/clientid-option61.results.configs.iscDhcpd'), content: buildResult.configExamples?.iscDhcpd, key: 'isc' }, { title: $t('tools/clientid-option61.results.configs.keaDhcp4'), content: buildResult.configExamples?.keaDhcp4, key: 'kea' }] as config (config.key)}
       {#if config.content}
         <div class="card results">
           <div class="card-header-with-action">
@@ -346,7 +393,9 @@
               onclick={() => clipboard.copy(config.content!, config.key)}
             >
               <Icon name={clipboard.isCopied(config.key) ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied(config.key) ? 'Copied' : 'Copy'}
+              {clipboard.isCopied(config.key)
+                ? $t('tools/clientid-option61.buttons.copied')
+                : $t('tools/clientid-option61.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{config.content}</pre>
@@ -357,30 +406,36 @@
 
   {#if activeTab === 'decode' && decodeResult && validationErrors.length === 0}
     <div class="card results">
-      <h3>Decoded Client Identifier</h3>
+      <h3>{$t('tools/clientid-option61.results.decodeTitle')}</h3>
 
       <div class="summary-card">
         <div>
-          <strong>Detected Mode:</strong>
-          {decodeResult.mode === 'hardware' ? 'Hardware Type + MAC' : 'Opaque Data'}
+          <strong>{$t('tools/clientid-option61.results.detectedMode')}</strong>
+          {decodeResult.mode === 'hardware'
+            ? $t('tools/clientid-option61.results.modeHardware')
+            : $t('tools/clientid-option61.results.modeOpaque')}
         </div>
-        <div><strong>Length:</strong> {decodeResult.length} bytes</div>
+        <div>
+          <strong>{$t('tools/clientid-option61.results.length')}</strong>
+          {$t('tools/clientid-option61.results.lengthBytes', { length: decodeResult.length })}
+        </div>
       </div>
 
       {#if decodeResult.decoded}
         <div class="decoded-fields">
           {#if decodeResult.decoded.hardwareType !== undefined}
             <div class="decoded-field">
-              <div class="field-label">Hardware Type</div>
+              <div class="field-label">{$t('tools/clientid-option61.results.fields.hardwareType')}</div>
               <div class="field-value">
-                {decodeResult.decoded.hardwareType} ({decodeResult.decoded.hardwareTypeName || 'Unknown'})
+                {decodeResult.decoded.hardwareType} ({decodeResult.decoded.hardwareTypeName ||
+                  $t('tools/clientid-option61.results.fields.hardwareTypeUnknown')})
               </div>
             </div>
           {/if}
 
           {#if decodeResult.decoded.macAddress}
             <div class="decoded-field">
-              <div class="field-label">MAC Address</div>
+              <div class="field-label">{$t('tools/clientid-option61.results.fields.macAddress')}</div>
               <div class="field-value">
                 <code>{decodeResult.decoded.macAddress}</code>
                 <button
@@ -396,7 +451,7 @@
 
           {#if decodeResult.decoded.opaqueData}
             <div class="decoded-field">
-              <div class="field-label">Opaque Data</div>
+              <div class="field-label">{$t('tools/clientid-option61.results.fields.opaqueData')}</div>
               <div class="field-value">
                 <code>{decodeResult.decoded.opaqueData}</code>
                 <button
@@ -414,7 +469,7 @@
 
       {#if decodeResult.breakdown && decodeResult.breakdown.length > 0}
         <div class="breakdown-section">
-          <h4>Breakdown</h4>
+          <h4>{$t('tools/clientid-option61.results.breakdown')}</h4>
           {#each decodeResult.breakdown as item, i (i)}
             <div class="breakdown-item">
               <div class="breakdown-label">{item.field}</div>

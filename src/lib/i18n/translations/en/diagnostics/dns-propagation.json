@@ -1,0 +1,140 @@
+{
+  "title": "DNS Propagation Checker",
+  "subtitle": "Check DNS record propagation across multiple public DNS resolvers. Compare responses from Cloudflare, Google, Quad9, and OpenDNS to verify consistent DNS propagation worldwide.",
+
+  "recordTypes": {
+    "A": {
+      "label": "A",
+      "description": "IPv4 address records"
+    },
+    "AAAA": {
+      "label": "AAAA",
+      "description": "IPv6 address records"
+    },
+    "CNAME": {
+      "label": "CNAME",
+      "description": "Canonical name records"
+    },
+    "MX": {
+      "label": "MX",
+      "description": "Mail exchange records"
+    },
+    "TXT": {
+      "label": "TXT",
+      "description": "Text records"
+    },
+    "NS": {
+      "label": "NS",
+      "description": "Name server records"
+    }
+  },
+
+  "resolvers": {
+    "cloudflare": {
+      "name": "Cloudflare",
+      "ip": "1.1.1.1",
+      "location": "Global"
+    },
+    "google": {
+      "name": "Google",
+      "ip": "8.8.8.8",
+      "location": "Global"
+    },
+    "quad9": {
+      "name": "Quad9",
+      "ip": "9.9.9.9",
+      "location": "Global"
+    },
+    "opendns": {
+      "name": "OpenDNS",
+      "ip": "208.67.222.222",
+      "location": "Global"
+    }
+  },
+
+  "examples": {
+    "title": "Propagation Examples",
+    "items": {
+      "googleA": {
+        "domain": "google.com",
+        "type": "A",
+        "description": "Check A record propagation",
+        "tooltip": "Check A record propagation for google.com"
+      },
+      "githubAAAA": {
+        "domain": "github.com",
+        "type": "AAAA",
+        "description": "IPv6 propagation check",
+        "tooltip": "Check AAAA record propagation for github.com"
+      },
+      "gmailMX": {
+        "domain": "gmail.com",
+        "type": "MX",
+        "description": "Mail server propagation",
+        "tooltip": "Check MX record propagation for gmail.com"
+      },
+      "dmarcTXT": {
+        "domain": "_dmarc.google.com",
+        "type": "TXT",
+        "description": "DMARC policy propagation",
+        "tooltip": "Check TXT record propagation for _dmarc.google.com"
+      }
+    }
+  },
+
+  "form": {
+    "title": "Propagation Check Configuration",
+    "domainLabel": "Domain Name",
+    "domainPlaceholder": "example.com",
+    "domainTooltip": "Enter the domain name to check propagation for",
+    "recordTypeLabel": "Record Type",
+    "recordTypeTooltip": "Select the DNS record type to check",
+    "checking": "Checking Propagation...",
+    "checkButton": "Check DNS Propagation"
+  },
+
+  "error": {
+    "title": "Propagation Check Failed",
+    "propagationFailed": "Propagation check failed: {status}",
+    "unknownError": "Unknown error occurred"
+  },
+
+  "results": {
+    "title": "Propagation Results",
+    "fullyPropagated": "Fully Propagated",
+    "inconsistentResults": "Inconsistent Results",
+    "copyAll": "Copy All Results",
+    "copied": "Copied!",
+    "errorMessage": "Error: {error}",
+    "noRecordsFound": "No records found",
+    "ttlTooltip": "Time To Live",
+    "lastChecked": "Last checked: {domain} ({type}) at {time}",
+    "copyHeader": "DNS Propagation Check for {domain} ({type})",
+    "copyCheckedAt": "Checked at: {time}",
+    "copyNoRecords": "No records found"
+  },
+
+  "education": {
+    "title": "Understanding DNS Propagation",
+    "whatIsPropagation": {
+      "title": "What is DNS Propagation?",
+      "description": "DNS propagation refers to the time it takes for DNS changes to spread across the internet. Different resolvers may cache records for different periods, leading to temporary inconsistencies."
+    },
+    "factors": {
+      "title": "Factors Affecting Propagation",
+      "ttl": "TTL Values: Lower TTL means faster propagation",
+      "caching": "Resolver Caching: Each resolver has its own cache policies",
+      "geography": "Geographic Location: Physical distance affects update speed",
+      "infrastructure": "DNS Infrastructure: Authoritative server response time"
+    },
+    "interpreting": {
+      "title": "Interpreting Results",
+      "fullyPropagated": "Fully Propagated: All resolvers return identical results",
+      "inconsistent": "Inconsistent: Different resolvers return different results",
+      "error": "Error: Resolver failed to respond or returned an error"
+    },
+    "resolversTested": {
+      "title": "DNS Resolvers Tested"
+    }
+  }
+}

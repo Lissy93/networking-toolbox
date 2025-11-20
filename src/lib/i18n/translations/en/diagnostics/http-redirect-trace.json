@@ -1,0 +1,27 @@
+{
+  "title": "HTTP Redirect Trace",
+  "description": "Trace HTTP redirects and analyze redirect chains for a URL",
+
+  "form": {
+    "title": "Redirect Trace",
+    "url": {
+      "label": "URL",
+      "placeholder": "https://example.com"
+    },
+    "trace": "Trace Redirects",
+    "tracing": "Tracing...",
+    "error": "Please enter a valid URL"
+  },
+
+  "results": {
+    "title": "Redirect Chain",
+    "redirect_count": "{count} redirects",
+    "final_destination": "Final Destination",
+    "status_code": "Status Code",
+    "location": "Location",
+    "redirect_time": "Redirect Time",
+    "total_time": "Total Time",
+    "redirect_loop": "Redirect Loop Detected",
+    "too_many_redirects": "Too Many Redirects"
+  }
+}

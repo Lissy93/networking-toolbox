@@ -1,0 +1,24 @@
+{
+  "title": "DNS Glue Record Checker",
+  "description": "Check for proper glue records configuration for name servers",
+
+  "form": {
+    "title": "Glue Record Check",
+    "domain": {
+      "label": "Domain",
+      "placeholder": "example.com"
+    },
+    "check": "Check Glue Records",
+    "checking": "Checking...",
+    "error": "Please enter a domain"
+  },
+
+  "results": {
+    "title": "Glue Record Results",
+    "glue_required": "Glue Required",
+    "glue_found": "Glue Found",
+    "glue_missing": "Glue Missing",
+    "nameservers": "Nameservers",
+    "glue_records": "Glue Records"
+  }
+}

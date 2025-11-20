@@ -1,0 +1,28 @@
+{
+  "title": "DNS Query Performance",
+  "description": "Measure DNS query performance and response times for a domain",
+
+  "form": {
+    "title": "DNS Performance Test",
+    "domain": {
+      "label": "Domain",
+      "placeholder": "example.com"
+    },
+    "record_type": {
+      "label": "Record Type"
+    },
+    "test": "Test DNS Performance",
+    "testing": "Testing...",
+    "error": "Please enter a domain"
+  },
+
+  "results": {
+    "title": "DNS Performance Results",
+    "query_time": "Query Time",
+    "avg_time": "Average Time",
+    "min_time": "Min Time",
+    "max_time": "Max Time",
+    "nameserver": "Nameserver",
+    "ttl": "TTL"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "title": "TLS Version Checker",
+  "description": "Check which TLS/SSL protocol versions are supported by a server",
+
+  "form": {
+    "title": "TLS Version Check",
+    "hostname": {
+      "label": "Hostname",
+      "placeholder": "example.com"
+    },
+    "port": {
+      "label": "Port",
+      "placeholder": "443"
+    },
+    "check": "Check TLS Versions",
+    "checking": "Checking...",
+    "error": "Please enter a hostname"
+  },
+
+  "results": {
+    "title": "TLS Version Support",
+    "versions": {
+      "tls13": "TLS 1.3",
+      "tls12": "TLS 1.2",
+      "tls11": "TLS 1.1",
+      "tls10": "TLS 1.0",
+      "ssl3": "SSL 3.0",
+      "ssl2": "SSL 2.0"
+    },
+    "supported": "Supported",
+    "not_supported": "Not Supported",
+    "deprecated": "Deprecated",
+    "insecure": "Insecure"
+  }
+}

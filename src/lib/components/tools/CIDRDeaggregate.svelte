@@ -5,6 +5,7 @@
   import { cidrDeaggregate, getSubnetSize, type DeaggregateResult } from '$lib/utils/cidr-deaggregate.js';
   import { formatNumber } from '$lib/utils/formatters';
   import '../../../styles/diagnostics-pages.scss';
+  import { t } from '$lib/stores/language';
 
   let input = $state(`192.168.0.0/22
 10.0.0.0-10.0.0.255`);
@@ -15,43 +16,43 @@
   let selectedExampleIndex = $state<number | null>(null);
   let _userModified = $state(false);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Break /22 into /24s',
+      label: $t('tools/cidr-deaggregate.examples.break22to24'),
       input: '192.168.0.0/22',
       targetPrefix: 24,
     },
     {
-      label: 'Decompose Range to /28s',
+      label: $t('tools/cidr-deaggregate.examples.decomposeRangeTo28'),
       input: '10.0.0.0-10.0.0.255',
       targetPrefix: 28,
     },
     {
-      label: 'Multiple Blocks to /26s',
+      label: $t('tools/cidr-deaggregate.examples.multipleBlocksTo26'),
       input: `172.16.0.0/24
 172.16.2.0/25`,
       targetPrefix: 26,
     },
     {
-      label: 'Enterprise Campus to /25s',
+      label: $t('tools/cidr-deaggregate.examples.enterpriseCampusTo25'),
       input: `10.10.0.0/16
 10.20.0.0/17`,
       targetPrefix: 25,
     },
     {
-      label: 'Data Center Racks to /29s',
+      label: $t('tools/cidr-deaggregate.examples.dataCenterRacksTo29'),
       input: `192.168.100.0/24
 192.168.101.0-192.168.101.127`,
       targetPrefix: 29,
     },
     {
-      label: 'Service Provider to /30s',
+      label: $t('tools/cidr-deaggregate.examples.serviceProviderTo30'),
       input: `203.0.113.0/26
 198.51.100.64/27
 198.51.100.96/28`,
       targetPrefix: 30,
     },
-  ];
+  ]);
 
   function loadExample(example: (typeof examples)[0], index: number) {
     input = example.input;
@@ -91,8 +92,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>CIDR Deaggregate</h2>
-    <p>Decompose CIDR blocks and ranges into uniform target prefix subnets</p>
+    <h2>{$t('tools/cidr-deaggregate.title')}</h2>
+    <p>{$t('tools/cidr-deaggregate.description')}</p>
   </header>
 
   <!-- Examples -->
@@ -100,7 +101,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('tools/cidr-deaggregate.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (example.label)}
@@ -111,7 +112,7 @@
           >
             <div class="example-label">{example.label}</div>
             <div class="example-preview">
-              Target: /{example.targetPrefix}
+              {$t('tools/cidr-deaggregate.examples.targetPreview', { targetPrefix: example.targetPrefix })}
             </div>
           </button>
         {/each}
@@ -123,25 +124,22 @@
   <section class="input-section">
     <div class="input-grid">
       <div class="input-group">
-        <label for="input" use:tooltip={'Enter CIDR blocks, IP ranges, or individual IPs - one per line'}>
-          Input Networks/Ranges
+        <label for="input" use:tooltip={$t('tools/cidr-deaggregate.input.networksTooltip')}>
+          {$t('tools/cidr-deaggregate.input.networksLabel')}
         </label>
         <textarea
           id="input"
           bind:value={input}
           oninput={handleInputChange}
-          placeholder="192.168.0.0/22&#10;10.0.0.0-10.0.255.255&#10;172.16.1.1"
+          placeholder={$t('tools/cidr-deaggregate.input.networksPlaceholder')}
           rows="6"
           required
         ></textarea>
       </div>
 
       <div class="input-group">
-        <label
-          for="target-prefix"
-          use:tooltip={'Target prefix length for uniform decomposition (e.g., 24 for /24 subnets)'}
-        >
-          Target Prefix Length
+        <label for="target-prefix" use:tooltip={$t('tools/cidr-deaggregate.input.targetPrefixTooltip')}>
+          {$t('tools/cidr-deaggregate.input.targetPrefixLabel')}
         </label>
         <div class="prefix-input-wrapper">
           <input
@@ -153,12 +151,12 @@
             max="32"
             required
           />
-          <span class="prefix-hint">/{targetPrefix}</span>
+          <span class="prefix-hint">{$t('tools/cidr-deaggregate.input.prefixHint', { prefix: targetPrefix })}</span>
         </div>
         <div class="prefix-info">
           {#if targetPrefix}
             {@const addresses = getSubnetSize(targetPrefix)}
-            Each /{targetPrefix} subnet = {formatNumber(addresses)} addresses
+            {$t('tools/cidr-deaggregate.input.subnetSize', { prefix: targetPrefix, count: formatNumber(addresses) })}
           {/if}
         </div>
       </div>
@@ -170,16 +168,18 @@
     <section class="results-section">
       {#if result.success}
         <div class="results-header">
-          <h3 use:tooltip={'Generated uniform subnets from input networks and ranges'}>Deaggregated Subnets</h3>
+          <h3 use:tooltip={$t('tools/cidr-deaggregate.results.titleTooltip')}>
+            {$t('tools/cidr-deaggregate.results.title')}
+          </h3>
           <div class="results-actions">
             <div class="results-summary">
               <span class="metric">
                 <Icon name="network" size="sm" />
-                {result.totalSubnets} subnets
+                {$t('tools/cidr-deaggregate.results.subnetsCount', { count: result.totalSubnets })}
               </span>
               <span class="metric">
                 <Icon name="database" size="sm" />
-                {formatNumber(result.totalAddresses)} addresses
+                {$t('tools/cidr-deaggregate.results.addressesCount', { count: formatNumber(result.totalAddresses) })}
               </span>
             </div>
             {#if result.subnets.length > 0}
@@ -188,7 +188,9 @@
                 onclick={copyAllSubnets}
               >
                 <Icon name={clipboard.isCopied('all-subnets') ? 'check' : 'copy'} size="sm" />
-                {clipboard.isCopied('all-subnets') ? 'Copied!' : 'Copy All'}
+                {clipboard.isCopied('all-subnets')
+                  ? $t('tools/cidr-deaggregate.results.copied')
+                  : $t('tools/cidr-deaggregate.results.copyAll')}
               </button>
             {/if}
           </div>
@@ -197,26 +199,43 @@
         <!-- Input Summary -->
         <div class="input-summary">
           <div class="summary-item">
-            <span class="summary-label" use:tooltip={'Original networks, ranges, and addresses provided'}>Input:</span>
+            <span class="summary-label" use:tooltip={$t('tools/cidr-deaggregate.summary.inputTooltip')}
+              >{$t('tools/cidr-deaggregate.summary.inputLabel')}</span
+            >
             <span class="summary-value">
-              {result.inputSummary.totalInputs} items, {formatNumber(result.inputSummary.totalInputAddresses)} addresses
+              {$t('tools/cidr-deaggregate.summary.inputValue', {
+                count: result.inputSummary.totalInputs,
+                addresses: formatNumber(result.inputSummary.totalInputAddresses),
+              })}
             </span>
           </div>
           <div class="summary-item">
-            <span class="summary-label" use:tooltip={'Uniform subnets generated from input'}>Output:</span>
+            <span class="summary-label" use:tooltip={$t('tools/cidr-deaggregate.summary.outputTooltip')}
+              >{$t('tools/cidr-deaggregate.summary.outputLabel')}</span
+            >
             <span class="summary-value">
-              {result.totalSubnets} /{targetPrefix} subnets, {formatNumber(result.totalAddresses)} addresses
+              {$t('tools/cidr-deaggregate.summary.outputValue', {
+                count: result.totalSubnets,
+                prefix: targetPrefix,
+                addresses: formatNumber(result.totalAddresses),
+              })}
             </span>
           </div>
           {#if result.totalAddresses !== result.inputSummary.totalInputAddresses}
             <div class="summary-item">
-              <span class="summary-label" use:tooltip={'Address count difference due to subnet boundary alignment'}
-                >Note:</span
+              <span class="summary-label" use:tooltip={$t('tools/cidr-deaggregate.summary.noteTooltip')}
+                >{$t('tools/cidr-deaggregate.summary.noteLabel')}</span
               >
               <span class="summary-value address-diff">
-                {result.totalAddresses > result.inputSummary.totalInputAddresses ? 'Expanded' : 'Reduced'} by {formatNumber(
-                  Math.abs(result.totalAddresses - result.inputSummary.totalInputAddresses),
-                )} addresses (due to alignment to /{targetPrefix} boundaries)
+                {result.totalAddresses > result.inputSummary.totalInputAddresses
+                  ? $t('tools/cidr-deaggregate.summary.expanded', {
+                      count: formatNumber(Math.abs(result.totalAddresses - result.inputSummary.totalInputAddresses)),
+                      prefix: targetPrefix,
+                    })
+                  : $t('tools/cidr-deaggregate.summary.reduced', {
+                      count: formatNumber(Math.abs(result.totalAddresses - result.inputSummary.totalInputAddresses)),
+                      prefix: targetPrefix,
+                    })}
               </span>
             </div>
           {/if}
@@ -232,21 +251,21 @@
                   <button
                     class="copy-button {clipboard.isCopied(`subnet-${index}`) ? 'copied' : ''}"
                     onclick={() => clipboard.copy(subnet, `subnet-${index}`)}
-                    aria-label="Copy CIDR block"
+                    aria-label={$t('tools/cidr-deaggregate.subnet.copyAria')}
                   >
                     <Icon name={clipboard.isCopied(`subnet-${index}`) ? 'check' : 'copy'} size="xs" />
                   </button>
                 </div>
                 <div class="subnet-info">
                   <span class="address-count">
-                    {formatNumber(subnetSize)} addresses
+                    {$t('tools/cidr-deaggregate.subnet.addressesCount', { count: formatNumber(subnetSize) })}
                   </span>
                   {#if subnetSize >= 256}
                     <span class="subnet-size">
                       {subnetSize >= 65536
-                        ? `${(subnetSize / 65536).toFixed(0)}×/16`
+                        ? $t('tools/cidr-deaggregate.subnet.sizeClass', { count: (subnetSize / 65536).toFixed(0) })
                         : subnetSize >= 256
-                          ? `${(subnetSize / 256).toFixed(0)}×/24`
+                          ? $t('tools/cidr-deaggregate.subnet.sizeClassSmall', { count: (subnetSize / 256).toFixed(0) })
                           : ''}
                     </span>
                   {/if}
@@ -257,15 +276,15 @@
         {:else}
           <div class="no-subnets">
             <Icon name="alert-circle" />
-            <h4>No Subnets Generated</h4>
-            <p>The target prefix length may be too large for the input networks, or the input is empty.</p>
+            <h4>{$t('tools/cidr-deaggregate.empty.title')}</h4>
+            <p>{$t('tools/cidr-deaggregate.empty.message')}</p>
           </div>
         {/if}
       {:else}
         <div class="error-message">
           <Icon name="alert-triangle" />
-          <h4>Deaggregation Error</h4>
-          <p>{result.error || 'Unknown error occurred'}</p>
+          <h4>{$t('tools/cidr-deaggregate.error.title')}</h4>
+          <p>{result.error || $t('tools/cidr-deaggregate.error.unknown')}</p>
         </div>
       {/if}
     </section>

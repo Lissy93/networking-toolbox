@@ -1,0 +1,25 @@
+{
+  "title": "SPF Record Flattener",
+  "description": "Flatten SPF records by resolving includes to reduce DNS lookups",
+
+  "form": {
+    "title": "SPF Flattening",
+    "domain": {
+      "label": "Domain",
+      "placeholder": "example.com"
+    },
+    "flatten": "Flatten SPF",
+    "flattening": "Flattening...",
+    "error": "Please enter a domain"
+  },
+
+  "results": {
+    "title": "Flattened SPF Record",
+    "original": "Original SPF",
+    "flattened": "Flattened SPF",
+    "lookup_count": "DNS Lookup Count",
+    "original_lookups": "Original Lookups",
+    "flattened_lookups": "Flattened Lookups",
+    "savings": "Lookup Savings"
+  }
+}

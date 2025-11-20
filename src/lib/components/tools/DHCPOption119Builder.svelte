@@ -4,6 +4,7 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
   import {
     buildOption119,
     parseOption119,
@@ -13,10 +14,10 @@
     type ParsedDomainSearch,
   } from '$lib/utils/dhcp-option119.js';
 
-  const modeOptions = [
-    { value: 'encode' as const, label: 'Encode', icon: 'wrench' },
-    { value: 'decode' as const, label: 'Decode', icon: 'search' },
-  ];
+  const modeOptions = $derived([
+    { value: 'encode' as const, label: $t('tools/dhcp-option119-builder.modes.encode'), icon: 'wrench' },
+    { value: 'decode' as const, label: $t('tools/dhcp-option119-builder.modes.decode'), icon: 'search' },
+  ]);
 
   let mode = $state<'encode' | 'decode'>('encode');
   let config = $state<DomainSearchConfig>({
@@ -49,41 +50,41 @@
     description: string;
   }
 
-  const encodeExamples: EncodeExample[] = [
+  const encodeExamples = $derived<EncodeExample[]>([
     {
-      label: 'Corporate',
+      label: $t('tools/dhcp-option119-builder.encodeExamples.corporate.label'),
       domains: ['corp.example.com', 'example.com'],
-      description: 'Corporate network with domain compression',
+      description: $t('tools/dhcp-option119-builder.encodeExamples.corporate.description'),
     },
     {
-      label: 'Multi-site',
+      label: $t('tools/dhcp-option119-builder.encodeExamples.multiSite.label'),
       domains: ['site1.example.com', 'site2.example.com', 'example.com'],
-      description: 'Multiple sites sharing common suffix',
+      description: $t('tools/dhcp-option119-builder.encodeExamples.multiSite.description'),
     },
     {
-      label: 'Development',
+      label: $t('tools/dhcp-option119-builder.encodeExamples.development.label'),
       domains: ['dev.example.com', 'staging.example.com', 'example.com'],
-      description: 'Development environments',
+      description: $t('tools/dhcp-option119-builder.encodeExamples.development.description'),
     },
-  ];
+  ]);
 
-  const decodeExamples: DecodeExample[] = [
+  const decodeExamples = $derived<DecodeExample[]>([
     {
-      label: 'Corporate',
+      label: $t('tools/dhcp-option119-builder.decodeExamples.corporate.label'),
       hexInput: '04636f7270076578616d706c6503636f6d00c005',
-      description: 'corp.example.com, example.com (with compression)',
+      description: $t('tools/dhcp-option119-builder.decodeExamples.corporate.description'),
     },
     {
-      label: 'Multi-site',
+      label: $t('tools/dhcp-option119-builder.decodeExamples.multiSite.label'),
       hexInput: '057369746531076578616d706c6503636f6d00057369746532c006c006',
-      description: 'site1.example.com, site2.example.com, example.com',
+      description: $t('tools/dhcp-option119-builder.decodeExamples.multiSite.description'),
     },
     {
-      label: 'Single Domain',
+      label: $t('tools/dhcp-option119-builder.decodeExamples.singleDomain.label'),
       hexInput: '076578616d706c6503636f6d00',
-      description: 'example.com (no compression)',
+      description: $t('tools/dhcp-option119-builder.decodeExamples.singleDomain.description'),
     },
-  ];
+  ]);
 
   // Reactive generation - use untrack to prevent infinite loop
   $effect(() => {
@@ -120,49 +121,49 @@
 
     // Validate domains
     if (cfg.domains.length === 0) {
-      domainErrors.push('At least one domain is required');
+      domainErrors.push($t('tools/dhcp-option119-builder.errors.atLeastOneDomain'));
     }
 
     for (let i = 0; i < cfg.domains.length; i++) {
       const domain = cfg.domains[i];
 
       if (!domain.trim()) {
-        domainErrors.push(`Domain ${i + 1}: Value is required`);
+        domainErrors.push($t('tools/dhcp-option119-builder.errors.domainRequired', { number: i + 1 }));
         continue;
       }
 
       if (!/^[a-zA-Z0-9.-]+$/.test(domain)) {
-        domainErrors.push(`Domain ${i + 1}: Invalid characters (use only letters, numbers, dots, hyphens)`);
+        domainErrors.push($t('tools/dhcp-option119-builder.errors.invalidCharacters', { number: i + 1 }));
         continue;
       }
 
       if (domain.startsWith('.') || domain.endsWith('.')) {
-        domainErrors.push(`Domain ${i + 1}: Cannot start or end with a dot`);
+        domainErrors.push($t('tools/dhcp-option119-builder.errors.cannotStartOrEndWithDot', { number: i + 1 }));
         continue;
       }
 
       if (domain.includes('..')) {
-        domainErrors.push(`Domain ${i + 1}: Cannot contain consecutive dots`);
+        domainErrors.push($t('tools/dhcp-option119-builder.errors.consecutiveDots', { number: i + 1 }));
         continue;
       }
 
       if (domain.length > 253) {
-        domainErrors.push(`Domain ${i + 1}: Exceeds maximum length of 253 characters`);
+        domainErrors.push($t('tools/dhcp-option119-builder.errors.exceedsMaxLength', { number: i + 1 }));
         continue;
       }
 
       const labels = domain.split('.');
       for (const label of labels) {
         if (label.length === 0) {
-          domainErrors.push(`Domain ${i + 1}: Empty label found`);
+          domainErrors.push($t('tools/dhcp-option119-builder.errors.emptyLabel', { number: i + 1 }));
           break;
         }
         if (label.length > 63) {
-          domainErrors.push(`Domain ${i + 1}: Label "${label}" exceeds maximum length of 63 characters`);
+          domainErrors.push($t('tools/dhcp-option119-builder.errors.labelTooLong', { number: i + 1, label }));
           break;
         }
         if (label.startsWith('-') || label.endsWith('-')) {
-          domainErrors.push(`Domain ${i + 1}: Label "${label}" cannot start or end with hyphen`);
+          domainErrors.push($t('tools/dhcp-option119-builder.errors.labelInvalidHyphen', { number: i + 1, label }));
           break;
         }
       }
@@ -173,19 +174,19 @@
       const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
 
       if (cfg.network.subnet && cfg.network.subnet.trim() && !ipv4Regex.test(cfg.network.subnet)) {
-        netErrors.push('Invalid subnet address');
+        netErrors.push($t('tools/dhcp-option119-builder.errors.invalidSubnet'));
       }
 
       if (cfg.network.netmask && cfg.network.netmask.trim() && !ipv4Regex.test(cfg.network.netmask)) {
-        netErrors.push('Invalid netmask');
+        netErrors.push($t('tools/dhcp-option119-builder.errors.invalidNetmask'));
       }
 
       if (cfg.network.rangeStart && cfg.network.rangeStart.trim() && !ipv4Regex.test(cfg.network.rangeStart)) {
-        netErrors.push('Invalid range start address');
+        netErrors.push($t('tools/dhcp-option119-builder.errors.invalidRangeStart'));
       }
 
       if (cfg.network.rangeEnd && cfg.network.rangeEnd.trim() && !ipv4Regex.test(cfg.network.rangeEnd)) {
-        netErrors.push('Invalid range end address');
+        netErrors.push($t('tools/dhcp-option119-builder.errors.invalidRangeEnd'));
       }
     }
 
@@ -196,7 +197,9 @@
       try {
         result = buildOption119(cfg);
       } catch (error) {
-        validationErrors = [error instanceof Error ? error.message : 'Encoding failed'];
+        validationErrors = [
+          error instanceof Error ? error.message : $t('tools/dhcp-option119-builder.errors.encodingFailed'),
+        ];
         result = null;
       }
     } else {
@@ -212,7 +215,7 @@
     }
 
     if (!/^[0-9a-fA-F\s:]+$/.test(decodeInput)) {
-      validationErrors = ['Invalid hex input: only hexadecimal characters allowed'];
+      validationErrors = [$t('tools/dhcp-option119-builder.errors.invalidHex')];
       decodeResult = null;
       return;
     }
@@ -221,7 +224,9 @@
       validationErrors = [];
       decodeResult = parseOption119(decodeInput);
     } catch (error) {
-      validationErrors = [error instanceof Error ? error.message : 'Decoding failed'];
+      validationErrors = [
+        error instanceof Error ? error.message : $t('tools/dhcp-option119-builder.errors.decodingFailed'),
+      ];
       decodeResult = null;
     }
   }
@@ -288,8 +293,8 @@
 </script>
 
 <ToolContentContainer
-  title="DHCP Option 119 - Domain Search List"
-  description="Encode and decode Domain Search List (RFC 3397/6731) to/from RFC 1035 wire format with domain compression. Generate configurations for ISC dhcpd and Kea DHCP."
+  title={$t('tools/dhcp-option119-builder.title')}
+  description={$t('tools/dhcp-option119-builder.subtitle')}
   navOptions={modeOptions}
   bind:selectedNav={mode}
 >
@@ -314,16 +319,18 @@
   {#if mode === 'encode'}
     <div class="card input-card">
       <div class="card-header">
-        <h3>Domain List</h3>
+        <h3>{$t('tools/dhcp-option119-builder.encode.domainListTitle')}</h3>
       </div>
       <div class="card-content">
         {#each config.domains as _, i (`domain-${i}`)}
           <div class="domain-group">
             <div class="domain-header">
               <h4>
-                <Icon name="globe" size="sm" />Domain {i + 1}
+                <Icon name="globe" size="sm" />{$t('tools/dhcp-option119-builder.encode.domain.title', {
+                  number: i + 1,
+                })}
               </h4>
-              <!-- <label for="domain-{i}">  
+              <!-- <label for="domain-{i}">
                 Domain Name
               </label> -->
               {#if config.domains.length > 1}
@@ -334,21 +341,26 @@
             </div>
 
             <div class="input-group">
-              <input id="domain-{i}" type="text" bind:value={config.domains[i]} placeholder="example.com" />
+              <input
+                id="domain-{i}"
+                type="text"
+                bind:value={config.domains[i]}
+                placeholder={$t('tools/dhcp-option119-builder.encode.domain.placeholder')}
+              />
             </div>
           </div>
         {/each}
 
         <button type="button" class="btn-add" onclick={addDomain}>
           <Icon name="plus" size="sm" />
-          Add Domain
+          {$t('tools/dhcp-option119-builder.encode.addDomain')}
         </button>
       </div>
     </div>
 
     {#if validationErrors.length > 0}
       <div class="card errors-card">
-        <h3>Validation Errors</h3>
+        <h3>{$t('tools/dhcp-option119-builder.errors.title')}</h3>
         {#each validationErrors as error, i (i)}
           <div class="error-message">
             <Icon name="alert-triangle" size="sm" />
@@ -360,11 +372,11 @@
 
     {#if result && validationErrors.length === 0}
       <div class="card results">
-        <h3>Encoded Option 119</h3>
+        <h3>{$t('tools/dhcp-option119-builder.results.encodeTitle')}</h3>
 
         <div class="output-group">
           <div class="output-header">
-            <h4>Hex-Encoded (Compact)</h4>
+            <h4>{$t('tools/dhcp-option119-builder.results.hexEncoded.title')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -372,7 +384,9 @@
               onclick={() => clipboard.copy(result!.hexEncoded, 'hex')}
             >
               <Icon name={clipboard.isCopied('hex') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('hex') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('hex')
+                ? $t('tools/dhcp-option119-builder.buttons.copied')
+                : $t('tools/dhcp-option119-builder.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.hexEncoded}</pre>
@@ -380,7 +394,7 @@
 
         <div class="output-group">
           <div class="output-header">
-            <h4>Wire Format (Spaced)</h4>
+            <h4>{$t('tools/dhcp-option119-builder.results.wireFormat.title')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -388,15 +402,23 @@
               onclick={() => clipboard.copy(result!.wireFormat, 'wire')}
             >
               <Icon name={clipboard.isCopied('wire') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('wire') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('wire')
+                ? $t('tools/dhcp-option119-builder.buttons.copied')
+                : $t('tools/dhcp-option119-builder.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.wireFormat}</pre>
         </div>
 
         <div class="summary-card">
-          <div><strong>Total Length:</strong> {result.totalLength} bytes</div>
-          <div><strong>Domains:</strong> {result.domainList.length}</div>
+          <div>
+            <strong>{$t('tools/dhcp-option119-builder.results.summary.totalLength')}</strong>
+            {$t('tools/dhcp-option119-builder.results.summary.bytes', { length: result.totalLength })}
+          </div>
+          <div>
+            <strong>{$t('tools/dhcp-option119-builder.results.summary.domains')}</strong>
+            {result.domainList.length}
+          </div>
         </div>
       </div>
     {/if}
@@ -406,25 +428,35 @@
     {#if result}
       <div class="card input-card">
         <div class="card-header">
-          <h3>Network Settings (Optional)</h3>
-          <p class="help-text">Customize network values for configuration examples below</p>
+          <h3>{$t('tools/dhcp-option119-builder.encode.networkSettings.title')}</h3>
+          <p class="help-text">{$t('tools/dhcp-option119-builder.encode.networkSettings.help')}</p>
         </div>
         <div class="card-content">
           <div class="input-row">
             <div class="input-group">
               <label for="subnet">
                 <Icon name="network" size="sm" />
-                Subnet
+                {$t('tools/dhcp-option119-builder.encode.networkSettings.subnet.label')}
               </label>
-              <input id="subnet" type="text" bind:value={config.network!.subnet} placeholder="192.168.1.0" />
+              <input
+                id="subnet"
+                type="text"
+                bind:value={config.network!.subnet}
+                placeholder={$t('tools/dhcp-option119-builder.encode.networkSettings.subnet.placeholder')}
+              />
             </div>
 
             <div class="input-group">
               <label for="netmask">
                 <Icon name="network" size="sm" />
-                Netmask
+                {$t('tools/dhcp-option119-builder.encode.networkSettings.netmask.label')}
               </label>
-              <input id="netmask" type="text" bind:value={config.network!.netmask} placeholder="255.255.255.0" />
+              <input
+                id="netmask"
+                type="text"
+                bind:value={config.network!.netmask}
+                placeholder={$t('tools/dhcp-option119-builder.encode.networkSettings.netmask.placeholder')}
+              />
             </div>
           </div>
 
@@ -432,24 +464,34 @@
             <div class="input-group">
               <label for="range-start">
                 <Icon name="arrow-right" size="sm" />
-                Range Start
+                {$t('tools/dhcp-option119-builder.encode.networkSettings.rangeStart.label')}
               </label>
-              <input id="range-start" type="text" bind:value={config.network!.rangeStart} placeholder="192.168.1.100" />
+              <input
+                id="range-start"
+                type="text"
+                bind:value={config.network!.rangeStart}
+                placeholder={$t('tools/dhcp-option119-builder.encode.networkSettings.rangeStart.placeholder')}
+              />
             </div>
 
             <div class="input-group">
               <label for="range-end">
                 <Icon name="arrow-right" size="sm" />
-                Range End
+                {$t('tools/dhcp-option119-builder.encode.networkSettings.rangeEnd.label')}
               </label>
-              <input id="range-end" type="text" bind:value={config.network!.rangeEnd} placeholder="192.168.1.200" />
+              <input
+                id="range-end"
+                type="text"
+                bind:value={config.network!.rangeEnd}
+                placeholder={$t('tools/dhcp-option119-builder.encode.networkSettings.rangeEnd.placeholder')}
+              />
             </div>
           </div>
         </div>
 
         {#if networkValidationErrors.length > 0}
           <div class="network-errors">
-            <h4>Network Settings Errors</h4>
+            <h4>{$t('tools/dhcp-option119-builder.encode.networkSettings.errorsTitle')}</h4>
             {#each networkValidationErrors as error, i (i)}
               <div class="network-error-item">
                 <Icon name="alert-triangle" size="sm" />
@@ -463,12 +505,12 @@
 
     {#if result && networkValidationErrors.length === 0}
       <div class="card results">
-        <h3>Configuration Examples</h3>
+        <h3>{$t('tools/dhcp-option119-builder.results.configExamplesTitle')}</h3>
 
         {#if result.examples.iscDhcpd}
           <div class="output-group">
             <div class="output-header">
-              <h4>ISC dhcpd Configuration</h4>
+              <h4>{$t('tools/dhcp-option119-builder.results.formats.iscDhcpd')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -476,7 +518,9 @@
                 onclick={() => clipboard.copy(result!.examples.iscDhcpd!, 'isc')}
               >
                 <Icon name={clipboard.isCopied('isc') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('isc') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('isc')
+                  ? $t('tools/dhcp-option119-builder.buttons.copied')
+                  : $t('tools/dhcp-option119-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.examples.iscDhcpd}</pre>
@@ -486,7 +530,7 @@
         {#if result.examples.keaDhcp4}
           <div class="output-group">
             <div class="output-header">
-              <h4>Kea DHCPv4 Configuration</h4>
+              <h4>{$t('tools/dhcp-option119-builder.results.formats.keaDhcp4')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -494,7 +538,9 @@
                 onclick={() => clipboard.copy(result!.examples.keaDhcp4!, 'kea')}
               >
                 <Icon name={clipboard.isCopied('kea') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('kea') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('kea')
+                  ? $t('tools/dhcp-option119-builder.buttons.copied')
+                  : $t('tools/dhcp-option119-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.examples.keaDhcp4}</pre>
@@ -505,31 +551,31 @@
   {:else}
     <div class="card input-card">
       <div class="card-header">
-        <h3>Decode Option 119 Hex</h3>
+        <h3>{$t('tools/dhcp-option119-builder.decode.title')}</h3>
       </div>
       <div class="card-content">
         <div class="input-group">
           <label for="decode-input">
             <Icon name="code" size="sm" />
-            Hex-Encoded Option 119
+            {$t('tools/dhcp-option119-builder.decode.input.label')}
           </label>
           <textarea
             id="decode-input"
             bind:value={decodeInput}
-            placeholder="Enter hex string (e.g., 0765786d706c6503636f6d00)"
+            placeholder={$t('tools/dhcp-option119-builder.decode.input.placeholder')}
             rows="4"
           ></textarea>
         </div>
         <button type="button" class="btn-primary" onclick={decode}>
           <Icon name="search" size="sm" />
-          Decode
+          {$t('tools/dhcp-option119-builder.decode.button')}
         </button>
       </div>
     </div>
 
     {#if validationErrors.length > 0}
       <div class="card errors-card">
-        <h3>Validation Errors</h3>
+        <h3>{$t('tools/dhcp-option119-builder.errors.title')}</h3>
         {#each validationErrors as error, i (i)}
           <div class="error-message">
             <Icon name="alert-triangle" size="sm" />
@@ -541,15 +587,21 @@
 
     {#if decodeResult && validationErrors.length === 0}
       <div class="card results">
-        <h3>Decoded Domain Search List</h3>
+        <h3>{$t('tools/dhcp-option119-builder.results.decodeTitle')}</h3>
 
         <div class="summary-card">
-          <div><strong>Total Length:</strong> {decodeResult.totalLength} bytes</div>
-          <div><strong>Domains Found:</strong> {decodeResult.domains.length}</div>
+          <div>
+            <strong>{$t('tools/dhcp-option119-builder.results.summary.totalLength')}</strong>
+            {$t('tools/dhcp-option119-builder.results.summary.bytes', { length: decodeResult.totalLength })}
+          </div>
+          <div>
+            <strong>{$t('tools/dhcp-option119-builder.results.domainsFound')}</strong>
+            {decodeResult.domains.length}
+          </div>
         </div>
 
         <div class="domains-section">
-          <h4>Domain List</h4>
+          <h4>{$t('tools/dhcp-option119-builder.results.domainListTitle')}</h4>
           {#each decodeResult.domains as domain, i (i)}
             <div class="domain-item">
               <Icon name="globe" size="sm" />

@@ -12,6 +12,7 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import { useClipboard } from '$lib/composables';
   import { formatNumber } from '$lib/utils/formatters';
+  import { t } from '$lib/stores/language';
 
   let networks = $state<NetworkInput[]>([]);
   let supernetResult = $state<SupernetResult | null>(null);
@@ -166,8 +167,8 @@
 </script>
 
 <ToolContentContainer
-  title="Supernet Calculator"
-  description="Aggregate multiple networks into a single supernet for route summarization and efficient routing table management."
+  title={$t('tools/supernet-calculator.title')}
+  description={$t('tools/supernet-calculator.description')}
   contentClass="supernet-calc-car"
 >
   <!-- Quick Examples -->
@@ -175,7 +176,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="sm" />
-        <h3>Quick Examples</h3>
+        <h3>{$t('tools/supernet-calculator.examples.title')}</h3>
       </summary>
       <div class="examples-grid">
         {#each examples as example (example.label)}
@@ -184,15 +185,18 @@
             onclick={() => loadExample(example)}
           >
             <div class="example-header">
-              <div class="example-label">{example.label}</div>
+              <div class="example-label">{$t(`tools/supernet-calculator.examples.${example.type}.label`)}</div>
               <div class="example-type {example.type}">
-                {example.networks.length} Networks
+                {$t('tools/supernet-calculator.examples.networks', { count: example.networks.length })}
               </div>
             </div>
             <code class="example-input">
-              {example.networks[0].network}/{example.networks[0].cidr} + {example.networks.length - 1} more
+              {example.networks[0].network}/{example.networks[0].cidr}
+              {$t('tools/supernet-calculator.examples.moreNetworks', { count: example.networks.length - 1 })}
             </code>
-            <div class="example-description">{example.description}</div>
+            <div class="example-description">
+              {$t(`tools/supernet-calculator.examples.${example.type}.description`)}
+            </div>
           </button>
         {/each}
       </div>
@@ -202,10 +206,10 @@
   <!-- Network Inputs -->
   <div class="network-inputs">
     <div class="inputs-header">
-      <h3>Input Networks</h3>
+      <h3>{$t('tools/supernet-calculator.input.title')}</h3>
       <button type="button" class="btn btn-primary" onclick={addNetwork}>
         <Icon name="plus" size="sm" />
-        Add Network
+        {$t('tools/supernet-calculator.input.addNetwork')}
       </button>
     </div>
 
@@ -219,7 +223,7 @@
                 <IPInput bind:value={network.network} placeholder="192.168.1.0" />
               </div>
               <div class="cidr-input">
-                <label for="cidr-{index}">CIDR</label>
+                <label for="cidr-{index}">{$t('tools/supernet-calculator.input.cidr')}</label>
                 <div class="cidr-controls">
                   <span class="cidr-display">/{network.cidr}</span>
                   <input
@@ -247,7 +251,7 @@
           <div class="network-description">
             <input
               type="text"
-              placeholder="Description (optional)"
+              placeholder={$t('tools/supernet-calculator.input.descriptionPlaceholder')}
               bind:value={network.description}
               class="description-input"
             />
@@ -260,12 +264,12 @@
   <!-- Aggregation Analysis -->
   {#if aggregationAnalysis && networks.filter((n) => n.network.trim()).length > 1}
     <div class="analysis-section">
-      <h3>Aggregation Analysis</h3>
+      <h3>{$t('tools/supernet-calculator.analysis.title')}</h3>
       <div class="analysis-card">
         <div class="analysis-header">
           <div class="analysis-stat">
-            <span class="stat-label" use:tooltip={'How efficiently the networks can be aggregated - higher is better'}
-              >Aggregation Efficiency</span
+            <span class="stat-label" use:tooltip={$t('tools/supernet-calculator.analysis.efficiencyTooltip')}
+              >{$t('tools/supernet-calculator.analysis.efficiency')}</span
             >
             <span class="stat-value" style="color: {getEfficiencyColor(aggregationAnalysis.efficiency)}">
               {aggregationAnalysis.efficiency.toFixed(1)}%
@@ -273,13 +277,15 @@
           </div>
           <div class="analysis-status" class:can-aggregate={aggregationAnalysis.canAggregate}>
             <Icon name={aggregationAnalysis.canAggregate ? 'check-circle' : 'alert-triangle'} size="sm" />
-            {aggregationAnalysis.canAggregate ? 'Can Aggregate' : 'Limited Aggregation'}
+            {aggregationAnalysis.canAggregate
+              ? $t('tools/supernet-calculator.analysis.canAggregate')
+              : $t('tools/supernet-calculator.analysis.limitedAggregation')}
           </div>
         </div>
 
         {#if aggregationAnalysis.recommendations.length > 0}
           <div class="recommendations">
-            <h4>Recommendations</h4>
+            <h4>{$t('tools/supernet-calculator.analysis.recommendations')}</h4>
             <ul>
               {#each aggregationAnalysis.recommendations as recommendation, index (index)}
                 <li>{recommendation}</li>
@@ -297,13 +303,11 @@
       {#if supernetResult.success && supernetResult.supernet}
         <!-- Summary Statistics -->
         <div class="info-panel success">
-          <h3>Supernet Summary</h3>
+          <h3>{$t('tools/supernet-calculator.summary.title')}</h3>
           <div class="summary-grid">
             <div class="summary-item">
-              <span
-                class="summary-label"
-                use:tooltip={'The aggregated network address that encompasses all input networks'}
-                >Supernet Address</span
+              <span class="summary-label" use:tooltip={$t('tools/supernet-calculator.summary.addressTooltip')}
+                >{$t('tools/supernet-calculator.summary.address')}</span
               >
               <div class="value-copy">
                 <span class="ip-value success">{supernetResult.supernet.network}/{supernetResult.supernet.cidr}</span>
@@ -319,8 +323,8 @@
               </div>
             </div>
             <div class="summary-item">
-              <span class="summary-label" use:tooltip={'Total number of host addresses available in the supernet'}
-                >Total Hosts</span
+              <span class="summary-label" use:tooltip={$t('tools/supernet-calculator.summary.totalHostsTooltip')}
+                >{$t('tools/supernet-calculator.summary.totalHosts')}</span
               >
               <span class="summary-value">{formatNumber(supernetResult.supernet.totalHosts)}</span>
             </div>
@@ -330,28 +334,32 @@
         <!-- Route Aggregation Savings -->
         {#if supernetResult.savingsAnalysis}
           <div class="info-panel info">
-            <h3>Route Aggregation Benefits</h3>
+            <h3>{$t('tools/supernet-calculator.benefits.title')}</h3>
             <div class="savings-grid">
               <div class="savings-item">
-                <span class="savings-label" use:tooltip={'Number of individual routes before aggregation'}
-                  >Original Routes</span
+                <span class="savings-label" use:tooltip={$t('tools/supernet-calculator.benefits.originalRoutesTooltip')}
+                  >{$t('tools/supernet-calculator.benefits.originalRoutes')}</span
                 >
                 <span class="savings-value">{supernetResult.savingsAnalysis.originalRoutes}</span>
               </div>
               <div class="savings-item">
-                <span class="savings-label" use:tooltip={'Number of routes after supernet aggregation'}
-                  >Aggregated Routes</span
+                <span
+                  class="savings-label"
+                  use:tooltip={$t('tools/supernet-calculator.benefits.aggregatedRoutesTooltip')}
+                  >{$t('tools/supernet-calculator.benefits.aggregatedRoutes')}</span
                 >
                 <span class="savings-value success">{supernetResult.savingsAnalysis.aggregatedRoutes}</span>
               </div>
               <div class="savings-item">
-                <span class="savings-label" use:tooltip={'Number of routes eliminated through aggregation'}
-                  >Routes Saved</span
+                <span class="savings-label" use:tooltip={$t('tools/supernet-calculator.benefits.routesSavedTooltip')}
+                  >{$t('tools/supernet-calculator.benefits.routesSaved')}</span
                 >
                 <span class="savings-value success">{supernetResult.savingsAnalysis.routeReduction}</span>
               </div>
               <div class="savings-item">
-                <span class="savings-label" use:tooltip={'Percentage reduction in routing table size'}>Reduction</span>
+                <span class="savings-label" use:tooltip={$t('tools/supernet-calculator.benefits.reductionTooltip')}
+                  >{$t('tools/supernet-calculator.benefits.reduction')}</span
+                >
                 <span class="savings-value success"
                   >{supernetResult.savingsAnalysis.reductionPercentage.toFixed(1)}%</span
                 >
@@ -363,16 +371,14 @@
         <!-- Detailed Information -->
         <div class="details-section">
           <div class="details-header">
-            <h3>Supernet Details</h3>
+            <h3>{$t('tools/supernet-calculator.details.title')}</h3>
           </div>
 
           <div class="details-grid">
             <div class="detail-item">
               <div class="detail-label-wrapper">
-                <span
-                  class="detail-label"
-                  use:tooltip={'The first IP address in the supernet that identifies the network itself'}
-                  >Network Address</span
+                <span class="detail-label" use:tooltip={$t('tools/supernet-calculator.details.networkAddressTooltip')}
+                  >{$t('tools/supernet-calculator.details.networkAddress')}</span
                 >
               </div>
               <div class="value-copy">
@@ -389,10 +395,8 @@
 
             <div class="detail-item">
               <div class="detail-label-wrapper">
-                <span
-                  class="detail-label"
-                  use:tooltip={'Defines which portion of the IP address represents the network vs host bits'}
-                  >Subnet Mask</span
+                <span class="detail-label" use:tooltip={$t('tools/supernet-calculator.details.subnetMaskTooltip')}
+                  >{$t('tools/supernet-calculator.details.subnetMask')}</span
                 >
               </div>
               <div class="value-copy">
@@ -409,10 +413,8 @@
 
             <div class="detail-item">
               <div class="detail-label-wrapper">
-                <span
-                  class="detail-label"
-                  use:tooltip={'Inverse of subnet mask, used in access control lists and routing protocols'}
-                  >Wildcard Mask</span
+                <span class="detail-label" use:tooltip={$t('tools/supernet-calculator.details.wildcardMaskTooltip')}
+                  >{$t('tools/supernet-calculator.details.wildcardMask')}</span
                 >
               </div>
               <div class="value-copy">
@@ -430,10 +432,8 @@
 
             <div class="detail-item">
               <div class="detail-label-wrapper">
-                <span
-                  class="detail-label"
-                  use:tooltip={'First and last usable IP addresses in the supernet (excluding network and broadcast)'}
-                  >Address Range</span
+                <span class="detail-label" use:tooltip={$t('tools/supernet-calculator.details.addressRangeTooltip')}
+                  >{$t('tools/supernet-calculator.details.addressRange')}</span
                 >
               </div>
               <div class="value-copy">
@@ -457,10 +457,8 @@
 
             <div class="detail-item full-width">
               <div class="detail-label-wrapper">
-                <span
-                  class="detail-label"
-                  use:tooltip={'Binary representation of the subnet mask showing network (1) and host (0) bits'}
-                  >Binary Subnet Mask</span
+                <span class="detail-label" use:tooltip={$t('tools/supernet-calculator.details.binaryMaskTooltip')}
+                  >{$t('tools/supernet-calculator.details.binaryMask')}</span
                 >
               </div>
               <div class="value-copy">
@@ -481,16 +479,16 @@
         <!-- Network Visualization -->
         {#if showVisualization}
           <div class="visualization-section">
-            <h3>Network Visualization</h3>
+            <h3>{$t('tools/supernet-calculator.visualization.title')}</h3>
             <div class="visualization-card">
               <div class="visualization-header">
-                <h4>Input Networks vs Supernet</h4>
-                <p>Visual representation of how individual networks are aggregated into a supernet</p>
+                <h4>{$t('tools/supernet-calculator.visualization.heading')}</h4>
+                <p>{$t('tools/supernet-calculator.visualization.description')}</p>
               </div>
 
               <div class="network-diagram">
                 <div class="input-networks">
-                  <h5>Input Networks</h5>
+                  <h5>{$t('tools/supernet-calculator.visualization.inputNetworks')}</h5>
                   {#each supernetResult.inputNetworks as network, index (network.id)}
                     <div class="network-visual">
                       <div class="network-bar" style="--network-index: {index}">
@@ -505,14 +503,18 @@
 
                 <div class="aggregation-arrow">
                   <Icon name="arrow-down" size="lg" />
-                  <span>Aggregates to</span>
+                  <span>{$t('tools/supernet-calculator.visualization.aggregatesTo')}</span>
                 </div>
 
                 <div class="supernet-visual">
-                  <h5>Supernet</h5>
+                  <h5>{$t('tools/supernet-calculator.visualization.supernet')}</h5>
                   <div class="supernet-bar">
                     <span class="supernet-label">{supernetResult.supernet.network}/{supernetResult.supernet.cidr}</span>
-                    <span class="supernet-hosts">{formatNumber(supernetResult.supernet.totalHosts)} hosts</span>
+                    <span class="supernet-hosts"
+                      >{$t('tools/supernet-calculator.visualization.hosts', {
+                        count: formatNumber(supernetResult.supernet.totalHosts),
+                      })}</span
+                    >
                   </div>
                 </div>
               </div>
@@ -522,7 +524,7 @@
       {:else}
         <!-- Error Display -->
         <div class="info-panel error">
-          <h3>Calculation Error</h3>
+          <h3>{$t('tools/supernet-calculator.error.title')}</h3>
           <p class="error-message">{supernetResult.error}</p>
         </div>
       {/if}

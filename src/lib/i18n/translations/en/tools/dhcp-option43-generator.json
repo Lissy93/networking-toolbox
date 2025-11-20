@@ -1,0 +1,83 @@
+{
+  "title": "DHCP Option 43 Generator",
+  "subtitle": "Generate vendor-specific DHCP Option 43 for wireless controller discovery (Cisco, Aruba, Ruckus, Meraki, UniFi)",
+
+  "examples": {
+    "ciscoCatalyst": "Cisco Catalyst with dual controllers",
+    "ciscoMeraki": "Single Meraki cloud controller",
+    "ruckusSmartzone": "Ruckus SmartZone controller",
+    "aruba": "Aruba wireless controller",
+    "unifi": "UniFi Network Controller",
+    "ruckusZonedirector": "Ruckus ZoneDirector (legacy)",
+    "tooltip": "Generate Option 43 for {vendor}"
+  },
+
+  "input": {
+    "title": "Generator Configuration",
+    "vendor": {
+      "label": "Wireless Controller Vendor"
+    },
+    "ipAddresses": {
+      "label": "Controller IP Address",
+      "labelPlural": "Controller IP Addresses",
+      "maxHint": "(max {max})",
+      "placeholder": "Enter IP address (one per line or comma-separated)\ne.g., 192.168.1.10, 192.168.1.11",
+      "placeholderPlural": "Enter IP addresses (one per line or comma-separated)\ne.g., 192.168.1.10, 192.168.1.11"
+    },
+    "generateButton": "Generate"
+  },
+
+  "errors": {
+    "noIPs": "Please enter at least one IP address",
+    "invalidIP": "Invalid IP address format: {ips}",
+    "maxExceeded": "{vendor} supports maximum {max} controller. You entered {count}.",
+    "maxExceededPlural": "{vendor} supports maximum {max} controllers. You entered {count}."
+  },
+
+  "results": {
+    "title": "Generated Option 43 Values",
+    "commandSection": {
+      "defaultLabel": "DHCP Server Command",
+      "calculationTitle": "How this value is calculated:"
+    },
+    "formats": {
+      "hex": {
+        "title": "Hexadecimal String",
+        "hint": "Raw hexadecimal - used in most DHCP server configurations"
+      },
+      "colonHex": {
+        "title": "Colon-Separated Hex",
+        "hint": "Used by Infoblox and some network appliances"
+      },
+      "windowsBinary": {
+        "title": "Windows DHCP Binary",
+        "hint": "Enter in Windows DHCP Server's Binary field for Option 43"
+      },
+      "iscDhcp": {
+        "title": "ISC DHCP Configuration",
+        "hint": "Add to dhcpd.conf for ISC DHCP server"
+      },
+      "mikrotik": {
+        "title": "Mikrotik Configuration",
+        "hint": "RouterOS DHCP option configuration command"
+      }
+    }
+  },
+
+  "notes": {
+    "title": "Important Notes",
+    "list": {
+      "vendorSpecific": "DHCP Option 43 is vendor-specific and must match the AP manufacturer's expected format",
+      "option60": "Some vendors require Option 60 (Vendor Class Identifier) to be set in addition to Option 43",
+      "reachability": "Ensure controller IPs are reachable from the AP management network",
+      "highAvailability": "For high availability, configure multiple controller IPs when supported",
+      "leaseRenewal": "Changes to DHCP options require AP to renew lease or reboot to take effect",
+      "testing": "Always test in a controlled environment before deploying to production networks"
+    }
+  },
+
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

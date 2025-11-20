@@ -1,0 +1,190 @@
+{
+  "title": "DMARC Policy Checker",
+  "subtitle": "Analyze DMARC (Domain-based Message Authentication, Reporting & Conformance) policies. Check policy configuration, alignment settings, and identify potential security issues.",
+
+  "examples": {
+    "title": "DMARC Examples",
+    "items": {
+      "google": {
+        "domain": "google.com",
+        "description": "Google DMARC policy",
+        "tooltip": "Check DMARC policy for google.com (Google DMARC policy)"
+      },
+      "github": {
+        "domain": "github.com",
+        "description": "GitHub enterprise DMARC",
+        "tooltip": "Check DMARC policy for github.com (GitHub enterprise DMARC)"
+      },
+      "microsoft": {
+        "domain": "microsoft.com",
+        "description": "Microsoft DMARC configuration",
+        "tooltip": "Check DMARC policy for microsoft.com (Microsoft DMARC configuration)"
+      },
+      "paypal": {
+        "domain": "paypal.com",
+        "description": "PayPal strict DMARC policy",
+        "tooltip": "Check DMARC policy for paypal.com (PayPal strict DMARC policy)"
+      },
+      "amazon": {
+        "domain": "amazon.com",
+        "description": "Amazon DMARC implementation",
+        "tooltip": "Check DMARC policy for amazon.com (Amazon DMARC implementation)"
+      },
+      "salesforce": {
+        "domain": "salesforce.com",
+        "description": "Salesforce DMARC setup",
+        "tooltip": "Check DMARC policy for salesforce.com (Salesforce DMARC setup)"
+      }
+    }
+  },
+
+  "form": {
+    "title": "DMARC Policy Check",
+    "domainLabel": "Domain Name",
+    "domainTooltip": "Enter the domain to check DMARC policy for",
+    "domainPlaceholder": "example.com",
+    "checkButton": "Check DMARC Policy",
+    "checking": "Checking DMARC..."
+  },
+
+  "results": {
+    "title": "DMARC Policy Analysis",
+    "copy": "Copy Results",
+    "copied": "Copied!",
+
+    "status": {
+      "secure": "DMARC Configuration Secure",
+      "issuesFound": "DMARC Issues Found",
+      "needsImprovement": "DMARC Needs Improvement",
+      "noCriticalIssues": "No critical issues detected",
+      "issuesIdentified": "{count} issue{plural} identified"
+    },
+
+    "recordSection": {
+      "title": "DMARC Record",
+      "location": "_dmarc.{domain}"
+    },
+
+    "policyConfiguration": {
+      "title": "Policy Configuration",
+      "mainPolicy": "Main Policy",
+      "subdomainPolicy": "Subdomain Policy",
+      "coverage": "Coverage",
+      "dkimAlignment": "DKIM Alignment",
+      "spfAlignment": "SPF Alignment",
+      "failureOptions": "Failure Options",
+
+      "policies": {
+        "reject": "Reject non-compliant messages",
+        "quarantine": "Quarantine suspicious messages",
+        "none": "Monitor only, no action",
+        "unknown": "Unknown policy"
+      },
+
+      "alignment": {
+        "strict": "Strict",
+        "relaxed": "Relaxed",
+        "strictDescription": "Exact domain match",
+        "relaxedDescription": "Organizational domain match"
+      },
+
+      "coverageDescription": "of messages affected",
+
+      "failureOptionsDescriptions": {
+        "both": "DKIM and SPF failure",
+        "any": "Any alignment failure",
+        "dkim": "DKIM failure only",
+        "spf": "SPF failure only",
+        "custom": "Custom configuration"
+      }
+    },
+
+    "reporting": {
+      "title": "Reporting Configuration",
+      "aggregateReports": "Aggregate Reports (RUA)",
+      "forensicReports": "Forensic Reports (RUF)",
+      "notConfigured": "Not configured"
+    },
+
+    "issues": {
+      "title": "Issues & Recommendations",
+      "messages": {
+        "policyNone": "Policy is set to \"none\" - no action taken on DMARC failures",
+        "relaxedAlignment": "Both DKIM and SPF alignment are relaxed - consider strict alignment",
+        "noAggregateReporting": "No aggregate reporting address (rua) specified",
+        "noForensicReporting": "No forensic reporting address (ruf) specified",
+        "partialCoverage": "Only {percentage}% of messages are subject to DMARC policy"
+      },
+      "severityLevels": {
+        "high": "HIGH",
+        "medium": "MEDIUM",
+        "low": "LOW"
+      }
+    }
+  },
+
+  "noRecord": {
+    "title": "No DMARC Record Found",
+    "message": "Domain {domain} does not have a DMARC policy configured at {dmarcDomain}.",
+    "helpText": "This means the domain is not protected by DMARC. Consider implementing a DMARC policy to prevent email spoofing."
+  },
+
+  "error": {
+    "title": "DMARC Check Failed",
+    "lookupFailed": "DMARC check failed: {status}",
+    "unknownError": "Unknown error occurred"
+  },
+
+  "copy": {
+    "header": "DMARC Check for {domain}",
+    "generatedAt": "Generated at: {timestamp}",
+    "recordLabel": "DMARC Record:",
+    "parsedPolicyLabel": "Parsed Policy:",
+    "mainPolicyLabel": "Main Policy:",
+    "subdomainPolicyLabel": "Subdomain Policy:",
+    "dkimAlignmentLabel": "DKIM Alignment:",
+    "spfAlignmentLabel": "SPF Alignment:",
+    "percentageLabel": "Percentage:",
+    "aggregateReportsLabel": "Aggregate Reports:",
+    "forensicReportsLabel": "Forensic Reports:",
+    "failureOptionsLabel": "Failure Options:",
+    "issuesFoundLabel": "Issues Found:",
+    "noIssuesFound": "No issues found - DMARC configuration looks good!",
+    "alignmentStrict": "strict",
+    "alignmentRelaxed": "relaxed"
+  },
+
+  "educational": {
+    "title": "Understanding DMARC",
+
+    "policies": {
+      "title": "DMARC Policies",
+      "none": "Monitor mode - collect data but take no action on failures",
+      "quarantine": "Mark suspicious messages, often sent to spam folder",
+      "reject": "Reject non-compliant messages outright (strongest security)"
+    },
+
+    "alignmentModes": {
+      "title": "Alignment Modes",
+      "relaxed": "Allows organizational domain matching (default)",
+      "strict": "Requires exact domain matching (more secure)"
+    },
+
+    "reportingTypes": {
+      "title": "Reporting Types",
+      "aggregate": "Daily summary reports of DMARC activity",
+      "forensic": "Real-time failure reports with message samples"
+    },
+
+    "bestPractices": {
+      "title": "Best Practices",
+      "items": {
+        "startMonitoring": "Start with p=none to monitor before enforcement",
+        "gradualEnforcement": "Gradually increase to p=quarantine then p=reject",
+        "setupReporting": "Set up aggregate reporting to monitor DMARC activity",
+        "strictAlignment": "Use strict alignment for enhanced security when possible",
+        "subdomainPolicy": "Consider subdomain policy for comprehensive coverage"
+      }
+    }
+  }
+}

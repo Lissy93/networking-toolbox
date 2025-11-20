@@ -1,0 +1,139 @@
+{
+  "title": "Random IP Generator",
+  "subtitle": "Generate random IP addresses from networks and ranges with uniqueness control and seeded randomness",
+
+  "examples": {
+    "title": "Quick Examples",
+    "titleTooltip": "Click to see example inputs",
+    "items": {
+      "basicCidr": {
+        "input": "192.168.1.0/24 x 5",
+        "description": "Generate 5 random IPs from a /24 subnet"
+      },
+      "multipleFormats": {
+        "input": "10.0.0.0-10.0.0.255 * 3\n172.16.0.0/16 [8]",
+        "description": "Multiple formats: range and CIDR with different counts"
+      },
+      "ipv6": {
+        "input": "2001:db8::/64 # 10\nfe80::/10 x 5",
+        "description": "IPv6 networks with various syntax formats"
+      },
+      "largeCounts": {
+        "input": "192.168.0.0/16 100\n203.0.113.0/24 * 20",
+        "description": "Large generation counts from different networks"
+      },
+      "specialUse": {
+        "input": "127.0.0.0/8\n::1/128 x 1\n169.254.0.0/16 [10]",
+        "description": "Special-use addresses: loopback and link-local"
+      },
+      "testNetworks": {
+        "input": "198.51.100.0/24 * 15\n198.18.0.0/15 [25]",
+        "description": "Test networks for documentation and benchmarking"
+      }
+    }
+  },
+
+  "networkConfig": {
+    "title": "Network Configuration",
+    "networksLabel": "Networks and Counts",
+    "networksTooltip": "Enter networks with generation counts using various formats",
+    "networksPlaceholder": "192.168.1.0/24 x 10\n10.0.0.0-10.0.0.255 5\n172.16.0.0/16 * 3\n2001:db8::/64[15]",
+    "networksSpecifyTooltip": "Specify networks and generation counts",
+    "helpText": "Formats: network x count, network * count, network count, network#count, network[count]",
+
+    "defaultCount": {
+      "label": "Default Count",
+      "tooltip": "Number of IPs to generate when count is not specified",
+      "placeholder": "5",
+      "valueTooltip": "Default generation count"
+    },
+
+    "unique": {
+      "label": "Unique IPs Only",
+      "tooltip": "Ensure all generated IPs are unique within each network"
+    },
+
+    "seed": {
+      "label": "Random Seed",
+      "tooltip": "Use the same seed for reproducible random results",
+      "placeholder": "Optional seed for reproducible results",
+      "valueTooltip": "Enter seed for reproducible randomness",
+      "generateTooltip": "Generate new random seed"
+    }
+  },
+
+  "loading": "Generating random IPs...",
+
+  "errors": {
+    "title": "Errors"
+  },
+
+  "summary": {
+    "title": "Generation Summary",
+    "copyTooltip": "Copy summary to clipboard",
+    "totalNetworks": {
+      "label": "Total Networks",
+      "tooltip": "Total number of networks processed"
+    },
+    "valid": {
+      "label": "Valid",
+      "tooltip": "Networks that were processed successfully"
+    },
+    "invalid": {
+      "label": "Invalid",
+      "tooltip": "Networks that had processing errors"
+    },
+    "totalIps": {
+      "label": "Total IPs",
+      "tooltip": "Total IP addresses generated across all networks"
+    },
+    "uniqueIps": {
+      "label": "Unique IPs",
+      "tooltip": "Number of unique IP addresses generated"
+    }
+  },
+
+  "allIps": {
+    "title": "All Generated IPs",
+    "count": "({count})",
+    "copyAllTooltip": "Copy all generated IPs to clipboard",
+    "exportTxtTooltip": "Export as plain text file",
+    "exportCsvTooltip": "Export as CSV file",
+    "exportJsonTooltip": "Export as JSON file",
+    "ipCopyTooltip": "Click to copy IP address"
+  },
+
+  "generations": {
+    "title": "Network Generations",
+    "requested": "Requested:",
+    "generated": "Generated:",
+    "unique": "Unique:",
+    "uniqueYes": "Yes",
+    "uniqueNo": "No",
+    "seed": "Seed:",
+    "seedCopyTooltip": "Click to copy",
+
+    "networkRange": {
+      "title": "Network Range",
+      "start": "Start:",
+      "end": "End:",
+      "total": "Total:",
+      "startCopyTooltip": "Click to copy",
+      "endCopyTooltip": "Click to copy"
+    },
+
+    "generatedIps": {
+      "title": "Generated IPs",
+      "count": "({count})"
+    }
+  },
+
+  "common": {
+    "copy": "Copy",
+    "copied": "Copied!",
+    "copyAll": "Copy All",
+    "txt": "TXT",
+    "csv": "CSV",
+    "json": "JSON"
+  }
+}

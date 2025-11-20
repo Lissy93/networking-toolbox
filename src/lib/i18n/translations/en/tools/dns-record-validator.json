@@ -1,0 +1,122 @@
+{
+  "title": "DNS Record Validator",
+  "subtitle": "Validate individual DNS resource record syntax for proper formatting and common issues",
+
+  "overview": {
+    "syntaxValidation": {
+      "title": "Syntax Validation:",
+      "description": "Verify record values match RFC specifications for format and constraints."
+    },
+    "errorDetection": {
+      "title": "Error Detection:",
+      "description": "Identify format errors, range violations, and protocol mismatches."
+    },
+    "bestPractices": {
+      "title": "Best Practices:",
+      "description": "Get warnings about potential issues and optimization suggestions."
+    }
+  },
+
+  "examples": {
+    "title": "Quick Examples",
+    "a": "Basic web server A record",
+    "aaaa": "IPv6 web server record",
+    "cname": "Blog subdomain alias",
+    "mx": "Primary mail server",
+    "txt": "SPF policy record",
+    "srv": "HTTPS service record"
+  },
+
+  "recordTypes": {
+    "a": {
+      "label": "A (IPv4 Address)",
+      "description": "Maps domain to IPv4 address"
+    },
+    "aaaa": {
+      "label": "AAAA (IPv6 Address)",
+      "description": "Maps domain to IPv6 address"
+    },
+    "cname": {
+      "label": "CNAME (Canonical Name)",
+      "description": "Alias to another domain"
+    },
+    "mx": {
+      "label": "MX (Mail Exchange)",
+      "description": "Mail server for domain"
+    },
+    "txt": {
+      "label": "TXT (Text)",
+      "description": "Arbitrary text data"
+    },
+    "srv": {
+      "label": "SRV (Service)",
+      "description": "Service location and port"
+    },
+    "caa": {
+      "label": "CAA (Certificate Authority)",
+      "description": "Certificate authority authorization"
+    }
+  },
+
+  "input": {
+    "recordType": {
+      "label": "Record Type",
+      "tooltip": "Select the DNS record type to validate"
+    },
+    "recordName": {
+      "label": "Record Name",
+      "tooltip": "The domain name for this DNS record",
+      "placeholder": "example.com"
+    },
+    "recordValue": {
+      "label": "Record Value",
+      "tooltip": "The value/data for this DNS record",
+      "placeholderTxt": "Enter TXT record content...",
+      "placeholderA": "192.0.2.1",
+      "placeholderAAAA": "2001:db8::1",
+      "placeholderDefault": "Record value..."
+    },
+    "priority": "Priority",
+    "service": "Service",
+    "protocol": "Protocol",
+    "weight": "Weight",
+    "port": "Port",
+    "flags": "Flags",
+    "tag": "Tag",
+    "ttl": {
+      "label": "TTL (seconds)",
+      "tooltip": "Time To Live in seconds (how long record should be cached)",
+      "placeholder": "3600"
+    }
+  },
+
+  "results": {
+    "validStatus": "Valid",
+    "invalidStatus": "Invalid",
+    "dnsRecord": "DNS Record",
+    "copyButton": "Copy Zone Line",
+    "zoneFileFormat": "Zone File Format:",
+    "errors": "Errors ({count})",
+    "warnings": "Warnings ({count})",
+    "normalizedValue": "Normalized Value"
+  },
+
+  "education": {
+    "commonRecordTypes": {
+      "title": "Common Record Types",
+      "description": "A/AAAA records map domains to IP addresses. CNAME creates aliases. MX directs email. TXT stores arbitrary data like SPF policies. SRV specifies service locations."
+    },
+    "validationScope": {
+      "title": "Validation Scope",
+      "description": "This validator checks syntax, format, and common configuration issues. It doesn't verify that targets exist or are reachable - use DNS lookup tools for connectivity testing."
+    },
+    "ttlGuidelines": {
+      "title": "TTL Guidelines",
+      "description": "Use shorter TTLs (300-3600s) for records that change frequently. Longer TTLs (3600-86400s) reduce DNS queries but slow propagation of changes. Balance based on your needs."
+    },
+    "bestPractices": {
+      "title": "Best Practices",
+      "description": "Always use fully qualified domain names (ending with .) in record values. Validate SPF/DMARC policies carefully. Keep MX priorities consistent. Use descriptive TXT record formatting."
+    }
+  }
+}

@@ -4,33 +4,27 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
   import { SHOW_TIPS_ON_HOMEPAGE } from '$lib/config/customizable-settings';
+  import { t } from '$lib/stores/language';
 
-  interface Tip {
-    icon: string;
-    title: string;
-    description: string;
-    shortcut?: string;
-  }
-
-  const tips: Tip[] = [
+  const tips = $derived([
     {
       icon: 'settings',
-      title: 'Customize the app in the settings',
-      description: 'Choose your homepage layout, nav links, theme and more',
+      title: $t('furniture.quick_tips.tips.customize.title'),
+      description: $t('furniture.quick_tips.tips.customize.description'),
       shortcut: 'Ctrl + ,',
     },
     {
       icon: 'bookmarks',
-      title: 'Bookmark tools for easy access and offline use',
-      description: 'Just right-click on any tool to bookmark or edit it',
+      title: $t('furniture.quick_tips.tips.bookmarks.title'),
+      description: $t('furniture.quick_tips.tips.bookmarks.description'),
     },
     {
       icon: 'search',
-      title: 'Use Ctrl + K to quickly search all tools',
-      description: 'Or, try Ctrl + / to view all shortcuts',
+      title: $t('furniture.quick_tips.tips.search.title'),
+      description: $t('furniture.quick_tips.tips.search.description'),
       shortcut: 'Ctrl + K',
     },
-  ];
+  ]);
 
   let visible = $state(false);
   let currentTipIndex = $state(0);
@@ -114,11 +108,11 @@
 </script>
 
 {#if visible}
-  <div class="quick-tips" role="complementary" aria-label="Quick tips">
+  <div class="quick-tips" role="complementary" aria-label={$t('furniture.quick_tips.title')}>
     <button
       class="close-btn"
       onclick={dismissTips}
-      aria-label="Dismiss tips"
+      aria-label={$t('furniture.quick_tips.dismiss')}
       use:tooltip={"Hide, and don't show tips again"}
     >
       <Icon name="x" size="sm" />
@@ -142,10 +136,10 @@
       </div>
 
       <div class="tip-controls">
-        <button class="nav-btn" onclick={previousTip} aria-label="Previous tip">
+        <button class="nav-btn" onclick={previousTip} aria-label={$t('furniture.quick_tips.previous')}>
           <Icon name="arrow-left" size="sm" />
         </button>
-        <button class="nav-btn" onclick={nextTip} aria-label="Next tip">
+        <button class="nav-btn" onclick={nextTip} aria-label={$t('furniture.quick_tips.next')}>
           <Icon name="arrow-right" size="sm" />
         </button>
       </div>

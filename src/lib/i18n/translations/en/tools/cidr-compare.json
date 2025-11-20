@@ -1,0 +1,63 @@
+{
+  "title": "CIDR Compare",
+  "description": "Compare two lists of networks to identify changes for auditing",
+
+  "examples": {
+    "title": "Quick Examples",
+    "networkAddition": "Network Addition",
+    "networkAdditionDesc": "Added 172.16.0.0/24",
+    "networkRemoval": "Network Removal",
+    "networkRemovalDesc": "Removed 172.16.0.0/12",
+    "mixedChanges": "Mixed Changes",
+    "mixedChangesDesc": "Swapped subnets",
+    "vlanReconfig": "VLAN Reconfiguration",
+    "vlanReconfigDesc": "Replaced VLANs 20,30 with 25,35",
+    "networkConsolidation": "Network Consolidation",
+    "networkConsolidationDesc": "Merged 4 /24s into 1 /22",
+    "branchOfficeMigration": "Branch Office Migration",
+    "branchOfficeMigrationDesc": "Migrated 172.16.x.x to 10.10.x.x"
+  },
+
+  "input": {
+    "networkListsHeading": "Network Lists",
+    "networkListsTooltip": "Compare two network lists to identify additions, removals, and unchanged items",
+    "swapButton": "Swap",
+    "swapTooltip": "Swap List A and List B",
+    "listALabel": "List A (Before)",
+    "listATooltip": "Original or 'before' state - CIDR blocks, IP ranges, or individual IPs",
+    "listAPlaceholder": "192.168.0.0/16\n10.0.0.0/8\n172.16.1.0-172.16.1.255",
+    "listBLabel": "List B (After)",
+    "listBTooltip": "Updated or 'after' state - CIDR blocks, IP ranges, or individual IPs",
+    "listBPlaceholder": "192.168.0.0/16\n10.0.0.0/8\n192.168.100.0/24"
+  },
+
+  "summary": {
+    "title": "Comparison Summary",
+    "titleTooltip": "Overview of changes between the two network lists",
+    "addedLabel": "Added",
+    "removedLabel": "Removed",
+    "unchangedLabel": "Unchanged",
+    "listATotal": "List A: {count} items",
+    "listBTotal": "List B: {count} items"
+  },
+
+  "categories": {
+    "addedTitle": "Added Networks ({count})",
+    "addedTooltip": "Networks present in List B but not in List A",
+    "removedTitle": "Removed Networks ({count})",
+    "removedTooltip": "Networks present in List A but not in List B",
+    "unchangedTitle": "Unchanged Networks ({count})",
+    "unchangedTooltip": "Networks present in both List A and List B"
+  },
+
+  "empty": {
+    "noAdded": "No networks added",
+    "noRemoved": "No networks removed",
+    "noUnchanged": "No networks remained unchanged"
+  },
+
+  "error": {
+    "title": "Comparison Error",
+    "unknown": "Unknown error occurred"
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "title": "DKIM Key Generator",
+  "description": "Generate DKIM RSA keypairs with selectors and DNS TXT records for email authentication.",
+
+  "config": {
+    "title": "Configuration",
+    "selectorLabel": "Selector:",
+    "selectorTooltip": "Unique identifier for this DKIM key (e.g., 'default', '202412', 'mailgun')",
+    "selectorPlaceholder": "default",
+    "domainLabel": "Domain:",
+    "domainTooltip": "Domain that will use this DKIM key for signing emails",
+    "domainPlaceholder": "example.com",
+    "keySizeLabel": "Key Size:",
+    "keySizeTooltip": "RSA key size in bits. 2048-bit recommended for security, 1024-bit for compatibility",
+    "keySizes": {
+      "1024": "1024-bit (Legacy)",
+      "2048": "2048-bit (Recommended)"
+    },
+    "generateButton": "Generate DKIM Keys",
+    "generating": "Generating..."
+  },
+
+  "keys": {
+    "title": "Generated Keys",
+    "privateKey": {
+      "title": "Private Key",
+      "hideTooltip": "Hide private key",
+      "showTooltip": "Show private key",
+      "hideButton": "Hide",
+      "showButton": "Show",
+      "downloadTooltip": "Download private key as PEM file",
+      "downloadButton": "Download",
+      "downloaded": "Downloaded!",
+      "hidden": "Private key hidden for security",
+      "warning": "Keep this private key secure. Never share it publicly or store it in version control."
+    },
+    "publicKey": {
+      "title": "Public Key",
+      "copyTooltip": "Copy public key to clipboard",
+      "copyButton": "Copy",
+      "copied": "Copied!",
+      "downloadTooltip": "Download public key as PEM file",
+      "downloadButton": "Download",
+      "downloaded": "Downloaded!"
+    }
+  },
+
+  "dns": {
+    "title": "DNS TXT Record",
+    "copyTooltip": "Copy DNS TXT record to clipboard",
+    "copyButton": "Copy",
+    "copied": "Copied!",
+    "exportTooltip": "Download DNS record as text file",
+    "exportButton": "Export",
+    "exported": "Downloaded!",
+    "zoneFileFormat": "Zone File Format:",
+    "dkimRecordValue": "DKIM Record Value:"
+  },
+
+  "implementation": {
+    "title": "Implementation Notes",
+    "selector": "Selector:",
+    "domain": "Domain:",
+    "keySize": "Key Size:",
+    "keySizeBits": "{size}-bit RSA",
+    "algorithm": "Algorithm:",
+    "algorithmValue": "RSA-SHA256 (rsa-sha256)",
+    "nextStepsTitle": "Next Steps:",
+    "steps": [
+      "Add the DNS TXT record to your domain's DNS configuration",
+      "Configure your mail server with the private key",
+      "Set up DKIM signing for outgoing emails",
+      "Test DKIM signatures using online validation tools"
+    ]
+  },
+
+  "examples": {
+    "title": "Example Configurations",
+    "standard": {
+      "name": "Standard Setup"
+    },
+    "monthly": {
+      "name": "Monthly Rotation"
+    },
+    "serviceSpecific": {
+      "name": "Service-Specific"
+    },
+    "selectorLabel": "Selector:",
+    "domainLabel": "Domain:",
+    "keySizeLabel": "Key Size:",
+    "keySizeBits": "{size}-bit"
+  }
+}

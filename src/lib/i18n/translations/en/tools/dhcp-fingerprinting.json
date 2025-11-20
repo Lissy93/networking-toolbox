@@ -1,0 +1,122 @@
+{
+  "title": "DHCP Fingerprinting Database",
+  "subtitle": "Identify devices based on their DHCP fingerprints using Parameter Request List (Option 55) and Vendor Class Identifier (Option 60). Database contains {count} known fingerprints from common devices, operating systems, and IoT equipment.",
+
+  "tabs": {
+    "lookup": "Fingerprint Lookup",
+    "reverse": "Device Search"
+  },
+
+  "examples": {
+    "windows": {
+      "label": "Windows 10/11",
+      "description": "Modern Windows desktop"
+    },
+    "macOS": {
+      "label": "macOS/iOS",
+      "description": "Apple device"
+    },
+    "android": {
+      "label": "Android",
+      "description": "Android smartphone"
+    },
+    "linux": {
+      "label": "Linux (dhclient)",
+      "description": "Linux with ISC dhclient"
+    },
+    "ciscoPhone": {
+      "label": "Cisco IP Phone",
+      "description": "Cisco VoIP device"
+    },
+    "raspberryPi": {
+      "label": "Raspberry Pi",
+      "description": "Raspberry Pi OS (Debian)"
+    },
+    "samsungTV": {
+      "label": "Samsung Smart TV",
+      "description": "Smart TV device"
+    }
+  },
+
+  "lookup": {
+    "title": "Device Fingerprint Lookup",
+    "parameterList": {
+      "label": "Parameter Request List (Option 55)",
+      "placeholder": "e.g., 1,3,6,15 or 0103060f or 1 3 6 15",
+      "hint": "Enter as comma-separated, hex, or space-separated numbers"
+    },
+    "vendorClass": {
+      "label": "Vendor Class Identifier (Option 60) - Optional",
+      "placeholder": "e.g., MSFT, dhcpcd, Cisco",
+      "hint": "Helps improve match accuracy"
+    },
+    "error": "Error:",
+    "requestedOptions": {
+      "title": "Requested DHCP Options",
+      "parameterList": "Parameter List:",
+      "hexEncoded": "Hex Encoded:",
+      "unknown": "Unknown"
+    },
+    "securityWarnings": {
+      "title": "Security Warnings"
+    },
+    "optionAnalysis": {
+      "title": "Option Analysis",
+      "unusualTitle": "Unusual Options Detected",
+      "unusualDescription": "These options may indicate vendor-specific configurations:",
+      "missingTitle": "Missing Options (vs. Best Match)",
+      "missingDescription": "Options present in the best match but not in your fingerprint:"
+    },
+    "matches": {
+      "title": "Matching Devices ({count})",
+      "exportJSON": "Export JSON",
+      "exportCSV": "Export CSV",
+      "confidence": "{level} confidence",
+      "matchScore": "{score}%",
+      "matchLabel": "Match",
+      "osLabel": "OS:",
+      "matchedOnLabel": "Matched On:",
+      "descriptionLabel": "Description:",
+      "knownParamsLabel": "Known Parameters:"
+    },
+    "noMatches": {
+      "title": "No Matches Found",
+      "description": "The provided fingerprint doesn't match any known devices in the database. This could be:",
+      "reasons": {
+        "custom": "A custom DHCP client configuration",
+        "uncommon": "An uncommon device or operating system",
+        "modified": "A device with a modified DHCP request list"
+      },
+      "hint": "Try adding the Vendor Class Identifier if available."
+    }
+  },
+
+  "reverse": {
+    "title": "Search by Device or OS",
+    "search": {
+      "label": "Search for Device/OS/Vendor",
+      "placeholder": "e.g., iPhone, Windows, Cisco, Printer...",
+      "hint": "Search the database by device name, OS, or vendor"
+    },
+    "results": {
+      "title": "Found {count} Device{plural}",
+      "confidence": "{level} confidence",
+      "osLabel": "OS:",
+      "descriptionLabel": "Description:",
+      "parameterListLabel": "Parameter Request List:",
+      "vendorPatternLabel": "Vendor Class Pattern:"
+    },
+    "noResults": {
+      "title": "No Devices Found",
+      "description": "No devices matched \"{query}\". Try a different search term."
+    }
+  },
+
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyAria": "Copy",
+    "copyHexAria": "Copy hex",
+    "copyParamListAria": "Copy parameter list"
+  }
+}

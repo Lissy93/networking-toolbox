@@ -1,0 +1,147 @@
+{
+  "title": "PXE Profile Generator",
+  "subtitle": "Generate PXE boot profiles with automatic UEFI/BIOS detection using DHCP Options 93/94. Configure bootfiles for different architectures and generate dhcpd/Kea configuration snippets.",
+
+  "profile": {
+    "title": "Profile Configuration",
+
+    "name": {
+      "label": "Profile Name",
+      "placeholder": "e.g., Production PXE"
+    },
+
+    "tftpServer": {
+      "label": "TFTP Server (Option 66)",
+      "placeholder": "e.g., pxe.example.com or 192.168.1.10",
+      "hint": "Hostname or IP address of the TFTP server"
+    },
+
+    "architecture": {
+      "label": "Architecture Mode",
+      "hint": "Auto-detect uses Option 93 to serve different bootfiles based on client firmware",
+      "options": {
+        "auto": "Auto-detect",
+        "bios": "BIOS only",
+        "uefiX64": "UEFI x64",
+        "uefiX86": "UEFI x86",
+        "uefiArm64": "UEFI ARM64",
+        "uefiArm32": "UEFI ARM32"
+      }
+    }
+  },
+
+  "bootfiles": {
+    "title": "Bootfiles (Option 67)",
+    "hint": "Configure bootfile names for different client architectures. At least one bootfile is required.",
+
+    "bios": {
+      "label": "BIOS Bootfile",
+      "placeholder": "e.g., pxelinux.0 or undionly.kpxe",
+      "hint": "For legacy BIOS systems (Arch Type 0x0000)"
+    },
+
+    "uefiX64": {
+      "label": "UEFI x64 Bootfile",
+      "placeholder": "e.g., bootx64.efi or ipxe-x64.efi",
+      "hint": "For UEFI x86-64 systems (Arch Type 0x0007)"
+    },
+
+    "uefiX86": {
+      "label": "UEFI x86 Bootfile",
+      "placeholder": "e.g., bootia32.efi",
+      "hint": "For UEFI IA32 systems (Arch Type 0x0006)"
+    },
+
+    "uefiArm64": {
+      "label": "UEFI ARM64 Bootfile",
+      "placeholder": "e.g., bootaa64.efi",
+      "hint": "For UEFI ARM 64-bit systems (Arch Type 0x000b)"
+    },
+
+    "uefiArm32": {
+      "label": "UEFI ARM32 Bootfile",
+      "placeholder": "e.g., bootarm.efi",
+      "hint": "For UEFI ARM 32-bit systems (Arch Type 0x000a)"
+    }
+  },
+
+  "network": {
+    "title": "Network Settings (Optional)",
+    "hint": "Customize network values for configuration examples below",
+
+    "subnet": {
+      "label": "Subnet",
+      "placeholder": "192.168.1.0"
+    },
+
+    "netmask": {
+      "label": "Netmask",
+      "placeholder": "255.255.255.0"
+    },
+
+    "rangeStart": {
+      "label": "Range Start",
+      "placeholder": "192.168.1.100"
+    },
+
+    "rangeEnd": {
+      "label": "Range End",
+      "placeholder": "192.168.1.200"
+    },
+
+    "gateway": {
+      "label": "Gateway",
+      "placeholder": "192.168.1.1"
+    },
+
+    "dns": {
+      "label": "DNS Server",
+      "placeholder": "8.8.8.8"
+    }
+  },
+
+  "errors": {
+    "validation": "Validation Errors",
+    "network": "Network Settings Errors"
+  },
+
+  "results": {
+    "summary": {
+      "title": "Profile Summary",
+      "profileName": "Profile Name:",
+      "architecture": "Architecture Mode:",
+      "tftpServer": "TFTP Server:",
+      "biosBootfile": "BIOS Bootfile:",
+      "uefiX64Bootfile": "UEFI x64 Bootfile:",
+      "uefiX86Bootfile": "UEFI x86 Bootfile:",
+      "uefiArm64Bootfile": "UEFI ARM64 Bootfile:",
+      "uefiArm32Bootfile": "UEFI ARM32 Bootfile:"
+    },
+
+    "config": {
+      "title": "DHCP Server Configuration",
+      "iscDhcpd": "ISC dhcpd Configuration",
+      "keaDhcp4": "Kea DHCPv4 Configuration"
+    },
+
+    "archDetection": {
+      "title": "PXE Boot Architecture Detection",
+      "intro": "DHCP Option 93 (Client System Architecture Type) allows the DHCP server to detect the client's firmware type and serve the appropriate bootfile. Common architecture types:",
+      "types": {
+        "bios": "Intel x86PC (Legacy BIOS)",
+        "efiIa32": "EFI IA32 (32-bit UEFI)",
+        "efiBC": "EFI BC (64-bit UEFI, most common)",
+        "efiArm32": "EFI ARM 32-bit",
+        "efiArm64": "EFI ARM 64-bit"
+      },
+      "autoDetectInfo": "When using auto-detect mode, the DHCP server will examine Option 93 in the client's DHCPDISCOVER message and respond with the appropriate bootfile for that architecture."
+    }
+  },
+
+  "common": {
+    "required": "*",
+    "recommended": "(recommended)",
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

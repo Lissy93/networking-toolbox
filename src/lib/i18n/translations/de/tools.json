@@ -1,0 +1,75 @@
+{
+  "subnet_calculator": {
+    "title": "Subnetz-Rechner",
+    "description": "Berechnen Sie Netzwerk-, Broadcast- und Host-Informationen für jedes Subnetz.",
+
+    "input": {
+      "cidr_label": "Netzwerkadresse (CIDR)",
+      "cidr_placeholder": "192.168.1.0/24"
+    },
+
+    "sections": {
+      "network_info": "Netzwerkinformationen",
+      "host_info": "Host-Informationen",
+      "binary_representation": "Binäre Darstellung"
+    },
+
+    "fields": {
+      "network_address": "Netzwerkadresse",
+      "broadcast_address": "Broadcast-Adresse",
+      "subnet_mask": "Subnetzmaske",
+      "wildcard_mask": "Wildcard-Maske",
+      "total_hosts": "Gesamt-Hosts",
+      "usable_hosts": "Nutzbare Hosts",
+      "first_host": "Erster Host",
+      "last_host": "Letzter Host",
+      "network_binary": "Netzwerk:",
+      "mask_binary": "Maske:",
+      "broadcast_binary": "Broadcast:"
+    },
+
+    "tooltips": {
+      "network_address": "Erste IP im Subnetz - identifiziert das Netzwerk",
+      "broadcast_address": "Letzte IP im Subnetz - sendet an alle Hosts",
+      "subnet_mask": "Definiert Netzwerk- vs. Host-Teil der IP",
+      "wildcard_mask": "Inverse der Subnetzmaske - wird in ACLs verwendet",
+      "total_hosts": "Alle IP-Adressen in diesem Subnetz",
+      "usable_hosts": "Für Geräte verfügbare IPs (ohne Netzwerk/Broadcast)",
+      "first_host": "Erste für Geräte verfügbare IP-Adresse",
+      "last_host": "Letzte für Geräte verfügbare IP-Adresse",
+      "network_binary": "Netzwerkadresse im Binärformat",
+      "mask_binary": "Subnetzmaske im Binärformat",
+      "broadcast_binary": "Broadcast-Adresse im Binärformat"
+    },
+
+    "explainer": {
+      "title": "Subnetzberechnungen verstehen",
+
+      "network_address_title": "Netzwerkadresse",
+      "network_address_content": "Die erste IP-Adresse in einem Subnetz, die zur Identifizierung des Netzwerks selbst verwendet wird. Hosts können diese Adresse nicht zugewiesen bekommen, da sie das gesamte Netzwerksegment repräsentiert.",
+
+      "broadcast_address_title": "Broadcast-Adresse",
+      "broadcast_address_content": "Die letzte IP-Adresse in einem Subnetz, die zum Senden von Nachrichten an alle Geräte im Netzwerk verwendet wird. Wenn ein Paket an diese Adresse gesendet wird, erreicht es jeden Host im Subnetz.",
+
+      "subnet_mask_title": "Subnetzmaske",
+      "subnet_mask_content": "Definiert, welcher Teil einer IP-Adresse das Netzwerk und welcher den Host repräsentiert. Eine Maske von /24 bedeutet, dass die ersten 24 Bits das Netzwerk identifizieren.",
+
+      "wildcard_mask_title": "Wildcard-Maske",
+      "wildcard_mask_content": "Die Inverse einer Subnetzmaske, die in Zugriffskontrolllisten verwendet wird. Wo die Subnetzmaske Einsen hat, hat die Wildcard-Maske Nullen und umgekehrt.",
+
+      "usable_hosts_title": "Nutzbare Hosts",
+      "usable_hosts_content": "Die Anzahl der für Geräte verfügbaren IP-Adressen. Immer 2 weniger als die Gesamtadressen, da Netzwerk- und Broadcast-Adressen reserviert sind.",
+
+      "cidr_notation_title": "CIDR-Notation",
+      "cidr_notation_content": "Classless Inter-Domain Routing-Notation (z.B. /24) gibt an, wie viele Bits für den Netzwerkteil verwendet werden. Höhere Zahlen bedeuten kleinere Subnetze mit weniger Hosts."
+    },
+
+    "tips": {
+      "title": "Profi-Tipps",
+      "plan_growth": "Wachstum einplanen: Wählen Sie Subnetzgrößen, die zukünftige Erweiterungen berücksichtigen",
+      "binary_understanding": "Binär verstehen: Das Erlernen von Binär hilft beim Verständnis der Subnetzbildung",
+      "common_sizes": "Häufige Größen: /24 (254 Hosts), /25 (126 Hosts), /26 (62 Hosts), /30 (2 Hosts für Punkt-zu-Punkt)",
+      "private_networks": "Private Netzwerke: Verwenden Sie RFC 1918-Adressen (10.x.x.x, 172.16-31.x.x, 192.168.x.x) für interne Netzwerke"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/stores/language';
   import '../../../../styles/diagnostics-pages.scss';
 
   let ipAddress = $state('8.8.8.8');
@@ -13,19 +14,35 @@
   let copiedState = $state(false);
   let selectedExampleIndex = $state<number | null>(null);
 
-  const resolvers = [
-    { value: 'cloudflare', label: 'Cloudflare (1.1.1.1)' },
-    { value: 'google', label: 'Google (8.8.8.8)' },
-    { value: 'quad9', label: 'Quad9 (9.9.9.9)' },
-    { value: 'opendns', label: 'OpenDNS (208.67.222.222)' },
-  ];
+  const resolvers = $derived([
+    { value: 'cloudflare', label: $t('diagnostics/dns-reverse-lookup.resolvers.cloudflare') },
+    { value: 'google', label: $t('diagnostics/dns-reverse-lookup.resolvers.google') },
+    { value: 'quad9', label: $t('diagnostics/dns-reverse-lookup.resolvers.quad9') },
+    { value: 'opendns', label: $t('diagnostics/dns-reverse-lookup.resolvers.opendns') },
+  ]);
 
-  const examples = [
-    { ip: '8.8.8.8', description: 'Google DNS server' },
-    { ip: '1.1.1.1', description: 'Cloudflare DNS server' },
-    { ip: '2001:4860:4860::8888', description: 'Google IPv6 DNS' },
-    { ip: '2606:4700:4700::1111', description: 'Cloudflare IPv6 DNS' },
-  ];
+  const examples = $derived([
+    {
+      ip: $t('diagnostics/dns-reverse-lookup.examples.items.googleDNS.ip'),
+      description: $t('diagnostics/dns-reverse-lookup.examples.items.googleDNS.description'),
+      tooltip: $t('diagnostics/dns-reverse-lookup.examples.items.googleDNS.tooltip'),
+    },
+    {
+      ip: $t('diagnostics/dns-reverse-lookup.examples.items.cloudflareDNS.ip'),
+      description: $t('diagnostics/dns-reverse-lookup.examples.items.cloudflareDNS.description'),
+      tooltip: $t('diagnostics/dns-reverse-lookup.examples.items.cloudflareDNS.tooltip'),
+    },
+    {
+      ip: $t('diagnostics/dns-reverse-lookup.examples.items.googleIPv6.ip'),
+      description: $t('diagnostics/dns-reverse-lookup.examples.items.googleIPv6.description'),
+      tooltip: $t('diagnostics/dns-reverse-lookup.examples.items.googleIPv6.tooltip'),
+    },
+    {
+      ip: $t('diagnostics/dns-reverse-lookup.examples.items.cloudflareIPv6.ip'),
+      description: $t('diagnostics/dns-reverse-lookup.examples.items.cloudflareIPv6.description'),
+      tooltip: $t('diagnostics/dns-reverse-lookup.examples.items.cloudflareIPv6.tooltip'),
+    },
+  ]);
 
   function isValidIP(ip: string): boolean {
     // Basic IPv4 validation
@@ -84,7 +101,7 @@
 
     try {
       if (!isValidIP(ipAddress.trim())) {
-        throw new Error('Invalid IP address format');
+        throw new Error($t('diagnostics/dns-reverse-lookup.error.invalidIPFormat'));
       }
 
       const resolverOpts =
@@ -101,7 +118,7 @@
       });
 
       if (!response.ok) {
-        throw new Error(`Reverse lookup failed: ${response.status}`);
+        throw new Error($t('diagnostics/dns-reverse-lookup.error.lookupFailed', { status: response.status }));
       }
 
       results = await response.json();
@@ -135,11 +152,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>Reverse DNS Lookup</h1>
-    <p>
-      Perform reverse DNS lookups (PTR records) to find hostnames associated with IP addresses. Automatically handles
-      both IPv4 and IPv6 addresses with proper .in-addr.arpa and .ip6.arpa zone formatting.
-    </p>
+    <h1>{$t('diagnostics/dns-reverse-lookup.title')}</h1>
+    <p>{$t('diagnostics/dns-reverse-lookup.subtitle')}</p>
   </header>
 
   <!-- Examples -->
@@ -147,7 +161,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Common IP Examples</h4>
+        <h4>{$t('diagnostics/dns-reverse-lookup.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -155,7 +169,7 @@
             class="example-card"
             class:selected={selectedExampleIndex === i}
             onclick={() => loadExample(example, i)}
-            use:tooltip={`Perform reverse lookup for ${example.ip} (${example.description})`}
+            use:tooltip={example.tooltip}
           >
             <h5>{example.ip}</h5>
             <p>{example.description}</p>
@@ -168,18 +182,18 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>Reverse Lookup Configuration</h3>
+      <h3>{$t('diagnostics/dns-reverse-lookup.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-grid">
         <div class="form-group">
-          <label for="ip" use:tooltip={'Enter an IPv4 or IPv6 address to perform reverse lookup'}>
-            IP Address
+          <label for="ip" use:tooltip={$t('diagnostics/dns-reverse-lookup.form.ipTooltip')}>
+            {$t('diagnostics/dns-reverse-lookup.form.ipLabel')}
             <input
               id="ip"
               type="text"
               bind:value={ipAddress}
-              placeholder="8.8.8.8 or 2001:db8::1"
+              placeholder={$t('diagnostics/dns-reverse-lookup.form.ipPlaceholder')}
               class:invalid={ipAddress && !isValidIP(ipAddress.trim())}
               onchange={() => {
                 clearExampleSelection();
@@ -187,20 +201,20 @@
               }}
             />
             {#if ipAddress && !isValidIP(ipAddress.trim())}
-              <span class="error-text">Invalid IP address format</span>
+              <span class="error-text">{$t('diagnostics/dns-reverse-lookup.form.invalidFormat')}</span>
             {/if}
           </label>
         </div>
 
         <div class="form-group resolver-group">
-          <label use:tooltip={'Choose a DNS resolver to use for the query'}>
-            DNS Resolver
+          <label use:tooltip={$t('diagnostics/dns-reverse-lookup.form.dnsResolverTooltip')}>
+            {$t('diagnostics/dns-reverse-lookup.form.dnsResolverLabel')}
             <div class="resolver-options">
               {#if useCustomResolver}
                 <input
                   type="text"
                   bind:value={customResolver}
-                  placeholder="8.8.8.8 or custom IP"
+                  placeholder={$t('diagnostics/dns-reverse-lookup.form.customResolverPlaceholder')}
                   onchange={() => {
                     clearExampleSelection();
                     if (ipAddress && isValidIP(ipAddress.trim())) performReverseLookup();
@@ -227,7 +241,7 @@
                     if (ipAddress && isValidIP(ipAddress.trim())) performReverseLookup();
                   }}
                 />
-                Use custom resolver
+                {$t('diagnostics/dns-reverse-lookup.form.useCustomResolver')}
               </label>
             </div>
           </label>
@@ -242,10 +256,10 @@
         >
           {#if loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Performing Reverse Lookup...
+            {$t('diagnostics/dns-reverse-lookup.form.performingLookup')}
           {:else}
             <Icon name="search" size="sm" />
-            Reverse Lookup IP
+            {$t('diagnostics/dns-reverse-lookup.form.lookupButton')}
           {/if}
         </button>
       </div>
@@ -273,25 +287,29 @@
   {#if results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>Reverse DNS Results</h3>
+        <h3>{$t('diagnostics/dns-reverse-lookup.results.title')}</h3>
         {#if results.Answer?.length > 0}
           <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
             <span class={copiedState ? 'text-green-500' : ''}
               ><Icon name={copiedState ? 'check' : 'copy'} size="xs" /></span
             >
-            {copiedState ? 'Copied!' : 'Copy Results'}
+            {copiedState
+              ? $t('diagnostics/dns-reverse-lookup.results.copied')
+              : $t('diagnostics/dns-reverse-lookup.results.copyButton')}
           </button>
         {/if}
       </div>
       <div class="card-content">
         <div class="lookup-info">
           <div class="info-item">
-            <span class="info-label" use:tooltip={'The IP address that was queried'}>IP Address:</span>
+            <span class="info-label" use:tooltip={$t('diagnostics/dns-reverse-lookup.results.ipAddressTooltip')}
+              >{$t('diagnostics/dns-reverse-lookup.results.ipAddressLabel')}</span
+            >
             <span class="info-value mono">{ipAddress}</span>
           </div>
           <div class="info-item">
-            <span class="info-label" use:tooltip={'The reverse DNS zone that was queried (automatically generated)'}
-              >Reverse Zone:</span
+            <span class="info-label" use:tooltip={$t('diagnostics/dns-reverse-lookup.results.reverseZoneTooltip')}
+              >{$t('diagnostics/dns-reverse-lookup.results.reverseZoneLabel')}</span
             >
             <span class="info-value mono">{results.reverseName}</span>
           </div>
@@ -300,12 +318,12 @@
         {#if results.Answer?.length > 0}
           {@const resData = results as { Answer: Array<{ data: string; TTL?: number }> }}
           <div class="records-list">
-            <h4>PTR Records Found:</h4>
+            <h4>{$t('diagnostics/dns-reverse-lookup.results.ptrRecordsFound')}</h4>
             {#each resData.Answer as record, _i (_i)}
               <div class="record-item">
                 <div class="record-data mono">{record.data}</div>
                 {#if record.TTL}
-                  <div class="record-ttl" use:tooltip={'Time To Live - how long this record can be cached'}>
+                  <div class="record-ttl" use:tooltip={$t('diagnostics/dns-reverse-lookup.results.ttlTooltip')}>
                     TTL: {record.TTL}s
                   </div>
                 {/if}
@@ -315,8 +333,8 @@
         {:else}
           <div class="no-records">
             <Icon name="alert-circle" size="md" />
-            <p>No PTR records found for <code>{ipAddress}</code></p>
-            <p class="help-text">This IP address may not have a reverse DNS entry configured.</p>
+            <p>{$t('diagnostics/dns-reverse-lookup.results.noRecords.title')} <code>{ipAddress}</code></p>
+            <p class="help-text">{$t('diagnostics/dns-reverse-lookup.results.noRecords.helpText')}</p>
           </div>
         {/if}
       </div>
@@ -329,7 +347,7 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="md" />
           <div>
-            <strong>Reverse Lookup Failed</strong>
+            <strong>{$t('diagnostics/dns-reverse-lookup.error.title')}</strong>
             <p>{error}</p>
           </div>
         </div>
@@ -340,36 +358,35 @@
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>About Reverse DNS Lookups</h3>
+      <h3>{$t('diagnostics/dns-reverse-lookup.education.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>How it Works</h4>
-          <p>
-            Reverse DNS converts IP addresses to hostnames using PTR records. IPv4 addresses use .in-addr.arpa zones,
-            while IPv6 addresses use .ip6.arpa zones with each nibble reversed.
-          </p>
+          <h4>{$t('diagnostics/dns-reverse-lookup.education.howItWorks.title')}</h4>
+          <p>{$t('diagnostics/dns-reverse-lookup.education.howItWorks.description')}</p>
         </div>
 
         <div class="info-section">
-          <h4>Common Use Cases</h4>
+          <h4>{$t('diagnostics/dns-reverse-lookup.education.useCases.title')}</h4>
           <ul>
-            <li>Email server verification</li>
-            <li>Security analysis and logging</li>
-            <li>Network troubleshooting</li>
-            <li>Identifying server ownership</li>
+            <li>{$t('diagnostics/dns-reverse-lookup.education.useCases.items.emailVerification')}</li>
+            <li>{$t('diagnostics/dns-reverse-lookup.education.useCases.items.securityAnalysis')}</li>
+            <li>{$t('diagnostics/dns-reverse-lookup.education.useCases.items.troubleshooting')}</li>
+            <li>{$t('diagnostics/dns-reverse-lookup.education.useCases.items.ownership')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Zone Format Examples</h4>
+          <h4>{$t('diagnostics/dns-reverse-lookup.education.zoneFormat.title')}</h4>
           <div class="format-examples">
             <div class="format-example">
-              <strong>IPv4:</strong> 8.8.8.8 → 8.8.8.8.in-addr.arpa
+              <strong>{$t('diagnostics/dns-reverse-lookup.education.zoneFormat.ipv4Label')}</strong>
+              {$t('diagnostics/dns-reverse-lookup.education.zoneFormat.ipv4Example')}
             </div>
             <div class="format-example">
-              <strong>IPv6:</strong> 2001:db8::1 → 1.0.0.0...b.d.0.1.0.0.2.ip6.arpa
+              <strong>{$t('diagnostics/dns-reverse-lookup.education.zoneFormat.ipv6Label')}</strong>
+              {$t('diagnostics/dns-reverse-lookup.education.zoneFormat.ipv6Example')}
             </div>
           </div>
         </div>

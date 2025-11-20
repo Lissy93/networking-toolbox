@@ -1,0 +1,94 @@
+{
+  "title": "Settings",
+  "description": "Customize your experience with themes, layouts, and accessibility options.",
+
+  "disabled": {
+    "title": "Settings Disabled",
+    "message": "Settings for this instance have been disabled by your administrator."
+  },
+
+  "language": {
+    "title": "Language"
+  },
+
+  "theme": {
+    "title": "Theme",
+    "show_more": "Show more themes",
+    "show_less": "Show less"
+  },
+
+  "font_scale": {
+    "title": "Font Scale"
+  },
+
+  "homepage_layout": {
+    "title": "Homepage Layout"
+  },
+
+  "top_navigation": {
+    "title": "Top Navigation"
+  },
+
+  "accessibility": {
+    "title": "Accessibility",
+    "show_all": "Show all a11y options",
+    "show_less": "Show less"
+  },
+
+  "site_branding": {
+    "title": "Site Branding",
+    "description": "Customize the site title, description, and icon.",
+    "site_title": "Site Title",
+    "site_description": "Description",
+    "site_icon_url": "Icon URL",
+    "apply": "Apply",
+    "reset": "Reset"
+  },
+
+  "primary_color": {
+    "title": "Primary Color",
+    "description": "Choose a primary color for the interface.",
+    "custom_color": "Use Custom Color",
+    "color_picker": "Color Picker",
+    "hex_code": "Hex Code",
+    "reset": "Reset"
+  },
+
+  "custom_css": {
+    "title": "Custom CSS",
+    "description": "Add your own CSS to customize the appearance globally.",
+    "placeholder": "/* Enter your custom CSS here */",
+    "characters": "characters",
+    "apply": "Apply",
+    "clear": "Clear"
+  },
+
+  "more_info": {
+    "title": "Not found what you were looking for?",
+    "line1": "Good news! The code is open source and easy to work with.",
+    "content": "Simply fork the repo, follow our dev setup instructions, make whatever changes and customizations you like, and then deploy your own instance.",
+    "support": "We also offer enterprise support services, where we can make custom changes for you."
+  },
+
+  "delete_data": {
+    "title": "Delete Data",
+    "caution": "Caution: This will reset all local data.",
+    "button": "Clear all Data"
+  },
+
+  "sync": {
+    "title": "Syncing Settings and Backup/Restore",
+    "line1": "Your settings are saved in your browser's local storage, and so they will be retained even after you quit the app.",
+    "content": "Since we don't require login/signup to use the app, there is currently no way to automatically sync your settings across devices. But if you're self-hosting Networking Toolbox, you can apply settings in your config, by including the following environment variables. This way, you're settings will be applied to all users across all devices.",
+    "export_settings": "Export Settings",
+    "export_styles": "Export Styles",
+    "env_vars_title": "Environment Variables",
+    "env_vars_description": "Current environment variable values. Copy and paste into your config file for self-hosted instances.",
+    "copy_clipboard": "Copy to Clipboard",
+    "copied": "Copied!",
+    "custom_css_title": "Custom CSS",
+    "custom_css_description": "Apply your custom CSS to your self-hosted instance by mounting a CSS file."
+  },
+
+  "more_settings": "More Settings"
+}

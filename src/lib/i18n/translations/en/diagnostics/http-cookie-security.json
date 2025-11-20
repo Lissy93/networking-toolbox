@@ -1,0 +1,83 @@
+{
+  "title": "HTTP Cookie Security Inspector",
+  "description": "Analyze Set-Cookie headers for Secure, HttpOnly, SameSite, and other security attributes",
+
+  "examples": {
+    "title": "Cookie Security Examples",
+    "github": "Excellent security (Score: 91)",
+    "cloudflare": "Strong security (Score: 90)",
+    "paypal": "Good security (Score: 80)",
+    "ebay": "Many cookies (7 cookies, Score: 67)",
+    "nytimes": "No HttpOnly flags (Score: 59)",
+    "apple": "Poor security (1 cookie, Score: 37)",
+    "linkedin": "Large set (7 cookies, Score: 69)",
+    "no_cookies": "No cookies found"
+  },
+
+  "form": {
+    "title": "URL to Inspect",
+    "url": {
+      "label": "URL",
+      "placeholder": "https://example.com",
+      "error": "Please enter a valid HTTP/HTTPS URL"
+    },
+    "inspect": "Inspect Cookies",
+    "analyzing": "Analyzing..."
+  },
+
+  "loading": {
+    "title": "Analyzing Cookies",
+    "description": "Inspecting Set-Cookie headers for security attributes..."
+  },
+
+  "results": {
+    "title": "Cookie Security Analysis",
+
+    "score": {
+      "title": "Security Score",
+      "no_cookies": "No cookies",
+      "overall": "Overall Assessment",
+      "total_cookies": "Total Cookies:",
+      "secure_cookies": "Secure Cookies:",
+      "httponly_cookies": "HttpOnly Cookies:"
+    },
+
+    "cookies": {
+      "title": "Cookie Details",
+      "value": "Value:",
+      "attributes": {
+        "secure": "Secure",
+        "httponly": "HttpOnly",
+        "samesite": "SameSite: {sameSite}"
+      },
+      "metadata": {
+        "domain": "Domain:",
+        "path": "Path:",
+        "expires": "Expires:",
+        "max_age": "Max-Age:",
+        "max_age_suffix": "s"
+      },
+      "issues": {
+        "title": "Security Issues:"
+      }
+    },
+
+    "none": {
+      "title": "No Cookies Found",
+      "message": "The server did not send any Set-Cookie headers in the response."
+    },
+
+    "recommendations": {
+      "title": "Security Recommendations"
+    }
+  },
+
+  "error": {
+    "title": "Cookie Inspection Failed",
+    "failed": "Failed to check cookie security",
+    "not_found": "Domain not found. Please check the URL and try again.",
+    "connection_refused": "Connection refused. The server may be down or unreachable.",
+    "timeout": "Request timed out. The server may be slow to respond.",
+    "unexpected": "An unexpected error occurred. Please try again."
+  }
+}
