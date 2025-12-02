@@ -1,58 +1,63 @@
 <script lang="ts">
   import CIDRSummarizer from '$lib/components/tools/CIDRSummarizer.svelte';
-
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'pages/cidr-summarize');
+  });
 </script>
 
 <div class="page-container">
   <CIDRSummarizer />
 
   <section class="explainer-section">
-    <h3>About CIDR Summarization</h3>
+    <h3>{$t('pages/cidr-summarize.cidrSummarize.about.title')}</h3>
     <p>
-      <strong>CIDR Summarization</strong> optimizes network routing by combining multiple IP addresses, ranges, and CIDR
-      blocks into the minimal set of CIDR prefixes that covers the same address space.
+      {$t('pages/cidr-summarize.cidrSummarize.about.description')}
     </p>
 
     <div class="benefits-grid">
       <div class="benefit-item">
-        <h4>Route Table Optimization</h4>
-        <p>Reduce routing table size by aggregating multiple routes into fewer, larger prefixes</p>
+        <h4>{$t('pages/cidr-summarize.cidrSummarize.benefits.routeTable.title')}</h4>
+        <p>{$t('pages/cidr-summarize.cidrSummarize.benefits.routeTable.description')}</p>
       </div>
       <div class="benefit-item">
-        <h4>Network Efficiency</h4>
-        <p>Minimize routing protocol overhead and improve convergence times</p>
+        <h4>{$t('pages/cidr-summarize.cidrSummarize.benefits.networkEfficiency.title')}</h4>
+        <p>{$t('pages/cidr-summarize.cidrSummarize.benefits.networkEfficiency.description')}</p>
       </div>
       <div class="benefit-item">
-        <h4>Dual Protocol Support</h4>
-        <p>Handle mixed IPv4 and IPv6 inputs with separate optimized outputs</p>
+        <h4>{$t('pages/cidr-summarize.cidrSummarize.benefits.dualProtocol.title')}</h4>
+        <p>{$t('pages/cidr-summarize.cidrSummarize.benefits.dualProtocol.description')}</p>
       </div>
       <div class="benefit-item">
-        <h4>Flexible Input Formats</h4>
-        <p>Process single IPs, CIDR blocks, and explicit ranges in any combination</p>
+        <h4>{$t('pages/cidr-summarize.cidrSummarize.benefits.flexibleInput.title')}</h4>
+        <p>{$t('pages/cidr-summarize.cidrSummarize.benefits.flexibleInput.description')}</p>
       </div>
     </div>
 
     <div class="modes-section">
-      <h4>Summarization Modes</h4>
+      <h4>{$t('pages/cidr-summarize.cidrSummarize.modes.title')}</h4>
       <div class="modes-grid">
         <div class="mode-item">
-          <h5>Exact Merge</h5>
+          <h5>{$t('pages/cidr-summarize.cidrSummarize.modes.exactMerge.title')}</h5>
           <p>
-            <strong>Conservative approach:</strong> Merges overlapping ranges exactly without additional aggregation
+            {$t('pages/cidr-summarize.cidrSummarize.modes.exactMerge.description')}
           </p>
           <div class="mode-example">
-            <span class="example-label">Example:</span>
+            <span class="example-label">{$t('pages/cidr-summarize.cidrSummarize.modes.example.label')}</span>
             <code class="example-input">192.168.1.0/24 + 192.168.2.0/24</code>
             <span class="arrow">→</span>
             <code class="example-output">192.168.1.0/24, 192.168.2.0/24</code>
           </div>
         </div>
         <div class="mode-item">
-          <h5>Minimal Cover</h5>
-          <p><strong>Aggressive optimization:</strong> Finds the smallest set of CIDR blocks that covers all inputs</p>
+          <h5>{$t('pages/cidr-summarize.cidrSummarize.modes.minimalCover.title')}</h5>
+          <p>{$t('pages/cidr-summarize.cidrSummarize.modes.minimalCover.description')}</p>
           <div class="mode-example">
-            <span class="example-label">Example:</span>
+            <span class="example-label">{$t('pages/cidr-summarize.cidrSummarize.modes.example.label')}</span>
             <code class="example-input">192.168.1.0/24 + 192.168.2.0/24</code>
             <span class="arrow">→</span>
             <code class="example-output">192.168.0.0/23</code>
@@ -62,56 +67,56 @@
     </div>
 
     <div class="use-cases-section">
-      <h4>Common Use Cases</h4>
+      <h4>{$t('pages/cidr-summarize.cidrSummarize.useCases.title')}</h4>
       <div class="use-cases-grid">
         <div class="use-case-item">
-          <h5>BGP Route Aggregation</h5>
-          <p>Optimize BGP advertisements by summarizing customer routes into provider prefixes</p>
+          <h5>{$t('pages/cidr-summarize.cidrSummarize.useCases.bgp.title')}</h5>
+          <p>{$t('pages/cidr-summarize.cidrSummarize.useCases.bgp.description')}</p>
         </div>
         <div class="use-case-item">
-          <h5>Firewall Rule Optimization</h5>
-          <p>Reduce ACL complexity by consolidating IP ranges into fewer CIDR rules</p>
+          <h5>{$t('pages/cidr-summarize.cidrSummarize.useCases.firewall.title')}</h5>
+          <p>{$t('pages/cidr-summarize.cidrSummarize.useCases.firewall.description')}</p>
         </div>
         <div class="use-case-item">
-          <h5>Network Planning</h5>
-          <p>Analyze address space utilization and optimize subnet allocations</p>
+          <h5>{$t('pages/cidr-summarize.cidrSummarize.useCases.planning.title')}</h5>
+          <p>{$t('pages/cidr-summarize.cidrSummarize.useCases.planning.description')}</p>
         </div>
         <div class="use-case-item">
-          <h5>Migration Planning</h5>
-          <p>Consolidate legacy network ranges during infrastructure modernization</p>
+          <h5>{$t('pages/cidr-summarize.cidrSummarize.useCases.migration.title')}</h5>
+          <p>{$t('pages/cidr-summarize.cidrSummarize.useCases.migration.description')}</p>
         </div>
       </div>
     </div>
 
     <div class="input-formats-section">
-      <h4>Supported Input Formats</h4>
+      <h4>{$t('pages/cidr-summarize.cidrSummarize.inputFormats.title')}</h4>
       <div class="formats-grid">
         <div class="format-item">
-          <h5>Single IP Addresses</h5>
+          <h5>{$t('pages/cidr-summarize.cidrSummarize.inputFormats.singleIP.title')}</h5>
           <div class="format-examples">
             <code>192.168.1.100</code>
             <code>2001:db8::1</code>
           </div>
         </div>
         <div class="format-item">
-          <h5>CIDR Blocks</h5>
+          <h5>{$t('pages/cidr-summarize.cidrSummarize.inputFormats.cidrBlocks.title')}</h5>
           <div class="format-examples">
             <code>10.0.0.0/8</code>
             <code>2001:db8::/32</code>
           </div>
         </div>
         <div class="format-item">
-          <h5>IP Ranges</h5>
+          <h5>{$t('pages/cidr-summarize.cidrSummarize.inputFormats.ipRanges.title')}</h5>
           <div class="format-examples">
             <code>172.16.1.1-172.16.1.100</code>
             <code>2001:db8::1-2001:db8::ffff</code>
           </div>
         </div>
         <div class="format-item">
-          <h5>Mixed Lists</h5>
+          <h5>{$t('pages/cidr-summarize.cidrSummarize.inputFormats.mixedLists.title')}</h5>
           <div class="format-examples">
-            <code>One item per line</code>
-            <code>IPv4 and IPv6 together</code>
+            <code>{$t('pages/cidr-summarize.cidrSummarize.inputFormats.mixedLists.example1')}</code>
+            <code>{$t('pages/cidr-summarize.cidrSummarize.inputFormats.mixedLists.example2')}</code>
           </div>
         </div>
       </div>
@@ -120,12 +125,10 @@
     <div class="info-box">
       <h4>
         <Icon name="lightbulb" size="sm" />
-        Optimization Tips
+        {$t('pages/cidr-summarize.cidrSummarize.optimizationTips.title')}
       </h4>
       <p>
-        For maximum efficiency, align your network allocations to power-of-2 boundaries. Contiguous address blocks
-        summarize much more effectively than scattered allocations. Use the exact merge mode for conservative
-        summarization or minimal cover for aggressive optimization.
+        {$t('pages/cidr-summarize.cidrSummarize.optimizationTips.description')}
       </p>
     </div>
   </section>

@@ -9,7 +9,7 @@
 
   // Load translations for this tool
   onMount(async () => {
-    await loadTranslations(get(locale), 'tools.eui64');
+    await loadTranslations(get(locale), 'tools');
   });
 
   let inputText = $state('00:1A:2B:3C:4D:5E\n02:1A:2B:FF:FE:3C:4D:5F\n08:00:27:12:34:56\n0A:00:27:FF:FE:12:34:57');

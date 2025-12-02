@@ -3,6 +3,13 @@
   import { macAddressContent } from '$lib/content/mac-address.js';
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools/mac-address');
+  });
 
   interface OUIField {
     key: string;
@@ -238,20 +245,21 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>MAC Address Converter & OUI Lookup</h2>
+    <h2>{$t('tools/mac-address.title')}</h2>
     <p>
-      Convert MAC addresses between different formats and identify the manufacturer using the Organizationally Unique
-      Identifier (OUI)
+      {$t('tools/mac-address.description')}
     </p>
   </header>
 
   <div class="input-section">
     <div class="inputs-section">
       <div class="mode-toggle-row">
-        <h3>MAC Address{isBulkMode ? 'es' : ''}</h3>
+        <h3>
+          {isBulkMode ? $t('tools/mac-address.form.bulkMode.title') : $t('tools/mac-address.form.singleMode.title')}
+        </h3>
         <button class="mode-toggle" onclick={toggleMode}>
           <Icon name={isBulkMode ? 'layers' : 'file'} size="sm" />
-          {isBulkMode ? 'Switch to Single' : 'Switch to Bulk'}
+          {isBulkMode ? $t('tools/mac-address.form.switchToSingle') : $t('tools/mac-address.form.switchToBulk')}
         </button>
       </div>
 
@@ -260,16 +268,16 @@
           <label
             for="inputs"
             use:tooltip={{
-              text: 'Enter multiple MAC addresses, one per line',
+              text: $t('tools/mac-address.form.bulkMode.tooltip'),
               position: 'top',
             }}
           >
-            Enter MAC Addresses
+            {$t('tools/mac-address.form.bulkMode.label')}
           </label>
           <textarea
             id="inputs"
             bind:value={inputText}
-            placeholder="00:1A:2B:3C:4D:5E&#10;00-50-56-C0-00-08&#10;001A.2B3C.4D5E&#10;001b632b4567"
+            placeholder={$t('tools/mac-address.form.bulkMode.placeholder')}
             rows="6"
             onkeydown={(e) => {
               if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -278,29 +286,35 @@
             }}
           ></textarea>
           <div class="input-help">
-            Enter MAC addresses one per line. Supported formats: <code>00:1A:2B:3C:4D:5E</code>,
-            <code>00-1A-2B-3C-4D-5E</code>, <code>001A.2B3C.4D5E</code> (Cisco), <code>001A2B3C4D5E</code>
+            {$t('tools/mac-address.form.helpText.bulk', {
+              formats: $t('tools/mac-address.form.helpText.formats', {
+                colon: '<code>00:1A:2B:3C:4D:5E</code>',
+                hyphen: '<code>00-1A-2B-3C-4D-5E</code>',
+                cisco: '<code>001A.2B3C.4D5E</code>',
+                bare: '<code>001A2B3C4D5E</code>',
+              }),
+            })}
           </div>
           <button class="lookup-btn bulk" onclick={handleSubmit} disabled={isLoading || !inputText.trim()}>
             <Icon name={isLoading ? 'loader' : 'search'} size="sm" />
-            {isLoading ? 'Looking up...' : 'Lookup'}
+            {isLoading ? $t('tools/mac-address.form.lookingUp') : $t('tools/mac-address.form.lookup')}
           </button>
         {:else}
           <label
             for="inputs"
             use:tooltip={{
-              text: 'Enter MAC address in any format: colon, hyphen, dot notation, or bare',
+              text: $t('tools/mac-address.form.singleMode.tooltip'),
               position: 'top',
             }}
           >
-            Enter MAC Address
+            {$t('tools/mac-address.form.singleMode.label')}
           </label>
           <div class="input-row">
             <input
               type="text"
               id="inputs"
               bind:value={inputText}
-              placeholder="00:1A:2B:3C:4D:5E"
+              placeholder={$t('tools/mac-address.form.singleMode.placeholder')}
               class="mac-input"
               oninput={clearExampleSelection}
               onkeydown={(e) => {
@@ -311,13 +325,18 @@
             />
             <button class="lookup-btn inline" onclick={handleSubmit} disabled={isLoading || !inputText.trim()}>
               <Icon name={isLoading ? 'loader' : 'search'} size="sm" />
-              {isLoading ? 'Looking up...' : 'Lookup'}
+              {isLoading ? $t('tools/mac-address.form.lookingUp') : $t('tools/mac-address.form.lookup')}
             </button>
           </div>
           <div class="input-help">
-            Supported formats: <code>00:1A:2B:3C:4D:5E</code>, <code>00-1A-2B-3C-4D-5E</code>,
-            <code>001A.2B3C.4D5E</code>
-            (Cisco), <code>001A2B3C4D5E</code>
+            {$t('tools/mac-address.form.helpText.single', {
+              formats: $t('tools/mac-address.form.helpText.formats', {
+                colon: '<code>00:1A:2B:3C:4D:5E</code>',
+                hyphen: '<code>00-1A-2B-3C-4D-5E</code>',
+                cisco: '<code>001A.2B3C.4D5E</code>',
+                bare: '<code>001A2B3C4D5E</code>',
+              }),
+            })}
           </div>
         {/if}
       </div>
@@ -329,7 +348,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('tools/mac-address.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -352,16 +371,20 @@
       {#if result.conversions.length > 0}
         <div class="conversions">
           <div class="conversions-header">
-            <h3>{result.conversions.length === 1 ? 'Address Conversion' : 'Address Conversions'}</h3>
+            <h3>
+              {result.conversions.length === 1
+                ? $t('tools/mac-address.results.conversion')
+                : $t('tools/mac-address.results.conversions')}
+            </h3>
             {#if result.conversions.length > 1}
               <div class="export-buttons">
                 <button onclick={() => exportResults('csv')}>
                   <Icon name="download" />
-                  Export CSV
+                  {$t('tools/mac-address.results.exportCsv')}
                 </button>
                 <button onclick={() => exportResults('json')}>
                   <Icon name="download" />
-                  Export JSON
+                  {$t('tools/mac-address.results.exportJson')}
                 </button>
               </div>
             {/if}
@@ -383,7 +406,7 @@
                 <div class="conversion-header">
                   <div class="input-display error">
                     <Icon name="x-circle" />
-                    <span>Invalid MAC Address</span>
+                    <span>{$t('tools/mac-address.results.invalidAddress')}</span>
                   </div>
                   {#if conversion.error}
                     <div class="error-message">{conversion.error}</div>
@@ -394,7 +417,7 @@
               {#if conversion.isValid}
                 <!-- OUI Information -->
                 <div class="conversion-section">
-                  <h4>OUI Information</h4>
+                  <h4>{$t('tools/mac-address.results.oui.title')}</h4>
                   <div class="oui-info">
                     {#each ouiFields as field (field.key)}
                       {@const value = field.render(conversion)}
@@ -442,7 +465,7 @@
 
                 <!-- Address Details -->
                 <div class="conversion-section">
-                  <h4>Address Details</h4>
+                  <h4>{$t('tools/mac-address.results.details.title')}</h4>
                   <div class="details-grid">
                     {#each detailFields as field (field.label)}
                       {@const active = field.invert ? !conversion.details[field.key] : conversion.details[field.key]}
@@ -456,7 +479,7 @@
 
                 <!-- Formats -->
                 <div class="conversion-section">
-                  <h4>Formats</h4>
+                  <h4>{$t('tools/mac-address.results.formats.title')}</h4>
                   <div class="format-grid">
                     {#each formatFields as field (field.key)}
                       {@const value = field.binary
@@ -474,7 +497,10 @@
                           <button
                             class="copy-btn"
                             onclick={() => copyToClipboard(value, copyId)}
-                            use:tooltip={{ text: 'Copy to clipboard', position: 'top' }}
+                            use:tooltip={{
+                              text: $t('tools/mac-address.results.formats.copyToClipboard'),
+                              position: 'top',
+                            }}
                           >
                             <Icon name={copiedStates[copyId] ? 'check' : 'copy'} />
                           </button>
@@ -490,23 +516,23 @@
 
         {#if result.conversions.length > 1}
           <div class="summary">
-            <h3>Conversion Summary</h3>
+            <h3>{$t('tools/mac-address.results.summary.title')}</h3>
             <div class="summary-stats">
               <div class="stat">
                 <span class="stat-value">{result.summary.total}</span>
-                <span class="stat-label">Total</span>
+                <span class="stat-label">{$t('tools/mac-address.results.summary.stats.total')}</span>
               </div>
               <div class="stat valid">
                 <span class="stat-value">{result.summary.valid}</span>
-                <span class="stat-label">Valid</span>
+                <span class="stat-label">{$t('tools/mac-address.results.summary.stats.valid')}</span>
               </div>
               <div class="stat invalid">
                 <span class="stat-value">{result.summary.invalid}</span>
-                <span class="stat-label">Invalid</span>
+                <span class="stat-label">{$t('tools/mac-address.results.summary.stats.invalid')}</span>
               </div>
               <div class="stat with-oui">
                 <span class="stat-value">{result.summary.withOUI}</span>
-                <span class="stat-label">With OUI</span>
+                <span class="stat-label">{$t('tools/mac-address.results.summary.stats.withOui')}</span>
               </div>
             </div>
           </div>
@@ -519,7 +545,7 @@
 <!-- Info Sections -->
 <div class="card info-card">
   <div class="card-header">
-    <h3>Understanding MAC Addresses</h3>
+    <h3>{$t('tools/mac-address.education.title')}</h3>
   </div>
   <div class="card-content">
     <details class="info-accordion">
@@ -629,7 +655,7 @@
     <details class="info-accordion">
       <summary class="accordion-summary">
         <Icon name="chevron-right" size="sm" />
-        <h4>Quick Tips</h4>
+        <h4>{$t('tools/mac-address.education.quickTips')}</h4>
       </summary>
       <div class="accordion-content">
         <ul>

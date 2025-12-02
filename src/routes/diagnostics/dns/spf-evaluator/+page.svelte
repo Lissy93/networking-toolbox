@@ -1,7 +1,14 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+  import { locale, loadTranslations, t } from '$lib/stores/language.js';
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import '../../../../styles/diagnostics-pages.scss';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics/dns-spf-evaluator');
+  });
 
   let domain = $state('google.com');
   let loading = $state(false);
@@ -10,14 +17,14 @@
   let copiedState = $state(false);
   let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
-    { domain: 'google.com', description: 'Google SPF with multiple includes' },
-    { domain: 'github.com', description: 'GitHub SPF record structure' },
-    { domain: 'mailchimp.com', description: 'MailChimp complex SPF policy' },
-    { domain: 'salesforce.com', description: 'Salesforce enterprise SPF' },
-    { domain: 'microsoft.com', description: 'Microsoft Office 365 SPF' },
-    { domain: 'atlassian.com', description: 'Atlassian SPF configuration' },
-  ];
+  const examples = $derived([
+    { domain: 'google.com', description: $t('examples.0.description') },
+    { domain: 'github.com', description: $t('examples.1.description') },
+    { domain: 'mailchimp.com', description: $t('examples.2.description') },
+    { domain: 'salesforce.com', description: $t('examples.3.description') },
+    { domain: 'microsoft.com', description: $t('examples.4.description') },
+    { domain: 'atlassian.com', description: $t('examples.5.description') },
+  ]);
 
   async function evaluateSPF() {
     loading = true;
@@ -40,7 +47,7 @@
 
       results = await response.json();
     } catch (err: unknown) {
-      error = err instanceof Error ? err.message : 'Unknown error occurred';
+      error = err instanceof Error ? err.message : $t('form.errors.unknownError');
     } finally {
       loading = false;
     }
@@ -57,21 +64,29 @@
   }
 
   function getMechanismType(mechanism: string): { type: string; color: string; icon: string } {
-    if (mechanism.startsWith('v=spf1')) return { type: 'version', color: 'primary', icon: 'shield' };
+    if (mechanism.startsWith('v=spf1'))
+      return { type: $t('results.mechanisms.types.version'), color: 'primary', icon: 'shield' };
     if (mechanism.startsWith('+all') || mechanism === 'all')
-      return { type: 'pass all', color: 'error', icon: 'shield-off' };
-    if (mechanism.startsWith('-all')) return { type: 'fail all', color: 'success', icon: 'shield-check' };
-    if (mechanism.startsWith('~all')) return { type: 'soft fail all', color: 'warning', icon: 'shield-alert' };
-    if (mechanism.startsWith('?all')) return { type: 'neutral all', color: 'secondary', icon: 'shield-question' };
-    if (mechanism.startsWith('ip4:')) return { type: 'IPv4', color: 'primary', icon: 'globe' };
-    if (mechanism.startsWith('ip6:')) return { type: 'IPv6', color: 'primary', icon: 'globe' };
-    if (mechanism.startsWith('a:') || mechanism === 'a') return { type: 'A record', color: 'secondary', icon: 'dns' };
+      return { type: $t('results.mechanisms.types.passAll'), color: 'error', icon: 'shield-off' };
+    if (mechanism.startsWith('-all'))
+      return { type: $t('results.mechanisms.types.failAll'), color: 'success', icon: 'shield-check' };
+    if (mechanism.startsWith('~all'))
+      return { type: $t('results.mechanisms.types.softFailAll'), color: 'warning', icon: 'shield-alert' };
+    if (mechanism.startsWith('?all'))
+      return { type: $t('results.mechanisms.types.neutralAll'), color: 'secondary', icon: 'shield-question' };
+    if (mechanism.startsWith('ip4:'))
+      return { type: $t('results.mechanisms.types.ipv4'), color: 'primary', icon: 'globe' };
+    if (mechanism.startsWith('ip6:'))
+      return { type: $t('results.mechanisms.types.ipv6'), color: 'primary', icon: 'globe' };
+    if (mechanism.startsWith('a:') || mechanism === 'a')
+      return { type: $t('results.mechanisms.types.aRecord'), color: 'secondary', icon: 'dns' };
     if (mechanism.startsWith('mx:') || mechanism === 'mx')
-      return { type: 'MX record', color: 'secondary', icon: 'mail' };
-    if (mechanism.startsWith('exists:')) return { type: 'exists check', color: 'warning', icon: 'search' };
+      return { type: $t('results.mechanisms.types.mxRecord'), color: 'secondary', icon: 'mail' };
+    if (mechanism.startsWith('exists:'))
+      return { type: $t('results.mechanisms.types.existsCheck'), color: 'warning', icon: 'search' };
     if (mechanism.startsWith('ptr:') || mechanism === 'ptr')
-      return { type: 'PTR record', color: 'secondary', icon: 'arrow-left' };
-    return { type: 'other', color: 'secondary', icon: 'help-circle' };
+      return { type: $t('results.mechanisms.types.ptrRecord'), color: 'secondary', icon: 'arrow-left' };
+    return { type: $t('results.mechanisms.types.other'), color: 'secondary', icon: 'help-circle' };
   }
 
   function renderIncludeTree(includes: unknown[], level = 0): any[] {
@@ -108,49 +123,50 @@
   }
 
   function getLookupStatus(): { status: string; color: string; message: string } {
-    if (!results) return { status: 'unknown', color: 'secondary', message: 'No evaluation performed' };
+    if (!results) return { status: 'unknown', color: 'secondary', message: $t('results.status.noEvaluation') };
     if (results.error) return { status: 'error', color: 'error', message: results.error };
 
     const count = results.lookupCount || 0;
-    if (count > 10) return { status: 'exceeded', color: 'error', message: `DNS lookup limit exceeded (${count}/10)` };
-    if (count > 8) return { status: 'warning', color: 'warning', message: `High DNS lookup count (${count}/10)` };
-    return { status: 'ok', color: 'success', message: `DNS lookups used: ${count}/10` };
+    if (count > 10)
+      return { status: 'exceeded', color: 'error', message: $t('results.status.limitExceeded', { count }) };
+    if (count > 8) return { status: 'warning', color: 'warning', message: $t('results.status.highCount', { count }) };
+    return { status: 'ok', color: 'success', message: $t('results.status.lookupsUsed', { count }) };
   }
 
   async function copyResults() {
     if (!results) return;
 
-    let text = `SPF Evaluation for ${domain}\n`;
-    text += `Generated at: ${new Date().toISOString()}\n\n`;
+    let text = $t('copyTemplate.header', { domain }) + '\n';
+    text += $t('copyTemplate.generated', { timestamp: new Date().toISOString() }) + '\n\n';
 
     if (results.record) {
-      text += `Original SPF Record:\n${results.record}\n\n`;
+      text += $t('copyTemplate.originalRecord', { record: results.record }) + '\n\n';
     }
 
     const expandedData = (results as { expanded?: { mechanisms?: string[]; includes?: unknown[] } }).expanded;
     if (expandedData?.mechanisms) {
-      text += `Mechanisms:\n`;
+      text += $t('copyTemplate.mechanismsHeader') + '\n';
       expandedData.mechanisms.forEach((mech: string) => {
-        text += `  ${mech}\n`;
+        text += $t('copyTemplate.mechanismItem', { mechanism: mech }) + '\n';
       });
       text += '\n';
     }
 
     if (expandedData?.includes) {
-      text += `Includes:\n`;
+      text += $t('copyTemplate.includesHeader') + '\n';
       const includeTree = renderIncludeTree(expandedData.includes);
       includeTree.forEach((item) => {
         const indent = '  '.repeat(item.level + 1);
-        text += `${indent}${item.type}: ${item.domain}`;
+        text += $t('copyTemplate.includeItem', { indent, type: item.type, domain: item.domain });
         if (item.result?.error) {
-          text += ` (Error: ${item.result.error})`;
+          text += $t('copyTemplate.includeError', { error: item.result.error });
         }
         text += '\n';
       });
     }
 
     const status = getLookupStatus();
-    text += `\nStatus: ${status.message}`;
+    text += $t('copyTemplate.statusHeader', { message: status.message });
 
     await navigator.clipboard.writeText(text);
     copiedState = true;
@@ -160,10 +176,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>SPF Record Evaluator</h1>
+    <h1>{$t('title')}</h1>
     <p>
-      Analyze SPF (Sender Policy Framework) records with recursive expansion of includes and redirects. Check DNS lookup
-      limits and identify potential policy issues.
+      {$t('description')}
     </p>
   </header>
 
@@ -172,7 +187,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>SPF Examples</h4>
+        <h4>{$t('examplesSection.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -180,7 +195,7 @@
             class="example-card"
             class:selected={selectedExampleIndex === i}
             onclick={() => loadExample(example, i)}
-            use:tooltip={`Evaluate SPF record for ${example.domain} (${example.description})`}
+            use:tooltip={$t('examplesSection.tooltip', { domain: example.domain, description: example.description })}
           >
             <h5>{example.domain}</h5>
             <p>{example.description}</p>
@@ -193,17 +208,17 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>SPF Evaluation</h3>
+      <h3>{$t('form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-group">
-        <label for="domain" use:tooltip={'Enter the domain to evaluate SPF records for'}>
-          Domain Name
+        <label for="domain" use:tooltip={$t('form.domain.tooltip')}>
+          {$t('form.domain.label')}
           <input
             id="domain"
             type="text"
             bind:value={domain}
-            placeholder="example.com"
+            placeholder={$t('form.domain.placeholder')}
             onchange={() => {
               clearExampleSelection();
               if (domain) evaluateSPF();
@@ -216,10 +231,10 @@
         <button class="evaluate-btn lookup-btn" onclick={evaluateSPF} disabled={loading || !domain.trim()}>
           {#if loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Evaluating SPF...
+            {$t('form.evaluating')}
           {:else}
             <Icon name="shield-check" size="sm" />
-            Evaluate SPF Record
+            {$t('form.evaluate')}
           {/if}
         </button>
       </div>
@@ -231,12 +246,12 @@
     {@const status = getLookupStatus()}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>SPF Evaluation Results</h3>
+        <h3>{$t('results.title')}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
           <span class={copiedState ? 'text-green-500' : ''}
             ><Icon name={copiedState ? 'check' : 'copy'} size="xs" /></span
           >
-          {copiedState ? 'Copied!' : 'Copy Results'}
+          {copiedState ? $t('results.copied') : $t('results.copy')}
         </button>
       </div>
       <div class="card-content">
@@ -258,7 +273,7 @@
         <!-- Original Record -->
         {#if results.record}
           <div class="record-section">
-            <h4>Original SPF Record</h4>
+            <h4>{$t('results.record.title')}</h4>
             <div class="record-display">
               <code>{results.record}</code>
             </div>
@@ -269,7 +284,7 @@
         {#if (results as { expanded?: { mechanisms?: string[] } }).expanded?.mechanisms?.length}
           {@const resultsExpanded = (results as { expanded?: { mechanisms?: string[] } }).expanded}
           <div class="mechanisms-section">
-            <h4>Direct Mechanisms</h4>
+            <h4>{$t('results.mechanisms.title')}</h4>
             <div class="mechanisms-grid">
               {#each resultsExpanded!.mechanisms! as mechanism, mechanismIndex (mechanismIndex)}
                 {@const mechInfo = getMechanismType(mechanism as string)}
@@ -289,13 +304,13 @@
         {#if results.expanded?.includes?.length > 0}
           {@const includesData = (results as { expanded: { includes: unknown[] } }).expanded.includes}
           <div class="includes-section">
-            <h4>Include Chain</h4>
+            <h4>{$t('results.includes.title')}</h4>
             <div class="include-tree">
               {#each renderIncludeTree(includesData) as item, itemIndex (itemIndex)}
                 <div class="include-item level-{item.level}">
                   <div class="include-header">
                     <Icon name={item.type === 'include' ? 'arrow-right' : 'corner-down-right'} size="xs" />
-                    <span class="include-type">{item.type}:</span>
+                    <span class="include-type">{$t(`results.includes.types.${item.type}`)}:</span>
                     <span class="include-domain">{item.domain}</span>
                     {#if item.result?.error}
                       <span class="text-error"><Icon name="alert-triangle" size="xs" /></span>
@@ -328,13 +343,13 @@
             }
           ).expanded.redirects}
           <div class="redirects-section">
-            <h4>Redirects</h4>
+            <h4>{$t('results.redirects.title')}</h4>
             <div class="redirects-list">
               {#each redirectsData as redirect, redirectIndex (redirectIndex)}
                 <div class="redirect-item">
                   <div class="redirect-header">
                     <Icon name="external-link" size="xs" />
-                    <span>redirect to: {redirect.domain}</span>
+                    <span>{$t('results.includes.redirectTo', { domain: redirect.domain })}</span>
                     {#if redirect.result?.error}
                       <span class="text-error"><Icon name="alert-triangle" size="xs" /></span>
                     {:else}
@@ -366,7 +381,7 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="md" />
           <div>
-            <strong>SPF Evaluation Failed</strong>
+            <strong>{$t('error.title')}</strong>
             <p>{error || results.error}</p>
           </div>
         </div>
@@ -377,67 +392,76 @@
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>Understanding SPF Records</h3>
+      <h3>{$t('education.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>SPF Mechanisms</h4>
+          <h4>{$t('education.mechanisms.title')}</h4>
           <div class="mechanism-types">
             <div class="mechanism-doc">
-              <strong>all:</strong> Matches all addresses (use carefully)
+              <strong>all:</strong>
+              {$t('education.mechanisms.all')}
             </div>
             <div class="mechanism-doc">
-              <strong>ip4/ip6:</strong> Matches specific IP addresses or ranges
+              <strong>ip4/ip6:</strong>
+              {$t('education.mechanisms.ipAddresses')}
             </div>
             <div class="mechanism-doc">
-              <strong>a/mx:</strong> Matches A or MX record addresses
+              <strong>a/mx:</strong>
+              {$t('education.mechanisms.records')}
             </div>
             <div class="mechanism-doc">
-              <strong>include:</strong> References another domain's SPF record
+              <strong>include:</strong>
+              {$t('education.mechanisms.include')}
             </div>
             <div class="mechanism-doc">
-              <strong>redirect:</strong> Redirects to another domain's SPF record
+              <strong>redirect:</strong>
+              {$t('education.mechanisms.redirect')}
             </div>
           </div>
         </div>
 
         <div class="info-section">
-          <h4>SPF Qualifiers</h4>
+          <h4>{$t('education.qualifiers.title')}</h4>
           <div class="qualifier-types">
             <div class="qualifier-doc">
-              <strong>+</strong> (Pass): Explicitly allow
+              <strong>+</strong>
+              {$t('education.qualifiers.pass')}
             </div>
             <div class="qualifier-doc">
-              <strong>-</strong> (Fail): Explicitly deny
+              <strong>-</strong>
+              {$t('education.qualifiers.fail')}
             </div>
             <div class="qualifier-doc">
-              <strong>~</strong> (Soft Fail): Mark as suspicious
+              <strong>~</strong>
+              {$t('education.qualifiers.softFail')}
             </div>
             <div class="qualifier-doc">
-              <strong>?</strong> (Neutral): No explicit policy
+              <strong>?</strong>
+              {$t('education.qualifiers.neutral')}
             </div>
           </div>
         </div>
 
         <div class="info-section">
-          <h4>DNS Lookup Limits</h4>
-          <p>SPF has a limit of 10 DNS lookups to prevent infinite loops and reduce load. This includes:</p>
+          <h4>{$t('education.dnsLimits.title')}</h4>
+          <p>{$t('education.dnsLimits.description')}</p>
           <ul>
-            <li>Each <code>include</code> mechanism</li>
-            <li>Each <code>a</code>, <code>mx</code>, <code>exists</code>, <code>ptr</code> mechanism</li>
-            <li>Lookups from <code>redirect</code> modifiers</li>
+            <li>{$t('education.dnsLimits.includeMechanisms', { mechanism: 'include' })}</li>
+            <li>{$t('education.dnsLimits.recordMechanisms', { mechanisms: 'a, mx, exists, ptr' })}</li>
+            <li>{$t('education.dnsLimits.redirectLookups', { modifier: 'redirect' })}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Best Practices</h4>
+          <h4>{$t('education.bestPractices.title')}</h4>
           <ul>
-            <li>Keep DNS lookups under the 10-lookup limit</li>
-            <li>End with <code>-all</code> or <code>~all</code> for security</li>
-            <li>Use IP addresses when possible to reduce lookups</li>
-            <li>Avoid excessive nesting of includes</li>
-            <li>Regularly audit and update SPF records</li>
+            <li>{$t('education.bestPractices.keepUnderLimit')}</li>
+            <li>{$t('education.bestPractices.endWithAll', { failAll: '-all', softFailAll: '~all' })}</li>
+            <li>{$t('education.bestPractices.useIpAddresses')}</li>
+            <li>{$t('education.bestPractices.avoidNesting')}</li>
+            <li>{$t('education.bestPractices.regularAudit')}</li>
           </ul>
         </div>
       </div>

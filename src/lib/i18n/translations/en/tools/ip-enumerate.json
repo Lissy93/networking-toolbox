@@ -12,7 +12,9 @@
     "includeNetwork": "Include network address",
     "includeNetworkTooltip": "Include the first address (network identifier)",
     "includeBroadcast": "Include broadcast address",
-    "includeBroadcastTooltip": "Include the last address (broadcast)"
+    "includeBroadcastTooltip": "Include the last address (broadcast)",
+    "network": "Network",
+    "broadcast": "Broadcast"
   },
   "examples": {
     "title": "Quick Examples",
@@ -40,6 +42,7 @@
   "actions": {
     "enumerate": "Enumerate Addresses",
     "enumerating": "Enumerating...",
+    "generating": "Generating addresses...",
     "copyAll": "Copy All",
     "exportTxt": "Export TXT",
     "exportCsv": "Export CSV",
@@ -73,5 +76,10 @@
   "warnings": {
     "largeGeneration": "Generating {count} addresses may take some time",
     "performanceWarning": "Large networks may impact browser performance"
+  },
+
+  "safety": {
+    "title": "Performance Notice",
+    "message": "Large networks will be truncated to prevent browser slowdown"
   }
 }

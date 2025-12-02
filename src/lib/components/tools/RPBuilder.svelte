@@ -8,7 +8,7 @@
 
   // Load translations for this tool
   onMount(async () => {
-    await loadTranslations(get(locale), 'tools.rp-builder');
+    await loadTranslations(get(locale), 'tools');
   });
 
   let domain = $state('');
@@ -20,28 +20,28 @@
 
   const roleExamples = $derived([
     {
-      name: $t('tools.rp-builder.examples.roles.systemAdmin.name'),
+      name: $t('tools.rp_builder.examples.roles.systemAdmin.name'),
       mbox: 'admin.example.com.',
       txt: 'admin-info.example.com.',
-      description: $t('tools.rp-builder.examples.roles.systemAdmin.description'),
+      description: $t('tools.rp_builder.examples.roles.systemAdmin.description'),
     },
     {
-      name: $t('tools.rp-builder.examples.roles.webmaster.name'),
+      name: $t('tools.rp_builder.examples.roles.webmaster.name'),
       mbox: 'webmaster.example.com.',
       txt: 'webmaster-info.example.com.',
-      description: $t('tools.rp-builder.examples.roles.webmaster.description'),
+      description: $t('tools.rp_builder.examples.roles.webmaster.description'),
     },
     {
-      name: $t('tools.rp-builder.examples.roles.security.name'),
+      name: $t('tools.rp_builder.examples.roles.security.name'),
       mbox: 'security.example.com.',
       txt: 'security-info.example.com.',
-      description: $t('tools.rp-builder.examples.roles.security.description'),
+      description: $t('tools.rp_builder.examples.roles.security.description'),
     },
     {
-      name: $t('tools.rp-builder.examples.roles.dnsAdmin.name'),
+      name: $t('tools.rp_builder.examples.roles.dnsAdmin.name'),
       mbox: 'dns-admin.example.com.',
       txt: 'dns-admin-info.example.com.',
-      description: $t('tools.rp-builder.examples.roles.dnsAdmin.description'),
+      description: $t('tools.rp_builder.examples.roles.dnsAdmin.description'),
     },
   ]);
 
@@ -71,23 +71,23 @@
     const warns = [];
 
     if (mailboxDname && !mailboxDname.includes('.')) {
-      warns.push($t('tools.rp-builder.alerts.warnings.mailboxFqdn'));
+      warns.push($t('tools.rp_builder.alerts.warnings.mailboxFqdn'));
     }
 
     if (txtDname && txtDname !== '.' && !txtDname.includes('.')) {
-      warns.push($t('tools.rp-builder.alerts.warnings.txtFqdn'));
+      warns.push($t('tools.rp_builder.alerts.warnings.txtFqdn'));
     }
 
     if (mailboxDname && mailboxDname.endsWith('.')) {
       // This is correct
     } else if (mailboxDname && mailboxDname !== '.') {
-      warns.push($t('tools.rp-builder.alerts.warnings.mailboxDot'));
+      warns.push($t('tools.rp_builder.alerts.warnings.mailboxDot'));
     }
 
     if (txtDname && txtDname.endsWith('.')) {
       // This is correct
     } else if (txtDname && txtDname !== '.') {
-      warns.push($t('tools.rp-builder.alerts.warnings.txtDot'));
+      warns.push($t('tools.rp_builder.alerts.warnings.txtDot'));
     }
 
     return warns;
@@ -97,15 +97,15 @@
     const infos = [];
 
     if (mailboxDname === '.') {
-      infos.push($t('tools.rp-builder.alerts.info.noMailbox'));
+      infos.push($t('tools.rp_builder.alerts.info.noMailbox'));
     }
 
     if (txtDname === '.') {
-      infos.push($t('tools.rp-builder.alerts.info.noTxt'));
+      infos.push($t('tools.rp_builder.alerts.info.noTxt'));
     }
 
     if (txtDname && txtDname !== '.') {
-      infos.push($t('tools.rp-builder.alerts.info.txtRecord', { txtDname }));
+      infos.push($t('tools.rp_builder.alerts.info.txtRecord', { txtDname }));
     }
 
     return infos;
@@ -173,15 +173,15 @@
 <div class="rp-builder">
   <div class="card">
     <div class="card-header">
-      <h1>{$t('tools.rp-builder.title')}</h1>
-      <p>{$t('tools.rp-builder.subtitle')}</p>
+      <h1>{$t('tools.rp_builder.title')}</h1>
+      <p>{$t('tools.rp_builder.subtitle')}</p>
     </div>
 
     <div class="card-content">
       <!-- Role Examples -->
       <details bind:open={showExamples} class="examples-section">
         <summary>
-          <span>{$t('tools.rp-builder.examples.title')}</span>
+          <span>{$t('tools.rp_builder.examples.title')}</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <polyline points="6,9 12,15 18,9"></polyline>
           </svg>
@@ -200,96 +200,96 @@
         <!-- Input Form -->
         <div class="input-section">
           <div class="field-group">
-            <label for="domain" use:tooltip={$t('tools.rp-builder.form.domain.tooltip')}>
-              {$t('tools.rp-builder.form.domain.label')} *
+            <label for="domain" use:tooltip={$t('tools.rp_builder.form.domain.tooltip')}>
+              {$t('tools.rp_builder.form.domain.label')} *
             </label>
             <input
               id="domain"
               type="text"
               bind:value={domain}
-              placeholder={$t('tools.rp-builder.form.domain.placeholder')}
+              placeholder={$t('tools.rp_builder.form.domain.placeholder')}
             />
-            <small>{$t('tools.rp-builder.form.domain.help')}</small>
+            <small>{$t('tools.rp_builder.form.domain.help')}</small>
           </div>
 
           <!-- Email to Domain Name Converter -->
           <div class="converter-section">
-            <h4>{$t('tools.rp-builder.form.converter.title')}</h4>
+            <h4>{$t('tools.rp_builder.form.converter.title')}</h4>
             <div class="converter-input">
               <input
                 type="email"
                 bind:value={emailInput}
-                placeholder={$t('tools.rp-builder.form.converter.placeholder')}
+                placeholder={$t('tools.rp_builder.form.converter.placeholder')}
               />
               <button onclick={convertEmailToDname} class="btn-success" disabled={!emailInput.trim()}>
-                {$t('tools.rp-builder.form.converter.button')}
+                {$t('tools.rp_builder.form.converter.button')}
               </button>
             </div>
-            <small>{$t('tools.rp-builder.form.converter.help')}</small>
+            <small>{$t('tools.rp_builder.form.converter.help')}</small>
           </div>
 
           <div class="field-group">
-            <label for="mailbox" use:tooltip={$t('tools.rp-builder.form.mailbox.tooltip')}>
-              {$t('tools.rp-builder.form.mailbox.label')} *
+            <label for="mailbox" use:tooltip={$t('tools.rp_builder.form.mailbox.tooltip')}>
+              {$t('tools.rp_builder.form.mailbox.label')} *
             </label>
             <input
               id="mailbox"
               type="text"
               bind:value={mailboxDname}
-              placeholder={$t('tools.rp-builder.form.mailbox.placeholder')}
+              placeholder={$t('tools.rp_builder.form.mailbox.placeholder')}
               class="mono-input"
             />
-            <small> {$t('tools.rp-builder.form.mailbox.help')} </small>
+            <small> {$t('tools.rp_builder.form.mailbox.help')} </small>
             {#if mailboxDname && mailboxDname !== '.'}
               <div class="email-preview">
                 <Mail size="12" />
-                {$t('tools.rp-builder.form.mailbox.emailPreview')}
-                {dnameToEmail(mailboxDname) || $t('tools.rp-builder.output.invalidFormat')}
+                {$t('tools.rp_builder.form.mailbox.emailPreview')}
+                {dnameToEmail(mailboxDname) || $t('tools.rp_builder.output.invalidFormat')}
               </div>
             {/if}
           </div>
 
           <div class="field-group">
-            <label for="txt" use:tooltip={$t('tools.rp-builder.form.txt.tooltip')}>
-              {$t('tools.rp-builder.form.txt.label')}
+            <label for="txt" use:tooltip={$t('tools.rp_builder.form.txt.tooltip')}>
+              {$t('tools.rp_builder.form.txt.label')}
             </label>
             <input
               id="txt"
               type="text"
               bind:value={txtDname}
-              placeholder={$t('tools.rp-builder.form.txt.placeholder')}
+              placeholder={$t('tools.rp_builder.form.txt.placeholder')}
               class="mono-input"
             />
-            <small> {$t('tools.rp-builder.form.txt.help')} </small>
+            <small> {$t('tools.rp_builder.form.txt.help')} </small>
           </div>
         </div>
 
         <!-- Output -->
         <div class="output-section">
           <div class="output-group">
-            <h3>{$t('tools.rp-builder.output.rpRecord')}</h3>
+            <h3>{$t('tools.rp_builder.output.rpRecord')}</h3>
             <div class="code-output">
               {#if isValid}
                 <pre>{rpRecord}</pre>
               {:else}
-                <p class="placeholder-text">{$t('tools.rp-builder.output.placeholder')}</p>
+                <p class="placeholder-text">{$t('tools.rp_builder.output.placeholder')}</p>
               {/if}
             </div>
           </div>
 
           {#if txtRecord}
             <div class="output-group">
-              <h3>{$t('tools.rp-builder.output.txtRecord')}</h3>
+              <h3>{$t('tools.rp_builder.output.txtRecord')}</h3>
               <div class="code-output txt-output">
                 <pre>{txtRecord}</pre>
-                <small>{$t('tools.rp-builder.output.txtHelp')}</small>
+                <small>{$t('tools.rp_builder.output.txtHelp')}</small>
               </div>
             </div>
           {/if}
 
           {#if info.length > 0}
             <div class="alert alert-info">
-              <h4>{$t('tools.rp-builder.alerts.info.title')}</h4>
+              <h4>{$t('tools.rp_builder.alerts.info.title')}</h4>
               <ul>
                 {#each info as infoItem, index (index)}
                   <li>{infoItem}</li>
@@ -300,7 +300,7 @@
 
           {#if warnings.length > 0}
             <div class="alert alert-warning">
-              <h4>{$t('tools.rp-builder.alerts.warnings.title')}</h4>
+              <h4>{$t('tools.rp_builder.alerts.warnings.title')}</h4>
               <ul>
                 {#each warnings as warning, index (index)}
                   <li>{warning}</li>
@@ -319,10 +319,10 @@
               >
                 {#if clipboard.isCopied('copy')}
                   <Check size="16" />
-                  {$t('tools.rp-builder.buttons.copied')}
+                  {$t('tools.rp_builder.buttons.copied')}
                 {:else}
                   <Copy size="16" />
-                  {$t('tools.rp-builder.buttons.copy')}
+                  {$t('tools.rp_builder.buttons.copy')}
                 {/if}
               </button>
               <button
@@ -333,10 +333,10 @@
               >
                 {#if clipboard.isCopied('download')}
                   <Check size="16" />
-                  {$t('tools.rp-builder.buttons.downloaded')}
+                  {$t('tools.rp_builder.buttons.downloaded')}
                 {:else}
                   <Download size="16" />
-                  {$t('tools.rp-builder.buttons.download')}
+                  {$t('tools.rp_builder.buttons.download')}
                 {/if}
               </button>
             </div>
@@ -347,48 +347,48 @@
       <!-- Information Section -->
       <div class="info-section">
         <div class="card info-card">
-          <h4>{$t('tools.rp-builder.info.about.title')}</h4>
+          <h4>{$t('tools.rp_builder.info.about.title')}</h4>
           <p>
-            {$t('tools.rp-builder.info.about.description')}
+            {$t('tools.rp_builder.info.about.description')}
           </p>
         </div>
 
         <div class="info-grid">
           <div class="card">
-            <h4>{$t('tools.rp-builder.info.encoding.title')}</h4>
+            <h4>{$t('tools.rp_builder.info.encoding.title')}</h4>
             <div class="encoding-examples">
-              <p>{$t('tools.rp-builder.info.encoding.description')}</p>
+              <p>{$t('tools.rp_builder.info.encoding.description')}</p>
               <div class="code-example">
-                <div><strong>Email:</strong> {$t('tools.rp-builder.info.encoding.examples.simple.email')}</div>
-                <div><strong>Encoded:</strong> {$t('tools.rp-builder.info.encoding.examples.simple.encoded')}</div>
+                <div><strong>Email:</strong> {$t('tools.rp_builder.info.encoding.examples.simple.email')}</div>
+                <div><strong>Encoded:</strong> {$t('tools.rp_builder.info.encoding.examples.simple.encoded')}</div>
               </div>
               <div class="code-example">
-                <div><strong>Email:</strong> {$t('tools.rp-builder.info.encoding.examples.complex.email')}</div>
-                <div><strong>Encoded:</strong> {$t('tools.rp-builder.info.encoding.examples.complex.encoded')}</div>
+                <div><strong>Email:</strong> {$t('tools.rp_builder.info.encoding.examples.complex.email')}</div>
+                <div><strong>Encoded:</strong> {$t('tools.rp_builder.info.encoding.examples.complex.encoded')}</div>
               </div>
-              <small>{$t('tools.rp-builder.info.encoding.note')}</small>
+              <small>{$t('tools.rp_builder.info.encoding.note')}</small>
             </div>
           </div>
 
           <div class="card">
-            <h4>{$t('tools.rp-builder.info.useCases.title')}</h4>
+            <h4>{$t('tools.rp_builder.info.useCases.title')}</h4>
             <ul class="use-cases">
-              <li>{$t('tools.rp-builder.info.useCases.items.zone')}</li>
-              <li>{$t('tools.rp-builder.info.useCases.items.server')}</li>
-              <li>{$t('tools.rp-builder.info.useCases.items.security')}</li>
-              <li>{$t('tools.rp-builder.info.useCases.items.automated')}</li>
-              <li>{$t('tools.rp-builder.info.useCases.items.compliance')}</li>
+              <li>{$t('tools.rp_builder.info.useCases.items.zone')}</li>
+              <li>{$t('tools.rp_builder.info.useCases.items.server')}</li>
+              <li>{$t('tools.rp_builder.info.useCases.items.security')}</li>
+              <li>{$t('tools.rp_builder.info.useCases.items.automated')}</li>
+              <li>{$t('tools.rp_builder.info.useCases.items.compliance')}</li>
             </ul>
           </div>
         </div>
 
         <div class="card best-practices-card">
-          <h4>{$t('tools.rp-builder.info.bestPractices.title')}</h4>
+          <h4>{$t('tools.rp_builder.info.bestPractices.title')}</h4>
           <ul class="best-practices">
-            <li>{$t('tools.rp-builder.info.bestPractices.items.fqdn')}</li>
-            <li>{$t('tools.rp-builder.info.bestPractices.items.txtRecords')}</li>
-            <li>{$t('tools.rp-builder.info.bestPractices.items.upToDate')}</li>
-            <li>{$t('tools.rp-builder.info.bestPractices.items.rolesBased')}</li>
+            <li>{$t('tools.rp_builder.info.bestPractices.items.fqdn')}</li>
+            <li>{$t('tools.rp_builder.info.bestPractices.items.txtRecords')}</li>
+            <li>{$t('tools.rp_builder.info.bestPractices.items.upToDate')}</li>
+            <li>{$t('tools.rp_builder.info.bestPractices.items.rolesBased')}</li>
           </ul>
         </div>
       </div>

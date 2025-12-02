@@ -1,0 +1,88 @@
+{
+  "title": "ARP vs NDP: IPv4 and IPv6 Address Resolution",
+  "description": "Compare Address Resolution Protocol (ARP) for IPv4 with Neighbor Discovery Protocol (NDP) for IPv6, including their differences, advantages, and practical implications",
+
+  "comparison": {
+    "title": "Side-by-Side Comparison",
+    "headers": {
+      "arp": "ARP (IPv4)",
+      "ndp": "NDP (IPv6)"
+    }
+  },
+
+  "arp": {
+    "messageTypes": {
+      "title": "ARP Message Types",
+      "fields": {
+        "description": "Description:",
+        "destination": "Destination:",
+        "response": "Response:"
+      }
+    },
+    "process": {
+      "title": "ARP Process"
+    },
+    "limitations": {
+      "title": "ARP Limitations"
+    }
+  },
+
+  "ndp": {
+    "messageTypes": {
+      "title": "NDP Message Types",
+      "fields": {
+        "icmpType": "ICMP Type:",
+        "description": "Description:",
+        "destination": "Destination:",
+        "purpose": "Purpose:"
+      }
+    },
+    "process": {
+      "title": "NDP Process"
+    },
+    "advantages": {
+      "title": "NDP Advantages Over ARP"
+    }
+  },
+
+  "practical": {
+    "title": "Practical Differences",
+    "fields": {
+      "arp": "ARP (IPv4):",
+      "ndp": "NDP (IPv6):",
+      "impact": "Impact:"
+    }
+  },
+
+  "troubleshooting": {
+    "title": "Troubleshooting Commands",
+    "headers": {
+      "ipv4": "IPv4 (ARP)",
+      "ipv6": "IPv6 (NDP)"
+    }
+  },
+
+  "issues": {
+    "title": "Common Issues",
+    "fields": {
+      "description": "Description:",
+      "detection": "Detection:",
+      "mitigation": "Mitigation:"
+    }
+  },
+
+  "bestPractices": {
+    "title": "Best Practices"
+  },
+
+  "quickReference": {
+    "title": "Quick Reference",
+    "arp": "ARP Key Points",
+    "ndp": "NDP Key Points"
+  },
+
+  "migration": {
+    "title": "IPv4 to IPv6 Migration Tips",
+    "considerations": "Important Considerations"
+  }
+}

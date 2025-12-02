@@ -8,7 +8,7 @@
 
   // Load translations for this tool
   onMount(async () => {
-    await loadTranslations(get(locale), 'tools.ptr-generator');
+    await loadTranslations(get(locale), 'tools');
   });
 
   let inputValue = $state('192.168.1.100');
@@ -41,40 +41,40 @@
 
   const examples = $derived([
     {
-      label: $t('tools.ptr-generator.examples.singleIPv4.label'),
+      label: $t('tools.ptr_generator.examples.singleIPv4.label'),
       input: '192.168.1.100',
       type: 'single' as const,
-      description: $t('tools.ptr-generator.examples.singleIPv4.description'),
+      description: $t('tools.ptr_generator.examples.singleIPv4.description'),
     },
     {
-      label: $t('tools.ptr-generator.examples.singleIPv6.label'),
+      label: $t('tools.ptr_generator.examples.singleIPv6.label'),
       input: '2001:db8::1',
       type: 'single' as const,
-      description: $t('tools.ptr-generator.examples.singleIPv6.description'),
+      description: $t('tools.ptr_generator.examples.singleIPv6.description'),
     },
     {
-      label: $t('tools.ptr-generator.examples.ipv4Subnet24.label'),
+      label: $t('tools.ptr_generator.examples.ipv4Subnet24.label'),
       input: '192.168.1.0/24',
       type: 'cidr' as const,
-      description: $t('tools.ptr-generator.examples.ipv4Subnet24.description'),
+      description: $t('tools.ptr_generator.examples.ipv4Subnet24.description'),
     },
     {
-      label: $t('tools.ptr-generator.examples.ipv4SmallBlock.label'),
+      label: $t('tools.ptr_generator.examples.ipv4SmallBlock.label'),
       input: '10.0.0.16/28',
       type: 'cidr' as const,
-      description: $t('tools.ptr-generator.examples.ipv4SmallBlock.description'),
+      description: $t('tools.ptr_generator.examples.ipv4SmallBlock.description'),
     },
     {
-      label: $t('tools.ptr-generator.examples.ipv6Network.label'),
+      label: $t('tools.ptr_generator.examples.ipv6Network.label'),
       input: '2001:db8::/64',
       type: 'cidr' as const,
-      description: $t('tools.ptr-generator.examples.ipv6Network.description'),
+      description: $t('tools.ptr_generator.examples.ipv6Network.description'),
     },
     {
-      label: $t('tools.ptr-generator.examples.largeBlock.label'),
+      label: $t('tools.ptr_generator.examples.largeBlock.label'),
       input: '2001:db8:1000::/48',
       type: 'cidr' as const,
-      description: $t('tools.ptr-generator.examples.largeBlock.description'),
+      description: $t('tools.ptr_generator.examples.largeBlock.description'),
     },
   ]);
 
@@ -162,7 +162,7 @@
     const prefix = parseInt(prefixStr);
 
     if (!isValidIPv4(network) || prefix < 0 || prefix > 32) {
-      throw new Error($t('tools.ptr-generator.errors.invalidIPv4CIDR'));
+      throw new Error($t('tools.ptr_generator.errors.invalidIPv4CIDR'));
     }
 
     const networkParts = network.split('.').map((p) => parseInt(p));
@@ -170,7 +170,7 @@
 
     // Limit to reasonable sizes
     if (hostBits > 16) {
-      throw new Error($t('tools.ptr-generator.errors.cidrTooLarge'));
+      throw new Error($t('tools.ptr_generator.errors.cidrTooLarge'));
     }
 
     const totalHosts = Math.pow(2, hostBits);
@@ -201,13 +201,13 @@
     const prefix = parseInt(prefixStr);
 
     if (!isValidIPv6(network) || prefix < 0 || prefix > 128) {
-      throw new Error($t('tools.ptr-generator.errors.invalidIPv6CIDR'));
+      throw new Error($t('tools.ptr_generator.errors.invalidIPv6CIDR'));
     }
 
     // For IPv6, we'll generate a representative set rather than all addresses
     // since IPv6 networks can be astronomically large
     if (prefix > 64) {
-      throw new Error($t('tools.ptr-generator.errors.ipv6CIDRTooSmall'));
+      throw new Error($t('tools.ptr_generator.errors.ipv6CIDRTooSmall'));
     }
 
     // For demonstration, return just the network address and a few examples
@@ -290,12 +290,12 @@ $TTL 86400
           const { ptrName, zone } = generateIPv6PTR(trimmed);
           entries.push({ ip: trimmed, ptrName, type: 'IPv6', zone });
         } else {
-          throw new Error($t('tools.ptr-generator.errors.invalidIPFormat'));
+          throw new Error($t('tools.ptr_generator.errors.invalidIPFormat'));
         }
       } else {
         // CIDR notation
         if (!trimmed.includes('/')) {
-          throw new Error($t('tools.ptr-generator.errors.cidrRequiresPrefix'));
+          throw new Error($t('tools.ptr_generator.errors.cidrRequiresPrefix'));
         }
 
         const [network] = trimmed.split('/');
@@ -313,7 +313,7 @@ $TTL 86400
             entries.push({ ip, ptrName, type: 'IPv6', zone });
           });
         } else {
-          throw new Error($t('tools.ptr-generator.errors.invalidNetworkAddress'));
+          throw new Error($t('tools.ptr_generator.errors.invalidNetworkAddress'));
         }
       }
 
@@ -347,7 +347,7 @@ $TTL 86400
     } catch (error) {
       results = {
         success: false,
-        error: error instanceof Error ? error.message : $t('tools.ptr-generator.errors.unknownError'),
+        error: error instanceof Error ? error.message : $t('tools.ptr_generator.errors.unknownError'),
         entries: [],
         zoneFiles: [],
         summary: { totalEntries: 0, ipv4Entries: 0, ipv6Entries: 0, uniqueZones: 0 },
@@ -373,8 +373,8 @@ $TTL 86400
 
 <div class="card">
   <header class="card-header">
-    <h1>{$t('tools.ptr-generator.title')}</h1>
-    <p>{$t('tools.ptr-generator.description')}</p>
+    <h1>{$t('tools.ptr_generator.title')}</h1>
+    <p>{$t('tools.ptr_generator.description')}</p>
   </header>
 
   <!-- Educational Overview Card -->
@@ -383,22 +383,22 @@ $TTL 86400
       <div class="overview-item">
         <Icon name="rotate" size="sm" />
         <div>
-          <strong>{$t('tools.ptr-generator.overview.reverseDNS.title')}:</strong>
-          {$t('tools.ptr-generator.overview.reverseDNS.content')}
+          <strong>{$t('tools.ptr_generator.overview.reverseDNS.title')}:</strong>
+          {$t('tools.ptr_generator.overview.reverseDNS.content')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="server" size="sm" />
         <div>
-          <strong>{$t('tools.ptr-generator.overview.zoneStructure.title')}:</strong>
-          {$t('tools.ptr-generator.overview.zoneStructure.content')}
+          <strong>{$t('tools.ptr_generator.overview.zoneStructure.title')}:</strong>
+          {$t('tools.ptr_generator.overview.zoneStructure.content')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="file" size="sm" />
         <div>
-          <strong>{$t('tools.ptr-generator.overview.zoneFiles.title')}:</strong>
-          {$t('tools.ptr-generator.overview.zoneFiles.content')}
+          <strong>{$t('tools.ptr_generator.overview.zoneFiles.title')}:</strong>
+          {$t('tools.ptr_generator.overview.zoneFiles.content')}
         </div>
       </div>
     </div>
@@ -409,7 +409,7 @@ $TTL 86400
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="sm" />
-        <h3>{$t('tools.ptr-generator.examples.title')}</h3>
+        <h3>{$t('tools.ptr_generator.examples.title')}</h3>
       </summary>
       <div class="examples-grid">
         {#each examples as example (example.label)}
@@ -421,8 +421,8 @@ $TTL 86400
               <div class="example-label">{example.label}</div>
               <div class="example-type {example.type}">
                 {example.type === 'single'
-                  ? $t('tools.ptr-generator.examples.types.singleIP')
-                  : $t('tools.ptr-generator.examples.types.cidrBlock')}
+                  ? $t('tools.ptr_generator.examples.types.singleIP')
+                  : $t('tools.ptr_generator.examples.types.cidrBlock')}
               </div>
             </div>
             <code class="example-input">{example.input}</code>
@@ -437,20 +437,20 @@ $TTL 86400
   <div class="card input-card">
     <!-- Input Type Selection -->
     <div class="type-section">
-      <h3 class="type-label">{$t('tools.ptr-generator.input.type.label')}</h3>
+      <h3 class="type-label">{$t('tools.ptr_generator.input.type.label')}</h3>
       <div class="type-options">
         <label class="type-option">
           <input type="radio" bind:group={inputType} value="single" onchange={handleTypeChange} />
           <div class="type-content">
             <Icon name="target" size="sm" />
-            <span>{$t('tools.ptr-generator.input.type.singleIP')}</span>
+            <span>{$t('tools.ptr_generator.input.type.singleIP')}</span>
           </div>
         </label>
         <label class="type-option">
           <input type="radio" bind:group={inputType} value="cidr" onchange={handleTypeChange} />
           <div class="type-content">
             <Icon name="network" size="sm" />
-            <span>{$t('tools.ptr-generator.input.type.cidrBlock')}</span>
+            <span>{$t('tools.ptr_generator.input.type.cidrBlock')}</span>
           </div>
         </label>
       </div>
@@ -461,13 +461,13 @@ $TTL 86400
       <label
         for="ip-input"
         use:tooltip={inputType === 'single'
-          ? $t('tools.ptr-generator.input.address.tooltipSingle')
-          : $t('tools.ptr-generator.input.address.tooltipCIDR')}
+          ? $t('tools.ptr_generator.input.address.tooltipSingle')
+          : $t('tools.ptr_generator.input.address.tooltipCIDR')}
       >
         <Icon name={inputType === 'single' ? 'target' : 'network'} size="sm" />
         {inputType === 'single'
-          ? $t('tools.ptr-generator.input.address.labelSingle')
-          : $t('tools.ptr-generator.input.address.labelCIDR')}
+          ? $t('tools.ptr_generator.input.address.labelSingle')
+          : $t('tools.ptr_generator.input.address.labelCIDR')}
       </label>
       <input
         id="ip-input"
@@ -475,8 +475,8 @@ $TTL 86400
         bind:value={inputValue}
         oninput={handleInputChange}
         placeholder={inputType === 'single'
-          ? $t('tools.ptr-generator.input.address.placeholderSingle')
-          : $t('tools.ptr-generator.input.address.placeholderCIDR')}
+          ? $t('tools.ptr_generator.input.address.placeholderSingle')
+          : $t('tools.ptr_generator.input.address.placeholderCIDR')}
         class="ip-input {results?.success === true ? 'valid' : results?.success === false ? 'invalid' : ''}"
         spellcheck="false"
       />
@@ -488,8 +488,8 @@ $TTL 86400
         <input type="checkbox" bind:checked={showZoneFiles} />
         <div class="checkbox-custom"></div>
         <div class="checkbox-content">
-          <span class="checkbox-label">{$t('tools.ptr-generator.input.options.generateZoneFiles')}</span>
-          <div class="checkbox-hint">{$t('tools.ptr-generator.input.options.zoneFilesHint')}</div>
+          <span class="checkbox-label">{$t('tools.ptr_generator.input.options.generateZoneFiles')}</span>
+          <div class="checkbox-hint">{$t('tools.ptr_generator.input.options.zoneFilesHint')}</div>
         </div>
       </label>
     </div>
@@ -500,27 +500,27 @@ $TTL 86400
     <div class="card results-card">
       {#if results.success}
         <div class="results-header">
-          <h3>{$t('tools.ptr-generator.results.title')}</h3>
+          <h3>{$t('tools.ptr_generator.results.title')}</h3>
           <div class="summary-stats">
             <div class="stat-item">
               <span class="stat-value">{results.summary.totalEntries}</span>
-              <span class="stat-label">{$t('tools.ptr-generator.results.summary.totalPTRs')}</span>
+              <span class="stat-label">{$t('tools.ptr_generator.results.summary.totalPTRs')}</span>
             </div>
             {#if results.summary.ipv4Entries > 0}
               <div class="stat-item">
                 <span class="stat-value">{results.summary.ipv4Entries}</span>
-                <span class="stat-label">{$t('tools.ptr-generator.results.summary.ipv4')}</span>
+                <span class="stat-label">{$t('tools.ptr_generator.results.summary.ipv4')}</span>
               </div>
             {/if}
             {#if results.summary.ipv6Entries > 0}
               <div class="stat-item">
                 <span class="stat-value">{results.summary.ipv6Entries}</span>
-                <span class="stat-label">{$t('tools.ptr-generator.results.summary.ipv6')}</span>
+                <span class="stat-label">{$t('tools.ptr_generator.results.summary.ipv6')}</span>
               </div>
             {/if}
             <div class="stat-item">
               <span class="stat-value">{results.summary.uniqueZones}</span>
-              <span class="stat-label">{$t('tools.ptr-generator.results.summary.zones')}</span>
+              <span class="stat-label">{$t('tools.ptr_generator.results.summary.zones')}</span>
             </div>
           </div>
         </div>
@@ -529,14 +529,14 @@ $TTL 86400
         <div class="ptr-records">
           <h4>
             <Icon name="list" size="sm" />
-            {$t('tools.ptr-generator.results.records.title')}
+            {$t('tools.ptr_generator.results.records.title')}
           </h4>
           <div class="records-table">
             <div class="table-header">
-              <div class="col-ip">{$t('tools.ptr-generator.results.records.ipAddress')}</div>
-              <div class="col-ptr">{$t('tools.ptr-generator.results.records.ptrName')}</div>
-              <div class="col-type">{$t('tools.ptr-generator.results.records.type')}</div>
-              <div class="col-zone">{$t('tools.ptr-generator.results.records.zone')}</div>
+              <div class="col-ip">{$t('tools.ptr_generator.results.records.ipAddress')}</div>
+              <div class="col-ptr">{$t('tools.ptr_generator.results.records.ptrName')}</div>
+              <div class="col-type">{$t('tools.ptr_generator.results.records.type')}</div>
+              <div class="col-zone">{$t('tools.ptr_generator.results.records.zone')}</div>
             </div>
             {#each results.entries.slice(0, 50) as entry (`${entry.ip}-${entry.ptrName}`)}
               <div class="table-row">
@@ -562,7 +562,7 @@ $TTL 86400
             {/each}
             {#if results.entries.length > 50}
               <div class="table-truncated">
-                {$t('tools.ptr-generator.results.records.moreRecords', { count: results.entries.length - 50 })}
+                {$t('tools.ptr_generator.results.records.moreRecords', { count: results.entries.length - 50 })}
               </div>
             {/if}
           </div>
@@ -573,7 +573,7 @@ $TTL 86400
           <div class="zone-files">
             <h4>
               <Icon name="file" size="sm" />
-              {$t('tools.ptr-generator.results.zoneFiles.title')}
+              {$t('tools.ptr_generator.results.zoneFiles.title')}
             </h4>
             {#each results.zoneFiles as zoneFile (zoneFile.zone)}
               <div class="zone-file">
@@ -587,7 +587,7 @@ $TTL 86400
                     onclick={() => clipboard.copy(zoneFile.content, `zone-${zoneFile.zone}`)}
                   >
                     <Icon name={clipboard.isCopied(`zone-${zoneFile.zone}`) ? 'check' : 'copy'} size="sm" />
-                    {$t('tools.ptr-generator.actions.copyZoneFile')}
+                    {$t('tools.ptr_generator.actions.copyZoneFile')}
                   </button>
                 </div>
                 <pre class="zone-content"><code>{zoneFile.content}</code></pre>
@@ -598,15 +598,15 @@ $TTL 86400
       {:else}
         <div class="error-result">
           <Icon name="alert-triangle" size="lg" />
-          <h4>{$t('tools.ptr-generator.errors.title')}</h4>
+          <h4>{$t('tools.ptr_generator.errors.title')}</h4>
           <p>{results.error}</p>
           <div class="error-help">
-            <strong>{$t('tools.ptr-generator.errors.validFormats')}:</strong>
+            <strong>{$t('tools.ptr_generator.errors.validFormats')}:</strong>
             <ul>
-              <li>{$t('tools.ptr-generator.errors.formats.singleIPv4')}</li>
-              <li>{$t('tools.ptr-generator.errors.formats.singleIPv6')}</li>
-              <li>{$t('tools.ptr-generator.errors.formats.ipv4CIDR')}</li>
-              <li>{$t('tools.ptr-generator.errors.formats.ipv6CIDR')}</li>
+              <li>{$t('tools.ptr_generator.errors.formats.singleIPv4')}</li>
+              <li>{$t('tools.ptr_generator.errors.formats.singleIPv6')}</li>
+              <li>{$t('tools.ptr_generator.errors.formats.ipv4CIDR')}</li>
+              <li>{$t('tools.ptr_generator.errors.formats.ipv6CIDR')}</li>
             </ul>
           </div>
         </div>
@@ -618,30 +618,30 @@ $TTL 86400
   <div class="education-card">
     <div class="education-grid">
       <div class="education-item info-panel">
-        <h4>{$t('tools.ptr-generator.education.whatArePTRRecords.title')}</h4>
+        <h4>{$t('tools.ptr_generator.education.whatArePTRRecords.title')}</h4>
         <p>
-          {$t('tools.ptr-generator.education.whatArePTRRecords.content')}
+          {$t('tools.ptr_generator.education.whatArePTRRecords.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>{$t('tools.ptr-generator.education.zoneStructure.title')}</h4>
+        <h4>{$t('tools.ptr_generator.education.zoneStructure.title')}</h4>
         <p>
-          {$t('tools.ptr-generator.education.zoneStructure.content')}
+          {$t('tools.ptr_generator.education.zoneStructure.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>{$t('tools.ptr-generator.education.zoneDelegation.title')}</h4>
+        <h4>{$t('tools.ptr_generator.education.zoneDelegation.title')}</h4>
         <p>
-          {$t('tools.ptr-generator.education.zoneDelegation.content')}
+          {$t('tools.ptr_generator.education.zoneDelegation.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>{$t('tools.ptr-generator.education.bestPractices.title')}</h4>
+        <h4>{$t('tools.ptr_generator.education.bestPractices.title')}</h4>
         <p>
-          {$t('tools.ptr-generator.education.bestPractices.content')}
+          {$t('tools.ptr_generator.education.bestPractices.content')}
         </p>
       </div>
     </div>
@@ -664,14 +664,6 @@ $TTL 86400
     align-items: flex-start;
     gap: var(--spacing-sm);
     color: var(--text-secondary);
-
-    code {
-      background-color: var(--bg-tertiary);
-      color: var(--text-primary);
-      padding: 2px var(--spacing-xs);
-      border-radius: var(--radius-sm);
-      font-family: var(--font-mono);
-    }
 
     strong {
       color: var(--text-primary);
@@ -1267,14 +1259,6 @@ $TTL 86400
       color: var(--text-secondary);
       line-height: 1.6;
       margin: 0;
-    }
-
-    code {
-      background-color: var(--bg-tertiary);
-      color: var(--text-primary);
-      padding: 2px var(--spacing-xs);
-      border-radius: var(--radius-sm);
-      font-family: var(--font-mono);
     }
   }
 

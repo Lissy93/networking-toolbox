@@ -3,6 +3,13 @@
   import { macAddressContent } from '$lib/content/mac-address.js';
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools/mac-address');
+  });
 
   interface OUIField {
     key: string;
@@ -41,51 +48,60 @@
     {
       mac: '00:1A:79:00:00:01',
       vendor: 'Telecomunication Technologies',
-      description: 'Ukrainian telecom equipment (Odessa)',
+      description: $t('examples.vendors.telecomunicationTech'),
     },
-    { mac: '3C:22:FB:A1:B2:C3', vendor: 'Apple', description: 'Apple device (Cupertino, CA)' },
-    { mac: 'DC:A6:32:A1:B2:C3', vendor: 'Raspberry Pi Trading', description: 'Raspberry Pi (Cambridge, UK)' },
-    { mac: '00:16:3E:1F:4A:B1', vendor: 'Xensource', description: 'Xen virtual machine (Palo Alto, CA)' },
-    { mac: '00:00:5E:00:01:01', vendor: 'ICANN IANA', description: 'IANA reserved addresses (special use)' },
-    { mac: '00:0D:B9:A1:B2:C3', vendor: 'PC Engines', description: 'PC Engines embedded systems (Switzerland)' },
-    { mac: 'FF:FF:FF:FF:FF:FF', vendor: '', description: 'Multicast/Broadcast' },
+    { mac: '3C:22:FB:A1:B2:C3', vendor: 'Apple', description: $t('examples.vendors.apple') },
+    { mac: 'DC:A6:32:A1:B2:C3', vendor: 'Raspberry Pi Trading', description: $t('examples.vendors.raspberryPi') },
+    { mac: '00:16:3E:1F:4A:B1', vendor: 'Xensource', description: $t('examples.vendors.xensource') },
+    { mac: '00:00:5E:00:01:01', vendor: 'ICANN IANA', description: $t('examples.vendors.icannIana') },
+    { mac: '00:0D:B9:A1:B2:C3', vendor: 'PC Engines', description: $t('examples.vendors.pcEngines') },
+    { mac: 'FF:FF:FF:FF:FF:FF', vendor: '', description: $t('examples.vendors.multicastBroadcast') },
   ];
 
   const ouiFields: OUIField[] = [
-    { key: 'oui', label: 'OUI', icon: 'hash', render: (c: MACConversionResult) => c.oui.oui, code: true },
+    {
+      key: 'oui',
+      label: $t('results.oui.fields.oui'),
+      icon: 'hash',
+      render: (c: MACConversionResult) => c.oui.oui,
+      code: true,
+    },
     {
       key: 'manufacturer',
-      label: 'Manufacturer',
+      label: $t('results.oui.fields.manufacturer'),
       icon: (c: MACConversionResult) => (c.oui.found ? 'building' : 'help-circle'),
-      render: (c: MACConversionResult) => (c.oui.found ? c.oui.manufacturer : 'Unknown'),
+      render: (c: MACConversionResult) => (c.oui.found ? c.oui.manufacturer : $t('results.oui.values.unknown')),
       class: 'manufacturer-item',
       valueClass: (c: MACConversionResult) => (!c.oui.found ? 'unknown' : ''),
     },
     {
       key: 'country',
-      label: 'Country',
+      label: $t('results.oui.fields.country'),
       icon: 'globe',
-      render: (c: MACConversionResult) => c.oui.country || 'N/A',
+      render: (c: MACConversionResult) => c.oui.country || $t('results.oui.values.na'),
       condition: (c: MACConversionResult) => !!c.oui.country,
     },
     {
       key: 'blockType',
-      label: 'Block Type',
+      label: $t('results.oui.fields.blockType'),
       icon: 'layers',
-      render: (c: MACConversionResult) => c.oui.blockType || 'N/A',
+      render: (c: MACConversionResult) => c.oui.blockType || $t('results.oui.values.na'),
       tooltip: (c: MACConversionResult) => (c.oui.blockType ? getBlockTypeTooltip(c.oui.blockType) : ''),
       condition: (c: MACConversionResult) => !!c.oui.blockType,
     },
     {
       key: 'blockSize',
-      label: 'Block Size',
+      label: $t('results.oui.fields.blockSize'),
       icon: 'database',
-      render: (c: MACConversionResult) => (c.oui.blockSize ? `${c.oui.blockSize.toLocaleString()} addresses` : 'N/A'),
+      render: (c: MACConversionResult) =>
+        c.oui.blockSize
+          ? $t('results.oui.values.addresses', { count: c.oui.blockSize.toLocaleString() })
+          : $t('results.oui.values.na'),
       condition: (c: MACConversionResult) => c.oui.blockSize != null,
     },
     {
       key: 'blockRange',
-      label: 'Address Range',
+      label: $t('results.oui.fields.addressRange'),
       icon: 'server',
       render: (c: MACConversionResult) => `${c.oui.blockStart}-${c.oui.blockEnd}`,
       valueClass: () => 'range',
@@ -93,83 +109,117 @@
     },
     {
       key: 'isPrivate',
-      label: 'Registry Status',
+      label: $t('results.oui.fields.registryStatus'),
       icon: 'shield',
-      render: (c: MACConversionResult) => (c.oui.isPrivate ? 'Private' : 'Public'),
+      render: (c: MACConversionResult) =>
+        c.oui.isPrivate ? $t('results.oui.values.private') : $t('results.oui.values.public'),
       condition: (c: MACConversionResult) => c.oui.isPrivate != null,
     },
     {
       key: 'updated',
-      label: 'Last Updated',
+      label: $t('results.oui.fields.lastUpdated'),
       icon: 'clock',
-      render: (c: MACConversionResult) => (c.oui.updated ? new Date(c.oui.updated).toLocaleDateString() : 'N/A'),
+      render: (c: MACConversionResult) =>
+        c.oui.updated ? new Date(c.oui.updated).toLocaleDateString() : $t('results.oui.values.na'),
       condition: (c: MACConversionResult) => !!c.oui.updated,
     },
     {
       key: 'address',
-      label: 'Address',
+      label: $t('results.oui.fields.address'),
       icon: 'map-pin',
-      render: (c: MACConversionResult) => c.oui.address || 'N/A',
+      render: (c: MACConversionResult) => c.oui.address || $t('results.oui.values.na'),
       class: 'address-item',
       condition: (c: MACConversionResult) => !!c.oui.address,
     },
   ];
 
   const detailFields: DetailField[] = [
-    { label: 'Universal Address', key: 'isUniversal' },
-    { label: 'Locally Administered', key: 'isUniversal', invert: true },
-    { label: 'Unicast', key: 'isUnicast' },
-    { label: 'Multicast/Broadcast', key: 'isUnicast', invert: true },
+    { label: $t('results.details.fields.universalAddress'), key: 'isUniversal' },
+    { label: $t('results.details.fields.locallyAdministered'), key: 'isUniversal', invert: true },
+    { label: $t('results.details.fields.unicast'), key: 'isUnicast' },
+    { label: $t('results.details.fields.multicastBroadcast'), key: 'isUnicast', invert: true },
   ];
 
   const formatFields: FormatField[] = [
-    { key: 'colon', label: 'Colon Notation', tooltip: 'Standard IEEE notation; most Linux, BSD, macOS use this' },
-    { key: 'hyphen', label: 'Hyphen Notation', tooltip: 'Common on Windows systems' },
-    { key: 'cisco', label: 'Cisco (Dot) Notation', tooltip: 'Cisco IOS / NX-OS style' },
-    { key: 'bareUppercase', label: 'Bare (Uppercase)', tooltip: 'Common in databases, APIs' },
-    { key: 'bareLowercase', label: 'Bare (Lowercase)', tooltip: 'Common in scripts, JSON, etc.' },
+    {
+      key: 'colon',
+      label: $t('results.formats.types.colonNotation.label'),
+      tooltip: $t('results.formats.types.colonNotation.tooltip'),
+    },
+    {
+      key: 'hyphen',
+      label: $t('results.formats.types.hyphenNotation.label'),
+      tooltip: $t('results.formats.types.hyphenNotation.tooltip'),
+    },
+    {
+      key: 'cisco',
+      label: $t('results.formats.types.ciscoNotation.label'),
+      tooltip: $t('results.formats.types.ciscoNotation.tooltip'),
+    },
+    {
+      key: 'bareUppercase',
+      label: $t('results.formats.types.bareUppercase.label'),
+      tooltip: $t('results.formats.types.bareUppercase.tooltip'),
+    },
+    {
+      key: 'bareLowercase',
+      label: $t('results.formats.types.bareLowercase.label'),
+      tooltip: $t('results.formats.types.bareLowercase.tooltip'),
+    },
     {
       key: 'eui64',
-      label: 'EUI-64 (expanded form)',
-      tooltip: 'Used when converting MAC → IPv6 Interface ID (adds FFFE in the middle, flips the U/L bit)',
+      label: $t('results.formats.types.eui64.label'),
+      tooltip: $t('results.formats.types.eui64.tooltip'),
     },
     {
       key: 'ipv6Style',
-      label: 'Dot-separated 2-byte groups',
-      tooltip: 'Occasionally seen in debugging or tools that mimic IPv6 notation',
+      label: $t('results.formats.types.ipv6Style.label'),
+      tooltip: $t('results.formats.types.ipv6Style.tooltip'),
     },
-    { key: 'spaceSeparated', label: 'Space-separated pairs', tooltip: 'Sometimes seen in hex dumps or firmware logs' },
+    {
+      key: 'spaceSeparated',
+      label: $t('results.formats.types.spaceSeparated.label'),
+      tooltip: $t('results.formats.types.spaceSeparated.tooltip'),
+    },
     {
       key: 'decimalOctets',
-      label: 'Decimal octets',
-      tooltip: 'Rare, but some diagnostic tools display MACs in decimal',
+      label: $t('results.formats.types.decimalOctets.label'),
+      tooltip: $t('results.formats.types.decimalOctets.tooltip'),
     },
-    { key: 'prefixedMac', label: 'Prefixed (MAC=)', tooltip: 'Seen in configuration files or CLI outputs' },
-    { key: 'slashSeparated', label: 'Slash-separated', tooltip: 'Seen in some telecom equipment or SNMP exports' },
+    {
+      key: 'prefixedMac',
+      label: $t('results.formats.types.prefixedMac.label'),
+      tooltip: $t('results.formats.types.prefixedMac.tooltip'),
+    },
+    {
+      key: 'slashSeparated',
+      label: $t('results.formats.types.slashSeparated.label'),
+      tooltip: $t('results.formats.types.slashSeparated.tooltip'),
+    },
     {
       key: 'prefixedBare',
-      label: 'Prefixed bare (MAC)',
-      tooltip: 'Appears in certain JSON/CSV exports or proprietary APIs',
+      label: $t('results.formats.types.prefixedBare.label'),
+      tooltip: $t('results.formats.types.prefixedBare.tooltip'),
     },
     {
       key: 'prefixedAddr',
-      label: 'Prefixed bare (addr)',
-      tooltip: 'Appears in certain JSON/CSV exports or proprietary APIs',
+      label: $t('results.formats.types.prefixedAddr.label'),
+      tooltip: $t('results.formats.types.prefixedAddr.tooltip'),
     },
     {
       key: 'binary',
-      label: 'Binary (8-bit groups)',
-      tooltip: 'Rare, but useful for bit-level inspection',
+      label: $t('results.formats.types.binary.label'),
+      tooltip: $t('results.formats.types.binary.tooltip'),
       binary: true,
       class: 'binary-item',
     },
   ];
 
   const blockTypeTooltips = {
-    'MA-L': 'Large block: 16.7 million addresses (24-bit prefix)',
-    'MA-M': 'Medium block: 1 million addresses (28-bit prefix)',
-    'MA-S': 'Small block: 4,096 addresses (36-bit prefix)',
-    CID: 'Company ID',
+    'MA-L': $t('results.oui.blockTypes.maL'),
+    'MA-M': $t('results.oui.blockTypes.maM'),
+    'MA-S': $t('results.oui.blockTypes.maS'),
+    CID: $t('results.oui.blockTypes.cid'),
   } as const;
 
   async function convertAddresses() {
@@ -238,20 +288,19 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>MAC Address Converter & OUI Lookup</h2>
+    <h2>{$t('title')}</h2>
     <p>
-      Convert MAC addresses between different formats and identify the manufacturer using the Organizationally Unique
-      Identifier (OUI)
+      {$t('description')}
     </p>
   </header>
 
   <div class="input-section">
     <div class="inputs-section">
       <div class="mode-toggle-row">
-        <h3>MAC Address{isBulkMode ? 'es' : ''}</h3>
+        <h3>{isBulkMode ? $t('form.bulkMode.title') : $t('form.singleMode.title')}</h3>
         <button class="mode-toggle" onclick={toggleMode}>
           <Icon name={isBulkMode ? 'layers' : 'file'} size="sm" />
-          {isBulkMode ? 'Switch to Single' : 'Switch to Bulk'}
+          {isBulkMode ? $t('form.switchToSingle') : $t('form.switchToBulk')}
         </button>
       </div>
 
@@ -260,16 +309,16 @@
           <label
             for="inputs"
             use:tooltip={{
-              text: 'Enter multiple MAC addresses, one per line',
+              text: $t('form.bulkMode.tooltip'),
               position: 'top',
             }}
           >
-            Enter MAC Addresses
+            {$t('form.bulkMode.label')}
           </label>
           <textarea
             id="inputs"
             bind:value={inputText}
-            placeholder="00:1A:2B:3C:4D:5E&#10;00-50-56-C0-00-08&#10;001A.2B3C.4D5E&#10;001b632b4567"
+            placeholder={$t('form.bulkMode.placeholder')}
             rows="6"
             onkeydown={(e) => {
               if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -278,29 +327,35 @@
             }}
           ></textarea>
           <div class="input-help">
-            Enter MAC addresses one per line. Supported formats: <code>00:1A:2B:3C:4D:5E</code>,
-            <code>00-1A-2B-3C-4D-5E</code>, <code>001A.2B3C.4D5E</code> (Cisco), <code>001A2B3C4D5E</code>
+            {$t('form.helpText.bulk', {
+              formats: $t('form.helpText.formats', {
+                colon: '00:1A:2B:3C:4D:5E',
+                hyphen: '00-1A-2B-3C-4D-5E',
+                cisco: '001A.2B3C.4D5E',
+                bare: '001A2B3C4D5E',
+              }),
+            })}
           </div>
           <button class="lookup-btn bulk" onclick={handleSubmit} disabled={isLoading || !inputText.trim()}>
             <Icon name={isLoading ? 'loader' : 'search'} size="sm" />
-            {isLoading ? 'Looking up...' : 'Lookup'}
+            {isLoading ? $t('form.lookingUp') : $t('form.lookup')}
           </button>
         {:else}
           <label
             for="inputs"
             use:tooltip={{
-              text: 'Enter MAC address in any format: colon, hyphen, dot notation, or bare',
+              text: $t('form.singleMode.tooltip'),
               position: 'top',
             }}
           >
-            Enter MAC Address
+            {$t('form.singleMode.label')}
           </label>
           <div class="input-row">
             <input
               type="text"
               id="inputs"
               bind:value={inputText}
-              placeholder="00:1A:2B:3C:4D:5E"
+              placeholder={$t('form.singleMode.placeholder')}
               class="mac-input"
               oninput={clearExampleSelection}
               onkeydown={(e) => {
@@ -311,13 +366,18 @@
             />
             <button class="lookup-btn inline" onclick={handleSubmit} disabled={isLoading || !inputText.trim()}>
               <Icon name={isLoading ? 'loader' : 'search'} size="sm" />
-              {isLoading ? 'Looking up...' : 'Lookup'}
+              {isLoading ? $t('form.lookingUp') : $t('form.lookup')}
             </button>
           </div>
           <div class="input-help">
-            Supported formats: <code>00:1A:2B:3C:4D:5E</code>, <code>00-1A-2B-3C-4D-5E</code>,
-            <code>001A.2B3C.4D5E</code>
-            (Cisco), <code>001A2B3C4D5E</code>
+            {$t('form.helpText.single', {
+              formats: $t('form.helpText.formats', {
+                colon: '00:1A:2B:3C:4D:5E',
+                hyphen: '00-1A-2B-3C-4D-5E',
+                cisco: '001A.2B3C.4D5E',
+                bare: '001A2B3C4D5E',
+              }),
+            })}
           </div>
         {/if}
       </div>
@@ -329,7 +389,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -352,16 +412,16 @@
       {#if result.conversions.length > 0}
         <div class="conversions">
           <div class="conversions-header">
-            <h3>{result.conversions.length === 1 ? 'Address Conversion' : 'Address Conversions'}</h3>
+            <h3>{result.conversions.length === 1 ? $t('results.conversion') : $t('results.conversions')}</h3>
             {#if result.conversions.length > 1}
               <div class="export-buttons">
                 <button onclick={() => exportResults('csv')}>
                   <Icon name="download" />
-                  Export CSV
+                  {$t('results.exportCsv')}
                 </button>
                 <button onclick={() => exportResults('json')}>
                   <Icon name="download" />
-                  Export JSON
+                  {$t('results.exportJson')}
                 </button>
               </div>
             {/if}
@@ -383,7 +443,7 @@
                 <div class="conversion-header">
                   <div class="input-display error">
                     <Icon name="x-circle" />
-                    <span>Invalid MAC Address</span>
+                    <span>{$t('results.invalidAddress')}</span>
                   </div>
                   {#if conversion.error}
                     <div class="error-message">{conversion.error}</div>
@@ -394,7 +454,7 @@
               {#if conversion.isValid}
                 <!-- OUI Information -->
                 <div class="conversion-section">
-                  <h4>OUI Information</h4>
+                  <h4>{$t('results.oui.title')}</h4>
                   <div class="oui-info">
                     {#each ouiFields as field (field.key)}
                       {@const value = field.render(conversion)}
@@ -442,7 +502,7 @@
 
                 <!-- Address Details -->
                 <div class="conversion-section">
-                  <h4>Address Details</h4>
+                  <h4>{$t('results.details.title')}</h4>
                   <div class="details-grid">
                     {#each detailFields as field (field.label)}
                       {@const active = field.invert ? !conversion.details[field.key] : conversion.details[field.key]}
@@ -456,7 +516,7 @@
 
                 <!-- Formats -->
                 <div class="conversion-section">
-                  <h4>Formats</h4>
+                  <h4>{$t('results.formats.title')}</h4>
                   <div class="format-grid">
                     {#each formatFields as field (field.key)}
                       {@const value = field.binary
@@ -474,7 +534,7 @@
                           <button
                             class="copy-btn"
                             onclick={() => copyToClipboard(value, copyId)}
-                            use:tooltip={{ text: 'Copy to clipboard', position: 'top' }}
+                            use:tooltip={{ text: $t('results.formats.copyToClipboard'), position: 'top' }}
                           >
                             <Icon name={copiedStates[copyId] ? 'check' : 'copy'} />
                           </button>
@@ -490,23 +550,23 @@
 
         {#if result.conversions.length > 1}
           <div class="summary">
-            <h3>Conversion Summary</h3>
+            <h3>{$t('results.summary.title')}</h3>
             <div class="summary-stats">
               <div class="stat">
                 <span class="stat-value">{result.summary.total}</span>
-                <span class="stat-label">Total</span>
+                <span class="stat-label">{$t('results.summary.stats.total')}</span>
               </div>
               <div class="stat valid">
                 <span class="stat-value">{result.summary.valid}</span>
-                <span class="stat-label">Valid</span>
+                <span class="stat-label">{$t('results.summary.stats.valid')}</span>
               </div>
               <div class="stat invalid">
                 <span class="stat-value">{result.summary.invalid}</span>
-                <span class="stat-label">Invalid</span>
+                <span class="stat-label">{$t('results.summary.stats.invalid')}</span>
               </div>
               <div class="stat with-oui">
                 <span class="stat-value">{result.summary.withOUI}</span>
-                <span class="stat-label">With OUI</span>
+                <span class="stat-label">{$t('results.summary.stats.withOui')}</span>
               </div>
             </div>
           </div>
@@ -519,7 +579,7 @@
 <!-- Info Sections -->
 <div class="card info-card">
   <div class="card-header">
-    <h3>Understanding MAC Addresses</h3>
+    <h3>{$t('education.title')}</h3>
   </div>
   <div class="card-content">
     <details class="info-accordion">
@@ -629,7 +689,7 @@
     <details class="info-accordion">
       <summary class="accordion-summary">
         <Icon name="chevron-right" size="sm" />
-        <h4>Quick Tips</h4>
+        <h4>{$t('education.quickTips')}</h4>
       </summary>
       <div class="accordion-content">
         <ul>

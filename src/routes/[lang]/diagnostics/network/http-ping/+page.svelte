@@ -40,7 +40,7 @@
     },
   ]);
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   const httpMethods = $derived([
     { value: 'HEAD', label: 'HEAD', description: $t('diagnostics/network-http-ping.methods.head') },

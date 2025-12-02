@@ -42,7 +42,7 @@
     { domain: 'wikipedia.org', desc: 'Example of wildcard certificate usage' },
     { domain: 'twitter.com', desc: 'Shows certificate lifecycle and expiration tracking' },
   ];
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   const statsConfig = [
     {

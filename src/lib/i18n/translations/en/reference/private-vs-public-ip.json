@@ -1,0 +1,143 @@
+{
+  "title": "Private vs Public IP Addresses",
+  "description": "Understanding the difference between private and public IP addresses, NAT implications, and quick identification methods.",
+
+  "sections": {
+    "overview": {
+      "title": "What's the Difference?",
+      "content": "Private IP addresses are used within local networks and are not routed on the public internet. Public IP addresses are globally unique and can be reached from anywhere on the internet.\n\nThe key difference is reachability: private IPs are only reachable within their local network, while public IPs are reachable from anywhere on the internet."
+    }
+  },
+
+  "privateRanges": {
+    "title": "Private IP Address Ranges (RFC 1918)",
+    "labels": {
+      "fullRange": "Full Range:",
+      "totalAddresses": "Total Addresses:",
+      "commonUse": "Common Use:",
+      "examples": "Examples:"
+    }
+  },
+
+  "publicRanges": {
+    "title": "Public IP Addresses",
+    "description": "All IP addresses not in private, reserved, or special-use ranges",
+    "characteristics": {
+      "title": "Characteristics",
+      "items": [
+        "Globally unique and routable on the internet",
+        "Assigned by Regional Internet Registries (RIRs)",
+        "Can be reached from anywhere on the internet",
+        "Cost money to obtain and maintain",
+        "Limited supply (IPv4 exhaustion)"
+      ]
+    },
+    "examples": {
+      "title": "Examples",
+      "headers": {
+        "publicIp": "Public IP",
+        "ownerService": "Owner/Service"
+      }
+    }
+  },
+
+  "natImplications": {
+    "title": "NAT (Network Address Translation) Implications",
+
+    "privateToPublic": {
+      "title": "Private Networks Accessing Internet",
+      "description": "Private addresses must be translated to public addresses to reach the internet",
+      "process": {
+        "title": "Process:",
+        "steps": [
+          "Device with private IP (192.168.1.100) wants to access internet",
+          "Router/NAT device translates to public IP (203.0.113.50)",
+          "Internet sees traffic from public IP, not private IP",
+          "Return traffic is translated back to private IP"
+        ]
+      },
+      "benefits": {
+        "title": "Benefits:",
+        "items": [
+          "Allows many devices to share one public IP",
+          "Provides security through address hiding",
+          "Conserves public IP addresses",
+          "Enables local network management"
+        ]
+      }
+    },
+
+    "publicToPrivate": {
+      "title": "Internet Accessing Private Networks",
+      "description": "Direct access from internet to private IPs requires special configuration",
+      "challenges": {
+        "title": "Challenges:",
+        "items": [
+          "Private IPs are not routed on internet",
+          "NAT blocks unsolicited inbound connections",
+          "Port forwarding needed for specific services",
+          "VPN required for general access"
+        ]
+      },
+      "solutions": {
+        "title": "Solutions:",
+        "items": [
+          "Port forwarding for specific services",
+          "VPN for secure remote access",
+          "DMZ for less secure but simple access",
+          "Reverse proxy for web services"
+        ]
+      }
+    }
+  },
+
+  "identification": {
+    "title": "Quick Identification Methods",
+    "headers": {
+      "method": "Method",
+      "privateIndicator": "Private Indicator",
+      "publicIndicator": "Public Indicator"
+    }
+  },
+
+  "tools": {
+    "title": "Useful Tools"
+  },
+
+  "commonScenarios": {
+    "title": "Common Network Scenarios",
+    "labels": {
+      "setup": "Setup:",
+      "privateIps": "Private IPs:",
+      "publicIp": "Public IP:",
+      "natBehavior": "NAT Behavior:"
+    }
+  },
+
+  "troubleshooting": {
+    "title": "Troubleshooting Common Issues",
+    "labels": {
+      "possibleCauses": "Possible Causes:",
+      "diagnosis": "Diagnosis:",
+      "solution": "Solution:"
+    }
+  },
+
+  "security": {
+    "title": "Security Considerations"
+  },
+
+  "bestPractices": {
+    "title": "Best Practices"
+  },
+
+  "quickReference": {
+    "title": "Quick Reference",
+    "privateRanges": {
+      "title": "Private IP Ranges"
+    },
+    "identificationTips": {
+      "title": "Identification Tips"
+    }
+  }
+}

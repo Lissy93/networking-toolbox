@@ -1,0 +1,82 @@
+{
+  "linkLocalApipa": {
+    "apipa": {
+      "addressRange": {
+        "title": "Address Range",
+        "network": "Network",
+        "fullRange": "Full Range",
+        "usableRange": "Usable Range",
+        "reserved": "Reserved"
+      },
+      "whenUsedTitle": "When APIPA is Used",
+      "howItWorksTitle": "How APIPA Works",
+      "characteristicsTitle": "APIPA Characteristics",
+      "troubleshootingTitle": "Troubleshooting APIPA Issues",
+      "troubleshootingLabels": {
+        "meaning": "Meaning",
+        "solution": "Solution"
+      }
+    },
+    "ipv6": {
+      "addressRange": {
+        "title": "Address Range",
+        "network": "Network",
+        "fullRange": "Full Range",
+        "commonFormat": "Common Format"
+      },
+      "addressFormationTitle": "Address Formation",
+      "whenUsedTitle": "When IPv6 Link-Local is Used",
+      "characteristicsTitle": "IPv6 Link-Local Characteristics",
+      "typesTitle": "Types of IPv6 Link-Local Addresses",
+      "typeLabels": {
+        "example": "Example",
+        "privacy": "Privacy"
+      }
+    },
+    "comparison": {
+      "title": "IPv4 APIPA vs IPv6 Link-Local Comparison",
+      "headers": {
+        "aspect": "Aspect",
+        "ipv4Apipa": "IPv4 APIPA",
+        "ipv6LinkLocal": "IPv6 Link-Local"
+      }
+    },
+    "practicalExamples": {
+      "title": "Practical Examples",
+      "labels": {
+        "ipv4Behavior": "IPv4 Behavior",
+        "ipv6Behavior": "IPv6 Behavior",
+        "impact": "Impact"
+      }
+    },
+    "troubleshootingCommands": {
+      "title": "Troubleshooting Commands",
+      "headers": {
+        "purpose": "Purpose",
+        "windows": "Windows",
+        "linux": "Linux",
+        "macOS": "macOS"
+      }
+    },
+    "whenToWorry": {
+      "title": "When to Worry",
+      "labels": {
+        "concernLevel": "Concern Level",
+        "action": "Action"
+      }
+    },
+    "bestPractices": {
+      "title": "Best Practices"
+    },
+    "commonMistakes": {
+      "title": "Common Mistakes"
+    },
+    "quickReference": {
+      "title": "Quick Reference",
+      "recognitionTitle": "Recognition",
+      "troubleshootingTitle": "Troubleshooting",
+      "keyDifferenceTitle": "Key Difference",
+      "keyDifferenceText": "IPv4 APIPA (169.254.x.x) indicates a problem - DHCP failed. IPv6 link-local (fe80::) is normal and required - every IPv6 interface has one."
+    }
+  }
+}

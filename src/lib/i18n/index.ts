@@ -169,6 +169,27 @@ export class I18n {
   }
 
   /**
+   * Get raw translation value (without string conversion) with fallback
+   */
+  getRaw(key: string): any {
+    // Try current locale
+    let translation = this.getTranslation(this.locale, key);
+
+    // Fallback to default locale
+    if (translation === undefined && this.locale !== this.fallbackLocale) {
+      translation = this.getTranslation(this.fallbackLocale, key);
+    }
+
+    // Return undefined if not found (don't return the key)
+    if (translation === undefined) {
+      console.warn(`[i18n] Missing translation for key: ${key}`);
+      return undefined;
+    }
+
+    return translation;
+  }
+
+  /**
    * Get all translations for current locale (for debugging)
    */
   getAll(): TranslationObject {
@@ -186,6 +207,13 @@ export const i18n = new I18n();
  */
 export function t(key: string, params?: InterpolationParams): string {
   return i18n.t(key, params);
+}
+
+/**
+ * Convenience function for raw translation values
+ */
+export function getRaw(key: string): any {
+  return i18n.getRaw(key);
 }
 
 /**

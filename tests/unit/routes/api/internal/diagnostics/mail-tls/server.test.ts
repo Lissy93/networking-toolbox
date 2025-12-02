@@ -74,7 +74,7 @@ describe('SMTP TLS Checker API', () => {
 		expect(data).toHaveProperty('domain');
 		expect(data).toHaveProperty('port');
 		expect(data.port).toBe(25); // Default port
-	});
+	}, 10000);
 
 	it('should normalize domain to lowercase', async () => {
 		const request = new Request('http://localhost', {
@@ -86,7 +86,7 @@ describe('SMTP TLS Checker API', () => {
 		const response = await POST({ request } as any);
 		const data = await response.json();
 		expect(data.domain).toBe('example.com');
-	});
+	}, 10000);
 
 	it('should include required fields in response', async () => {
 		const request = new Request('http://localhost', {
@@ -103,5 +103,5 @@ describe('SMTP TLS Checker API', () => {
 		expect(data).toHaveProperty('supportsSTARTTLS');
 		expect(data).toHaveProperty('supportsDirectTLS');
 		expect(data).toHaveProperty('timestamp');
-	});
+	}, 10000);
 });

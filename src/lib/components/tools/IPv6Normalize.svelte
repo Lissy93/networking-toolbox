@@ -8,7 +8,7 @@
 
   // Load translations for this tool
   onMount(async () => {
-    await loadTranslations(get(locale), 'tools.ipv6-normalize');
+    await loadTranslations(get(locale), 'tools');
   });
 
   let inputText = $state(
@@ -33,7 +33,7 @@
       result = {
         normalizations: [],
         summary: { totalInputs: 0, validInputs: 0, invalidInputs: 0, alreadyNormalizedInputs: 0 },
-        errors: [error instanceof Error ? error.message : $t('tools.ipv6-normalize.errors.unknownError')],
+        errors: [error instanceof Error ? error.message : $t('tools.ipv6_normalize.errors.unknownError')],
       };
     } finally {
       isLoading = false;
@@ -50,13 +50,13 @@
 
     if (format === 'csv') {
       const headers = [
-        $t('tools.ipv6-normalize.csvHeaders.input'),
-        $t('tools.ipv6-normalize.csvHeaders.normalized'),
-        $t('tools.ipv6-normalize.csvHeaders.valid'),
-        $t('tools.ipv6-normalize.csvHeaders.compressionApplied'),
-        $t('tools.ipv6-normalize.csvHeaders.leadingZerosRemoved'),
-        $t('tools.ipv6-normalize.csvHeaders.lowercaseApplied'),
-        $t('tools.ipv6-normalize.csvHeaders.error'),
+        $t('tools.ipv6_normalize.csvHeaders.input'),
+        $t('tools.ipv6_normalize.csvHeaders.normalized'),
+        $t('tools.ipv6_normalize.csvHeaders.valid'),
+        $t('tools.ipv6_normalize.csvHeaders.compressionApplied'),
+        $t('tools.ipv6_normalize.csvHeaders.leadingZerosRemoved'),
+        $t('tools.ipv6_normalize.csvHeaders.lowercaseApplied'),
+        $t('tools.ipv6_normalize.csvHeaders.error'),
       ].join(',');
       const rows = result.normalizations.map(
         (norm) =>
@@ -109,30 +109,30 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>{$t('tools.ipv6-normalize.title')}</h2>
+    <h2>{$t('tools.ipv6_normalize.title')}</h2>
     <p>
-      {$t('tools.ipv6-normalize.description')}
+      {$t('tools.ipv6_normalize.description')}
     </p>
   </header>
 
   <div class="input-section">
     <div class="input-group">
-      <label for="inputs">{$t('tools.ipv6-normalize.input.label')}</label>
-      <textarea id="inputs" bind:value={inputText} placeholder={$t('tools.ipv6-normalize.input.placeholder')} rows="6"
+      <label for="inputs">{$t('tools.ipv6_normalize.input.label')}</label>
+      <textarea id="inputs" bind:value={inputText} placeholder={$t('tools.ipv6_normalize.input.placeholder')} rows="6"
       ></textarea>
       <div class="input-help">
-        {$t('tools.ipv6-normalize.input.help')}
+        {$t('tools.ipv6_normalize.input.help')}
       </div>
     </div>
 
     <div class="rfc-info">
-      <h3>{$t('tools.ipv6-normalize.rfc.title')}</h3>
-      <p>{$t('tools.ipv6-normalize.rfc.description')}</p>
+      <h3>{$t('tools.ipv6_normalize.rfc.title')}</h3>
+      <p>{$t('tools.ipv6_normalize.rfc.description')}</p>
       <ul>
-        <li>{$t('tools.ipv6-normalize.rfc.rules.lowercase')}</li>
-        <li>{$t('tools.ipv6-normalize.rfc.rules.leadingZeros')}</li>
-        <li>{$t('tools.ipv6-normalize.rfc.rules.compression')}</li>
-        <li>{$t('tools.ipv6-normalize.rfc.rules.singleZero')}</li>
+        <li>{$t('tools.ipv6_normalize.rfc.rules.lowercase')}</li>
+        <li>{$t('tools.ipv6_normalize.rfc.rules.leadingZeros')}</li>
+        <li>{$t('tools.ipv6_normalize.rfc.rules.compression')}</li>
+        <li>{$t('tools.ipv6_normalize.rfc.rules.singleZero')}</li>
       </ul>
     </div>
   </div>
@@ -140,7 +140,7 @@
   {#if isLoading}
     <div class="loading">
       <Icon name="loader" />
-      {$t('tools.ipv6-normalize.actions.normalizing')}
+      {$t('tools.ipv6_normalize.actions.normalizing')}
     </div>
   {/if}
 
@@ -148,7 +148,7 @@
     <div class="results">
       {#if result.errors.length > 0}
         <div class="errors">
-          <h3><Icon name="alert-triangle" /> {$t('tools.ipv6-normalize.errors.title')}</h3>
+          <h3><Icon name="alert-triangle" /> {$t('tools.ipv6_normalize.errors.title')}</h3>
           {#each result.errors as error (error)}
             <div class="error-item">{error}</div>
           {/each}
@@ -157,23 +157,23 @@
 
       {#if result.normalizations.length > 0}
         <div class="summary">
-          <h3>{$t('tools.ipv6-normalize.summary.title')}</h3>
+          <h3>{$t('tools.ipv6_normalize.summary.title')}</h3>
           <div class="summary-stats">
             <div class="stat">
               <span class="stat-value">{result.summary.totalInputs}</span>
-              <span class="stat-label">{$t('tools.ipv6-normalize.summary.totalInputs')}</span>
+              <span class="stat-label">{$t('tools.ipv6_normalize.summary.totalInputs')}</span>
             </div>
             <div class="stat valid">
               <span class="stat-value">{result.summary.validInputs}</span>
-              <span class="stat-label">{$t('tools.ipv6-normalize.summary.validInputs')}</span>
+              <span class="stat-label">{$t('tools.ipv6_normalize.summary.validInputs')}</span>
             </div>
             <div class="stat invalid">
               <span class="stat-value">{result.summary.invalidInputs}</span>
-              <span class="stat-label">{$t('tools.ipv6-normalize.summary.invalidInputs')}</span>
+              <span class="stat-label">{$t('tools.ipv6_normalize.summary.invalidInputs')}</span>
             </div>
             <div class="stat already-normalized">
               <span class="stat-value">{result.summary.alreadyNormalizedInputs}</span>
-              <span class="stat-label">{$t('tools.ipv6-normalize.summary.alreadyNormalized')}</span>
+              <span class="stat-label">{$t('tools.ipv6_normalize.summary.alreadyNormalized')}</span>
             </div>
           </div>
         </div>

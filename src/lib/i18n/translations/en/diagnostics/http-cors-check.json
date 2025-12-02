@@ -31,6 +31,7 @@
       "label": "HTTP Method",
       "tooltip": "The HTTP method to test"
     },
+    "checkButton": "Check CORS",
     "check": "Check CORS",
     "checking": "Checking CORS..."
   },
@@ -77,10 +78,33 @@
     }
   },
 
+  "errors": {
+    "title": "CORS Check Failed"
+  },
+
   "error": {
     "title": "CORS Check Failed",
     "network": "Network error occurred",
     "timeout": "Request timed out"
+  },
+
+  "about": {
+    "title": "About CORS",
+    "whatIs": {
+      "title": "What is CORS?",
+      "description": "Cross-Origin Resource Sharing (CORS) is a security feature implemented by web browsers that restricts web pages from making requests to a different domain than the one serving the page."
+    },
+    "preflight": {
+      "title": "Preflight Requests",
+      "description": "For certain cross-origin requests, browsers send a preflight OPTIONS request to check if the actual request is allowed."
+    },
+    "headers": {
+      "title": "CORS Headers",
+      "allowOrigin": "Access-Control-Allow-Origin: Specifies which origins can access the resource",
+      "allowMethods": "Access-Control-Allow-Methods: Lists allowed HTTP methods",
+      "allowHeaders": "Access-Control-Allow-Headers: Specifies allowed request headers",
+      "allowCredentials": "Access-Control-Allow-Credentials: Indicates if credentials can be included"
+    }
   },
 
   "info": {

@@ -1,9 +1,16 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../../styles/diagnostics-pages.scss';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics');
+  });
 
   let host = $state('google.com:443');
   let servername = $state('');
@@ -11,20 +18,20 @@
   const diagnosticState = useDiagnosticState<any>();
   const clipboard = useClipboard();
   const examplesList = [
-    { host: 'google.com:443', description: 'Google TLS version support' },
-    { host: 'github.com:443', description: 'GitHub TLS versions' },
-    { host: 'cloudflare.com:443', description: 'Cloudflare TLS support' },
-    { host: 'microsoft.com:443', description: 'Microsoft TLS versions' },
-    { host: 'amazon.com:443', description: 'Amazon TLS configuration' },
-    { host: 'facebook.com:443', description: 'Facebook TLS versions' },
+    { host: 'google.com:443', description: $t('diagnostics.tls-versions.examples.google') },
+    { host: 'github.com:443', description: $t('diagnostics.tls-versions.examples.github') },
+    { host: 'cloudflare.com:443', description: $t('diagnostics.tls-versions.examples.cloudflare') },
+    { host: 'microsoft.com:443', description: $t('diagnostics.tls-versions.examples.microsoft') },
+    { host: 'amazon.com:443', description: $t('diagnostics.tls-versions.examples.amazon') },
+    { host: 'facebook.com:443', description: $t('diagnostics.tls-versions.examples.facebook') },
   ];
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   const tlsVersions = [
-    { version: 'TLSv1', name: 'TLS 1.0', deprecated: true },
-    { version: 'TLSv1.1', name: 'TLS 1.1', deprecated: true },
-    { version: 'TLSv1.2', name: 'TLS 1.2', deprecated: false },
-    { version: 'TLSv1.3', name: 'TLS 1.3', deprecated: false },
+    { version: 'TLSv1', name: $t('diagnostics.tls-versions.versions.tls10'), deprecated: true },
+    { version: 'TLSv1.1', name: $t('diagnostics.tls-versions.versions.tls11'), deprecated: true },
+    { version: 'TLSv1.2', name: $t('diagnostics.tls-versions.versions.tls12'), deprecated: false },
+    { version: 'TLSv1.3', name: $t('diagnostics.tls-versions.versions.tls13'), deprecated: false },
   ];
 
   // Reactive validation
@@ -60,7 +67,7 @@
 
       diagnosticState.setResults(await response.json());
     } catch (err: unknown) {
-      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      diagnosticState.setError(err instanceof Error ? err.message : $t('common.errors.unknownError'));
     }
   }
 
@@ -78,17 +85,30 @@
     deprecated: boolean,
   ): { status: string; icon: string; class: string } {
     if (!supported) {
-      return { status: 'Not Supported', icon: 'x-circle', class: 'error' };
+      return { status: $t('diagnostics.tls-versions.results.versions.notSupported'), icon: 'x-circle', class: 'error' };
     }
     if (deprecated) {
-      return { status: 'Supported (Deprecated)', icon: 'alert-triangle', class: 'warning' };
+      return {
+        status: $t('diagnostics.tls-versions.results.versions.supportedDeprecated'),
+        icon: 'alert-triangle',
+        class: 'warning',
+      };
     }
-    return { status: 'Supported', icon: 'check-circle', class: 'success' };
+    return {
+      status: $t('diagnostics.tls-versions.results.versions.supported'),
+      icon: 'check-circle',
+      class: 'success',
+    };
   }
 
   function getOverallSecurity(): { level: string; class: string; icon: string; description: string } {
     if (!diagnosticState.results)
-      return { level: 'Unknown', class: 'secondary', icon: 'help-circle', description: 'No results available' };
+      return {
+        level: $t('diagnostics.tls-versions.results.security.levels.unknown'),
+        class: 'secondary',
+        icon: 'help-circle',
+        description: $t('diagnostics.tls-versions.results.security.descriptions.unknown'),
+      };
 
     const supportedVersions = diagnosticState.results.supportedVersions || [];
     const hasDeprecated = supportedVersions.some((v: string) => v === 'TLSv1' || v === 'TLSv1.1');
@@ -97,27 +117,42 @@
 
     if (hasModern && hasSecure && !hasDeprecated) {
       return {
-        level: 'Excellent',
+        level: $t('diagnostics.tls-versions.results.security.levels.excellent'),
         class: 'success',
         icon: 'shield-check',
-        description: 'Only modern TLS versions supported',
+        description: $t('diagnostics.tls-versions.results.security.descriptions.excellent'),
       };
     }
     if (hasSecure && !hasDeprecated) {
-      return { level: 'Good', class: 'success', icon: 'shield', description: 'Secure TLS versions only' };
+      return {
+        level: $t('diagnostics.tls-versions.results.security.levels.good'),
+        class: 'success',
+        icon: 'shield',
+        description: $t('diagnostics.tls-versions.results.security.descriptions.good'),
+      };
     }
     if (hasDeprecated && hasSecure) {
       return {
-        level: 'Warning',
+        level: $t('diagnostics.tls-versions.results.security.levels.warning'),
         class: 'warning',
         icon: 'shield-alert',
-        description: 'Deprecated versions still supported',
+        description: $t('diagnostics.tls-versions.results.security.descriptions.warning'),
       };
     }
     if (supportedVersions.length === 0) {
-      return { level: 'Critical', class: 'error', icon: 'shield-off', description: 'No TLS versions detected' };
+      return {
+        level: $t('diagnostics.tls-versions.results.security.levels.critical'),
+        class: 'error',
+        icon: 'shield-off',
+        description: $t('diagnostics.tls-versions.results.security.descriptions.critical'),
+      };
     }
-    return { level: 'Poor', class: 'error', icon: 'shield-x', description: 'Only deprecated versions supported' };
+    return {
+      level: $t('diagnostics.tls-versions.results.security.levels.poor'),
+      class: 'error',
+      icon: 'shield-x',
+      description: $t('diagnostics.tls-versions.results.security.descriptions.poor'),
+    };
   }
 
   async function copyVersionsInfo() {
@@ -152,10 +187,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>TLS Versions Probe</h1>
+    <h1>{$t('diagnostics.tls-versions.title')}</h1>
     <p>
-      Test which TLS protocol versions a server supports by attempting connections with different TLS version
-      constraints. Identify deprecated versions and assess overall TLS security posture.
+      {$t('diagnostics.tls-versions.description')}
     </p>
   </header>
 
@@ -164,27 +198,27 @@
     examples={examplesList}
     selectedIndex={examples.selectedIndex}
     onSelect={loadExample}
-    title="TLS Version Examples"
+    title={$t('common.labels.examples')}
     getLabel={(ex) => ex.host}
     getDescription={(ex) => ex.description}
-    getTooltip={(ex) => `Probe TLS versions for ${ex.host} (${ex.description})`}
+    getTooltip={(ex) => `${$t('diagnostics.tls-versions.form.probe')} ${ex.host} (${ex.description})`}
   />
 
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>TLS Versions Probe Configuration</h3>
+      <h3>{$t('diagnostics.tls-versions.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-row">
         <div class="form-group">
           <label for="host">
-            Host:Port
+            {$t('diagnostics.tls-versions.form.host.label')}
             <input
               id="host"
               type="text"
               bind:value={host}
-              placeholder="google.com:443"
+              placeholder={$t('diagnostics.tls-versions.form.host.placeholder')}
               class:invalid={host && !isInputValid}
               onchange={() => {
                 examples.clear();
@@ -192,7 +226,7 @@
               }}
             />
             {#if host && !isInputValid}
-              <span class="error-text">Invalid host:port format</span>
+              <span class="error-text">{$t('common.validation.invalidFormat')}</span>
             {/if}
           </label>
         </div>
@@ -209,13 +243,13 @@
                 if (isInputValid()) probeTLSVersions();
               }}
             />
-            Use custom SNI servername
+            {$t('diagnostics.tls-versions.form.servername.checkbox')}
           </label>
           {#if useCustomServername}
             <input
               type="text"
               bind:value={servername}
-              placeholder="example.com"
+              placeholder={$t('diagnostics.tls-versions.form.servername.placeholder')}
               onchange={() => {
                 examples.clear();
                 if (isInputValid()) probeTLSVersions();
@@ -229,10 +263,10 @@
         <button class="lookup-btn" onclick={probeTLSVersions} disabled={diagnosticState.loading || !isInputValid}>
           {#if diagnosticState.loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Probing TLS Versions...
+            {$t('diagnostics.tls-versions.form.probing')}
           {:else}
             <Icon name="search" size="sm" />
-            Probe TLS Versions
+            {$t('diagnostics.tls-versions.form.probe')}
           {/if}
         </button>
       </div>
@@ -243,7 +277,7 @@
   {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>TLS Versions Probe Results</h3>
+        <h3>{$t('diagnostics.tls-versions.results.title')}</h3>
         <button class="copy-btn" onclick={copyVersionsInfo} disabled={clipboard.isCopied()}>
           <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
           {clipboard.isCopied() ? 'Copied!' : 'Copy Results'}
@@ -259,15 +293,22 @@
               <div class="status-item {security.class}">
                 <Icon name={security.icon} size="sm" />
                 <div>
-                  <span class="status-title">Security Level: {security.level}</span>
+                  <span class="status-title"
+                    >{$t('diagnostics.tls-versions.results.security.title')}: {security.level}</span
+                  >
                   <p class="status-desc">{security.description}</p>
                 </div>
               </div>
               <div class="status-item success">
                 <Icon name="check-square" size="sm" />
                 <div>
-                  <span class="status-title">{diagnosticState.results.totalSupported} Versions Supported</span>
-                  <p class="status-desc">Out of {tlsVersions.length} tested</p>
+                  <span class="status-title"
+                    >{diagnosticState.results.totalSupported}
+                    {$t('diagnostics.tls-versions.results.versions.supported')}</span
+                  >
+                  <p class="status-desc">
+                    {$t('diagnostics.tls-versions.results.summary.outOfTested', { count: tlsVersions.length })}
+                  </p>
                 </div>
               </div>
             </div>
@@ -275,7 +316,7 @@
 
           <!-- Version Details -->
           <div class="versions-section">
-            <h4>TLS Version Support</h4>
+            <h4>{$t('diagnostics.tls-versions.results.versions.title')}</h4>
             <div class="versions-grid">
               {#each tlsVersions as tlsVer (tlsVer.version)}
                 {@const supported = diagnosticState.results.supported[tlsVer.version]}
@@ -302,7 +343,7 @@
                   {#if tlsVer.deprecated}
                     <div class="version-warning">
                       <Icon name="alert-triangle" size="xs" />
-                      <span>This version is deprecated and should not be used</span>
+                      <span>{$t('diagnostics.tls-versions.warnings.deprecated')}</span>
                     </div>
                   {/if}
                 </div>
@@ -313,15 +354,19 @@
           <!-- Version Range Summary -->
           {#if diagnosticState.results.minVersion || diagnosticState.results.maxVersion}
             <div class="range-section">
-              <h4>Supported Version Range</h4>
+              <h4>{$t('diagnostics.tls-versions.results.summary.title')}</h4>
               <div class="range-info">
                 <div class="range-item">
-                  <span class="range-label">Minimum Version:</span>
-                  <span class="range-value mono">{diagnosticState.results.minVersion || 'Unknown'}</span>
+                  <span class="range-label">{$t('diagnostics.tls-versions.results.summary.minVersion')}:</span>
+                  <span class="range-value mono"
+                    >{diagnosticState.results.minVersion || $t('common.common.unknown')}</span
+                  >
                 </div>
                 <div class="range-item">
-                  <span class="range-label">Maximum Version:</span>
-                  <span class="range-value mono">{diagnosticState.results.maxVersion || 'Unknown'}</span>
+                  <span class="range-label">{$t('diagnostics.tls-versions.results.summary.maxVersion')}:</span>
+                  <span class="range-value mono"
+                    >{diagnosticState.results.maxVersion || $t('common.common.unknown')}</span
+                  >
                 </div>
               </div>
             </div>
@@ -331,40 +376,39 @@
     </div>
   {/if}
 
-  <ErrorCard title="TLS Versions Probe Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('diagnostics.tls-versions.title')} error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>Understanding TLS Versions</h3>
+      <h3>{$t('diagnostics.tls-versions.educational.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>TLS Version Security</h4>
+          <h4>{$t('diagnostics.tls-versions.educational.versionSecurity.title')}</h4>
           <ul>
-            <li><strong>TLS 1.3:</strong> Latest version with improved security and performance</li>
-            <li><strong>TLS 1.2:</strong> Widely supported, secure when properly configured</li>
-            <li><strong>TLS 1.1:</strong> Deprecated, should not be used</li>
-            <li><strong>TLS 1.0:</strong> Deprecated, contains security vulnerabilities</li>
+            <li>{$t('diagnostics.tls-versions.educational.versionSecurity.tls13')}</li>
+            <li>{$t('diagnostics.tls-versions.educational.versionSecurity.tls12')}</li>
+            <li>{$t('diagnostics.tls-versions.educational.versionSecurity.tls11')}</li>
+            <li>{$t('diagnostics.tls-versions.educational.versionSecurity.tls10')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Best Practices</h4>
+          <h4>{$t('diagnostics.tls-versions.educational.bestPractices.title')}</h4>
           <ul>
-            <li>Enable TLS 1.2 and 1.3 only</li>
-            <li>Disable deprecated versions (TLS 1.0, 1.1)</li>
-            <li>Regularly update TLS implementations</li>
-            <li>Use strong cipher suites</li>
+            <li>{$t('diagnostics.tls-versions.educational.bestPractices.enableModern')}</li>
+            <li>{$t('diagnostics.tls-versions.educational.bestPractices.disableDeprecated')}</li>
+            <li>{$t('diagnostics.tls-versions.educational.bestPractices.updateRegularly')}</li>
+            <li>{$t('diagnostics.tls-versions.educational.bestPractices.strongCiphers')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Compliance Requirements</h4>
+          <h4>{$t('diagnostics.tls-versions.educational.compliance.title')}</h4>
           <p>
-            Many compliance standards (PCI DSS, HIPAA) require disabling deprecated TLS versions. Check your specific
-            requirements.
+            {$t('diagnostics.tls-versions.educational.compliance.description')}
           </p>
         </div>
       </div>

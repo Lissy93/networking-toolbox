@@ -5,7 +5,14 @@
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ActionButton from '$lib/components/common/ActionButton.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import '../../../../../styles/diagnostics-pages.scss';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics/dns-propagation');
+  });
 
   let domainName = $state('example.com');
   let recordType = $state('A');
@@ -15,12 +22,12 @@
   const clipboard = useClipboard();
 
   const recordTypes = [
-    { value: 'A', label: 'A', description: 'IPv4 address records' },
-    { value: 'AAAA', label: 'AAAA', description: 'IPv6 address records' },
-    { value: 'CNAME', label: 'CNAME', description: 'Canonical name records' },
-    { value: 'MX', label: 'MX', description: 'Mail exchange records' },
-    { value: 'TXT', label: 'TXT', description: 'Text records' },
-    { value: 'NS', label: 'NS', description: 'Name server records' },
+    { value: 'A', label: 'A', description: $t('diagnostics/dns-propagation.recordTypes.A.description') },
+    { value: 'AAAA', label: 'AAAA', description: $t('diagnostics/dns-propagation.recordTypes.AAAA.description') },
+    { value: 'CNAME', label: 'CNAME', description: $t('diagnostics/dns-propagation.recordTypes.CNAME.description') },
+    { value: 'MX', label: 'MX', description: $t('diagnostics/dns-propagation.recordTypes.MX.description') },
+    { value: 'TXT', label: 'TXT', description: $t('diagnostics/dns-propagation.recordTypes.TXT.description') },
+    { value: 'NS', label: 'NS', description: $t('diagnostics/dns-propagation.recordTypes.NS.description') },
   ];
 
   const resolverInfo = {
@@ -31,13 +38,13 @@
   };
 
   const examplesList = [
-    { domain: 'google.com', type: 'A', description: 'Check A record propagation' },
-    { domain: 'github.com', type: 'AAAA', description: 'IPv6 propagation check' },
-    { domain: 'gmail.com', type: 'MX', description: 'Mail server propagation' },
-    { domain: '_dmarc.google.com', type: 'TXT', description: 'DMARC policy propagation' },
+    { domain: 'google.com', type: 'A', description: 'googleA' },
+    { domain: 'github.com', type: 'AAAA', description: 'githubAAAA' },
+    { domain: 'gmail.com', type: 'MX', description: 'gmailMX' },
+    { domain: '_dmarc.google.com', type: 'TXT', description: 'dmarcTXT' },
   ];
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   async function checkPropagation() {
     diagnosticState.startOperation();
@@ -61,7 +68,9 @@
       const data = await response.json();
       diagnosticState.setResults(data.results);
     } catch (err: unknown) {
-      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      diagnosticState.setError(
+        err instanceof Error ? err.message : $t('diagnostics/dns-propagation.error.unknownError'),
+      );
     }
   }
 
@@ -141,10 +150,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>DNS Propagation Checker</h1>
+    <h1>{$t('diagnostics/dns-propagation.title')}</h1>
     <p>
-      Check DNS record propagation across multiple public DNS resolvers. Compare responses from Cloudflare, Google,
-      Quad9, and OpenDNS to verify consistent DNS propagation worldwide.
+      {$t('diagnostics/dns-propagation.subtitle')}
     </p>
   </header>
 
@@ -153,22 +161,22 @@
     examples={examplesList}
     selectedIndex={examples.selectedIndex}
     onSelect={loadExample}
-    title="Propagation Examples"
+    title={$t('diagnostics/dns-propagation.examples.title')}
     getLabel={(ex) => `${ex.domain} (${ex.type})`}
-    getDescription={(ex) => ex.description}
-    getTooltip={(ex) => `Check ${ex.type} record propagation for ${ex.domain}`}
+    getDescription={(ex) => $t(`diagnostics/dns-propagation.examples.items.${ex.description}.description`)}
+    getTooltip={(ex) => $t(`diagnostics/dns-propagation.examples.items.${ex.description}.tooltip`)}
   />
 
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>Propagation Check Configuration</h3>
+      <h3>{$t('diagnostics/dns-propagation.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-row two-columns">
         <div class="form-group">
-          <label for="domain" use:tooltip={'Enter the domain name to check propagation for'}>
-            Domain Name
+          <label for="domain" use:tooltip={$t('diagnostics/dns-propagation.form.domainTooltip')}>
+            {$t('diagnostics/dns-propagation.form.domainLabel')}
             <input
               id="domain"
               type="text"
@@ -183,8 +191,8 @@
         </div>
 
         <div class="form-group">
-          <label for="type" use:tooltip={'Select the DNS record type to check'}>
-            Record Type
+          <label for="type" use:tooltip={$t('diagnostics/dns-propagation.form.recordTypeTooltip')}>
+            {$t('diagnostics/dns-propagation.form.recordTypeLabel')}
             <select
               id="type"
               bind:value={recordType}
@@ -206,11 +214,11 @@
           loading={diagnosticState.loading}
           disabled={!domainName.trim()}
           icon="globe"
-          loadingText="Checking Propagation..."
+          loadingText={$t('diagnostics/dns-propagation.form.checking')}
           onclick={checkPropagation}
           class="check-btn"
         >
-          Check DNS Propagation
+          {$t('diagnostics/dns-propagation.form.checkButton')}
         </ActionButton>
       </div>
     </div>
@@ -221,17 +229,17 @@
     <div class="card results-card">
       <div class="card-header row">
         <div>
-          <h3>Propagation Results</h3>
+          <h3>{$t('diagnostics/dns-propagation.results.title')}</h3>
           <div class="consistency-status">
             {#if areResultsConsistent()}
               <div class="status-success">
                 <Icon name="check-circle" size="xs" />
-                <span class="status-text">Fully Propagated</span>
+                <span class="status-text">{$t('diagnostics/dns-propagation.results.fullyPropagated')}</span>
               </div>
             {:else}
               <div class="status-warning">
                 <Icon name="alert-circle" size="xs" />
-                <span class="status-text">Inconsistent Results</span>
+                <span class="status-text">{$t('diagnostics/dns-propagation.results.inconsistentResults')}</span>
               </div>
             {/if}
           </div>
@@ -240,7 +248,9 @@
           <div class={clipboard.isCopied() ? 'status-success' : ''}>
             <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
           </div>
-          {clipboard.isCopied() ? 'Copied!' : 'Copy All Results'}
+          {clipboard.isCopied()
+            ? $t('diagnostics/dns-propagation.results.copied')
+            : $t('diagnostics/dns-propagation.results.copyAll')}
         </button>
       </div>
       <div class="card-content">
@@ -278,7 +288,9 @@
                       <div class="record">
                         <span class="record-data mono">{record.data}</span>
                         {#if record.TTL}
-                          <span class="record-ttl" use:tooltip={'Time To Live'}>TTL: {record.TTL}s</span>
+                          <span class="record-ttl" use:tooltip={$t('diagnostics/dns-propagation.results.ttlTooltip')}
+                            >TTL: {record.TTL}s</span
+                          >
                         {/if}
                       </div>
                     {/each}
@@ -286,7 +298,7 @@
                 {:else}
                   <div class="no-records">
                     <Icon name="minus-circle" size="xs" />
-                    <span>No records found</span>
+                    <span>{$t('diagnostics/dns-propagation.results.noRecordsFound')}</span>
                   </div>
                 {/if}
               </div>
@@ -304,59 +316,58 @@
     </div>
   {/if}
 
-  <ErrorCard title="Propagation Check Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('diagnostics/dns-propagation.error.title')} error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>Understanding DNS Propagation</h3>
+      <h3>{$t('diagnostics/dns-propagation.education.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>What is DNS Propagation?</h4>
+          <h4>{$t('diagnostics/dns-propagation.education.whatIsPropagation.title')}</h4>
           <p>
-            DNS propagation refers to the time it takes for DNS changes to spread across the internet. Different
-            resolvers may cache records for different periods, leading to temporary inconsistencies.
+            {$t('diagnostics/dns-propagation.education.whatIsPropagation.description')}
           </p>
         </div>
 
         <div class="info-section">
-          <h4>Factors Affecting Propagation</h4>
+          <h4>{$t('diagnostics/dns-propagation.education.factors.title')}</h4>
           <ul>
-            <li><strong>TTL Values:</strong> Lower TTL means faster propagation</li>
-            <li><strong>Resolver Caching:</strong> Each resolver has its own cache policies</li>
-            <li><strong>Geographic Location:</strong> Physical distance affects update speed</li>
-            <li><strong>DNS Infrastructure:</strong> Authoritative server response time</li>
+            <li>{$t('diagnostics/dns-propagation.education.factors.ttl')}</li>
+            <li>{$t('diagnostics/dns-propagation.education.factors.caching')}</li>
+            <li>{$t('diagnostics/dns-propagation.education.factors.geography')}</li>
+            <li>{$t('diagnostics/dns-propagation.education.factors.infrastructure')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Interpreting Results</h4>
+          <h4>{$t('diagnostics/dns-propagation.education.interpreting.title')}</h4>
           <div class="status-legend">
             <div class="legend-item">
               <div class="status-success">
                 <Icon name="check-circle" size="xs" />
               </div>
-              <span><strong>Fully Propagated:</strong> All resolvers return identical results</span>
+              <span>{$t('diagnostics/dns-propagation.education.interpreting.fullyPropagated')}</span>
             </div>
             <div class="legend-item">
               <div class="status-warning">
                 <Icon name="alert-circle" size="xs" />
               </div>
-              <span><strong>Inconsistent:</strong> Different resolvers return different results</span>
+              <span>{$t('diagnostics/dns-propagation.education.interpreting.inconsistent')}</span>
             </div>
             <div class="legend-item">
               <div class="status-error">
                 <Icon name="x-circle" size="xs" />
               </div>
-              <span><strong>Error:</strong> Resolver failed to respond or returned an error</span>
+              <span>{$t('diagnostics/dns-propagation.education.interpreting.error')}</span>
             </div>
           </div>
         </div>
 
         <div class="info-section">
-          <h4>DNS Resolvers Tested</h4>
+          <h4>{$t('diagnostics/dns-propagation.education.resolversTested.title')}</h4>
           <div class="resolvers-info">
             {#each Object.entries(resolverInfo) as [_key, info] (_key)}
               <div class="resolver-info-item">
@@ -529,10 +540,6 @@
     gap: var(--spacing-xs);
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
-
-    strong {
-      color: var(--text-primary);
-    }
   }
 
   .resolvers-info {

@@ -21,7 +21,7 @@
 
   // Load translations for this tool
   onMount(async () => {
-    await loadTranslations(get(locale), 'tools.vlsm-calculator');
+    await loadTranslations(get(locale), 'tools');
   });
 
   let networkIP = $state('192.168.1.0');
@@ -44,7 +44,7 @@
   function addSubnet() {
     subnets.push({
       id: generateSubnetId(),
-      name: $t('tools.vlsm-calculator.defaultSubnetName', { number: subnets.length + 1 }),
+      name: $t('tools.vlsm_calculator.defaultSubnetName', { number: subnets.length + 1 }),
       hostsNeeded: 50,
       description: '',
     });
@@ -144,20 +144,20 @@
   });
 </script>
 
-<ToolContentContainer title={$t('tools.vlsm-calculator.title')} description={$t('tools.vlsm-calculator.description')}>
+<ToolContentContainer title={$t('tools.vlsm_calculator.title')} description={$t('tools.vlsm_calculator.description')}>
   <!-- Network Configuration -->
   <div class="network-config">
-    <h3>{$t('tools.vlsm-calculator.networkConfig.title')}</h3>
+    <h3>{$t('tools.vlsm_calculator.networkConfig.title')}</h3>
     <div class="grid grid-2">
       <div class="form-group">
         <IPInput
           bind:value={networkIP}
-          label={$t('tools.vlsm-calculator.networkConfig.networkAddress.label')}
-          placeholder={$t('tools.vlsm-calculator.networkConfig.networkAddress.placeholder')}
+          label={$t('tools.vlsm_calculator.networkConfig.networkAddress.label')}
+          placeholder={$t('tools.vlsm_calculator.networkConfig.networkAddress.placeholder')}
         />
       </div>
       <div class="form-group">
-        <label for="cidr-input">{$t('tools.vlsm-calculator.networkConfig.cidrNotation.label')}</label>
+        <label for="cidr-input">{$t('tools.vlsm_calculator.networkConfig.cidrNotation.label')}</label>
         <div class="cidr-input">
           <span class="cidr-prefix">/{cidr}</span>
           <input id="cidr-input" type="range" min="8" max="30" bind:value={cidr} class="cidr-slider" />
@@ -170,10 +170,10 @@
   <!-- Subnet Requirements -->
   <div class="subnet-requirements">
     <div class="requirements-header">
-      <h3>{$t('tools.vlsm-calculator.subnetRequirements.title')}</h3>
+      <h3>{$t('tools.vlsm_calculator.subnetRequirements.title')}</h3>
       <button type="button" class="btn btn-primary" onclick={addSubnet}>
         <Icon name="plus" size="sm" />
-        {$t('tools.vlsm-calculator.subnetRequirements.addSubnet')}
+        {$t('tools.vlsm_calculator.subnetRequirements.addSubnet')}
       </button>
     </div>
 
@@ -185,13 +185,13 @@
             <div class="requirement-inputs">
               <input
                 type="text"
-                placeholder={$t('tools.vlsm-calculator.subnetRequirements.subnetName.placeholder')}
+                placeholder={$t('tools.vlsm_calculator.subnetRequirements.subnetName.placeholder')}
                 bind:value={subnet.name}
                 oninput={(e) => updateSubnet(subnet.id, 'name', (e.target as HTMLInputElement)?.value)}
                 class="subnet-name-input"
               />
               <div class="hosts-input">
-                <label for="hosts-{index}">{$t('tools.vlsm-calculator.subnetRequirements.hostsNeeded')}</label>
+                <label for="hosts-{index}">{$t('tools.vlsm_calculator.subnetRequirements.hostsNeeded')}</label>
                 <input
                   id="hosts-{index}"
                   type="number"
@@ -217,7 +217,7 @@
           <div class="requirement-description">
             <input
               type="text"
-              placeholder={$t('tools.vlsm-calculator.subnetRequirements.description.placeholder')}
+              placeholder={$t('tools.vlsm_calculator.subnetRequirements.description.placeholder')}
               bind:value={subnet.description}
               oninput={(e) => updateSubnet(subnet.id, 'description', (e.target as HTMLTextAreaElement)?.value)}
               class="description-input"
@@ -234,26 +234,26 @@
       {#if vlsmResult.success}
         <!-- Summary -->
         <div class="info-panel success">
-          <h3>{$t('tools.vlsm-calculator.summary.title')}</h3>
+          <h3>{$t('tools.vlsm_calculator.summary.title')}</h3>
           <div class="summary-stats">
             <div class="stat-item">
-              <span class="stat-label">{$t('tools.vlsm-calculator.summary.totalSubnets')}</span>
+              <span class="stat-label">{$t('tools.vlsm_calculator.summary.totalSubnets')}</span>
               <span class="stat-value">{vlsmResult.subnets.length}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">{$t('tools.vlsm-calculator.summary.hostsRequested')}</span>
+              <span class="stat-label">{$t('tools.vlsm_calculator.summary.hostsRequested')}</span>
               <span class="stat-value">{formatNumber(vlsmResult.totalHostsRequested)}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">{$t('tools.vlsm-calculator.summary.hostsProvided')}</span>
+              <span class="stat-label">{$t('tools.vlsm_calculator.summary.hostsProvided')}</span>
               <span class="stat-value">{formatNumber(vlsmResult.totalHostsProvided)}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">{$t('tools.vlsm-calculator.summary.wastedHosts')}</span>
+              <span class="stat-label">{$t('tools.vlsm_calculator.summary.wastedHosts')}</span>
               <span class="stat-value danger">{formatNumber(vlsmResult.totalWastedHosts)}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">{$t('tools.vlsm-calculator.summary.efficiency')}</span>
+              <span class="stat-label">{$t('tools.vlsm_calculator.summary.efficiency')}</span>
               <span
                 class="stat-value"
                 style="color: {getEfficiencyColor(vlsmResult.totalWastedHosts, vlsmResult.totalHostsProvided)}"
@@ -262,7 +262,7 @@
               </span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">{$t('tools.vlsm-calculator.summary.remainingAddresses')}</span>
+              <span class="stat-label">{$t('tools.vlsm_calculator.summary.remainingAddresses')}</span>
               <span class="stat-value">{formatNumber(vlsmResult.remainingAddresses)}</span>
             </div>
           </div>
@@ -270,15 +270,15 @@
 
         <!-- Subnets Table -->
         <div class="subnets-table-container">
-          <h3>{$t('tools.vlsm-calculator.table.title')}</h3>
+          <h3>{$t('tools.vlsm_calculator.table.title')}</h3>
           <div class="subnets-table">
             <div class="table-header">
-              <div class="col-name">{$t('tools.vlsm-calculator.table.columns.subnet')}</div>
-              <div class="col-network">{$t('tools.vlsm-calculator.table.columns.network')}</div>
-              <div class="col-hosts">{$t('tools.vlsm-calculator.table.columns.hosts')}</div>
-              <div class="col-mask">{$t('tools.vlsm-calculator.table.columns.mask')}</div>
-              <div class="col-efficiency">{$t('tools.vlsm-calculator.table.columns.efficiency')}</div>
-              <div class="col-actions">{$t('tools.vlsm-calculator.table.columns.actions')}</div>
+              <div class="col-name">{$t('tools.vlsm_calculator.table.columns.subnet')}</div>
+              <div class="col-network">{$t('tools.vlsm_calculator.table.columns.network')}</div>
+              <div class="col-hosts">{$t('tools.vlsm_calculator.table.columns.hosts')}</div>
+              <div class="col-mask">{$t('tools.vlsm_calculator.table.columns.mask')}</div>
+              <div class="col-efficiency">{$t('tools.vlsm_calculator.table.columns.efficiency')}</div>
+              <div class="col-actions">{$t('tools.vlsm_calculator.table.columns.actions')}</div>
             </div>
 
             {#each vlsmResult.subnets as subnet (subnet.id)}
@@ -302,14 +302,14 @@
                 <div class="col-hosts">
                   <div class="hosts-info">
                     <div class="hosts-needed">
-                      {$t('tools.vlsm-calculator.table.hostsNeeded', { count: subnet.hostsNeeded })}
+                      {$t('tools.vlsm_calculator.table.hostsNeeded', { count: subnet.hostsNeeded })}
                     </div>
                     <div class="hosts-provided">
-                      {$t('tools.vlsm-calculator.table.hostsProvided', { count: subnet.hostsProvided })}
+                      {$t('tools.vlsm_calculator.table.hostsProvided', { count: subnet.hostsProvided })}
                     </div>
                     {#if subnet.wastedHosts > 0}
                       <div class="hosts-wasted">
-                        {$t('tools.vlsm-calculator.table.hostsWasted', { count: subnet.wastedHosts })}
+                        {$t('tools.vlsm_calculator.table.hostsWasted', { count: subnet.wastedHosts })}
                       </div>
                     {/if}
                   </div>
@@ -339,7 +339,7 @@
                   >
                     <Icon name="chevron-down" size="sm" />
                   </button>
-                  <Tooltip text={$t('tools.vlsm-calculator.actions.copyNetworkInfo')} position="left">
+                  <Tooltip text={$t('tools.vlsm_calculator.actions.copyNetworkInfo')} position="left">
                     <button
                       type="button"
                       class="btn btn-ghost {clipboard.isCopied(`copy-${subnet.id}`) ? 'copied' : ''}"
@@ -357,59 +357,59 @@
                     <div class="detail-item">
                       <span
                         class="detail-label"
-                        use:tooltip={$t('tools.vlsm-calculator.details.networkAddress.tooltip')}
-                        >{$t('tools.vlsm-calculator.details.networkAddress.label')}</span
+                        use:tooltip={$t('tools.vlsm_calculator.details.networkAddress.tooltip')}
+                        >{$t('tools.vlsm_calculator.details.networkAddress.label')}</span
                       >
                       <code class="detail-value">{subnet.networkAddress}</code>
                     </div>
                     <div class="detail-item">
                       <span
                         class="detail-label"
-                        use:tooltip={$t('tools.vlsm-calculator.details.broadcastAddress.tooltip')}
-                        >{$t('tools.vlsm-calculator.details.broadcastAddress.label')}</span
+                        use:tooltip={$t('tools.vlsm_calculator.details.broadcastAddress.tooltip')}
+                        >{$t('tools.vlsm_calculator.details.broadcastAddress.label')}</span
                       >
                       <code class="detail-value">{subnet.broadcastAddress}</code>
                     </div>
                     <div class="detail-item">
                       <span
                         class="detail-label"
-                        use:tooltip={$t('tools.vlsm-calculator.details.firstUsableHost.tooltip')}
-                        >{$t('tools.vlsm-calculator.details.firstUsableHost.label')}</span
+                        use:tooltip={$t('tools.vlsm_calculator.details.firstUsableHost.tooltip')}
+                        >{$t('tools.vlsm_calculator.details.firstUsableHost.label')}</span
                       >
                       <code class="detail-value">{subnet.firstUsableHost}</code>
                     </div>
                     <div class="detail-item">
                       <span
                         class="detail-label"
-                        use:tooltip={$t('tools.vlsm-calculator.details.lastUsableHost.tooltip')}
-                        >{$t('tools.vlsm-calculator.details.lastUsableHost.label')}</span
+                        use:tooltip={$t('tools.vlsm_calculator.details.lastUsableHost.tooltip')}
+                        >{$t('tools.vlsm_calculator.details.lastUsableHost.label')}</span
                       >
                       <code class="detail-value">{subnet.lastUsableHost}</code>
                     </div>
                     <div class="detail-item">
-                      <span class="detail-label" use:tooltip={$t('tools.vlsm-calculator.details.subnetMask.tooltip')}
-                        >{$t('tools.vlsm-calculator.details.subnetMask.label')}</span
+                      <span class="detail-label" use:tooltip={$t('tools.vlsm_calculator.details.subnetMask.tooltip')}
+                        >{$t('tools.vlsm_calculator.details.subnetMask.label')}</span
                       >
                       <code class="detail-value">{subnet.subnetMask}</code>
                     </div>
                     <div class="detail-item">
-                      <span class="detail-label" use:tooltip={$t('tools.vlsm-calculator.details.wildcardMask.tooltip')}
-                        >{$t('tools.vlsm-calculator.details.wildcardMask.label')}</span
+                      <span class="detail-label" use:tooltip={$t('tools.vlsm_calculator.details.wildcardMask.tooltip')}
+                        >{$t('tools.vlsm_calculator.details.wildcardMask.label')}</span
                       >
                       <code class="detail-value">{subnet.wildcardMask}</code>
                     </div>
                     <div class="detail-item">
-                      <span class="detail-label" use:tooltip={$t('tools.vlsm-calculator.details.binaryMask.tooltip')}
-                        >{$t('tools.vlsm-calculator.details.binaryMask.label')}</span
+                      <span class="detail-label" use:tooltip={$t('tools.vlsm_calculator.details.binaryMask.tooltip')}
+                        >{$t('tools.vlsm_calculator.details.binaryMask.label')}</span
                       >
                       <code class="detail-value binary-mask">{subnet.binaryMask}</code>
                     </div>
                     <div class="detail-item">
-                      <span class="detail-label" use:tooltip={$t('tools.vlsm-calculator.details.hostBits.tooltip')}
-                        >{$t('tools.vlsm-calculator.details.hostBits.label')}</span
+                      <span class="detail-label" use:tooltip={$t('tools.vlsm_calculator.details.hostBits.tooltip')}
+                        >{$t('tools.vlsm_calculator.details.hostBits.label')}</span
                       >
                       <code class="detail-value"
-                        >{$t('tools.vlsm-calculator.details.hostBits.value', { count: subnet.actualHostBits })}</code
+                        >{$t('tools.vlsm_calculator.details.hostBits.value', { count: subnet.actualHostBits })}</code
                       >
                     </div>
                   </div>
@@ -432,7 +432,7 @@
       {:else}
         <!-- Error -->
         <div class="info-panel error">
-          <h3>{$t('tools.vlsm-calculator.error.title')}</h3>
+          <h3>{$t('tools.vlsm_calculator.error.title')}</h3>
           <p class="error-message">{vlsmResult.error}</p>
         </div>
       {/if}

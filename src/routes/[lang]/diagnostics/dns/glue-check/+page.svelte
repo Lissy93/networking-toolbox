@@ -1,7 +1,14 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+  import { locale, loadTranslations, t } from '$lib/stores/language.js';
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import '../../../../../styles/diagnostics-pages.scss';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics/glue-check');
+  });
 
   let zoneName = $state('example.com');
   let loading = $state(false);
@@ -9,18 +16,18 @@
   let error = $state<string | null>(null);
   let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
-    { zone: 'cloudflare.com', description: 'Multiple NS with full IPv4+IPv6 glue records' },
-    { zone: 'yahoo.com', description: 'Mixed glue status with warning (missing IPv6 on one NS)' },
-    { zone: 'bbc.co.uk', description: 'Mixed delegation: internal and external nameservers' },
-    { zone: 'github.com', description: 'All external nameservers (NSOne + AWS Route53)' },
-    { zone: 'twitch.tv', description: 'Different TLD (.tv) with external AWS nameservers' },
-    { zone: 'apple.com', description: 'Clean 4-nameserver setup with complete glue records' },
-  ];
+  const examples = $derived([
+    { zone: $t('examples.items.0.zone'), description: $t('examples.items.0.description') },
+    { zone: $t('examples.items.1.zone'), description: $t('examples.items.1.description') },
+    { zone: $t('examples.items.2.zone'), description: $t('examples.items.2.description') },
+    { zone: $t('examples.items.3.zone'), description: $t('examples.items.3.description') },
+    { zone: $t('examples.items.4.zone'), description: $t('examples.items.4.description') },
+    { zone: $t('examples.items.5.zone'), description: $t('examples.items.5.description') },
+  ]);
 
   async function checkGlue() {
     if (!zoneName?.trim()) {
-      error = 'Please enter a zone name';
+      error = $t('errors.emptyZone');
       return;
     }
 
@@ -41,12 +48,12 @@
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to check glue records');
+        throw new Error(data.message || $t('errors.fetchFailed'));
       }
 
       results = data;
     } catch (err) {
-      error = err instanceof Error ? err.message : 'An error occurred';
+      error = err instanceof Error ? err.message : $t('errors.genericError');
     } finally {
       loading = false;
     }
@@ -65,8 +72,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>DNS Glue Check Tool</h1>
-    <p>Check which NS names require glue records and whether A/AAAA records exist</p>
+    <h1>{$t('title')}</h1>
+    <p>{$t('description')}</p>
   </header>
 
   <!-- Examples -->
@@ -74,7 +81,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -82,7 +89,7 @@
             class="example-card"
             class:selected={selectedExampleIndex === i}
             onclick={() => loadExample(example, i)}
-            use:tooltip={`Check glue records for ${example.zone} zone`}
+            use:tooltip={$t('examples.title') + `: ${example.zone}`}
           >
             <h5>{example.zone}</h5>
             <p>{example.description}</p>
@@ -95,17 +102,17 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>Glue Check Configuration</h3>
+      <h3>{$t('results.summary.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-group">
-        <label for="zone">Zone Name</label>
+        <label for="zone">{$t('form.zoneName.label')}</label>
         <div class="input-flex-container">
           <input
             id="zone"
             type="text"
             bind:value={zoneName}
-            placeholder="example.com"
+            placeholder={$t('form.zoneName.placeholder')}
             disabled={loading}
             onchange={() => clearExampleSelection()}
             onkeydown={(e) => e.key === 'Enter' && checkGlue()}
@@ -113,10 +120,10 @@
           <button onclick={checkGlue} disabled={loading} class="primary">
             {#if loading}
               <Icon name="loader" size="sm" animate="spin" />
-              Checking...
+              {$t('form.checkButton.checking')}
             {:else}
               <Icon name="search" size="sm" />
-              Check Glue
+              {$t('form.checkButton.default')}
             {/if}
           </button>
         </div>
@@ -130,7 +137,7 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="md" />
           <div>
-            <strong>Glue Check Failed</strong>
+            <strong>{$t('results.summary.title')}</strong>
             <p>{error}</p>
           </div>
         </div>
@@ -144,8 +151,8 @@
         <div class="loading-state">
           <Icon name="loader" size="lg" animate="spin" />
           <div class="loading-text">
-            <h3>Checking Glue Records</h3>
-            <p>Analyzing nameservers and checking for required glue records...</p>
+            <h3>{$t('loading.title')}</h3>
+            <p>{$t('loading.description')}</p>
           </div>
         </div>
       </div>
@@ -155,7 +162,7 @@
   {#if results}
     <div class="card results-card">
       <div class="card-header">
-        <h3>Glue Check Results</h3>
+        <h3>{$t('results.title')}</h3>
       </div>
       <div class="card-content">
         <div class="results-section">

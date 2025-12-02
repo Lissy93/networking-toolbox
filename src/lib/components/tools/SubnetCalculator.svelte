@@ -17,7 +17,7 @@
 
   // Load translations for this tool
   onMount(async () => {
-    await loadTranslations(get(locale), 'tools.subnet-calculator');
+    await loadTranslations(get(locale), 'tools');
   });
 
   const versionOptions = [
@@ -62,8 +62,8 @@
 </script>
 
 <ToolContentContainer
-  title={$t('tools.subnet-calculator.title')}
-  description={$t('tools.subnet-calculator.description')}
+  title={$t('tools.subnet_calculator.title')}
+  description={$t('tools.subnet_calculator.description')}
   navOptions={versionOptions}
   bind:selectedNav={selectedVersion}
   onNavChange={handleVersionChange}
@@ -72,8 +72,8 @@
   <div class="form-group">
     <CIDRInput
       bind:value={cidrInput}
-      label={$t('tools.subnet-calculator.input.cidr_label')}
-      placeholder={$t('tools.subnet-calculator.input.cidr_placeholder')}
+      label={$t('tools.subnet_calculator.input.cidr_label')}
+      placeholder={$t('tools.subnet_calculator.input.cidr_placeholder')}
     />
   </div>
 
@@ -85,27 +85,27 @@
         <h3
           style="margin-bottom: var(--spacing-md); border-bottom: 1px solid var(--border-primary); padding-bottom: var(--spacing-xs);"
         >
-          {$t('tools.subnet-calculator.sections.network_info')}
+          {$t('tools.subnet_calculator.sections.network_info')}
         </h3>
 
         <div class="info-cards">
           <div class="info-card">
-            <span class="info-label" use:tooltip={$t('tools.subnet-calculator.tooltips.network_address')}
-              >{$t('tools.subnet-calculator.fields.network_address')}</span
+            <span class="info-label" use:tooltip={$t('tools.subnet_calculator.tooltips.network_address')}
+              >{$t('tools.subnet_calculator.fields.network_address')}</span
             >
             <div class="value-copy">
               <code class="ip-value success">{subnetInfo.network.octets.join('.')}</code>
               <Tooltip
                 text={clipboard.isCopied('network')
-                  ? $t('tools.subnet-calculator.actions.copied')
-                  : $t('tools.subnet-calculator.actions.copy_network')}
+                  ? $t('tools.subnet_calculator.actions.copied')
+                  : $t('tools.subnet_calculator.actions.copy_network')}
                 position="top"
               >
                 <button
                   type="button"
                   class="btn-icon copy-btn {clipboard.isCopied('network') ? 'copied' : ''}"
                   onclick={() => clipboard.copy(subnetInfo!.network.octets.join('.'), 'network')}
-                  aria-label={$t('tools.subnet-calculator.actions.copy_network_aria')}
+                  aria-label={$t('tools.subnet_calculator.actions.copy_network_aria')}
                 >
                   <SvgIcon icon={clipboard.isCopied('network') ? 'check' : 'clipboard'} size="md" />
                 </button>
@@ -114,22 +114,22 @@
           </div>
 
           <div class="info-card">
-            <span class="info-label" use:tooltip={$t('tools.subnet-calculator.tooltips.broadcast_address')}
-              >{$t('tools.subnet-calculator.fields.broadcast_address')}</span
+            <span class="info-label" use:tooltip={$t('tools.subnet_calculator.tooltips.broadcast_address')}
+              >{$t('tools.subnet_calculator.fields.broadcast_address')}</span
             >
             <div class="value-copy">
               <code class="ip-value error">{subnetInfo.broadcast.octets.join('.')}</code>
               <Tooltip
                 text={clipboard.isCopied('broadcast')
-                  ? $t('tools.subnet-calculator.actions.copied')
-                  : $t('tools.subnet-calculator.actions.copy_broadcast')}
+                  ? $t('tools.subnet_calculator.actions.copied')
+                  : $t('tools.subnet_calculator.actions.copy_broadcast')}
                 position="top"
               >
                 <button
                   type="button"
                   class="btn-icon copy-btn {clipboard.isCopied('broadcast') ? 'copied' : ''}"
                   onclick={() => clipboard.copy(subnetInfo!.broadcast.octets.join('.'), 'broadcast')}
-                  aria-label={$t('tools.subnet-calculator.actions.copy_broadcast_aria')}
+                  aria-label={$t('tools.subnet_calculator.actions.copy_broadcast_aria')}
                 >
                   <SvgIcon icon={clipboard.isCopied('broadcast') ? 'check' : 'clipboard'} size="md" />
                 </button>
@@ -138,8 +138,8 @@
           </div>
 
           <div class="info-card">
-            <span class="info-label" use:tooltip={$t('tools.subnet-calculator.tooltips.subnet_mask')}
-              >{$t('tools.subnet-calculator.fields.subnet_mask')}</span
+            <span class="info-label" use:tooltip={$t('tools.subnet_calculator.tooltips.subnet_mask')}
+              >{$t('tools.subnet_calculator.fields.subnet_mask')}</span
             >
             <div class="value-copy">
               <code class="ip-value info">{subnetInfo.subnet.octets.join('.')}</code>
@@ -148,8 +148,8 @@
           </div>
 
           <div class="info-card">
-            <span class="info-label" use:tooltip={$t('tools.subnet-calculator.tooltips.wildcard_mask')}
-              >{$t('tools.subnet-calculator.fields.wildcard_mask')}</span
+            <span class="info-label" use:tooltip={$t('tools.subnet_calculator.tooltips.wildcard_mask')}
+              >{$t('tools.subnet_calculator.fields.wildcard_mask')}</span
             >
             <code class="ip-value warning">{subnetInfo.wildcardMask.octets.join('.')}</code>
           </div>
@@ -161,34 +161,34 @@
         <h3
           style="margin-bottom: var(--spacing-md); border-bottom: 1px solid var(--border-primary); padding-bottom: var(--spacing-xs);"
         >
-          {$t('tools.subnet-calculator.sections.host_info')}
+          {$t('tools.subnet_calculator.sections.host_info')}
         </h3>
 
         <div class="info-cards">
           <div class="info-card">
-            <span class="info-label" use:tooltip={$t('tools.subnet-calculator.tooltips.total_hosts')}
-              >{$t('tools.subnet-calculator.fields.total_hosts')}</span
+            <span class="info-label" use:tooltip={$t('tools.subnet_calculator.tooltips.total_hosts')}
+              >{$t('tools.subnet_calculator.fields.total_hosts')}</span
             >
             <span class="metric-value info">{formatNumber(subnetInfo.hostCount)}</span>
           </div>
 
           <div class="info-card">
-            <span class="info-label" use:tooltip={$t('tools.subnet-calculator.tooltips.usable_hosts')}
-              >{$t('tools.subnet-calculator.fields.usable_hosts')}</span
+            <span class="info-label" use:tooltip={$t('tools.subnet_calculator.tooltips.usable_hosts')}
+              >{$t('tools.subnet_calculator.fields.usable_hosts')}</span
             >
             <span class="metric-value success">{formatNumber(subnetInfo.usableHosts)}</span>
           </div>
 
           <div class="info-card">
-            <span class="info-label" use:tooltip={$t('tools.subnet-calculator.tooltips.first_host')}
-              >{$t('tools.subnet-calculator.fields.first_host')}</span
+            <span class="info-label" use:tooltip={$t('tools.subnet_calculator.tooltips.first_host')}
+              >{$t('tools.subnet_calculator.fields.first_host')}</span
             >
             <code class="ip-value success">{subnetInfo.firstHost.octets.join('.')}</code>
           </div>
 
           <div class="info-card">
-            <span class="info-label" use:tooltip={$t('tools.subnet-calculator.tooltips.last_host')}
-              >{$t('tools.subnet-calculator.fields.last_host')}</span
+            <span class="info-label" use:tooltip={$t('tools.subnet_calculator.tooltips.last_host')}
+              >{$t('tools.subnet_calculator.fields.last_host')}</span
             >
             <code class="ip-value success">{subnetInfo.lastHost.octets.join('.')}</code>
           </div>
@@ -198,23 +198,23 @@
 
     <!-- Binary Representation -->
     <section class="info-panel" style="margin-top: var(--spacing-lg);">
-      <h3>{$t('tools.subnet-calculator.sections.binary_representation')}</h3>
+      <h3>{$t('tools.subnet_calculator.sections.binary_representation')}</h3>
       <div class="binary-display">
         <div class="binary-row">
-          <span class="info-label" use:tooltip={$t('tools.subnet-calculator.tooltips.network_binary')}
-            >{$t('tools.subnet-calculator.binary.network_label')}</span
+          <span class="info-label" use:tooltip={$t('tools.subnet_calculator.tooltips.network_binary')}
+            >{$t('tools.subnet_calculator.binary.network_label')}</span
           >
           <code class="binary-value success">{subnetInfo.network.binary}</code>
         </div>
         <div class="binary-row">
-          <span class="info-label" use:tooltip={$t('tools.subnet-calculator.tooltips.mask_binary')}
-            >{$t('tools.subnet-calculator.binary.mask_label')}</span
+          <span class="info-label" use:tooltip={$t('tools.subnet_calculator.tooltips.mask_binary')}
+            >{$t('tools.subnet_calculator.binary.mask_label')}</span
           >
           <code class="binary-value info">{subnetInfo.subnet.binary}</code>
         </div>
         <div class="binary-row">
-          <span class="info-label" use:tooltip={$t('tools.subnet-calculator.tooltips.broadcast_binary')}
-            >{$t('tools.subnet-calculator.binary.broadcast_label')}</span
+          <span class="info-label" use:tooltip={$t('tools.subnet_calculator.tooltips.broadcast_binary')}
+            >{$t('tools.subnet_calculator.binary.broadcast_label')}</span
           >
           <code class="binary-value error">{subnetInfo.broadcast.binary}</code>
         </div>
@@ -231,65 +231,65 @@
   {#if isCalculating}
     <div class="loading" style="justify-content: center; padding: var(--spacing-xl);">
       <div class="spinner"></div>
-      {$t('tools.subnet-calculator.actions.calculating')}
+      {$t('tools.subnet_calculator.actions.calculating')}
     </div>
   {/if}
 
   <!-- Explainer Section -->
   <section class="explainer-section">
-    <h3>{$t('tools.subnet-calculator.explainer.title')}</h3>
+    <h3>{$t('tools.subnet_calculator.explainer.title')}</h3>
 
     <div class="explainer-grid">
       <div class="explainer-card no-hover">
-        <h4>{$t('tools.subnet-calculator.explainer.network_address.title')}</h4>
+        <h4>{$t('tools.subnet_calculator.explainer.network_address.title')}</h4>
         <p>
-          {$t('tools.subnet-calculator.explainer.network_address.description')}
+          {$t('tools.subnet_calculator.explainer.network_address.description')}
         </p>
       </div>
 
       <div class="explainer-card no-hover">
-        <h4>{$t('tools.subnet-calculator.explainer.broadcast_address.title')}</h4>
+        <h4>{$t('tools.subnet_calculator.explainer.broadcast_address.title')}</h4>
         <p>
-          {$t('tools.subnet-calculator.explainer.broadcast_address.description')}
+          {$t('tools.subnet_calculator.explainer.broadcast_address.description')}
         </p>
       </div>
 
       <div class="explainer-card no-hover">
-        <h4>{$t('tools.subnet-calculator.explainer.subnet_mask.title')}</h4>
+        <h4>{$t('tools.subnet_calculator.explainer.subnet_mask.title')}</h4>
         <p>
-          {$t('tools.subnet-calculator.explainer.subnet_mask.description')}
+          {$t('tools.subnet_calculator.explainer.subnet_mask.description')}
         </p>
       </div>
 
       <div class="explainer-card no-hover">
-        <h4>{$t('tools.subnet-calculator.explainer.wildcard_mask.title')}</h4>
+        <h4>{$t('tools.subnet_calculator.explainer.wildcard_mask.title')}</h4>
         <p>
-          {$t('tools.subnet-calculator.explainer.wildcard_mask.description')}
+          {$t('tools.subnet_calculator.explainer.wildcard_mask.description')}
         </p>
       </div>
 
       <div class="explainer-card no-hover">
-        <h4>{$t('tools.subnet-calculator.explainer.usable_hosts.title')}</h4>
+        <h4>{$t('tools.subnet_calculator.explainer.usable_hosts.title')}</h4>
         <p>
-          {$t('tools.subnet-calculator.explainer.usable_hosts.description')}
+          {$t('tools.subnet_calculator.explainer.usable_hosts.description')}
         </p>
       </div>
 
       <div class="explainer-card no-hover">
-        <h4>{$t('tools.subnet-calculator.explainer.cidr_notation.title')}</h4>
+        <h4>{$t('tools.subnet_calculator.explainer.cidr_notation.title')}</h4>
         <p>
-          {$t('tools.subnet-calculator.explainer.cidr_notation.description')}
+          {$t('tools.subnet_calculator.explainer.cidr_notation.description')}
         </p>
       </div>
     </div>
 
     <div class="tips-box">
-      <h4>{$t('tools.subnet-calculator.tips.title')}</h4>
+      <h4>{$t('tools.subnet_calculator.tips.title')}</h4>
       <ul>
-        <li>{$t('tools.subnet-calculator.tips.plan_growth')}</li>
-        <li>{$t('tools.subnet-calculator.tips.binary_understanding')}</li>
-        <li>{$t('tools.subnet-calculator.tips.common_sizes')}</li>
-        <li>{$t('tools.subnet-calculator.tips.private_networks')}</li>
+        <li>{$t('tools.subnet_calculator.tips.plan_growth')}</li>
+        <li>{$t('tools.subnet_calculator.tips.binary_understanding')}</li>
+        <li>{$t('tools.subnet_calculator.tips.common_sizes')}</li>
+        <li>{$t('tools.subnet_calculator.tips.private_networks')}</li>
       </ul>
     </div>
   </section>

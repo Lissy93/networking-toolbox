@@ -92,7 +92,7 @@
     },
   ]);
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   $effect(() => {
     if (service && service !== 'custom' && services[service as keyof typeof services]) {

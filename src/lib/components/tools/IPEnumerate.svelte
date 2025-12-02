@@ -9,7 +9,7 @@
 
   // Load translations for this tool
   onMount(async () => {
-    await loadTranslations(get(locale), 'tools.ip-enumerate');
+    await loadTranslations(get(locale), 'tools');
   });
 
   let input = $state('192.168.1.0/28');
@@ -43,29 +43,29 @@
 
   const examples = $derived([
     {
-      label: $t('tools.ip-enumerate.examples.smallSubnet.label'),
+      label: $t('tools.ip_enumerate.examples.smallSubnet.label'),
       input: '192.168.1.0/28',
-      description: $t('tools.ip-enumerate.examples.smallSubnet.description'),
+      description: $t('tools.ip_enumerate.examples.smallSubnet.description'),
     },
     {
-      label: $t('tools.ip-enumerate.examples.standardSubnet.label'),
+      label: $t('tools.ip_enumerate.examples.standardSubnet.label'),
       input: '10.0.0.0/30',
-      description: $t('tools.ip-enumerate.examples.standardSubnet.description'),
+      description: $t('tools.ip_enumerate.examples.standardSubnet.description'),
     },
     {
-      label: $t('tools.ip-enumerate.examples.ipRange.label'),
+      label: $t('tools.ip_enumerate.examples.ipRange.label'),
       input: '172.16.1.1-172.16.1.10',
-      description: $t('tools.ip-enumerate.examples.ipRange.description'),
+      description: $t('tools.ip_enumerate.examples.ipRange.description'),
     },
     {
-      label: $t('tools.ip-enumerate.examples.singleAddress.label'),
+      label: $t('tools.ip_enumerate.examples.singleAddress.label'),
       input: '192.168.0.0/24',
-      description: $t('tools.ip-enumerate.examples.singleAddress.description'),
+      description: $t('tools.ip_enumerate.examples.singleAddress.description'),
     },
     {
-      label: $t('tools.ip-enumerate.examples.largeBlock.label'),
+      label: $t('tools.ip_enumerate.examples.largeBlock.label'),
       input: '2001:db8::/126',
-      description: $t('tools.ip-enumerate.examples.largeBlock.description'),
+      description: $t('tools.ip_enumerate.examples.largeBlock.description'),
     },
   ]);
 
@@ -173,7 +173,7 @@
 
           if (size > BigInt(ABSOLUTE_MAX_GENERATION)) {
             throw new Error(
-              $t('tools.ip-enumerate.errors.ipv6TooLarge', {
+              $t('tools.ip_enumerate.errors.ipv6TooLarge', {
                 prefix: prefixLength,
                 count: formatNumber(Number(size)),
                 max: formatNumber(ABSOLUTE_MAX_GENERATION),
@@ -199,7 +199,7 @@
 
           if (size > ABSOLUTE_MAX_GENERATION) {
             throw new Error(
-              $t('tools.ip-enumerate.errors.cidrTooLarge', {
+              $t('tools.ip_enumerate.errors.cidrTooLarge', {
                 prefix: prefixLength,
                 count: formatNumber(size),
                 max: formatNumber(ABSOLUTE_MAX_GENERATION),
@@ -237,7 +237,7 @@
 
         if (count > ABSOLUTE_MAX_GENERATION) {
           throw new Error(
-            $t('tools.ip-enumerate.errors.rangeTooLarge', {
+            $t('tools.ip_enumerate.errors.rangeTooLarge', {
               count: formatNumber(count),
               max: formatNumber(ABSOLUTE_MAX_GENERATION),
             }),
@@ -276,7 +276,7 @@
     } catch (error) {
       result = {
         success: false,
-        error: error instanceof Error ? error.message : $t('tools.ip-enumerate.errors.unknownError'),
+        error: error instanceof Error ? error.message : $t('tools.ip_enumerate.errors.unknownError'),
         addresses: [],
         totalCount: 0,
         displayCount: 0,
@@ -357,21 +357,21 @@
   <!-- Input Card with everything -->
   <div class="card main-input-card">
     <header class="card-header">
-      <h2>{$t('tools.ip-enumerate.title')}</h2>
-      <p>{$t('tools.ip-enumerate.description')}</p>
+      <h2>{$t('tools.ip_enumerate.title')}</h2>
+      <p>{$t('tools.ip_enumerate.description')}</p>
     </header>
 
     <input
       type="text"
       bind:value={input}
       oninput={handleInputChange}
-      placeholder={$t('tools.ip-enumerate.input.placeholder')}
+      placeholder={$t('tools.ip_enumerate.input.placeholder')}
       class="network-input"
     />
 
     <div class="options-row">
       <div class="limit-control">
-        <label for="max-display">{$t('tools.ip-enumerate.input.maxDisplay.label')}</label>
+        <label for="max-display">{$t('tools.ip_enumerate.input.maxDisplay.label')}</label>
         <input
           id="max-display"
           type="number"
@@ -387,12 +387,12 @@
         <label class="checkbox-option">
           <input type="checkbox" bind:checked={includeNetwork} onchange={handleInputChange} />
           <span class="checkmark"></span>
-          {$t('tools.ip-enumerate.input.options.network')}
+          {$t('tools.ip_enumerate.input.options.network')}
         </label>
         <label class="checkbox-option">
           <input type="checkbox" bind:checked={includeBroadcast} onchange={handleInputChange} />
           <span class="checkmark"></span>
-          {$t('tools.ip-enumerate.input.options.broadcast')}
+          {$t('tools.ip_enumerate.input.options.broadcast')}
         </label>
       </div>
     </div>
@@ -402,7 +402,7 @@
       <details class="examples-details">
         <summary class="examples-summary">
           <Icon name="chevron-right" size="sm" />
-          <h4>{$t('tools.ip-enumerate.examples.title')}</h4>
+          <h4>{$t('tools.ip_enumerate.examples.title')}</h4>
         </summary>
         <div class="examples-list">
           {#each examples as example (example.label)}
@@ -423,8 +423,8 @@
     <div class="safety-warning">
       <Icon name="alert-triangle" size="sm" />
       <div>
-        <strong>{$t('tools.ip-enumerate.safety.title')}:</strong>
-        {$t('tools.ip-enumerate.safety.message', {
+        <strong>{$t('tools.ip_enumerate.safety.title')}:</strong>
+        {$t('tools.ip_enumerate.safety.message', {
           maxDisplay: formatNumber(ABSOLUTE_MAX_DISPLAY),
           maxGeneration: formatNumber(ABSOLUTE_MAX_GENERATION),
         })}
@@ -437,7 +437,7 @@
     <div class="card loading-card">
       <div class="loading-content">
         <Icon name="loader" size="lg" />
-        <span>{$t('tools.ip-enumerate.actions.generating')}</span>
+        <span>{$t('tools.ip_enumerate.actions.generating')}</span>
       </div>
     </div>
   {/if}
@@ -451,52 +451,52 @@
           <div class="card-header">
             <h3>
               <Icon name="list" size="sm" />
-              {$t('tools.ip-enumerate.results.title')}
+              {$t('tools.ip_enumerate.results.title')}
             </h3>
           </div>
 
           <div class="export-actions">
             <button class="export-btn" onclick={exportToJSON}>
               <Icon name="json-file" size="sm" />
-              {$t('tools.ip-enumerate.actions.exportJSON')}
+              {$t('tools.ip_enumerate.actions.exportJSON')}
             </button>
             <button class="export-btn" onclick={exportToCSV}>
               <Icon name="csv-file" size="sm" />
-              {$t('tools.ip-enumerate.actions.exportCSV')}
+              {$t('tools.ip_enumerate.actions.exportCSV')}
             </button>
             <button
               class="copy-btn {clipboard.isCopied('all-addresses') ? 'copied' : ''}"
               onclick={() => clipboard.copy((result?.addresses || []).join('\n'), 'all-addresses')}
             >
               <Icon name={clipboard.isCopied('all-addresses') ? 'check' : 'copy'} size="sm" />
-              {$t('tools.ip-enumerate.actions.copyAll')}
+              {$t('tools.ip_enumerate.actions.copyAll')}
             </button>
           </div>
 
           <div class="summary-stats">
             <div class="stat">
               <span class="stat-value">{formatNumber(result.totalCount)}</span>
-              <span class="stat-label">{$t('tools.ip-enumerate.results.stats.total')}</span>
+              <span class="stat-label">{$t('tools.ip_enumerate.results.stats.total')}</span>
             </div>
             <div class="stat">
               <span class="stat-value">{formatNumber(result.displayCount)}</span>
-              <span class="stat-label">{$t('tools.ip-enumerate.results.stats.shown')}</span>
+              <span class="stat-label">{$t('tools.ip_enumerate.results.stats.shown')}</span>
             </div>
             <div class="stat">
               <span class="stat-value">{estimateMemoryUsage(result.displayCount)}</span>
-              <span class="stat-label">{$t('tools.ip-enumerate.results.stats.memory')}</span>
+              <span class="stat-label">{$t('tools.ip_enumerate.results.stats.memory')}</span>
             </div>
           </div>
 
           {#if result.networkInfo.network}
             <div class="network-info">
               <div class="info-item">
-                <span>{$t('tools.ip-enumerate.results.networkInfo.network')}:</span>
+                <span>{$t('tools.ip_enumerate.results.networkInfo.network')}:</span>
                 <code>{result.networkInfo.network}</code>
               </div>
               {#if result.networkInfo.broadcast}
                 <div class="info-item">
-                  <span>{$t('tools.ip-enumerate.results.networkInfo.broadcast')}:</span>
+                  <span>{$t('tools.ip_enumerate.results.networkInfo.broadcast')}:</span>
                   <code>{result.networkInfo.broadcast}</code>
                 </div>
               {/if}
@@ -509,11 +509,11 @@
           <div class="card-header">
             <h3>
               <Icon name="target" size="sm" />
-              {$t('tools.ip-enumerate.results.addresses.title')}
+              {$t('tools.ip_enumerate.results.addresses.title')}
             </h3>
             {#if result.truncated}
               <span class="truncated-notice"
-                >{$t('tools.ip-enumerate.results.addresses.truncatedNotice', {
+                >{$t('tools.ip_enumerate.results.addresses.truncatedNotice', {
                   shown: formatNumber(result.displayCount),
                   total: formatNumber(result.totalCount),
                 })}</span
@@ -540,7 +540,7 @@
         <div class="card error-card">
           <div class="error-content">
             <Icon name="alert-triangle" size="lg" />
-            <h3>{$t('tools.ip-enumerate.errors.title')}</h3>
+            <h3>{$t('tools.ip_enumerate.errors.title')}</h3>
             <p>{result.error}</p>
           </div>
         </div>

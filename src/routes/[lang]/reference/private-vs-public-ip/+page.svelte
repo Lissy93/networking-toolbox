@@ -1,31 +1,37 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+  import { locale, loadTranslations, t } from '$lib/stores/language.js';
   import { privateVsPublicContent } from '$lib/content/private-vs-public-ip.js';
-
   import Icon from '$lib/components/global/Icon.svelte';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'reference/private-vs-public-ip');
+  });
 </script>
 
 <div class="page-container">
   <div class="ref-page">
     <div class="ref-header">
-      <h1>{privateVsPublicContent.title}</h1>
-      <p class="subtitle">{privateVsPublicContent.description}</p>
+      <h1>{$t('title')}</h1>
+      <p class="subtitle">{$t('description')}</p>
     </div>
 
     <div class="ref-section">
-      <h2>{privateVsPublicContent.sections.overview.title}</h2>
-      <p>{privateVsPublicContent.sections.overview.content}</p>
+      <h2>{$t('sections.overview.title')}</h2>
+      <p>{$t('sections.overview.content')}</p>
     </div>
 
     <div class="ref-section">
-      <h2>Private IP Address Ranges (RFC 1918)</h2>
+      <h2>{$t('privateRanges.title')}</h2>
       {#each privateVsPublicContent.privateRanges as range, index (`${range.range}-${index}`)}
         <div class="ref-examples">
           <div class="examples-title">{range.range} - {range.class}</div>
           <div class="example-item">
-            <div><strong>Full Range:</strong> <code>{range.fullRange}</code></div>
-            <div><strong>Total Addresses:</strong> {range.addresses}</div>
-            <div><strong>Common Use:</strong> {range.commonUse}</div>
-            <div><strong>Examples:</strong></div>
+            <div><strong>{$t('privateRanges.labels.fullRange')}</strong> <code>{range.fullRange}</code></div>
+            <div><strong>{$t('privateRanges.labels.totalAddresses')}</strong> {range.addresses}</div>
+            <div><strong>{$t('privateRanges.labels.commonUse')}</strong> {range.commonUse}</div>
+            <div><strong>{$t('privateRanges.labels.examples')}</strong></div>
             {#each range.examples as example, index (`example-${index}`)}
               <code class="example-input">{example}</code>
             {/each}
@@ -35,22 +41,22 @@
     </div>
 
     <div class="ref-section">
-      <h2>Public IP Addresses</h2>
-      <p>{privateVsPublicContent.publicRanges.description}</p>
+      <h2>{$t('publicRanges.title')}</h2>
+      <p>{$t('publicRanges.description')}</p>
 
-      <h3>Characteristics</h3>
+      <h3>{$t('publicRanges.characteristics.title')}</h3>
       <ul>
-        {#each privateVsPublicContent.publicRanges.characteristics as characteristic, index (`char-${index}`)}
+        {#each $t('publicRanges.characteristics.items') as characteristic, index (`char-${index}`)}
           <li>{characteristic}</li>
         {/each}
       </ul>
 
-      <h3>Examples</h3>
+      <h3>{$t('publicRanges.examples.title')}</h3>
       <table class="ref-table">
         <thead>
           <tr>
-            <th>Public IP</th>
-            <th>Owner/Service</th>
+            <th>{$t('publicRanges.examples.headers.publicIp')}</th>
+            <th>{$t('publicRanges.examples.headers.ownerService')}</th>
           </tr>
         </thead>
         <tbody>
@@ -65,42 +71,42 @@
     </div>
 
     <div class="ref-section">
-      <h2>{privateVsPublicContent.natImplications.title}</h2>
+      <h2>{$t('natImplications.title')}</h2>
 
       <div class="ref-grid two-col">
         <div class="grid-item">
-          <div class="item-title">{privateVsPublicContent.natImplications.privateToPublic.title}</div>
-          <div class="item-description">{privateVsPublicContent.natImplications.privateToPublic.description}</div>
+          <div class="item-title">{$t('natImplications.privateToPublic.title')}</div>
+          <div class="item-description">{$t('natImplications.privateToPublic.description')}</div>
 
-          <h4>Process:</h4>
+          <h4>{$t('natImplications.privateToPublic.process.title')}</h4>
           <ol>
-            {#each privateVsPublicContent.natImplications.privateToPublic.process as step, index (`nat-step-${index}`)}
+            {#each $t('natImplications.privateToPublic.process.steps') as step, index (`nat-step-${index}`)}
               <li>{step}</li>
             {/each}
           </ol>
 
-          <h4>Benefits:</h4>
+          <h4>{$t('natImplications.privateToPublic.benefits.title')}</h4>
           <ul>
-            {#each privateVsPublicContent.natImplications.privateToPublic.benefits as benefit, index (`benefit-${index}`)}
+            {#each $t('natImplications.privateToPublic.benefits.items') as benefit, index (`benefit-${index}`)}
               <li>{benefit}</li>
             {/each}
           </ul>
         </div>
 
         <div class="grid-item">
-          <div class="item-title">{privateVsPublicContent.natImplications.publicToPrivate.title}</div>
-          <div class="item-description">{privateVsPublicContent.natImplications.publicToPrivate.description}</div>
+          <div class="item-title">{$t('natImplications.publicToPrivate.title')}</div>
+          <div class="item-description">{$t('natImplications.publicToPrivate.description')}</div>
 
-          <h4>Challenges:</h4>
+          <h4>{$t('natImplications.publicToPrivate.challenges.title')}</h4>
           <ul>
-            {#each privateVsPublicContent.natImplications.publicToPrivate.challenges as challenge, index (`challenge-${index}`)}
+            {#each $t('natImplications.publicToPrivate.challenges.items') as challenge, index (`challenge-${index}`)}
               <li>{challenge}</li>
             {/each}
           </ul>
 
-          <h4>Solutions:</h4>
+          <h4>{$t('natImplications.publicToPrivate.solutions.title')}</h4>
           <ul>
-            {#each privateVsPublicContent.natImplications.publicToPrivate.solutions as solution, index (`solution-${index}`)}
+            {#each $t('natImplications.publicToPrivate.solutions.items') as solution, index (`solution-${index}`)}
               <li>{solution}</li>
             {/each}
           </ul>
@@ -109,15 +115,15 @@
     </div>
 
     <div class="ref-section">
-      <h2>Quick Identification Methods</h2>
+      <h2>{$t('identification.title')}</h2>
 
       <table class="ref-table">
         <thead>
           <tr>
-            <th>Method</th>
+            <th>{$t('identification.headers.method')}</th>
             <th>Description</th>
-            <th>Private Indicator</th>
-            <th>Public Indicator</th>
+            <th>{$t('identification.headers.privateIndicator')}</th>
+            <th>{$t('identification.headers.publicIndicator')}</th>
           </tr>
         </thead>
         <tbody>
@@ -132,7 +138,7 @@
         </tbody>
       </table>
 
-      <h3>Useful Tools</h3>
+      <h3>{$t('tools.title')}</h3>
       <div class="ref-grid two-col">
         {#each privateVsPublicContent.identification.tools as tool, index (`${tool.tool}-${index}`)}
           <div class="grid-item">
@@ -144,22 +150,22 @@
     </div>
 
     <div class="ref-section">
-      <h2>Common Network Scenarios</h2>
+      <h2>{$t('commonScenarios.title')}</h2>
       {#each privateVsPublicContent.commonScenarios as scenario, index (`${scenario.scenario}-${index}`)}
         <div class="ref-examples">
           <div class="examples-title">{scenario.scenario}</div>
           <div class="example-item">
-            <div><strong>Setup:</strong> {scenario.setup}</div>
-            <div><strong>Private IPs:</strong> {scenario.privateIPs}</div>
-            <div><strong>Public IP:</strong> {scenario.publicIP}</div>
-            <div><strong>NAT Behavior:</strong> {scenario.natBehavior}</div>
+            <div><strong>{$t('commonScenarios.labels.setup')}</strong> {scenario.setup}</div>
+            <div><strong>{$t('commonScenarios.labels.privateIps')}</strong> {scenario.privateIPs}</div>
+            <div><strong>{$t('commonScenarios.labels.publicIp')}</strong> {scenario.publicIP}</div>
+            <div><strong>{$t('commonScenarios.labels.natBehavior')}</strong> {scenario.natBehavior}</div>
           </div>
         </div>
       {/each}
     </div>
 
     <div class="ref-section">
-      <h2>Troubleshooting Common Issues</h2>
+      <h2>{$t('troubleshooting.title')}</h2>
       {#each privateVsPublicContent.troubleshooting as issue, index (`${issue.issue}-${index}`)}
         <div class="ref-warning">
           <div class="warning-title">
@@ -167,16 +173,16 @@
             {issue.issue}
           </div>
           <div class="warning-content">
-            <p><strong>Possible Causes:</strong> {issue.possibleCauses.join(', ')}</p>
-            <p><strong>Diagnosis:</strong> {issue.diagnosis}</p>
-            <p><strong>Solution:</strong> {issue.solution}</p>
+            <p><strong>{$t('troubleshooting.labels.possibleCauses')}</strong> {issue.possibleCauses.join(', ')}</p>
+            <p><strong>{$t('troubleshooting.labels.diagnosis')}</strong> {issue.diagnosis}</p>
+            <p><strong>{$t('troubleshooting.labels.solution')}</strong> {issue.solution}</p>
           </div>
         </div>
       {/each}
     </div>
 
     <div class="ref-section">
-      <h2>Security Considerations</h2>
+      <h2>{$t('security.title')}</h2>
       {#each privateVsPublicContent.securityConsiderations as security, index (`${security.aspect}-${index}`)}
         <div class="ref-examples">
           <div class="examples-title">{security.aspect}</div>
@@ -192,7 +198,7 @@
     </div>
 
     <div class="ref-section">
-      <h2>Best Practices</h2>
+      <h2>{$t('bestPractices.title')}</h2>
       <ul>
         {#each privateVsPublicContent.bestPractices as practice, index (`practice-${index}`)}
           <li>{practice}</li>
@@ -201,18 +207,18 @@
     </div>
 
     <div class="ref-section">
-      <h2>Quick Reference</h2>
+      <h2>{$t('quickReference.title')}</h2>
 
       <div class="ref-grid two-col">
         <div class="grid-item">
-          <div class="item-title">Private IP Ranges</div>
+          <div class="item-title">{$t('quickReference.privateRanges.title')}</div>
           {#each privateVsPublicContent.quickReference.privateRanges as range, index (`qr-range-${index}`)}
             <div class="item-code">{range}</div>
           {/each}
         </div>
 
         <div class="grid-item">
-          <div class="item-title">Identification Tips</div>
+          <div class="item-title">{$t('quickReference.identificationTips.title')}</div>
           {#each privateVsPublicContent.quickReference.identificationTips as tip, index (`qr-tip-${index}`)}
             <div class="item-description">{tip}</div>
           {/each}

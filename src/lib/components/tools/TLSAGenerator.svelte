@@ -8,7 +8,7 @@
 
   // Load translations for this tool
   onMount(async () => {
-    await loadTranslations(get(locale), 'tools.tlsa-generator');
+    await loadTranslations(get(locale), 'tools');
   });
 
   let domain = $state('example.com');
@@ -26,23 +26,23 @@
   let selectedExample = $state<string | null>(null);
   const clipboard = useClipboard();
 
-  const usageDescriptions = {
-    0: 'CA Constraint - Certificate must be issued by the CA represented in the TLSA record',
-    1: 'Service Certificate Constraint - Certificate must match the one in the TLSA record',
-    2: 'Trust Anchor Assertion - Certificate must chain to the CA in the TLSA record',
-    3: 'Domain-Issued Certificate - Certificate must match the one specified (most common)',
-  };
+  const usageDescriptions = $derived({
+    0: $t('tools.tlsa_generator.parameters.usage.descriptions.caConstraint'),
+    1: $t('tools.tlsa_generator.parameters.usage.descriptions.serviceConstraint'),
+    2: $t('tools.tlsa_generator.parameters.usage.descriptions.trustAnchor'),
+    3: $t('tools.tlsa_generator.parameters.usage.descriptions.domainIssued'),
+  });
 
-  const selectorDescriptions = {
-    0: 'Full Certificate - Use the entire certificate',
-    1: 'Subject Public Key Info - Use only the public key portion (recommended)',
-  };
+  const selectorDescriptions = $derived({
+    0: $t('tools.tlsa_generator.parameters.selector.descriptions.fullCert'),
+    1: $t('tools.tlsa_generator.parameters.selector.descriptions.spki'),
+  });
 
-  const matchingTypeDescriptions = {
-    0: 'Exact Match - Use the certificate/key data as-is (not recommended)',
-    1: 'SHA-256 Hash - Use SHA-256 hash of the certificate/key (recommended)',
-    2: 'SHA-512 Hash - Use SHA-512 hash of the certificate/key',
-  };
+  const matchingTypeDescriptions = $derived({
+    0: $t('tools.tlsa_generator.parameters.matching.descriptions.exact'),
+    1: $t('tools.tlsa_generator.parameters.matching.descriptions.sha256'),
+    2: $t('tools.tlsa_generator.parameters.matching.descriptions.sha512'),
+  });
 
   const tlsaRecord = $derived.by(() => {
     let associationData = '';
@@ -54,7 +54,7 @@
         .toLowerCase();
     } else if (inputType === 'certificate') {
       if (certificateInput.trim()) {
-        associationData = 'Generated hash would appear here (requires certificate parsing)';
+        associationData = $t('tools.tlsa_generator.output.generated_hash_placeholder');
       }
     }
 
@@ -78,46 +78,46 @@
     const errors = [];
 
     if (!domain.trim()) {
-      errors.push('Domain is required');
+      errors.push($t('tools.tlsa_generator.validation.errors.domainRequired'));
     } else if (!domain.includes('.')) {
-      warnings.push('Domain should include TLD (e.g., .com, .org)');
+      warnings.push($t('tools.tlsa_generator.validation.warnings.domainTld'));
     }
 
     if (port < 1 || port > 65535) {
-      errors.push('Port must be between 1 and 65535');
+      errors.push($t('tools.tlsa_generator.validation.errors.portRange'));
     }
 
     if (inputType === 'certificate') {
       if (!certificateInput.trim()) {
-        errors.push('Certificate data is required');
+        errors.push($t('tools.tlsa_generator.validation.errors.certificateRequired'));
       } else if (!certificateInput.includes('BEGIN CERTIFICATE') && !certificateInput.includes('BEGIN PUBLIC KEY')) {
-        warnings.push('Certificate should be in PEM format');
+        warnings.push($t('tools.tlsa_generator.validation.warnings.pemFormat'));
       }
     } else if (inputType === 'hash') {
       if (!hashInput.trim()) {
-        errors.push('Hash value is required');
+        errors.push($t('tools.tlsa_generator.validation.errors.hashRequired'));
       } else {
         const cleanHash = hashInput.trim().replace(/[^a-fA-F0-9]/g, '');
         if (matchingType === 1 && cleanHash.length !== 64) {
-          warnings.push('SHA-256 hash should be exactly 64 hexadecimal characters');
+          warnings.push($t('tools.tlsa_generator.validation.warnings.sha256Length'));
         } else if (matchingType === 2 && cleanHash.length !== 128) {
-          warnings.push('SHA-512 hash should be exactly 128 hexadecimal characters');
+          warnings.push($t('tools.tlsa_generator.validation.warnings.sha512Length'));
         } else if (!/^[a-fA-F0-9]+$/.test(cleanHash)) {
-          errors.push('Hash must contain only hexadecimal characters');
+          errors.push($t('tools.tlsa_generator.validation.errors.hexOnly'));
         }
       }
     }
 
     if (usage === 0 || usage === 2) {
-      warnings.push('Usage types 0 and 2 require careful CA certificate management');
+      warnings.push($t('tools.tlsa_generator.validation.warnings.usageTypes02'));
     }
 
     if (selector === 0) {
-      warnings.push('Full certificate selector (0) is less flexible than SPKI selector (1)');
+      warnings.push($t('tools.tlsa_generator.validation.warnings.selectorFull'));
     }
 
     if (matchingType === 0) {
-      warnings.push('Exact match (0) is not recommended - use SHA-256 (1) or SHA-512 (2)');
+      warnings.push($t('tools.tlsa_generator.validation.warnings.exactMatch'));
     }
 
     return {
@@ -159,10 +159,10 @@
     }
   }
 
-  const exampleConfigurations = [
+  const exampleConfigurations = $derived([
     {
-      name: 'HTTPS Certificate Pin',
-      description: 'Pin a specific certificate for HTTPS',
+      name: $t('tools.tlsa_generator.examples.https.name'),
+      description: $t('tools.tlsa_generator.examples.https.description'),
       domain: 'example.com',
       port: 443,
       protocol: 'tcp',
@@ -172,8 +172,8 @@
       hash: 'a1b2c3d4e5f67890abcdef1234567890abcdef1234567890abcdef1234567890',
     },
     {
-      name: 'SMTP TLS Certificate',
-      description: 'DANE for email server TLS',
+      name: $t('tools.tlsa_generator.examples.smtp.name'),
+      description: $t('tools.tlsa_generator.examples.smtp.description'),
       domain: 'mail.example.com',
       port: 587,
       protocol: 'tcp',
@@ -183,8 +183,8 @@
       hash: 'fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321',
     },
     {
-      name: 'CA Trust Anchor',
-      description: 'Trust anchor for certificate authority',
+      name: $t('tools.tlsa_generator.examples.ca.name'),
+      description: $t('tools.tlsa_generator.examples.ca.description'),
       domain: 'secure.example.com',
       port: 443,
       protocol: 'tcp',
@@ -193,7 +193,7 @@
       matchingType: 2,
       hash: 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
     },
-  ];
+  ]);
 
   function loadExample(example: {
     name: string;
@@ -218,21 +218,21 @@
     selectedExample = example.name;
   }
 
-  const securityTips = [
-    'Use usage type 3 (Domain-Issued Certificate) for most scenarios',
-    'Prefer selector 1 (SPKI) over selector 0 (full certificate) for flexibility',
-    'Use SHA-256 (1) or SHA-512 (2) matching types, avoid exact match (0)',
-    'Pin multiple certificates to avoid service disruption during certificate rotation',
-    'Test TLSA records with DANE validation tools before deployment',
-  ];
+  const securityTips = $derived([
+    $t('tools.tlsa_generator.security.tips.usage3'),
+    $t('tools.tlsa_generator.security.tips.selectorSpki'),
+    $t('tools.tlsa_generator.security.tips.hashTypes'),
+    $t('tools.tlsa_generator.security.tips.multipleCerts'),
+    $t('tools.tlsa_generator.security.tips.testRecords'),
+  ]);
 </script>
 
 <div class="container">
   <div class="card">
     <div class="card-header">
-      <h1>{$t('tools.tlsa-generator.title')}</h1>
+      <h1>{$t('tools.tlsa_generator.title')}</h1>
       <p>
-        {$t('tools.tlsa-generator.subtitle')}
+        {$t('tools.tlsa_generator.subtitle')}
       </p>
     </div>
 
@@ -242,25 +242,25 @@
         <div class="card sub-card">
           <h3 class="section-title">
             <Icon name="globe" size="sm" />
-            {$t('tools.tlsa-generator.service.title')}
+            {$t('tools.tlsa_generator.service.title')}
           </h3>
 
           <div class="service-grid">
             <div class="input-group">
-              <label for="domain" use:tooltip={$t('tools.tlsa-generator.service.domain.tooltip')}
-                >{$t('tools.tlsa-generator.service.domain.label')}</label
+              <label for="domain" use:tooltip={$t('tools.tlsa_generator.service.domain.tooltip')}
+                >{$t('tools.tlsa_generator.service.domain.label')}</label
               >
               <input
                 id="domain"
                 type="text"
                 bind:value={domain}
-                placeholder={$t('tools.tlsa-generator.service.domain.placeholder')}
+                placeholder={$t('tools.tlsa_generator.service.domain.placeholder')}
               />
             </div>
 
             <div class="input-group">
-              <label for="port" use:tooltip={$t('tools.tlsa-generator.service.port.tooltip')}
-                >{$t('tools.tlsa-generator.service.port.label')}</label
+              <label for="port" use:tooltip={$t('tools.tlsa_generator.service.port.tooltip')}
+                >{$t('tools.tlsa_generator.service.port.label')}</label
               >
               <input
                 id="port"
@@ -268,17 +268,17 @@
                 bind:value={port}
                 min="1"
                 max="65535"
-                placeholder={$t('tools.tlsa-generator.service.port.placeholder')}
+                placeholder={$t('tools.tlsa_generator.service.port.placeholder')}
               />
             </div>
 
             <div class="input-group">
-              <label for="protocol" use:tooltip={$t('tools.tlsa-generator.service.protocol.tooltip')}
-                >{$t('tools.tlsa-generator.service.protocol.label')}</label
+              <label for="protocol" use:tooltip={$t('tools.tlsa_generator.service.protocol.tooltip')}
+                >{$t('tools.tlsa_generator.service.protocol.label')}</label
               >
               <select id="protocol" bind:value={protocol}>
-                <option value="tcp">{$t('tools.tlsa-generator.service.protocol.options.tcp')}</option>
-                <option value="udp">{$t('tools.tlsa-generator.service.protocol.options.udp')}</option>
+                <option value="tcp">{$t('tools.tlsa_generator.service.protocol.options.tcp')}</option>
+                <option value="udp">{$t('tools.tlsa_generator.service.protocol.options.udp')}</option>
               </select>
             </div>
           </div>
@@ -288,37 +288,41 @@
         <div class="card sub-card">
           <h3 class="section-title">
             <Icon name="settings" size="sm" />
-            {$t('tools.tlsa-generator.parameters.title')}
+            {$t('tools.tlsa_generator.parameters.title')}
           </h3>
 
           <div class="input-group">
-            <label for="usage" use:tooltip={'Certificate usage - how the certificate should be used for authentication'}
-              >Certificate Usage:</label
+            <label for="usage" use:tooltip={$t('tools.tlsa_generator.parameters.usage.tooltip')}
+              >{$t('tools.tlsa_generator.parameters.usage.label')}</label
             >
             <select id="usage" bind:value={usage}>
-              <option value={0}>0 - CA Constraint</option>
-              <option value={1}>1 - Service Certificate Constraint</option>
-              <option value={2}>2 - Trust Anchor Assertion</option>
-              <option value={3}>3 - Domain-Issued Certificate</option>
+              <option value={0}>{$t('tools.tlsa_generator.parameters.usage.options.caConstraint')}</option>
+              <option value={1}>{$t('tools.tlsa_generator.parameters.usage.options.serviceConstraint')}</option>
+              <option value={2}>{$t('tools.tlsa_generator.parameters.usage.options.trustAnchor')}</option>
+              <option value={3}>{$t('tools.tlsa_generator.parameters.usage.options.domainIssued')}</option>
             </select>
             <p class="description">{usageDescriptions[usage as keyof typeof usageDescriptions]}</p>
           </div>
 
           <div class="input-group">
-            <label for="selector" use:tooltip={'Which part of the certificate to use'}>Selector:</label>
+            <label for="selector" use:tooltip={$t('tools.tlsa_generator.parameters.selector.tooltip')}
+              >{$t('tools.tlsa_generator.parameters.selector.label')}</label
+            >
             <select id="selector" bind:value={selector}>
-              <option value={0}>0 - Full Certificate</option>
-              <option value={1}>1 - Subject Public Key Info</option>
+              <option value={0}>{$t('tools.tlsa_generator.parameters.selector.options.fullCert')}</option>
+              <option value={1}>{$t('tools.tlsa_generator.parameters.selector.options.spki')}</option>
             </select>
             <p class="description">{selectorDescriptions[selector as keyof typeof selectorDescriptions]}</p>
           </div>
 
           <div class="input-group">
-            <label for="matchingType" use:tooltip={'How to process the certificate data'}>Matching Type:</label>
+            <label for="matchingType" use:tooltip={$t('tools.tlsa_generator.parameters.matching.tooltip')}
+              >{$t('tools.tlsa_generator.parameters.matching.label')}</label
+            >
             <select id="matchingType" bind:value={matchingType}>
-              <option value={0}>0 - Exact Match</option>
-              <option value={1}>1 - SHA-256 Hash</option>
-              <option value={2}>2 - SHA-512 Hash</option>
+              <option value={0}>{$t('tools.tlsa_generator.parameters.matching.options.exact')}</option>
+              <option value={1}>{$t('tools.tlsa_generator.parameters.matching.options.sha256')}</option>
+              <option value={2}>{$t('tools.tlsa_generator.parameters.matching.options.sha512')}</option>
             </select>
             <p class="description">{matchingTypeDescriptions[matchingType as keyof typeof matchingTypeDescriptions]}</p>
           </div>
@@ -328,24 +332,24 @@
         <div class="card sub-card">
           <h3 class="section-title">
             <Icon name="key" size="sm" />
-            Certificate Data
+            {$t('tools.tlsa_generator.certificate.title')}
           </h3>
 
           <div class="radio-group">
             <label class="radio-option">
               <input type="radio" bind:group={inputType} value="certificate" />
-              <span>Certificate/Public Key (PEM)</span>
+              <span>{$t('tools.tlsa_generator.certificate.pemOption')}</span>
             </label>
             <label class="radio-option">
               <input type="radio" bind:group={inputType} value="hash" />
-              <span>Hash Value</span>
+              <span>{$t('tools.tlsa_generator.certificate.hashOption')}</span>
             </label>
           </div>
 
           {#if inputType === 'certificate'}
             <div class="input-group">
-              <label for="certificate" use:tooltip={'Paste the PEM-encoded certificate or public key'}
-                >Certificate/Public Key:</label
+              <label for="certificate" use:tooltip={$t('tools.tlsa_generator.certificate.pemTooltip')}
+                >{$t('tools.tlsa_generator.certificate.pemLabel')}</label
               >
               <textarea
                 id="certificate"
@@ -358,18 +362,24 @@
                 onclick={generateHashFromInput}
                 disabled={!certificateInput.trim()}
                 class="btn btn-secondary"
-                use:tooltip={'Generate hash from certificate (demo mode)'}
+                use:tooltip={$t('tools.tlsa_generator.certificate.generateTooltip')}
               >
                 <Icon name="arrow-right" size="sm" />
-                Generate Hash
+                {$t('tools.tlsa_generator.certificate.generateButton')}
               </button>
             </div>
           {:else}
             <div class="input-group">
               <label
                 for="hash"
-                use:tooltip={`Enter the ${matchingType === 1 ? 'SHA-256' : matchingType === 2 ? 'SHA-512' : 'exact'} hash value`}
-                >Hash Value:</label
+                use:tooltip={$t('tools.tlsa_generator.certificate.hashTooltip', {
+                  type:
+                    matchingType === 1
+                      ? 'SHA-256'
+                      : matchingType === 2
+                        ? 'SHA-512'
+                        : $t('tools.tlsa_generator.certificate.exact'),
+                })}>{$t('tools.tlsa_generator.certificate.hashLabel')}</label
               >
               <textarea
                 id="hash"
@@ -391,31 +401,31 @@
           <!-- Generated Record -->
           <div class="card">
             <div class="card-header-with-actions">
-              <h3>{$t('tools.tlsa-generator.output.title')}</h3>
+              <h3>{$t('tools.tlsa_generator.output.title')}</h3>
               <div class="actions">
                 <button
                   type="button"
                   class="btn btn-primary"
                   class:success={clipboard.isCopied('copy-tlsa')}
                   onclick={() => copyToClipboard(dnsRecord, 'copy-tlsa')}
-                  use:tooltip={'Copy TLSA record to clipboard'}
+                  use:tooltip={$t('tools.tlsa_generator.output.copy.tooltip')}
                 >
                   <Icon name={clipboard.isCopied('copy-tlsa') ? 'check' : 'copy'} size="sm" />
                   {clipboard.isCopied('copy-tlsa')
-                    ? $t('tools.tlsa-generator.output.copy.copied')
-                    : $t('tools.tlsa-generator.output.copy.button')}
+                    ? $t('tools.tlsa_generator.output.copy.copied')
+                    : $t('tools.tlsa_generator.output.copy.button')}
                 </button>
                 <button
                   type="button"
                   class="btn btn-success"
                   class:success={clipboard.isCopied('export-tlsa')}
                   onclick={exportAsZoneFile}
-                  use:tooltip={'Download as zone file'}
+                  use:tooltip={$t('tools.tlsa_generator.output.export.tooltip')}
                 >
                   <Icon name={clipboard.isCopied('export-tlsa') ? 'check' : 'download'} size="sm" />
                   {clipboard.isCopied('export-tlsa')
-                    ? $t('tools.tlsa-generator.output.export.downloaded')
-                    : $t('tools.tlsa-generator.output.export.button')}
+                    ? $t('tools.tlsa_generator.output.export.downloaded')
+                    : $t('tools.tlsa_generator.output.export.button')}
                 </button>
               </div>
             </div>
@@ -425,21 +435,21 @@
             </div>
 
             <div class="breakdown">
-              <h4>Record Breakdown:</h4>
+              <h4>{$t('tools.tlsa_generator.output.breakdown.title')}</h4>
               <div class="breakdown-grid">
                 <div class="breakdown-item">
-                  <strong>Service:</strong> _{port}._{protocol}
+                  <strong>{$t('tools.tlsa_generator.output.breakdown.service')}</strong> _{port}._{protocol}
                 </div>
                 <div class="breakdown-item">
-                  <strong>Usage:</strong>
+                  <strong>{$t('tools.tlsa_generator.output.breakdown.usage')}</strong>
                   {usage} ({Object.values(usageDescriptions)[usage].split(' - ')[0]})
                 </div>
                 <div class="breakdown-item">
-                  <strong>Selector:</strong>
+                  <strong>{$t('tools.tlsa_generator.output.breakdown.selector')}</strong>
                   {selector} ({Object.values(selectorDescriptions)[selector].split(' - ')[0]})
                 </div>
                 <div class="breakdown-item">
-                  <strong>Matching:</strong>
+                  <strong>{$t('tools.tlsa_generator.output.breakdown.matching')}</strong>
                   {matchingType} ({Object.values(matchingTypeDescriptions)[matchingType].split(' - ')[0]})
                 </div>
               </div>
@@ -451,14 +461,16 @@
         <div class="card">
           <h3 class="section-title">
             <Icon name="bar-chart" size="sm" />
-            Validation
+            {$t('tools.tlsa_generator.validation.title')}
           </h3>
 
           <div class="status-center">
             <div class="status-item">
-              <span>Status:</span>
+              <span>{$t('tools.tlsa_generator.validation.status.label')}</span>
               <span class="status" class:valid={validation.isValid} class:invalid={!validation.isValid}>
-                {validation.isValid ? 'Valid' : 'Invalid'}
+                {validation.isValid
+                  ? $t('tools.tlsa_generator.validation.status.valid')
+                  : $t('tools.tlsa_generator.validation.status.invalid')}
               </span>
             </div>
           </div>
@@ -488,7 +500,7 @@
           {#if validation.isValid && validation.errors.length === 0 && validation.warnings.length === 0}
             <div class="message success">
               <Icon name="check-circle" size="sm" />
-              <div>TLSA record is valid and ready to deploy!</div>
+              <div>{$t('tools.tlsa_generator.validation.readyToDeploy')}</div>
             </div>
           {/if}
         </div>
@@ -497,7 +509,7 @@
         <div class="card">
           <h3 class="section-title">
             <Icon name="shield" size="sm" />
-            Security Best Practices
+            {$t('tools.tlsa_generator.security.title')}
           </h3>
 
           <ul class="tips-list">
@@ -514,7 +526,7 @@
       <details bind:open={showExamples}>
         <summary class="examples-summary">
           <Icon name="lightbulb" size="sm" />
-          Example Configurations
+          {$t('tools.tlsa_generator.examples.title')}
           <span class="chevron"><Icon name="chevron-down" size="sm" /></span>
         </summary>
         <div class="examples-grid">
@@ -528,9 +540,13 @@
               <div class="example-name">{example.name}</div>
               <p class="example-description">{example.description}</p>
               <div class="example-config">
-                <div>Port: <code>{example.port}/{example.protocol}</code></div>
                 <div>
-                  Usage: <code>{example.usage}</code>, Selector: <code>{example.selector}</code>, Type:
+                  {$t('tools.tlsa_generator.examples.config.port')}: <code>{example.port}/{example.protocol}</code>
+                </div>
+                <div>
+                  {$t('tools.tlsa_generator.examples.config.usage')}: <code>{example.usage}</code>, {$t(
+                    'tools.tlsa_generator.examples.config.selector',
+                  )}: <code>{example.selector}</code>, {$t('tools.tlsa_generator.examples.config.type')}:
                   <code>{example.matchingType}</code>
                 </div>
               </div>

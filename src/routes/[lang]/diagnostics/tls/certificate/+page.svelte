@@ -4,7 +4,14 @@
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import { tooltip } from '$lib/actions/tooltip.js';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import '../../../../../styles/diagnostics-pages.scss';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics/tls-certificate');
+  });
 
   let host = $state('google.com:443');
   let servername = $state('');
@@ -18,16 +25,16 @@
     daysUntilExpiry: number;
   }
 
-  const examplesList = [
-    { host: 'google.com:443', description: 'Google TLS certificate' },
-    { host: 'github.com:443', description: 'GitHub certificate chain' },
-    { host: 'cloudflare.com:443', description: 'Cloudflare certificate' },
-    { host: 'wikipedia.org:443', description: 'Wikipedia certificate' },
-    { host: 'stackoverflow.com:443', description: 'Stack Overflow certificate' },
-    { host: 'microsoft.com:443', description: 'Microsoft certificate' },
-  ];
+  const examplesList = $derived([
+    { host: 'google.com:443', description: $t('examples.0.description') },
+    { host: 'github.com:443', description: $t('examples.1.description') },
+    { host: 'cloudflare.com:443', description: $t('examples.2.description') },
+    { host: 'wikipedia.org:443', description: $t('examples.3.description') },
+    { host: 'stackoverflow.com:443', description: $t('examples.4.description') },
+    { host: 'microsoft.com:443', description: $t('examples.5.description') },
+  ]);
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   // Reactive validation
   const isInputValid = $derived(() => {
@@ -55,16 +62,16 @@
         const errorText = await response.text();
         try {
           const errorData = JSON.parse(errorText);
-          throw new Error(errorData.message || `Certificate analysis failed (${response.status})`);
+          throw new Error(errorData.message || $t('form.errors.analysisFailedStatus', { status: response.status }));
         } catch {
-          throw new Error(`Certificate analysis failed (${response.status})`);
+          throw new Error($t('form.errors.analysisFailedStatus', { status: response.status }));
         }
       }
 
       const data = await response.json();
       diagnosticState.setResults(data);
     } catch (err: unknown) {
-      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      diagnosticState.setError(err instanceof Error ? err.message : $t('form.errors.unknownError'));
     }
   }
 
@@ -78,36 +85,48 @@
 
   function getExpiryStatus(cert: Certificate): { status: string; icon: string; class: string } {
     if (cert.isExpired) {
-      return { status: 'Expired', icon: 'x-circle', class: 'error' };
+      return { status: $t('results.status.expired'), icon: 'x-circle', class: 'error' };
     }
     if (cert.daysUntilExpiry <= 7) {
-      return { status: `Expires in ${cert.daysUntilExpiry} days`, icon: 'alert-triangle', class: 'error' };
+      return {
+        status: $t('results.status.expiresInDays', { days: cert.daysUntilExpiry }),
+        icon: 'alert-triangle',
+        class: 'error',
+      };
     }
     if (cert.daysUntilExpiry <= 30) {
-      return { status: `Expires in ${cert.daysUntilExpiry} days`, icon: 'alert-triangle', class: 'warning' };
+      return {
+        status: $t('results.status.expiresInDays', { days: cert.daysUntilExpiry }),
+        icon: 'alert-triangle',
+        class: 'warning',
+      };
     }
-    return { status: `Valid for ${cert.daysUntilExpiry} days`, icon: 'check-circle', class: 'success' };
+    return {
+      status: $t('results.status.validForDays', { days: cert.daysUntilExpiry }),
+      icon: 'check-circle',
+      class: 'success',
+    };
   }
 
   async function copyCertificateInfo() {
     if (!diagnosticState.results?.peerCertificate) return;
 
     const cert = diagnosticState.results.peerCertificate;
-    let text = `TLS Certificate Analysis for ${host}\n`;
-    text += `Generated at: ${new Date().toISOString()}\n\n`;
-    text += `Subject: ${cert.subject.CN}\n`;
-    text += `Issuer: ${cert.issuer.CN}\n`;
-    text += `Valid From: ${cert.validFrom}\n`;
-    text += `Valid To: ${cert.validTo}\n`;
-    text += `Days Until Expiry: ${cert.daysUntilExpiry}\n`;
-    text += `Serial Number: ${cert.serialNumber}\n`;
-    text += `Fingerprint (SHA1): ${cert.fingerprint}\n`;
-    text += `Fingerprint (SHA256): ${cert.fingerprint256}\n`;
+    let text = $t('copyTemplate.header', { host }) + '\n';
+    text += $t('copyTemplate.generated', { timestamp: new Date().toISOString() }) + '\n\n';
+    text += $t('copyTemplate.subject', { subject: cert.subject.CN }) + '\n';
+    text += $t('copyTemplate.issuer', { issuer: cert.issuer.CN }) + '\n';
+    text += $t('copyTemplate.validFrom', { validFrom: cert.validFrom }) + '\n';
+    text += $t('copyTemplate.validTo', { validTo: cert.validTo }) + '\n';
+    text += $t('copyTemplate.daysUntilExpiry', { days: cert.daysUntilExpiry }) + '\n';
+    text += $t('copyTemplate.serialNumber', { serialNumber: cert.serialNumber }) + '\n';
+    text += $t('copyTemplate.fingerprintSha1', { fingerprint: cert.fingerprint }) + '\n';
+    text += $t('copyTemplate.fingerprintSha256', { fingerprint256: cert.fingerprint256 }) + '\n';
 
     if (cert.subjectAltNames.length > 0) {
-      text += `\nSubject Alternative Names:\n`;
+      text += '\n' + $t('copyTemplate.sanHeader') + '\n';
       cert.subjectAltNames.forEach((san: string) => {
-        text += `  ${san}\n`;
+        text += $t('copyTemplate.sanItem', { san }) + '\n';
       });
     }
 
@@ -117,10 +136,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>TLS Certificate Analyzer</h1>
+    <h1>{$t('title')}</h1>
     <p>
-      Analyze TLS certificates, view certificate chains, check expiration dates, and examine Subject Alternative Names
-      (SANs). Supports custom SNI servername for multi-domain certificates.
+      {$t('description')}
     </p>
   </header>
 
@@ -129,36 +147,36 @@
     examples={examplesList}
     selectedIndex={examples.selectedIndex}
     onSelect={loadExample}
-    title="Certificate Examples"
+    title={$t('examplesSection.title')}
     getLabel={(example) => example.host}
     getDescription={(example) => example.description}
-    getTooltip={(example) => `Analyze certificate for ${example.host} (${example.description})`}
+    getTooltip={(example) => $t('examplesSection.tooltip', { host: example.host, description: example.description })}
   />
 
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>Certificate Analysis Configuration</h3>
+      <h3>{$t('form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-row">
         <div class="form-group">
           <label for="host">
-            Host:Port
+            {$t('form.hostPort.label')}
             <input
               id="host"
               type="text"
               bind:value={host}
-              placeholder="google.com:443"
+              placeholder={$t('form.hostPort.placeholder')}
               class:invalid={host && !isInputValid}
-              use:tooltip={'Enter hostname:port (e.g., google.com:443)'}
+              use:tooltip={$t('form.hostPort.tooltip')}
               onchange={() => {
                 examples.clear();
                 if (isInputValid()) analyzeCertificate();
               }}
             />
             {#if host && !isInputValid}
-              <span class="error-text">Invalid host:port format</span>
+              <span class="error-text">{$t('form.hostPort.error')}</span>
             {/if}
           </label>
         </div>
@@ -175,14 +193,14 @@
                 if (isInputValid()) analyzeCertificate();
               }}
             />
-            Use custom SNI servername
+            {$t('form.customSni.label')}
           </label>
           {#if useCustomServername}
             <input
               type="text"
               bind:value={servername}
-              placeholder="example.com"
-              use:tooltip={'Custom servername for SNI (Server Name Indication)'}
+              placeholder={$t('form.customSni.placeholder')}
+              use:tooltip={$t('form.customSni.tooltip')}
               onchange={() => {
                 examples.clear();
                 if (isInputValid()) analyzeCertificate();
@@ -196,10 +214,10 @@
         <button class="lookup-btn" onclick={analyzeCertificate} disabled={diagnosticState.loading || !isInputValid}>
           {#if diagnosticState.loading}
             <Icon name="loader-2" size="sm" animate="spin" />
-            Analyzing Certificate...
+            {$t('form.analyzing')}
           {:else}
             <Icon name="shield-check" size="sm" />
-            Analyze Certificate
+            {$t('form.analyze')}
           {/if}
         </button>
       </div>
@@ -210,10 +228,10 @@
   {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>Certificate Analysis Results</h3>
+        <h3>{$t('results.title')}</h3>
         <button class="copy-btn" onclick={copyCertificateInfo} disabled={clipboard.isCopied()}>
           <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
-          {clipboard.isCopied() ? 'Copied!' : 'Copy Certificate Info'}
+          {clipboard.isCopied() ? $t('results.copied') : $t('results.copy')}
         </button>
       </div>
       <div class="card-content">
@@ -230,37 +248,39 @@
               </div>
               <div class="status-item {cert.isNotYetValid ? 'warning' : 'success'}">
                 <Icon name={cert.isNotYetValid ? 'clock' : 'calendar'} size="sm" />
-                <span>{cert.isNotYetValid ? 'Not yet valid' : 'Currently valid'}</span>
+                <span
+                  >{cert.isNotYetValid ? $t('results.status.notYetValid') : $t('results.status.currentlyValid')}</span
+                >
               </div>
             </div>
 
             <!-- Certificate Details -->
             <div class="cert-details">
               <div class="detail-section">
-                <h4>Certificate Information</h4>
+                <h4>{$t('results.certificate.title')}</h4>
                 <div class="detail-grid">
                   <div class="detail-item">
-                    <span class="detail-label">Common Name:</span>
+                    <span class="detail-label">{$t('results.certificate.commonName')}</span>
                     <span class="detail-value mono">{cert.subject.CN}</span>
                   </div>
                   <div class="detail-item">
-                    <span class="detail-label">Organization:</span>
-                    <span class="detail-value">{cert.subject.O || 'N/A'}</span>
+                    <span class="detail-label">{$t('results.certificate.organization')}</span>
+                    <span class="detail-value">{cert.subject.O || $t('results.certificate.na')}</span>
                   </div>
                   <div class="detail-item">
-                    <span class="detail-label">Issuer:</span>
+                    <span class="detail-label">{$t('results.certificate.issuer')}</span>
                     <span class="detail-value">{cert.issuer.CN}</span>
                   </div>
                   <div class="detail-item">
-                    <span class="detail-label">Serial Number:</span>
+                    <span class="detail-label">{$t('results.certificate.serialNumber')}</span>
                     <span class="detail-value mono">{cert.serialNumber}</span>
                   </div>
                   <div class="detail-item">
-                    <span class="detail-label">Valid From:</span>
+                    <span class="detail-label">{$t('results.certificate.validFrom')}</span>
                     <span class="detail-value">{new Date(cert.validFrom).toLocaleString()}</span>
                   </div>
                   <div class="detail-item">
-                    <span class="detail-label">Valid To:</span>
+                    <span class="detail-label">{$t('results.certificate.validTo')}</span>
                     <span class="detail-value">{new Date(cert.validTo).toLocaleString()}</span>
                   </div>
                 </div>
@@ -269,7 +289,7 @@
               <!-- Subject Alternative Names -->
               {#if cert.subjectAltNames?.length > 0}
                 <div class="detail-section">
-                  <h4>Subject Alternative Names</h4>
+                  <h4>{$t('results.san.title')}</h4>
                   <div class="san-list">
                     {#each cert.subjectAltNames as san, index (index)}
                       <span class="san-item mono">{san}</span>
@@ -280,14 +300,14 @@
 
               <!-- Fingerprints -->
               <div class="detail-section">
-                <h4>Fingerprints</h4>
+                <h4>{$t('results.fingerprints.title')}</h4>
                 <div class="detail-grid">
                   <div class="detail-item">
-                    <span class="detail-label">SHA1:</span>
+                    <span class="detail-label">{$t('results.fingerprints.sha1')}</span>
                     <span class="detail-value mono">{cert.fingerprint}</span>
                   </div>
                   <div class="detail-item">
-                    <span class="detail-label">SHA256:</span>
+                    <span class="detail-label">{$t('results.fingerprints.sha256')}</span>
                     <span class="detail-value mono">{cert.fingerprint256}</span>
                   </div>
                 </div>
@@ -299,17 +319,19 @@
         <!-- Certificate Chain -->
         {#if diagnosticState.results.chain?.length > 0}
           <div class="chain-section">
-            <h4>Certificate Chain ({diagnosticState.results.chain.length} certificates)</h4>
+            <h4>{$t('results.chain.title', { count: diagnosticState.results.chain.length })}</h4>
             <div class="chain-list">
               {#each diagnosticState.results.chain as chainCert, i (i)}
                 <div class="chain-item">
                   <div class="chain-header">
-                    <span class="chain-level">Level {i}</span>
+                    <span class="chain-level">{$t('results.chain.level', { level: i })}</span>
                     <span class="chain-cn mono">{chainCert.subject.CN}</span>
                   </div>
                   <div class="chain-details">
-                    <span>Issuer: {chainCert.issuer.CN}</span>
-                    <span>Expires: {new Date(chainCert.validTo).toLocaleDateString()}</span>
+                    <span>{$t('results.chain.issuer', { issuer: chainCert.issuer.CN })}</span>
+                    <span
+                      >{$t('results.chain.expires', { date: new Date(chainCert.validTo).toLocaleDateString() })}</span
+                    >
                   </div>
                 </div>
               {/each}
@@ -320,23 +342,23 @@
         <!-- Connection Details -->
         {#if diagnosticState.results.protocol || diagnosticState.results.cipher || diagnosticState.results.alpnProtocol}
           <div class="connection-section">
-            <h4>Connection Details</h4>
+            <h4>{$t('results.connection.title')}</h4>
             <div class="detail-grid">
               {#if diagnosticState.results.protocol}
                 <div class="detail-item">
-                  <span class="detail-label">TLS Version:</span>
+                  <span class="detail-label">{$t('results.connection.tlsVersion')}</span>
                   <span class="detail-value">{diagnosticState.results.protocol}</span>
                 </div>
               {/if}
               {#if diagnosticState.results.cipher}
                 <div class="detail-item">
-                  <span class="detail-label">Cipher Suite:</span>
+                  <span class="detail-label">{$t('results.connection.cipherSuite')}</span>
                   <span class="detail-value">{diagnosticState.results.cipher.name}</span>
                 </div>
               {/if}
               {#if diagnosticState.results.alpnProtocol}
                 <div class="detail-item">
-                  <span class="detail-label">ALPN Protocol:</span>
+                  <span class="detail-label">{$t('results.connection.alpnProtocol')}</span>
                   <span class="detail-value">{diagnosticState.results.alpnProtocol}</span>
                 </div>
               {/if}
@@ -347,7 +369,7 @@
     </div>
   {/if}
 
-  <ErrorCard title="Certificate Analysis Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('error.title')} error={diagnosticState.error} />
 </div>
 
 <style lang="scss">

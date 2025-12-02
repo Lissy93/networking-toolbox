@@ -1,25 +1,152 @@
 {
   "title": "SPF Record Evaluator",
-  "description": "Evaluate and validate SPF records for email authentication",
+  "description": "Analyze SPF (Sender Policy Framework) records with recursive expansion of includes and redirects. Check DNS lookup limits and identify potential policy issues.",
+
+  "examples": [
+    {
+      "domain": "google.com",
+      "description": "Google SPF with multiple includes"
+    },
+    {
+      "domain": "github.com",
+      "description": "GitHub SPF record structure"
+    },
+    {
+      "domain": "mailchimp.com",
+      "description": "MailChimp complex SPF policy"
+    },
+    {
+      "domain": "salesforce.com",
+      "description": "Salesforce enterprise SPF"
+    },
+    {
+      "domain": "microsoft.com",
+      "description": "Microsoft Office 365 SPF"
+    },
+    {
+      "domain": "atlassian.com",
+      "description": "Atlassian SPF configuration"
+    }
+  ],
+
+  "examplesSection": {
+    "title": "SPF Examples",
+    "tooltip": "Evaluate SPF record for {domain} ({description})"
+  },
 
   "form": {
     "title": "SPF Evaluation",
     "domain": {
-      "label": "Domain",
-      "placeholder": "example.com"
+      "label": "Domain Name",
+      "placeholder": "example.com",
+      "tooltip": "Enter the domain to evaluate SPF records for"
     },
-    "evaluate": "Evaluate SPF",
-    "evaluating": "Evaluating...",
-    "error": "Please enter a domain"
+    "evaluate": "Evaluate SPF Record",
+    "evaluating": "Evaluating SPF...",
+    "errors": {
+      "unknownError": "Unknown error occurred"
+    }
   },
 
   "results": {
     "title": "SPF Evaluation Results",
-    "valid": "Valid",
-    "invalid": "Invalid",
-    "warnings": "Warnings",
-    "errors": "Errors",
-    "dns_lookups": "DNS Lookups",
-    "mechanisms": "Mechanisms"
+    "copy": "Copy Results",
+    "copied": "Copied!",
+
+    "status": {
+      "noEvaluation": "No evaluation performed",
+      "limitExceeded": "DNS lookup limit exceeded ({count}/10)",
+      "highCount": "High DNS lookup count ({count}/10)",
+      "lookupsUsed": "DNS lookups used: {count}/10"
+    },
+
+    "record": {
+      "title": "Original SPF Record"
+    },
+
+    "mechanisms": {
+      "title": "Direct Mechanisms",
+      "types": {
+        "version": "version",
+        "passAll": "pass all",
+        "failAll": "fail all",
+        "softFailAll": "soft fail all",
+        "neutralAll": "neutral all",
+        "ipv4": "IPv4",
+        "ipv6": "IPv6",
+        "aRecord": "A record",
+        "mxRecord": "MX record",
+        "existsCheck": "exists check",
+        "ptrRecord": "PTR record",
+        "other": "other"
+      }
+    },
+
+    "includes": {
+      "title": "Include Chain",
+      "types": {
+        "include": "include",
+        "redirect": "redirect"
+      },
+      "redirectTo": "redirect to: {domain}"
+    },
+
+    "redirects": {
+      "title": "Redirects"
+    }
+  },
+
+  "error": {
+    "title": "SPF Evaluation Failed"
+  },
+
+  "copyTemplate": {
+    "header": "SPF Evaluation for {domain}",
+    "generated": "Generated at: {timestamp}",
+    "originalRecord": "Original SPF Record:\n{record}",
+    "mechanismsHeader": "Mechanisms:",
+    "mechanismItem": "  {mechanism}",
+    "includesHeader": "Includes:",
+    "includeItem": "{indent}{type}: {domain}",
+    "includeError": " (Error: {error})",
+    "statusHeader": "\nStatus: {message}"
+  },
+
+  "education": {
+    "title": "Understanding SPF Records",
+
+    "mechanisms": {
+      "title": "SPF Mechanisms",
+      "all": "Matches all addresses (use carefully)",
+      "ipAddresses": "Matches specific IP addresses or ranges",
+      "records": "Matches A or MX record addresses",
+      "include": "References another domain's SPF record",
+      "redirect": "Redirects to another domain's SPF record"
+    },
+
+    "qualifiers": {
+      "title": "SPF Qualifiers",
+      "pass": "(Pass): Explicitly allow",
+      "fail": "(Fail): Explicitly deny",
+      "softFail": "(Soft Fail): Mark as suspicious",
+      "neutral": "(Neutral): No explicit policy"
+    },
+
+    "dnsLimits": {
+      "title": "DNS Lookup Limits",
+      "description": "SPF has a limit of 10 DNS lookups to prevent infinite loops and reduce load. This includes:",
+      "includeMechanisms": "Each {mechanism} mechanism",
+      "recordMechanisms": "Each {mechanisms} mechanism",
+      "redirectLookups": "Lookups from {modifier} modifiers"
+    },
+
+    "bestPractices": {
+      "title": "Best Practices",
+      "keepUnderLimit": "Keep DNS lookups under the 10-lookup limit",
+      "endWithAll": "End with {failAll} or {softFailAll} for security",
+      "useIpAddresses": "Use IP addresses when possible to reduce lookups",
+      "avoidNesting": "Avoid excessive nesting of includes",
+      "regularAudit": "Regularly audit and update SPF records"
+    }
   }
 }

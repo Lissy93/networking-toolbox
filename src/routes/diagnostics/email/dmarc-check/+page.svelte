@@ -38,7 +38,7 @@
     },
   ];
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   async function checkDMARC() {
     diagnosticState.startOperation();

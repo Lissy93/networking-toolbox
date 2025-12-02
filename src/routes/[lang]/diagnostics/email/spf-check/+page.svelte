@@ -1,8 +1,14 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
-  import { t } from '$lib/i18n';
   import '../../../../../styles/diagnostics-pages.scss';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics/email-spf-check');
+  });
 
   let domain = $state('gmail.com');
   let loading = $state(false);
@@ -12,12 +18,12 @@
   let selectedExampleIndex = $state<number | null>(null);
 
   const examples = [
-    { domain: 'gmail.com', description: 'Google Gmail SPF policy' },
-    { domain: 'outlook.com', description: 'Microsoft Outlook SPF setup' },
-    { domain: 'salesforce.com', description: 'Salesforce SPF configuration' },
-    { domain: 'mailchimp.com', description: 'MailChimp email service SPF' },
-    { domain: 'github.com', description: 'GitHub enterprise SPF policy' },
-    { domain: 'sendgrid.com', description: 'SendGrid email platform SPF' },
+    { domain: 'gmail.com', description: $t('diagnostics/email-spf-check.examples.gmail') },
+    { domain: 'outlook.com', description: $t('diagnostics/email-spf-check.examples.outlook') },
+    { domain: 'salesforce.com', description: $t('diagnostics/email-spf-check.examples.salesforce') },
+    { domain: 'mailchimp.com', description: $t('diagnostics/email-spf-check.examples.mailchimp') },
+    { domain: 'github.com', description: $t('diagnostics/email-spf-check.examples.github') },
+    { domain: 'sendgrid.com', description: $t('diagnostics/email-spf-check.examples.sendgrid') },
   ];
 
   async function checkSPF() {
@@ -122,9 +128,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>{t('diagnostics.email-spf-check.title')}</h1>
+    <h1>{$t('diagnostics/email-spf-check.title')}</h1>
     <p>
-      {t('diagnostics.email-spf-check.description')}
+      {$t('diagnostics/email-spf-check.description')}
     </p>
   </header>
 
@@ -133,7 +139,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>{t('diagnostics.email-spf-check.examples.title')}</h4>
+        <h4>{$t('diagnostics/email-spf-check.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -154,17 +160,17 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>SPF Policy Check</h3>
+      <h3>{$t('diagnostics/email-spf-check.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-group">
-        <label for="domain" use:tooltip={'Enter the domain to check SPF policy for'}>
-          Domain Name
+        <label for="domain" use:tooltip={$t('diagnostics/email-spf-check.form.domain.tooltip')}>
+          {$t('diagnostics/email-spf-check.form.domain.label')}
           <input
             id="domain"
             type="text"
             bind:value={domain}
-            placeholder="example.com"
+            placeholder={$t('diagnostics/email-spf-check.form.domain.placeholder')}
             onchange={() => {
               clearExampleSelection();
               if (domain) checkSPF();
@@ -177,10 +183,10 @@
         <button class="check-btn lookup-btn" onclick={checkSPF} disabled={loading || !domain.trim()}>
           {#if loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Checking SPF...
+            {$t('diagnostics/email-spf-check.form.checking')}
           {:else}
             <Icon name="mail-check" size="sm" />
-            Check SPF Policy
+            {$t('diagnostics/email-spf-check.form.check')}
           {/if}
         </button>
       </div>
@@ -191,10 +197,12 @@
   {#if results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>SPF Policy Analysis</h3>
+        <h3>{$t('diagnostics/email-spf-check.results.title')}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
           <Icon name={copiedState ? 'check' : 'copy'} size="xs" />
-          {copiedState ? 'Copied!' : 'Copy Results'}
+          {copiedState
+            ? $t('diagnostics/email-spf-check.results.copied')
+            : $t('diagnostics/email-spf-check.results.copy')}
         </button>
       </div>
       <div class="card-content">
@@ -205,14 +213,16 @@
               <div class="deliverability-overview {getDeliverabilityColor(results.emailAnalysis.deliverabilityRisk)}">
                 <Icon name={getDeliverabilityIcon(results.emailAnalysis.deliverabilityRisk)} size="md" />
                 <div>
-                  <h4>Email Deliverability Risk: {results.emailAnalysis.deliverabilityRisk.toUpperCase()}</h4>
+                  <h4>
+                    {$t('diagnostics/email-spf-check.results.deliverability.title')}: {results.emailAnalysis.deliverabilityRisk.toUpperCase()}
+                  </h4>
                   <p>
                     {#if results.emailAnalysis.deliverabilityRisk === 'low'}
-                      Strong SPF policy with hard fail - excellent email security
+                      {$t('diagnostics/email-spf-check.results.deliverability.low')}
                     {:else if results.emailAnalysis.deliverabilityRisk === 'medium'}
-                      Moderate SPF policy with soft fail - good but could be stronger
+                      {$t('diagnostics/email-spf-check.results.deliverability.medium')}
                     {:else}
-                      Weak or missing SPF policy - high risk of email spoofing
+                      {$t('diagnostics/email-spf-check.results.deliverability.high')}
                     {/if}
                   </p>
                 </div>
@@ -222,12 +232,16 @@
                 <div class="detail-item {results.emailAnalysis.hasHardFail ? 'success' : 'warning'}">
                   <Icon name={results.emailAnalysis.hasHardFail ? 'check-circle' : 'alert-circle'} size="sm" />
                   <div>
-                    <span class="detail-label">Hard Fail (-all)</span>
-                    <span class="detail-value">{results.emailAnalysis.hasHardFail ? 'Enabled' : 'Disabled'}</span>
+                    <span class="detail-label">{$t('diagnostics/email-spf-check.results.details.hardFail.label')}</span>
+                    <span class="detail-value"
+                      >{results.emailAnalysis.hasHardFail
+                        ? $t('diagnostics/email-spf-check.results.details.hardFail.enabled')
+                        : $t('diagnostics/email-spf-check.results.details.hardFail.disabled')}</span
+                    >
                     <span class="detail-description">
                       {results.emailAnalysis.hasHardFail
-                        ? 'Unauthorized emails will be rejected'
-                        : 'Consider upgrading to -all for better security'}
+                        ? $t('diagnostics/email-spf-check.results.details.hardFail.enabledDesc')
+                        : $t('diagnostics/email-spf-check.results.details.hardFail.disabledDesc')}
                     </span>
                   </div>
                 </div>
@@ -248,14 +262,18 @@
                     size="sm"
                   />
                   <div>
-                    <span class="detail-label">Soft Fail (~all)</span>
-                    <span class="detail-value">{results.emailAnalysis.hasSoftFail ? 'Enabled' : 'Disabled'}</span>
+                    <span class="detail-label">{$t('diagnostics/email-spf-check.results.details.softFail.label')}</span>
+                    <span class="detail-value"
+                      >{results.emailAnalysis.hasSoftFail
+                        ? $t('diagnostics/email-spf-check.results.details.softFail.enabled')
+                        : $t('diagnostics/email-spf-check.results.details.softFail.disabled')}</span
+                    >
                     <span class="detail-description">
                       {results.emailAnalysis.hasSoftFail
-                        ? 'Unauthorized emails marked as suspicious'
+                        ? $t('diagnostics/email-spf-check.results.details.softFail.enabledDesc')
                         : results.emailAnalysis.hasHardFail
-                          ? 'Using stronger hard fail instead'
-                          : 'No SPF enforcement configured'}
+                          ? $t('diagnostics/email-spf-check.results.details.softFail.hardFailInstead')
+                          : $t('diagnostics/email-spf-check.results.details.softFail.noEnforcement')}
                     </span>
                   </div>
                 </div>
@@ -264,9 +282,15 @@
                   <div class="detail-item error">
                     <Icon name="alert-triangle" size="sm" />
                     <div>
-                      <span class="detail-label">Allows All (+all)</span>
-                      <span class="detail-value">Enabled</span>
-                      <span class="detail-description">WARNING: Any server can send email for this domain</span>
+                      <span class="detail-label"
+                        >{$t('diagnostics/email-spf-check.results.details.allowsAll.label')}</span
+                      >
+                      <span class="detail-value"
+                        >{$t('diagnostics/email-spf-check.results.details.allowsAll.enabled')}</span
+                      >
+                      <span class="detail-description"
+                        >{$t('diagnostics/email-spf-check.results.details.allowsAll.warning')}</span
+                      >
                     </div>
                   </div>
                 {/if}
@@ -276,9 +300,9 @@
 
           <!-- SPF Record Display -->
           <div class="record-section">
-            <h4>SPF Record</h4>
+            <h4>{$t('diagnostics/email-spf-check.results.record.title')}</h4>
             <div class="record-display">
-              <div class="record-location">TXT record for {domain}</div>
+              <div class="record-location">{$t('diagnostics/email-spf-check.results.record.location', { domain })}</div>
               <code>{results.record}</code>
             </div>
           </div>
@@ -286,17 +310,18 @@
           <!-- Expanded Analysis -->
           {#if results.expanded}
             <div class="analysis-section">
-              <h4>SPF Policy Breakdown</h4>
+              <h4>{$t('diagnostics/email-spf-check.results.breakdown.title')}</h4>
 
               <!-- Lookup Count Warning -->
               {#if results.lookupCount > 8}
                 <div class="warning-box">
                   <Icon name="alert-triangle" size="sm" />
                   <div>
-                    <strong>DNS Lookup Limit Exceeded</strong>
+                    <strong>{$t('diagnostics/email-spf-check.results.breakdown.lookupLimitExceeded.title')}</strong>
                     <p>
-                      This SPF record requires {results.lookupCount} DNS lookups, which exceeds the RFC limit of 10. This
-                      may cause delivery failures.
+                      {$t('diagnostics/email-spf-check.results.breakdown.lookupLimitExceeded.message', {
+                        count: results.lookupCount,
+                      })}
                     </p>
                   </div>
                 </div>
@@ -304,10 +329,11 @@
                 <div class="info-box">
                   <Icon name="info" size="sm" />
                   <div>
-                    <strong>High DNS Lookup Count</strong>
+                    <strong>{$t('diagnostics/email-spf-check.results.breakdown.highLookupCount.title')}</strong>
                     <p>
-                      This SPF record requires {results.lookupCount} DNS lookups. Consider optimizing to stay well below
-                      the 10-lookup limit.
+                      {$t('diagnostics/email-spf-check.results.breakdown.highLookupCount.message', {
+                        count: results.lookupCount,
+                      })}
                     </p>
                   </div>
                 </div>
@@ -317,36 +343,46 @@
               {#if results.expanded.mechanisms.length > 0}
                 {@const spfExpanded = (results as { expanded: { mechanisms: string[] } }).expanded}
                 <div class="mechanisms-section">
-                  <h5>Direct Mechanisms</h5>
+                  <h5>{$t('diagnostics/email-spf-check.results.breakdown.directMechanisms')}</h5>
                   <div class="mechanism-list">
                     {#each spfExpanded.mechanisms as mechanism, mechanismIndex (mechanismIndex)}
                       <div class="mechanism-item">
                         <code>{mechanism}</code>
                         <span class="mechanism-description">
                           {#if mechanism.startsWith('v=spf1')}
-                            SPF version identifier
+                            {$t('diagnostics/email-spf-check.results.mechanisms.spfVersion')}
                           {:else if mechanism.startsWith('ip4:')}
-                            IPv4 address or network: {mechanism.substring(4)}
+                            {$t('diagnostics/email-spf-check.results.mechanisms.ipv4Address', {
+                              address: mechanism.substring(4),
+                            })}
                           {:else if mechanism.startsWith('ip6:')}
-                            IPv6 address or network: {mechanism.substring(4)}
+                            {$t('diagnostics/email-spf-check.results.mechanisms.ipv6Address', {
+                              address: mechanism.substring(4),
+                            })}
                           {:else if mechanism.startsWith('a:')}
-                            A record lookup for: {mechanism.substring(2)}
+                            {$t('diagnostics/email-spf-check.results.mechanisms.aRecordSpecific', {
+                              domain: mechanism.substring(2),
+                            })}
                           {:else if mechanism === 'a'}
-                            A record lookup for domain itself
+                            {$t('diagnostics/email-spf-check.results.mechanisms.aRecordDomain')}
                           {:else if mechanism.startsWith('mx:')}
-                            MX record lookup for: {mechanism.substring(3)}
+                            {$t('diagnostics/email-spf-check.results.mechanisms.mxRecordSpecific', {
+                              domain: mechanism.substring(3),
+                            })}
                           {:else if mechanism === 'mx'}
-                            MX record lookup for domain itself
+                            {$t('diagnostics/email-spf-check.results.mechanisms.mxRecordDomain')}
                           {:else if mechanism.startsWith('exists:')}
-                            DNS lookup test: {mechanism.substring(7)}
+                            {$t('diagnostics/email-spf-check.results.mechanisms.existsLookup', {
+                              domain: mechanism.substring(7),
+                            })}
                           {:else if mechanism === '-all'}
-                            Hard fail - reject unauthorized emails
+                            {$t('diagnostics/email-spf-check.results.mechanisms.hardFail')}
                           {:else if mechanism === '~all'}
-                            Soft fail - mark unauthorized emails as suspicious
+                            {$t('diagnostics/email-spf-check.results.mechanisms.softFail')}
                           {:else if mechanism === '+all'}
-                            Pass all - allow any server (dangerous)
+                            {$t('diagnostics/email-spf-check.results.mechanisms.passAll')}
                           {:else if mechanism === '?all'}
-                            Neutral - no policy decision
+                            {$t('diagnostics/email-spf-check.results.mechanisms.neutral')}
                           {:else}
                             {mechanism}
                           {/if}
@@ -365,7 +401,7 @@
                   }
                 ).expanded}
                 <div class="includes-section">
-                  <h5>Included SPF Policies</h5>
+                  <h5>{$t('diagnostics/email-spf-check.results.breakdown.includedPolicies')}</h5>
                   <div class="include-list">
                     {#each spfIncludes.includes as include, includeIndex (includeIndex)}
                       <div class="include-item">
@@ -396,11 +432,10 @@
             <div class="no-record-content">
               <Icon name="alert-triangle" size="md" />
               <div>
-                <h4>No SPF Record Found</h4>
-                <p>Domain <code>{domain}</code> does not have an SPF record configured.</p>
+                <h4>{$t('diagnostics/email-spf-check.results.noRecord.title')}</h4>
+                <p>{$t('diagnostics/email-spf-check.results.noRecord.message', { domain })}</p>
                 <p class="risk-warning">
-                  This means anyone can send email claiming to be from this domain, significantly increasing spoofing
-                  risk.
+                  {$t('diagnostics/email-spf-check.results.noRecord.warning')}
                 </p>
               </div>
             </div>
@@ -416,7 +451,7 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="md" />
           <div>
-            <strong>SPF Check Failed</strong>
+            <strong>{$t('diagnostics/email-spf-check.results.error.title')}</strong>
             <p>{error}</p>
           </div>
         </div>
@@ -427,62 +462,75 @@
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>Understanding SPF for Email</h3>
+      <h3>{$t('diagnostics/email-spf-check.education.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>SPF Mechanisms</h4>
+          <h4>{$t('diagnostics/email-spf-check.education.mechanisms.title')}</h4>
           <div class="mechanism-explanations">
             <div class="mechanism-explanation">
-              <strong>ip4/ip6:</strong> Authorize specific IP addresses or networks
+              <strong>ip4/ip6:</strong>
+              {$t('diagnostics/email-spf-check.education.mechanisms.ip')}
             </div>
             <div class="mechanism-explanation">
-              <strong>a/mx:</strong> Authorize servers from A or MX records
+              <strong>a/mx:</strong>
+              {$t('diagnostics/email-spf-check.education.mechanisms.amx')}
             </div>
             <div class="mechanism-explanation">
-              <strong>include:</strong> Include another domain's SPF policy
+              <strong>include:</strong>
+              {$t('diagnostics/email-spf-check.education.mechanisms.include')}
             </div>
             <div class="mechanism-explanation">
-              <strong>all:</strong> Final policy decision (+pass, ~soft fail, -hard fail)
+              <strong>all:</strong>
+              {$t('diagnostics/email-spf-check.education.mechanisms.all')}
             </div>
           </div>
         </div>
 
         <div class="info-section">
-          <h4>Email Deliverability</h4>
+          <h4>{$t('diagnostics/email-spf-check.education.deliverability.title')}</h4>
           <ul>
-            <li><strong>Hard Fail (-all):</strong> Best security, blocks unauthorized senders</li>
-            <li><strong>Soft Fail (~all):</strong> Marks suspicious, doesn't block delivery</li>
-            <li><strong>No SPF:</strong> High spoofing risk, may affect deliverability</li>
-            <li><strong>Too many lookups:</strong> Can cause delivery failures</li>
+            <li>
+              <strong>Hard Fail (-all):</strong>
+              {$t('diagnostics/email-spf-check.education.deliverability.hardFail')}
+            </li>
+            <li>
+              <strong>Soft Fail (~all):</strong>
+              {$t('diagnostics/email-spf-check.education.deliverability.softFail')}
+            </li>
+            <li><strong>No SPF:</strong> {$t('diagnostics/email-spf-check.education.deliverability.noSpf')}</li>
+            <li>
+              <strong>Too many lookups:</strong>
+              {$t('diagnostics/email-spf-check.education.deliverability.tooManyLookups')}
+            </li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Best Practices</h4>
+          <h4>{$t('diagnostics/email-spf-check.education.bestPractices.title')}</h4>
           <ul>
-            <li>Use -all for hard fail when possible</li>
-            <li>Keep DNS lookups under 10 (preferably under 5)</li>
-            <li>Test SPF changes before deployment</li>
-            <li>Monitor email delivery after SPF changes</li>
+            <li>{$t('diagnostics/email-spf-check.education.bestPractices.useHardFail')}</li>
+            <li>{$t('diagnostics/email-spf-check.education.bestPractices.limitLookups')}</li>
+            <li>{$t('diagnostics/email-spf-check.education.bestPractices.testChanges')}</li>
+            <li>{$t('diagnostics/email-spf-check.education.bestPractices.monitorDelivery')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Common SPF Examples</h4>
+          <h4>{$t('diagnostics/email-spf-check.education.examples.title')}</h4>
           <div class="spf-examples">
             <div class="spf-example">
               <code>v=spf1 include:_spf.google.com ~all</code>
-              <span>Use Google Workspace with soft fail</span>
+              <span>{$t('diagnostics/email-spf-check.education.examples.googleWorkspace')}</span>
             </div>
             <div class="spf-example">
               <code>v=spf1 ip4:192.168.1.1 -all</code>
-              <span>Only allow specific IP with hard fail</span>
+              <span>{$t('diagnostics/email-spf-check.education.examples.specificIp')}</span>
             </div>
             <div class="spf-example">
               <code>v=spf1 a mx -all</code>
-              <span>Allow A and MX record servers with hard fail</span>
+              <span>{$t('diagnostics/email-spf-check.education.examples.aMxRecords')}</span>
             </div>
           </div>
         </div>
@@ -773,13 +821,6 @@
       p {
         margin: 0 0 var(--spacing-xs) 0;
         color: var(--text-secondary);
-
-        code {
-          background: var(--bg-secondary);
-          padding: 2px 4px;
-          border-radius: 3px;
-          font-family: var(--font-mono);
-        }
       }
 
       .risk-warning {

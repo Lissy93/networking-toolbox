@@ -70,8 +70,34 @@
     }
   },
 
+  "errors": {
+    "title": "Performance Test Failed"
+  },
+
   "error": {
     "title": "Performance Test Failed"
+  },
+
+  "about": {
+    "title": "About HTTP Performance",
+    "timingComponents": {
+      "title": "Timing Components",
+      "dns": "DNS Resolution: Time to resolve domain name to IP address",
+      "tcp": "TCP Connect: Time to establish TCP connection",
+      "tls": "TLS Handshake: Time for SSL/TLS negotiation (HTTPS only)",
+      "ttfb": "Time to First Byte: Server processing and response start time"
+    },
+    "grades": {
+      "title": "Performance Grades",
+      "excellent": "A (≤200ms): Excellent performance",
+      "good": "B (≤500ms): Good performance",
+      "acceptable": "C (≤1000ms): Acceptable performance",
+      "poor": "D/F (>1000ms): Poor performance"
+    },
+    "optimization": {
+      "title": "Optimization Tips",
+      "description": "Use CDN for faster response times, enable compression, implement HTTP/2, optimize DNS resolution, and consider connection keep-alive for multiple requests."
+    }
   },
 
   "info": {

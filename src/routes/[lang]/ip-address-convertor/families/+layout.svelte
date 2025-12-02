@@ -3,6 +3,13 @@
   import '../../../../styles/converters.scss';
   import '../../../../styles/components.scss';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'pages');
+  });
 </script>
 
 <div class="container">
@@ -13,37 +20,48 @@
     <div class="explainer-card no-hover">
       <h3>
         <Icon name="info" size="md" />
-        Understanding IPv4 and IPv6
+        {$t('pages.ipConverter.families.understanding.title')}
       </h3>
       <div class="explainer-content">
         <div class="format-explanations">
           <!-- IPv4 Overview -->
           <div class="format-explanation">
-            <h4><span class="format-badge ipv4">IPv4 (Internet Protocol version 4)</span></h4>
-            <p><strong>Address Length:</strong> 32 bits (4 bytes)</p>
-            <p><strong>Format:</strong> Dotted decimal notation (e.g., 192.168.1.1)</p>
-            <p><strong>Total Addresses:</strong> ~4.3 billion addresses</p>
-            <p><strong>Example:</strong> <code>203.0.113.45</code></p>
-            <p><strong>Status:</strong> Widely deployed but address space exhausted</p>
+            <h4><span class="format-badge ipv4">{$t('pages.ipConverter.families.understanding.ipv4.title')}</span></h4>
+            <p><strong>{$t('pages.ipConverter.families.understanding.ipv4.addressLength')}</strong></p>
+            <p><strong>{$t('pages.ipConverter.families.understanding.ipv4.format')}</strong></p>
+            <p><strong>{$t('pages.ipConverter.families.understanding.ipv4.totalAddresses')}</strong></p>
+            <p>
+              <strong>{$t('pages.ipConverter.families.understanding.ipv4.example')}</strong> <code>203.0.113.45</code>
+            </p>
+            <p><strong>{$t('pages.ipConverter.families.understanding.ipv4.status')}</strong></p>
           </div>
 
           <!-- IPv6 Overview -->
           <div class="format-explanation">
-            <h4><span class="format-badge ipv6">IPv6 (Internet Protocol version 6)</span></h4>
-            <p><strong>Address Length:</strong> 128 bits (16 bytes)</p>
-            <p><strong>Format:</strong> Hexadecimal with colons (e.g., 2001:db8::1)</p>
-            <p><strong>Total Addresses:</strong> ~340 undecillion addresses</p>
-            <p><strong>Example:</strong> <code>2001:0db8:85a3:0000:0000:8a2e:0370:7334</code></p>
-            <p><strong>Status:</strong> Modern standard with virtually unlimited address space</p>
+            <h4><span class="format-badge ipv6">{$t('pages.ipConverter.families.understanding.ipv6.title')}</span></h4>
+            <p><strong>{$t('pages.ipConverter.families.understanding.ipv6.addressLength')}</strong></p>
+            <p><strong>{$t('pages.ipConverter.families.understanding.ipv6.format')}</strong></p>
+            <p><strong>{$t('pages.ipConverter.families.understanding.ipv6.totalAddresses')}</strong></p>
+            <p>
+              <strong>{$t('pages.ipConverter.families.understanding.ipv6.example')}</strong>
+              <code>2001:0db8:85a3:0000:0000:8a2e:0370:7334</code>
+            </p>
+            <p><strong>{$t('pages.ipConverter.families.understanding.ipv6.status')}</strong></p>
           </div>
 
           <!-- IPv4-mapped IPv6 -->
           <div class="format-explanation">
-            <h4><span class="format-badge mapped">IPv4-mapped IPv6</span></h4>
-            <p><strong>Purpose:</strong> Represent IPv4 addresses within IPv6 format</p>
-            <p><strong>Format:</strong> <code>::ffff:192.0.2.1</code> or <code>::ffff:c000:0201</code></p>
-            <p><strong>Usage:</strong> Transition mechanism and dual-stack implementations</p>
-            <p><strong>Structure:</strong> 80 zero bits + 16 one bits (ffff) + 32-bit IPv4 address</p>
+            <h4>
+              <span class="format-badge mapped">{$t('pages.ipConverter.families.understanding.ipv4Mapped.title')}</span>
+            </h4>
+            <p><strong>{$t('pages.ipConverter.families.understanding.ipv4Mapped.purpose')}</strong></p>
+            <p>
+              <strong>{$t('pages.ipConverter.families.understanding.ipv4Mapped.format')}</strong>
+              <code>::ffff:192.0.2.1</code>
+              or <code>::ffff:c000:0201</code>
+            </p>
+            <p><strong>{$t('pages.ipConverter.families.understanding.ipv4Mapped.usage')}</strong></p>
+            <p><strong>{$t('pages.ipConverter.families.understanding.ipv4Mapped.structure')}</strong></p>
           </div>
         </div>
       </div>
@@ -52,37 +70,41 @@
     <div class="explainer-card no-hover">
       <h3>
         <Icon name="lightbulb" size="md" />
-        Conversion Methods & Use Cases
+        {$t('pages.ipConverter.families.conversionMethods.title')}
       </h3>
       <div class="explainer-content">
         <div class="usage-scenarios">
           <div class="usage-scenario">
-            <h4>IPv4 to IPv6 Conversion</h4>
+            <h4>{$t('pages.ipConverter.families.conversionMethods.ipv4ToIpv6.title')}</h4>
             <ul>
-              <li><strong>IPv4-mapped:</strong> Embed IPv4 addresses in IPv6 format</li>
-              <li><strong>Dual-stack:</strong> Run both protocols simultaneously</li>
-              <li><strong>Tunneling:</strong> Encapsulate IPv4 traffic in IPv6 packets</li>
-              <li><strong>Migration:</strong> Gradual transition from IPv4 to IPv6</li>
+              <li><strong>{$t('pages.ipConverter.families.conversionMethods.ipv4ToIpv6.mapped')}</strong></li>
+              <li><strong>{$t('pages.ipConverter.families.conversionMethods.ipv4ToIpv6.dualStack')}</strong></li>
+              <li><strong>{$t('pages.ipConverter.families.conversionMethods.ipv4ToIpv6.tunneling')}</strong></li>
+              <li><strong>{$t('pages.ipConverter.families.conversionMethods.ipv4ToIpv6.migration')}</strong></li>
             </ul>
           </div>
 
           <div class="usage-scenario">
-            <h4>IPv6 to IPv4 Extraction</h4>
+            <h4>{$t('pages.ipConverter.families.conversionMethods.ipv6ToIpv4.title')}</h4>
             <ul>
-              <li><strong>Legacy Support:</strong> Extract IPv4 from mapped addresses</li>
-              <li><strong>Compatibility:</strong> Interface with IPv4-only systems</li>
-              <li><strong>Debugging:</strong> Identify original IPv4 addresses</li>
-              <li><strong>Analysis:</strong> Traffic analysis and monitoring</li>
+              <li><strong>{$t('pages.ipConverter.families.conversionMethods.ipv6ToIpv4.legacySupport')}</strong></li>
+              <li><strong>{$t('pages.ipConverter.families.conversionMethods.ipv6ToIpv4.compatibility')}</strong></li>
+              <li><strong>{$t('pages.ipConverter.families.conversionMethods.ipv6ToIpv4.debugging')}</strong></li>
+              <li><strong>{$t('pages.ipConverter.families.conversionMethods.ipv6ToIpv4.analysis')}</strong></li>
             </ul>
           </div>
 
           <div class="usage-scenario">
-            <h4>Real-world Applications</h4>
+            <h4>{$t('pages.ipConverter.families.conversionMethods.realWorldApps.title')}</h4>
             <ul>
-              <li><strong>Web Servers:</strong> Handle both IPv4 and IPv6 clients</li>
-              <li><strong>Load Balancers:</strong> Route traffic between IP versions</li>
-              <li><strong>Network Monitoring:</strong> Unified logging and analysis</li>
-              <li><strong>API Integration:</strong> Service compatibility layers</li>
+              <li><strong>{$t('pages.ipConverter.families.conversionMethods.realWorldApps.webServers')}</strong></li>
+              <li><strong>{$t('pages.ipConverter.families.conversionMethods.realWorldApps.loadBalancers')}</strong></li>
+              <li>
+                <strong>{$t('pages.ipConverter.families.conversionMethods.realWorldApps.networkMonitoring')}</strong>
+              </li>
+              <li>
+                <strong>{$t('pages.ipConverter.families.conversionMethods.realWorldApps.apiIntegration')}</strong>
+              </li>
             </ul>
           </div>
         </div>
@@ -92,20 +114,20 @@
     <div class="explainer-card no-hover">
       <h3>
         <Icon name="warning" size="md" />
-        Important Considerations
+        {$t('pages.ipConverter.families.considerations.title')}
       </h3>
       <div class="explainer-content">
         <div class="class-notes">
-          <h4>Limitations & Best Practices</h4>
+          <h4>{$t('pages.ipConverter.families.considerations.limitations.title')}</h4>
           <ul>
             <li>
-              <strong>IPv4-mapped IPv6:</strong> Only works for representing IPv4 addresses, not true IPv6 migration
+              <strong>{$t('pages.ipConverter.families.considerations.limitations.ipv4MappedLimit')}</strong>
             </li>
-            <li><strong>Security:</strong> IPv4-mapped addresses may bypass IPv6-specific security rules</li>
-            <li><strong>Performance:</strong> Native IPv6 is preferred over IPv4-mapped when possible</li>
-            <li><strong>Compatibility:</strong> Not all applications handle IPv4-mapped IPv6 correctly</li>
-            <li><strong>Best Practice:</strong> Use dual-stack configuration rather than relying solely on mapping</li>
-            <li><strong>Future-proofing:</strong> Plan for IPv6-native implementations</li>
+            <li><strong>{$t('pages.ipConverter.families.considerations.limitations.security')}</strong></li>
+            <li><strong>{$t('pages.ipConverter.families.considerations.limitations.performance')}</strong></li>
+            <li><strong>{$t('pages.ipConverter.families.considerations.limitations.compatibility')}</strong></li>
+            <li><strong>{$t('pages.ipConverter.families.considerations.limitations.bestPractice')}</strong></li>
+            <li><strong>{$t('pages.ipConverter.families.considerations.limitations.futureProofing')}</strong></li>
           </ul>
         </div>
       </div>

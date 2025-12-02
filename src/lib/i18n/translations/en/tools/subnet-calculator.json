@@ -73,6 +73,33 @@
       "description": "Classless Inter-Domain Routing notation (e.g., /24) indicates how many bits are used for the network portion. Higher numbers mean smaller subnets with fewer hosts."
     }
   },
+  "explainer": {
+    "title": "Understanding Subnetting",
+    "network_address": {
+      "title": "Network Address",
+      "description": "The first IP address in a subnet, used to identify the network itself. Hosts cannot be assigned this address as it represents the entire network segment."
+    },
+    "broadcast_address": {
+      "title": "Broadcast Address",
+      "description": "The last IP address in a subnet, used to send messages to all devices on the network. When a packet is sent to this address, it reaches every host in the subnet."
+    },
+    "subnet_mask": {
+      "title": "Subnet Mask",
+      "description": "Defines which portion of an IP address represents the network and which represents the host. A mask of /24 means the first 24 bits identify the network."
+    },
+    "wildcard_mask": {
+      "title": "Wildcard Mask",
+      "description": "The inverse of a subnet mask, used in access control lists. Where the subnet mask has 1s, the wildcard has 0s, and vice versa."
+    },
+    "usable_hosts": {
+      "title": "Usable Hosts",
+      "description": "The number of IP addresses available for devices. Always 2 less than total addresses because network and broadcast addresses are reserved."
+    },
+    "cidr_notation": {
+      "title": "CIDR Notation",
+      "description": "Classless Inter-Domain Routing notation (e.g., /24) indicates how many bits are used for the network portion. Higher numbers mean smaller subnets with fewer hosts."
+    }
+  },
   "tips": {
     "title": "💡 Pro Tips",
     "plan_growth": "Plan for Growth: Choose subnet sizes that accommodate future expansion",

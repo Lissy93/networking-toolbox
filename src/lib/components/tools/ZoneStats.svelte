@@ -3,15 +3,22 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { parseZoneFile, generateZoneStats, type ZoneStats } from '$lib/utils/zone-parser.js';
   import { useClipboard } from '$lib/composables';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools/zone-stats');
+  });
 
   let zoneInput = $state('');
   let results = $state<ZoneStats | null>(null);
   const clipboard = useClipboard();
   let activeExampleIndex = $state<number | null>(null);
 
-  const examples = [
+  const examples = $derived([
     {
-      name: 'Simple Zone',
+      name: $t('examples.simple.name'),
       content: `$ORIGIN example.com.
 $TTL 86400
 @	IN	SOA	ns1.example.com. admin.example.com. (
@@ -28,10 +35,10 @@ $TTL 86400
 www	300	IN	A	192.0.2.1
 mail	IN	A	192.0.2.10
 ftp	IN	CNAME	www.example.com.`,
-      description: 'Basic zone with common record types',
+      description: $t('examples.simple.description'),
     },
     {
-      name: 'Complex Zone',
+      name: $t('examples.complex.name'),
       content: `$ORIGIN example.com.
 $TTL 3600
 @	IN	SOA	ns1.example.com. hostmaster.example.com. 2023010101 10800 3600 604800 86400
@@ -54,10 +61,10 @@ _sip._tcp	IN	SRV	10 60 5060 sip.example.com.
 
 blog	IN	CNAME	www.example.com.
 shop	IN	CNAME	www.example.com.`,
-      description: 'Comprehensive zone with diverse record types and TTLs',
+      description: $t('examples.complex.description'),
     },
     {
-      name: 'Large Organization',
+      name: $t('examples.large.name'),
       content: `$ORIGIN bigcorp.com.
 $TTL 7200
 
@@ -98,9 +105,9 @@ dns4	IN	A	203.0.113.113
 london	IN	A	203.0.113.200
 tokyo	IN	A	203.0.113.201
 sydney	IN	A	203.0.113.202`,
-      description: 'Large organization with multiple services and locations',
+      description: $t('examples.large.description'),
     },
-  ];
+  ]);
 
   function loadExample(example: (typeof examples)[0], index: number) {
     zoneInput = example.content;
@@ -135,12 +142,12 @@ sydney	IN	A	203.0.113.202`,
   function formatStatsForCopy(stats: ZoneStats): string {
     const lines: string[] = [];
 
-    lines.push(`DNS Zone Statistics Report`);
-    lines.push(`========================\n`);
+    lines.push($t('copyTemplate.title'));
+    lines.push($t('copyTemplate.separator') + '\n');
 
-    lines.push(`Total Records: ${stats.totalRecords}\n`);
+    lines.push($t('copyTemplate.totalRecords', { count: stats.totalRecords }) + '\n');
 
-    lines.push(`Records by Type:`);
+    lines.push($t('copyTemplate.recordsByType'));
     Object.entries(stats.recordsByType)
       .sort(([, a], [, b]) => b - a)
       .forEach(([type, count]) => {
@@ -148,29 +155,34 @@ sydney	IN	A	203.0.113.202`,
       });
     lines.push('');
 
-    lines.push(`TTL Distribution:`);
+    lines.push($t('copyTemplate.ttlDistribution'));
     Object.entries(stats.ttlDistribution)
       .sort(([a], [b]) => parseInt(a) - parseInt(b))
       .forEach(([ttl, count]) => {
-        lines.push(`  ${ttl}s: ${count} record${count !== 1 ? 's' : ''}`);
+        const plural = count !== 1 ? 's' : '';
+        lines.push(`  ${$t('copyTemplate.ttlEntry', { ttl, count, plural })}`);
       });
     lines.push('');
 
-    lines.push(`Name Statistics:`);
-    lines.push(`  Shortest name: ${stats.nameDepths.min} characters`);
-    lines.push(`  Longest name: ${stats.nameDepths.max} characters`);
-    lines.push(`  Average length: ${stats.nameDepths.average.toFixed(1)} characters`);
+    lines.push($t('copyTemplate.nameStats'));
+    lines.push(`  ${$t('copyTemplate.shortestName', { length: stats.nameDepths.min })}`);
+    lines.push(`  ${$t('copyTemplate.longestName', { length: stats.nameDepths.max })}`);
+    lines.push(`  ${$t('copyTemplate.averageLength', { length: stats.nameDepths.average.toFixed(1) })}`);
     lines.push('');
 
-    lines.push(`Largest Record: ${stats.largestRecord.size} bytes`);
+    lines.push($t('copyTemplate.largestRecord', { size: stats.largestRecord.size }));
     lines.push(`  ${stats.largestRecord.record.owner} ${stats.largestRecord.record.type}`);
     lines.push('');
 
-    lines.push(`Zone Health:`);
-    lines.push(`  Has SOA: ${stats.sanityChecks.hasSoa ? 'Yes' : 'No'}`);
-    lines.push(`  Has NS records: ${stats.sanityChecks.hasNs ? 'Yes' : 'No'}`);
-    lines.push(`  Duplicate records: ${stats.sanityChecks.duplicates.length}`);
-    lines.push(`  Orphaned glue: ${stats.sanityChecks.orphanedGlue.length}`);
+    lines.push($t('copyTemplate.zoneHealth'));
+    lines.push(
+      `  ${$t('copyTemplate.hasSoa', { status: stats.sanityChecks.hasSoa ? $t('copyTemplate.yes') : $t('copyTemplate.no') })}`,
+    );
+    lines.push(
+      `  ${$t('copyTemplate.hasNs', { status: stats.sanityChecks.hasNs ? $t('copyTemplate.yes') : $t('copyTemplate.no') })}`,
+    );
+    lines.push(`  ${$t('copyTemplate.duplicates', { count: stats.sanityChecks.duplicates.length })}`);
+    lines.push(`  ${$t('copyTemplate.orphanedGlue', { count: stats.sanityChecks.orphanedGlue.length })}`);
 
     return lines.join('\n');
   }
@@ -188,17 +200,17 @@ sydney	IN	A	203.0.113.202`,
   }
 
   function getTTLLabel(ttl: number): string {
-    if (ttl < 300) return 'Very Short';
-    if (ttl < 3600) return 'Short';
-    if (ttl < 86400) return 'Medium';
-    return 'Long';
+    if (ttl < 300) return $t('results.ttlDistribution.labels.veryShort');
+    if (ttl < 3600) return $t('results.ttlDistribution.labels.short');
+    if (ttl < 86400) return $t('results.ttlDistribution.labels.medium');
+    return $t('results.ttlDistribution.labels.long');
   }
 </script>
 
 <div class="card">
   <header class="card-header">
-    <h1>DNS Zone Statistics</h1>
-    <p>Analyze zone file structure, record distribution, and configuration health</p>
+    <h1>{$t('title')}</h1>
+    <p>{$t('description')}</p>
   </header>
 
   <!-- Educational Overview -->
@@ -207,19 +219,22 @@ sydney	IN	A	203.0.113.202`,
       <div class="overview-item">
         <Icon name="bar-chart" size="sm" />
         <div>
-          <strong>Record Analysis:</strong> Count and categorize all DNS records by type and TTL.
+          <strong>{$t('overview.recordAnalysis.title')}</strong>
+          {$t('overview.recordAnalysis.content')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="ruler" size="sm" />
         <div>
-          <strong>Size Metrics:</strong> Identify largest records and analyze name length distribution.
+          <strong>{$t('overview.sizeMetrics.title')}</strong>
+          {$t('overview.sizeMetrics.content')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="shield" size="sm" />
         <div>
-          <strong>Health Checks:</strong> Validate zone structure and identify potential issues.
+          <strong>{$t('overview.healthChecks.title')}</strong>
+          {$t('overview.healthChecks.content')}
         </div>
       </div>
     </div>
@@ -230,7 +245,7 @@ sydney	IN	A	203.0.113.202`,
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="sm" />
-        <h3>Zone Analysis Examples</h3>
+        <h3>{$t('examples.title')}</h3>
       </summary>
       <div class="examples-grid">
         {#each examples as example, index (example.name)}
@@ -249,9 +264,9 @@ sydney	IN	A	203.0.113.202`,
   <!-- Input Section -->
   <div class="card input-card">
     <div class="input-group">
-      <label for="zone-input" use:tooltip={'Paste your DNS zone file for comprehensive statistical analysis'}>
+      <label for="zone-input" use:tooltip={$t('input.tooltip')}>
         <Icon name="file" size="sm" />
-        Zone File Content
+        {$t('input.label')}
       </label>
       <textarea
         id="zone-input"
@@ -280,13 +295,13 @@ www	IN	A	192.0.2.1"
   {#if results}
     <section class="results-section">
       <div class="results-header">
-        <h3>Zone Analysis Report</h3>
+        <h3>{$t('results.title')}</h3>
         <button
           class="copy-button {clipboard.isCopied() ? 'copied' : ''}"
           onclick={() => results && clipboard.copy(formatStatsForCopy(results))}
         >
           <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="sm" />
-          {clipboard.isCopied() ? 'Copied!' : 'Copy Report'}
+          {clipboard.isCopied() ? $t('results.copied') : $t('results.copy')}
         </button>
       </div>
 
@@ -299,7 +314,7 @@ www	IN	A	192.0.2.1"
             </div>
             <div class="stat-info">
               <div class="stat-value">{results.totalRecords}</div>
-              <div class="stat-label">Total Records</div>
+              <div class="stat-label">{$t('results.stats.totalRecords')}</div>
             </div>
           </div>
 
@@ -309,7 +324,7 @@ www	IN	A	192.0.2.1"
             </div>
             <div class="stat-info">
               <div class="stat-value">{Object.keys(results.recordsByType).length}</div>
-              <div class="stat-label">Record Types</div>
+              <div class="stat-label">{$t('results.stats.recordTypes')}</div>
             </div>
           </div>
 
@@ -319,7 +334,7 @@ www	IN	A	192.0.2.1"
             </div>
             <div class="stat-info">
               <div class="stat-value">{Object.keys(results.ttlDistribution).length}</div>
-              <div class="stat-label">Unique TTLs</div>
+              <div class="stat-label">{$t('results.stats.uniqueTtls')}</div>
             </div>
           </div>
 
@@ -329,7 +344,7 @@ www	IN	A	192.0.2.1"
             </div>
             <div class="stat-info">
               <div class="stat-value">{results.nameDepths.average.toFixed(1)}</div>
-              <div class="stat-label">Avg Name Length</div>
+              <div class="stat-label">{$t('results.stats.avgNameLength')}</div>
             </div>
           </div>
         </div>
@@ -338,14 +353,19 @@ www	IN	A	192.0.2.1"
         <div class="chart-card">
           <h4>
             <Icon name="pie" size="sm" />
-            Record Type Distribution
+            {$t('results.recordDistribution.title')}
           </h4>
           <div class="record-types-chart">
             {#each Object.entries(results.recordsByType).sort(([, a], [, b]) => b - a) as [type, count] (type)}
               <div class="type-row">
                 <div class="type-info">
                   <span class="type-name">{type}</span>
-                  <span class="type-count">{count} record{count !== 1 ? 's' : ''}</span>
+                  <span class="type-count"
+                    >{count}
+                    {count !== 1
+                      ? $t('results.recordDistribution.recordsPlural')
+                      : $t('results.recordDistribution.records')}</span
+                  >
                 </div>
                 <div class="type-bar-container">
                   <div class="type-bar" style="width: {(count / results.totalRecords) * 100}%"></div>
@@ -362,7 +382,7 @@ www	IN	A	192.0.2.1"
         <div class="chart-card">
           <h4>
             <Icon name="clock" size="sm" />
-            TTL Distribution
+            {$t('results.ttlDistribution.title')}
           </h4>
           <div class="ttl-distribution">
             {#each Object.entries(results.ttlDistribution).sort(([a], [b]) => parseInt(a) - parseInt(b)) as [ttl, count] (ttl)}
@@ -373,7 +393,12 @@ www	IN	A	192.0.2.1"
                   </span>
                   <span class="ttl-label">({getTTLLabel(parseInt(ttl))})</span>
                 </div>
-                <div class="ttl-count">{count} record{count !== 1 ? 's' : ''}</div>
+                <div class="ttl-count">
+                  {count}
+                  {count !== 1
+                    ? $t('results.recordDistribution.recordsPlural')
+                    : $t('results.recordDistribution.records')}
+                </div>
               </div>
             {/each}
           </div>
@@ -383,21 +408,24 @@ www	IN	A	192.0.2.1"
         <div class="analysis-card">
           <h4>
             <Icon name="ruler" size="sm" />
-            Name Length Analysis
+            {$t('results.nameAnalysis.title')}
           </h4>
           <div class="name-stats">
             <div class="name-stat">
-              <div class="name-stat-label">Shortest Name</div>
-              <div class="name-stat-value">{results.nameDepths.min} chars</div>
+              <div class="name-stat-label">{$t('results.nameAnalysis.shortestName')}</div>
+              <div class="name-stat-value">{results.nameDepths.min} {$t('results.nameAnalysis.chars')}</div>
             </div>
             <div class="name-stat">
-              <div class="name-stat-label">Longest Name</div>
-              <div class="name-stat-value">{results.nameDepths.max} chars</div>
+              <div class="name-stat-label">{$t('results.nameAnalysis.longestName')}</div>
+              <div class="name-stat-value">{results.nameDepths.max} {$t('results.nameAnalysis.chars')}</div>
               <div class="name-stat-detail">{results.longestName.name}</div>
             </div>
             <div class="name-stat">
-              <div class="name-stat-label">Average Length</div>
-              <div class="name-stat-value">{results.nameDepths.average.toFixed(1)} chars</div>
+              <div class="name-stat-label">{$t('results.nameAnalysis.averageLength')}</div>
+              <div class="name-stat-value">
+                {results.nameDepths.average.toFixed(1)}
+                {$t('results.nameAnalysis.chars')}
+              </div>
             </div>
           </div>
         </div>
@@ -406,10 +434,10 @@ www	IN	A	192.0.2.1"
         <div class="analysis-card">
           <h4>
             <Icon name="maximize" size="sm" />
-            Largest Record
+            {$t('results.largestRecord.title')}
           </h4>
           <div class="largest-record">
-            <div class="record-size">{results.largestRecord.size} bytes</div>
+            <div class="record-size">{results.largestRecord.size} {$t('results.largestRecord.bytes')}</div>
             <div class="record-details">
               <div class="record-owner">{results.largestRecord.record.owner}</div>
               <div class="record-type-data">
@@ -424,25 +452,25 @@ www	IN	A	192.0.2.1"
         <div class="health-card">
           <h4>
             <Icon name="shield" size="sm" />
-            Zone Health Checks
+            {$t('results.healthChecks.title')}
           </h4>
           <div class="health-checks">
             <div class="health-check {results.sanityChecks.hasSoa ? 'pass' : 'fail'}">
               <Icon name={results.sanityChecks.hasSoa ? 'check-circle' : 'x-circle'} size="sm" />
-              <span>SOA Record Present</span>
+              <span>{$t('results.healthChecks.soaPresent')}</span>
             </div>
 
             <div class="health-check {results.sanityChecks.hasNs ? 'pass' : 'fail'}">
               <Icon name={results.sanityChecks.hasNs ? 'check-circle' : 'x-circle'} size="sm" />
-              <span>NS Records Present</span>
+              <span>{$t('results.healthChecks.nsPresent')}</span>
             </div>
 
             <div class="health-check {results.sanityChecks.duplicates.length === 0 ? 'pass' : 'warn'}">
               <Icon name={results.sanityChecks.duplicates.length === 0 ? 'check-circle' : 'alert-triangle'} size="sm" />
               <span>
                 {results.sanityChecks.duplicates.length === 0
-                  ? 'No Duplicate Records'
-                  : `${results.sanityChecks.duplicates.length} Duplicate Record${results.sanityChecks.duplicates.length !== 1 ? 's' : ''}`}
+                  ? $t('results.healthChecks.noDuplicates')
+                  : `${results.sanityChecks.duplicates.length} ${results.sanityChecks.duplicates.length !== 1 ? $t('results.healthChecks.duplicateRecordsPlural') : $t('results.healthChecks.duplicateRecords')}`}
               </span>
             </div>
 
@@ -453,8 +481,8 @@ www	IN	A	192.0.2.1"
               />
               <span>
                 {results.sanityChecks.orphanedGlue.length === 0
-                  ? 'No Orphaned Glue Records'
-                  : `${results.sanityChecks.orphanedGlue.length} Orphaned Glue Record${results.sanityChecks.orphanedGlue.length !== 1 ? 's' : ''}`}
+                  ? $t('results.healthChecks.noOrphanedGlue')
+                  : `${results.sanityChecks.orphanedGlue.length} ${results.sanityChecks.orphanedGlue.length !== 1 ? $t('results.healthChecks.orphanedGluePlural') : $t('results.healthChecks.orphanedGlue')}`}
               </span>
             </div>
           </div>
@@ -467,34 +495,30 @@ www	IN	A	192.0.2.1"
   <div class="education-card">
     <div class="education-grid">
       <div class="education-item info-panel">
-        <h4>Zone Statistics</h4>
+        <h4>{$t('education.statistics.title')}</h4>
         <p>
-          Zone statistics help understand DNS structure, identify optimization opportunities, and spot potential issues.
-          Analyze record distribution, TTL patterns, and naming conventions for better zone management.
+          {$t('education.statistics.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>TTL Strategy</h4>
+        <h4>{$t('education.ttlStrategy.title')}</h4>
         <p>
-          TTL distribution reveals caching patterns. Short TTLs enable quick changes but increase DNS load. Long TTLs
-          reduce queries but slow propagation. Balance based on change frequency and traffic patterns.
+          {$t('education.ttlStrategy.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Record Analysis</h4>
+        <h4>{$t('education.recordAnalysis.title')}</h4>
         <p>
-          Record type distribution shows zone complexity. Heavy A/AAAA records suggest web services, many MX records
-          indicate mail infrastructure, and diverse types show comprehensive DNS usage.
+          {$t('education.recordAnalysis.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Health Monitoring</h4>
+        <h4>{$t('education.healthMonitoring.title')}</h4>
         <p>
-          Regular zone analysis catches configuration drift, identifies duplicates, and ensures essential records exist.
-          Use statistics to track zone growth and optimize DNS performance over time.
+          {$t('education.healthMonitoring.content')}
         </p>
       </div>
     </div>

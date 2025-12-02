@@ -1,0 +1,98 @@
+{
+  "title": "RRSIG Planner",
+  "description": "Suggest RRSIG validity windows (inception/expiration) based on TTLs and desired overlap, with renewal lead-time guidance for automated DNSSEC signature management.",
+
+  "form": {
+    "ttl": {
+      "label": "TTL (seconds)",
+      "error": "TTL must be between 1 and 86400 seconds"
+    },
+    "overlap": {
+      "label": "Desired Overlap (hours)",
+      "error": "Overlap must be between 1 and 168 hours"
+    },
+    "leadTime": {
+      "label": "Renewal Lead Time (hours)",
+      "error": "Lead time must be between 1 and 168 hours"
+    },
+    "clockSkew": {
+      "label": "Clock Skew (hours)",
+      "error": "Clock skew must be between 0 and 24 hours"
+    },
+    "validityDays": {
+      "label": "Signature Validity (days)",
+      "error": "Validity must be between 1 and 365 days"
+    }
+  },
+
+  "warnings": {
+    "title": "Timing Warnings:"
+  },
+
+  "windows": {
+    "current": {
+      "title": "Current Signature Window",
+      "copy": "Copy"
+    },
+    "next": {
+      "title": "Next Signature Window",
+      "copySchedule": "Copy Full Schedule"
+    },
+    "timing": {
+      "inception": "Inception (Start Time)",
+      "expiration": "Expiration (End Time)",
+      "renewal": "Renewal Time",
+      "nextInception": "Next Inception",
+      "nextExpiration": "Next Expiration",
+      "followingRenewal": "Following Renewal",
+      "renewalNote": "Generate next signatures before this time"
+    },
+    "metrics": {
+      "validityPeriod": "Validity Period",
+      "leadTime": "Lead Time",
+      "overlapPeriod": "Overlap Period"
+    }
+  },
+
+  "guidelines": {
+    "title": "Implementation Guidelines",
+    "automation": {
+      "title": "Automation Schedule:",
+      "monitor": "Monitor renewal times continuously",
+      "generate": "Generate new signatures {leadTime} before expiration",
+      "maintain": "Maintain {overlap} overlap period",
+      "account": "Account for {clockSkew}h clock skew tolerance"
+    },
+    "bestPractices": {
+      "title": "Best Practices:",
+      "test": "Test signature generation before deployment",
+      "monitor": "Monitor DNSSEC validation after updates",
+      "backup": "Keep backup signatures for rollback",
+      "log": "Log all signature generation events"
+    }
+  },
+
+  "education": {
+    "timing": {
+      "title": "RRSIG Timing",
+      "content": "RRSIG records have inception and expiration timestamps that define when the signature is valid. Proper timing ensures continuous DNSSEC validation during key transitions."
+    },
+    "overlap": {
+      "title": "Overlap Strategy",
+      "content": "Overlapping signature validity periods prevent validation failures during rollover. New signatures should be generated before old ones expire."
+    },
+    "clockSkew": {
+      "title": "Clock Skew Tolerance",
+      "content": "Account for time differences between authoritative servers and validators. Start signatures slightly in the past to accommodate clock skew."
+    },
+    "automation": {
+      "title": "Automation Benefits",
+      "content": "Automated RRSIG generation reduces manual errors and ensures consistent timing. Plan renewal schedules based on TTL values and operational requirements."
+    }
+  },
+
+  "copyTemplates": {
+    "single": "RRSIG Timing Window:\nInception: {inception} ({inceptionTimestamp})\nExpiration: {expiration} ({expirationTimestamp})\nRenewal Time: {renewal}",
+    "schedule": "RRSIG Planning Schedule:\n\nCurrent Window:\nInception: {currentInception} ({currentInceptionTimestamp})\nExpiration: {currentExpiration} ({currentExpirationTimestamp})\nRenewal Time: {currentRenewal}\n\nNext Window:\nInception: {nextInception} ({nextInceptionTimestamp})\nExpiration: {nextExpiration} ({nextExpirationTimestamp})\nRenewal Time: {nextRenewal}"
+  }
+}

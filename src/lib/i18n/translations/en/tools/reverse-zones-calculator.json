@@ -1,0 +1,94 @@
+{
+  "title": "Reverse Zones Calculator",
+  "description": "Calculate the minimal set of reverse DNS zones needed to delegate a CIDR block",
+
+  "overview": {
+    "zoneBoundaries": {
+      "title": "Zone Boundaries",
+      "description": "IPv4 uses octet boundaries (/8, /16, /24) and IPv6 uses nibble boundaries (4-bit increments)."
+    },
+    "delegation": {
+      "title": "Delegation",
+      "description": "DNS zones must be properly delegated by upstream providers at natural boundaries."
+    },
+    "optimization": {
+      "title": "Optimization",
+      "description": "Calculate the minimal number of zones needed to avoid unnecessary complexity."
+    }
+  },
+
+  "examples": {
+    "title": "Quick Examples",
+    "ipv4_24": {
+      "label": "IPv4 /24 Network",
+      "description": "Single class C zone delegation"
+    },
+    "ipv4_16": {
+      "label": "IPv4 /16 Network",
+      "description": "Class B with multiple /24 zones"
+    },
+    "ipv4_20": {
+      "label": "IPv4 /20 Block",
+      "description": "16 class C zones needed"
+    },
+    "ipv4_28": {
+      "label": "IPv4 /28 Subnet",
+      "description": "Small subnet within /24 zone"
+    },
+    "ipv6_64": {
+      "label": "IPv6 /64 Network",
+      "description": "IPv6 nibble boundary delegation"
+    },
+    "ipv6_48": {
+      "label": "IPv6 /48 Prefix",
+      "description": "IPv6 /48 delegation zone"
+    }
+  },
+
+  "input": {
+    "label": "CIDR Network",
+    "placeholder": "e.g., 192.168.1.0/24 or 2001:db8::/48",
+    "help": "Enter the network you need reverse DNS zones for"
+  },
+
+  "buttons": {
+    "calculate": "Calculate Zones",
+    "clear": "Clear"
+  },
+
+  "results": {
+    "title": "Reverse Zone Analysis",
+    "analysis": {
+      "title": "Zone Analysis",
+      "totalZones": "Total Zones",
+      "ipv4Zones": "IPv4 Zones",
+      "ipv6Zones": "IPv6 Zones",
+      "delegationType": "Delegation Type"
+    },
+    "zones": {
+      "title": "Required Reverse Zones",
+      "zone": "Zone",
+      "type": "Type",
+      "delegation": "Delegation",
+      "addresses": "Addresses"
+    },
+    "configuration": {
+      "title": "Configuration Examples",
+      "bindConfig": "BIND9 Configuration",
+      "delegationCommands": "Zone File Setup Commands"
+    }
+  },
+
+  "delegationTypes": {
+    "classC": "Class C (/24)",
+    "custom": "Custom",
+    "multipleZones": "Multiple zones",
+    "ipv6Nibble": "IPv6 nibble boundary"
+  },
+
+  "error": {
+    "title": "Calculation Error",
+    "noZones": "No reverse zones could be calculated for this CIDR",
+    "invalidInput": "Invalid CIDR format"
+  }
+}

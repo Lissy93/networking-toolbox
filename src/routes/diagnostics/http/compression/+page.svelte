@@ -16,7 +16,7 @@
     { url: 'https://www.cloudflare.com', description: 'Cloudflare (brotli support)' },
   ];
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   const isInputValid = $derived(() => {
     const trimmedUrl = url.trim();

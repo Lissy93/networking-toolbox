@@ -53,7 +53,7 @@
     },
   ];
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   function generate() {
     errors = [];

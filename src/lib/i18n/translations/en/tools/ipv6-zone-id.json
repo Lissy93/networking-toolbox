@@ -66,6 +66,21 @@
   "info": {
     "title": "IPv6 Zone Identifiers",
     "description": "Zone identifiers specify the network interface for link-local and multicast addresses",
-    "usage": "Format: address%zone (e.g., fe80::1%eth0)"
+    "usage": "Format: address%zone (e.g., fe80::1%eth0)",
+    "whenRequired": {
+      "title": "When Zone IDs Are Required",
+      "linkLocal": {
+        "type": "Link-Local Addresses",
+        "description": "Required to specify which network interface"
+      },
+      "multicast": {
+        "type": "Multicast Addresses",
+        "description": "Required for link-local and site-local multicast"
+      }
+    },
+    "commonIdentifiers": {
+      "title": "Common Zone Identifiers",
+      "examples": "eth0, wlan0, lo0, 1, 2, 3"
+    }
   }
 }

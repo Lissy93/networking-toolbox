@@ -24,9 +24,25 @@
       "label": "Desired Host Count",
       "tooltip": "Number of hosts needed in the new subnet"
     },
+    "targetPrefix": {
+      "label": "Target Prefix Length"
+    },
+    "policy": {
+      "label": "Allocation Policy",
+      "options": {
+        "firstFit": "First Fit",
+        "bestFit": "Best Fit"
+      }
+    },
+    "maxCandidates": {
+      "label": "Maximum Candidates"
+    },
     "options": {
       "ipv4UsableHosts": "Count only usable hosts (exclude network/broadcast)",
-      "maxCandidates": "Maximum candidates to return"
+      "maxCandidates": "Maximum candidates to return",
+      "usableHosts": {
+        "label": "Count Usable Hosts Only"
+      }
     }
   },
   "allocation": {
@@ -40,27 +56,29 @@
       "worstFitDesc": "Maximize remaining contiguous space"
     }
   },
+  "searchCriteria": {
+    "title": "Search Criteria",
+    "byPrefix": {
+      "label": "By Prefix Length"
+    },
+    "byHosts": {
+      "label": "By Host Count"
+    }
+  },
+
   "examples": {
     "title": "Quick Examples",
     "officeSubnets": {
-      "label": "Office Subnets",
-      "description": "Find next /24 in corporate network"
+      "label": "Office Subnets"
     },
-    "vlanPlanning": {
-      "label": "VLAN Planning",
-      "description": "Plan VLAN subnets with different sizes"
+    "hostBasedSearch": {
+      "label": "Host-Based Search"
     },
-    "datacenterBlocks": {
-      "label": "Datacenter Blocks",
-      "description": "Large block allocation in datacenter"
+    "multiplePools": {
+      "label": "Multiple Pools"
     },
-    "homeNetwork": {
-      "label": "Home Network",
-      "description": "Small network subdivision"
-    },
-    "ipv6Allocation": {
-      "label": "IPv6 Allocation",
-      "description": "IPv6 subnet planning"
+    "ipv6Example": {
+      "label": "IPv6 Example"
     }
   },
   "actions": {

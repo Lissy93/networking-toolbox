@@ -8,7 +8,7 @@
 
   // Load translations for this tool
   onMount(async () => {
-    await loadTranslations(get(locale), 'tools/ipv6-teredo');
+    await loadTranslations(get(locale), 'tools');
   });
 
   let input = $state('2001:0000:4136:e378:8000:63bf:3fff:fdd2');
@@ -38,24 +38,24 @@
 
   const examples = $derived([
     {
-      label: $t('tools.ipv6-teredo.examples.microsoftTeredo'),
+      label: $t('tools.ipv6_teredo.examples.microsoftTeredo'),
       address: '2001:0000:4136:e378:8000:63bf:3fff:fdd2',
-      description: $t('tools.ipv6-teredo.examples.microsoftTeredoDesc'),
+      description: $t('tools.ipv6_teredo.examples.microsoftTeredoDesc'),
     },
     {
-      label: $t('tools.ipv6-teredo.examples.compressedForm'),
+      label: $t('tools.ipv6_teredo.examples.compressedForm'),
       address: '2001::4136:e378:8000:63bf:3fff:fdd2',
-      description: $t('tools.ipv6-teredo.examples.compressedFormDesc'),
+      description: $t('tools.ipv6_teredo.examples.compressedFormDesc'),
     },
     {
-      label: $t('tools.ipv6-teredo.examples.behindNATCone'),
+      label: $t('tools.ipv6_teredo.examples.behindNATCone'),
       address: '2001:0000:5ef5:79fb:0000:5efe:c0a8:0101',
-      description: $t('tools.ipv6-teredo.examples.behindNATConeDesc'),
+      description: $t('tools.ipv6_teredo.examples.behindNATConeDesc'),
     },
     {
-      label: $t('tools.ipv6-teredo.examples.directConnection'),
+      label: $t('tools.ipv6_teredo.examples.directConnection'),
       address: '2001:0000:4136:e378:ffff:ffff:ffff:ffff',
-      description: $t('tools.ipv6-teredo.examples.directConnectionDesc'),
+      description: $t('tools.ipv6_teredo.examples.directConnectionDesc'),
     },
   ]);
 
@@ -272,8 +272,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>{$t('tools.ipv6-teredo.title')}</h1>
-    <p>{$t('tools.ipv6-teredo.description')}</p>
+    <h1>{$t('tools.ipv6_teredo.title')}</h1>
+    <p>{$t('tools.ipv6_teredo.description')}</p>
   </header>
 
   <!-- Educational Overview -->
@@ -282,23 +282,23 @@
       <div class="overview-item">
         <Icon name="tunnel" size="sm" />
         <div>
-          <strong>{$t('tools.ipv6-teredo.overview.tunneling.title')}</strong>
-          {$t('tools.ipv6-teredo.overview.tunneling.description')}
+          <strong>{$t('tools.ipv6_teredo.overview.tunneling.title')}</strong>
+          {$t('tools.ipv6_teredo.overview.tunneling.description')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="globe" size="sm" />
         <div>
-          <strong>{$t('tools.ipv6-teredo.overview.format.title')}</strong>
+          <strong>{$t('tools.ipv6_teredo.overview.format.title')}</strong>
           <code>2001:0000:SSSS:SSSS:FFFF:PPPP:CCCC:CCCC</code>
-          {$t('tools.ipv6-teredo.overview.format.description')}
+          {$t('tools.ipv6_teredo.overview.format.description')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="shield" size="sm" />
         <div>
-          <strong>{$t('tools.ipv6-teredo.overview.obfuscation.title')}</strong>
-          {$t('tools.ipv6-teredo.overview.obfuscation.description')}
+          <strong>{$t('tools.ipv6_teredo.overview.obfuscation.title')}</strong>
+          {$t('tools.ipv6_teredo.overview.obfuscation.description')}
         </div>
       </div>
     </div>
@@ -309,7 +309,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="sm" />
-        <h3>{$t('tools.ipv6-teredo.examples.title')}</h3>
+        <h3>{$t('tools.ipv6_teredo.examples.title')}</h3>
       </summary>
       <div class="examples-grid">
         {#each examples as example (example.label)}
@@ -329,20 +329,20 @@
   <!-- Input Section -->
   <section class="input-section">
     <div class="input-group">
-      <label for="teredo-input" use:tooltip={$t('tools.ipv6-teredo.input.help')}>
+      <label for="teredo-input" use:tooltip={$t('tools.ipv6_teredo.input.help')}>
         <Icon name="tunnel" size="sm" />
-        {$t('tools.ipv6-teredo.input.label')}
+        {$t('tools.ipv6_teredo.input.label')}
       </label>
       <input
         id="teredo-input"
         type="text"
         bind:value={input}
         oninput={handleInputChange}
-        placeholder={$t('tools.ipv6-teredo.input.placeholder')}
+        placeholder={$t('tools.ipv6_teredo.input.placeholder')}
         class="teredo-input {result?.success === true ? 'valid' : result?.success === false ? 'invalid' : ''}"
         spellcheck="false"
       />
-      <div class="input-hint">{$t('tools.ipv6-teredo.input.help')}</div>
+      <div class="input-hint">{$t('tools.ipv6_teredo.input.help')}</div>
     </div>
   </section>
 
@@ -353,53 +353,53 @@
         <div class="results-header">
           <h3>
             <Icon name="check-circle" size="sm" />
-            {$t('tools.ipv6-teredo.results.validAddress')}
+            {$t('tools.ipv6_teredo.results.validAddress')}
           </h3>
         </div>
 
         <!-- Address Breakdown -->
         <div class="address-breakdown">
           <div class="breakdown-header">
-            <h4>{$t('tools.ipv6-teredo.breakdown.title')}</h4>
+            <h4>{$t('tools.ipv6_teredo.breakdown.title')}</h4>
             <code class="full-address">{result.details.fullAddress}</code>
           </div>
 
           <div class="breakdown-grid">
             <div class="breakdown-section prefix">
-              <div class="section-label">{$t('tools.ipv6-teredo.breakdown.prefix.label')}</div>
+              <div class="section-label">{$t('tools.ipv6_teredo.breakdown.prefix.label')}</div>
               <code class="section-value">{result.components.prefix}</code>
-              <div class="section-description">{$t('tools.ipv6-teredo.breakdown.prefix.description')}</div>
+              <div class="section-description">{$t('tools.ipv6_teredo.breakdown.prefix.description')}</div>
             </div>
 
             <div class="breakdown-section server">
-              <div class="section-label">{$t('tools.ipv6-teredo.breakdown.server.label')}</div>
+              <div class="section-label">{$t('tools.ipv6_teredo.breakdown.server.label')}</div>
               <code class="section-value">{result.details.addressGroups[2]}:{result.details.addressGroups[3]}</code>
               <div class="section-description">
-                {$t('tools.ipv6-teredo.breakdown.server.description')}
+                {$t('tools.ipv6_teredo.breakdown.server.description')}
                 {result.components.serverIPv4}
               </div>
             </div>
 
             <div class="breakdown-section flags">
-              <div class="section-label">{$t('tools.ipv6-teredo.breakdown.flags.label')}</div>
+              <div class="section-label">{$t('tools.ipv6_teredo.breakdown.flags.label')}</div>
               <code class="section-value">{result.details.addressGroups[4]}</code>
               <div class="section-description">{result.components.flags}</div>
             </div>
 
             <div class="breakdown-section port">
-              <div class="section-label">{$t('tools.ipv6-teredo.breakdown.port.label')}</div>
+              <div class="section-label">{$t('tools.ipv6_teredo.breakdown.port.label')}</div>
               <code class="section-value">{result.details.addressGroups[5]}</code>
               <div class="section-description">
-                {$t('tools.ipv6-teredo.breakdown.port.description')}
+                {$t('tools.ipv6_teredo.breakdown.port.description')}
                 {result.components.clientPort}
               </div>
             </div>
 
             <div class="breakdown-section client">
-              <div class="section-label">{$t('tools.ipv6-teredo.breakdown.client.label')}</div>
+              <div class="section-label">{$t('tools.ipv6_teredo.breakdown.client.label')}</div>
               <code class="section-value">{result.details.addressGroups[6]}:{result.details.addressGroups[7]}</code>
               <div class="section-description">
-                {$t('tools.ipv6-teredo.breakdown.client.description')}
+                {$t('tools.ipv6_teredo.breakdown.client.description')}
                 {result.components.clientIPv4}
               </div>
             </div>
@@ -410,14 +410,14 @@
         <div class="components-section">
           <h4>
             <Icon name="layers" size="sm" />
-            {$t('tools.ipv6-teredo.components.title')}
+            {$t('tools.ipv6_teredo.components.title')}
           </h4>
 
           <div class="components-grid">
             <div class="component-card server">
               <div class="component-header">
                 <Icon name="server" size="sm" />
-                <span class="component-title">{$t('tools.ipv6-teredo.components.teredoServer.title')}</span>
+                <span class="component-title">{$t('tools.ipv6_teredo.components.teredoServer.title')}</span>
               </div>
               <div class="component-content">
                 <code class="component-value">{result.components.serverIPv4}</code>
@@ -428,13 +428,13 @@
                   <Icon name={clipboard.isCopied('server') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
-              <div class="component-description">{$t('tools.ipv6-teredo.components.teredoServer.description')}</div>
+              <div class="component-description">{$t('tools.ipv6_teredo.components.teredoServer.description')}</div>
             </div>
 
             <div class="component-card client">
               <div class="component-header">
                 <Icon name="user" size="sm" />
-                <span class="component-title">{$t('tools.ipv6-teredo.components.clientIPv4.title')}</span>
+                <span class="component-title">{$t('tools.ipv6_teredo.components.clientIPv4.title')}</span>
               </div>
               <div class="component-content">
                 <code class="component-value">{result.components.clientIPv4}</code>
@@ -445,13 +445,13 @@
                   <Icon name={clipboard.isCopied('client') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
-              <div class="component-description">{$t('tools.ipv6-teredo.components.clientIPv4.description')}</div>
+              <div class="component-description">{$t('tools.ipv6_teredo.components.clientIPv4.description')}</div>
             </div>
 
             <div class="component-card port">
               <div class="component-header">
                 <Icon name="hash" size="sm" />
-                <span class="component-title">{$t('tools.ipv6-teredo.components.clientPort.title')}</span>
+                <span class="component-title">{$t('tools.ipv6_teredo.components.clientPort.title')}</span>
               </div>
               <div class="component-content">
                 <code class="component-value">{result.components.clientPort}</code>
@@ -462,22 +462,22 @@
                   <Icon name={clipboard.isCopied('port') ? 'check' : 'copy'} size="sm" />
                 </button>
               </div>
-              <div class="component-description">{$t('tools.ipv6-teredo.components.clientPort.description')}</div>
+              <div class="component-description">{$t('tools.ipv6_teredo.components.clientPort.description')}</div>
             </div>
 
             <div class="component-card flags">
               <div class="component-header">
                 <Icon name="flag" size="sm" />
-                <span class="component-title">{$t('tools.ipv6-teredo.components.natType.title')}</span>
+                <span class="component-title">{$t('tools.ipv6_teredo.components.natType.title')}</span>
               </div>
               <div class="component-content">
                 <span class="component-value {result.components.cone ? 'cone' : 'restricted'}"
                   >{result.components.cone
-                    ? $t('tools.ipv6-teredo.natTypes.cone')
-                    : $t('tools.ipv6-teredo.natTypes.symmetric')}</span
+                    ? $t('tools.ipv6_teredo.natTypes.cone')
+                    : $t('tools.ipv6_teredo.natTypes.symmetric')}</span
                 >
               </div>
-              <div class="component-description">{$t('tools.ipv6-teredo.components.natType.description')}</div>
+              <div class="component-description">{$t('tools.ipv6_teredo.components.natType.description')}</div>
             </div>
           </div>
         </div>

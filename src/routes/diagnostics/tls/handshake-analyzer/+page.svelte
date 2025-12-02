@@ -44,7 +44,7 @@
     { hostname: 'baidu.com', port: 443, description: 'Baidu (China - TLS 1.2)' },
     { hostname: 'zoom.us', port: 443, description: 'Zoom' },
   ];
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   async function analyzeHandshake() {
     diagnosticState.startOperation();

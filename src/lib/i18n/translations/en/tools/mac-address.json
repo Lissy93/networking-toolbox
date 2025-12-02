@@ -1,0 +1,165 @@
+{
+  "title": "MAC Address Converter & OUI Lookup",
+  "description": "Convert MAC addresses between different formats and identify the manufacturer using the Organizationally Unique Identifier (OUI)",
+
+  "form": {
+    "singleMode": {
+      "title": "MAC Address",
+      "label": "Enter MAC Address",
+      "placeholder": "00:1A:2B:3C:4D:5E",
+      "tooltip": "Enter MAC address in any format: colon, hyphen, dot notation, or bare"
+    },
+    "bulkMode": {
+      "title": "MAC Addresses",
+      "label": "Enter MAC Addresses",
+      "placeholder": "00:1A:2B:3C:4D:5E\n00-50-56-C0-00-08\n001A.2B3C.4D5E\n001b632b4567",
+      "tooltip": "Enter multiple MAC addresses, one per line"
+    },
+    "lookup": "Lookup",
+    "lookingUp": "Looking up...",
+    "switchToSingle": "Switch to Single",
+    "switchToBulk": "Switch to Bulk",
+    "helpText": {
+      "single": "Supported formats: {formats}",
+      "bulk": "Enter MAC addresses one per line. Supported formats: {formats}",
+      "formats": "{colon}, {hyphen}, {cisco} (Cisco), {bare}"
+    }
+  },
+
+  "examples": {
+    "title": "Quick Examples",
+    "vendors": {
+      "telecomunicationTech": "Ukrainian telecom equipment (Odessa)",
+      "apple": "Apple device (Cupertino, CA)",
+      "raspberryPi": "Raspberry Pi (Cambridge, UK)",
+      "xensource": "Xen virtual machine (Palo Alto, CA)",
+      "icannIana": "IANA reserved addresses (special use)",
+      "pcEngines": "PC Engines embedded systems (Switzerland)",
+      "multicastBroadcast": "Multicast/Broadcast"
+    }
+  },
+
+  "results": {
+    "conversion": "Address Conversion",
+    "conversions": "Address Conversions",
+    "invalidAddress": "Invalid MAC Address",
+    "exportCsv": "Export CSV",
+    "exportJson": "Export JSON",
+
+    "oui": {
+      "title": "OUI Information",
+      "fields": {
+        "oui": "OUI",
+        "manufacturer": "Manufacturer",
+        "country": "Country",
+        "blockType": "Block Type",
+        "blockSize": "Block Size",
+        "addressRange": "Address Range",
+        "registryStatus": "Registry Status",
+        "lastUpdated": "Last Updated",
+        "address": "Address"
+      },
+      "values": {
+        "unknown": "Unknown",
+        "na": "N/A",
+        "private": "Private",
+        "public": "Public",
+        "addresses": "{count} addresses"
+      },
+      "blockTypes": {
+        "maL": "Large block: 16.7 million addresses (24-bit prefix)",
+        "maM": "Medium block: 1 million addresses (28-bit prefix)",
+        "maS": "Small block: 4,096 addresses (36-bit prefix)",
+        "cid": "Company ID"
+      }
+    },
+
+    "details": {
+      "title": "Address Details",
+      "fields": {
+        "universalAddress": "Universal Address",
+        "locallyAdministered": "Locally Administered",
+        "unicast": "Unicast",
+        "multicastBroadcast": "Multicast/Broadcast"
+      }
+    },
+
+    "formats": {
+      "title": "Formats",
+      "types": {
+        "colonNotation": {
+          "label": "Colon Notation",
+          "tooltip": "Standard IEEE notation; most Linux, BSD, macOS use this"
+        },
+        "hyphenNotation": {
+          "label": "Hyphen Notation",
+          "tooltip": "Common on Windows systems"
+        },
+        "ciscoNotation": {
+          "label": "Cisco (Dot) Notation",
+          "tooltip": "Cisco IOS / NX-OS style"
+        },
+        "bareUppercase": {
+          "label": "Bare (Uppercase)",
+          "tooltip": "Common in databases, APIs"
+        },
+        "bareLowercase": {
+          "label": "Bare (Lowercase)",
+          "tooltip": "Common in scripts, JSON, etc."
+        },
+        "eui64": {
+          "label": "EUI-64 (expanded form)",
+          "tooltip": "Used when converting MAC → IPv6 Interface ID (adds FFFE in the middle, flips the U/L bit)"
+        },
+        "ipv6Style": {
+          "label": "Dot-separated 2-byte groups",
+          "tooltip": "Occasionally seen in debugging or tools that mimic IPv6 notation"
+        },
+        "spaceSeparated": {
+          "label": "Space-separated pairs",
+          "tooltip": "Sometimes seen in hex dumps or firmware logs"
+        },
+        "decimalOctets": {
+          "label": "Decimal octets",
+          "tooltip": "Rare, but some diagnostic tools display MACs in decimal"
+        },
+        "prefixedMac": {
+          "label": "Prefixed (MAC=)",
+          "tooltip": "Seen in configuration files or CLI outputs"
+        },
+        "slashSeparated": {
+          "label": "Slash-separated",
+          "tooltip": "Seen in some telecom equipment or SNMP exports"
+        },
+        "prefixedBare": {
+          "label": "Prefixed bare (MAC)",
+          "tooltip": "Appears in certain JSON/CSV exports or proprietary APIs"
+        },
+        "prefixedAddr": {
+          "label": "Prefixed bare (addr)",
+          "tooltip": "Appears in certain JSON/CSV exports or proprietary APIs"
+        },
+        "binary": {
+          "label": "Binary (8-bit groups)",
+          "tooltip": "Rare, but useful for bit-level inspection"
+        }
+      },
+      "copyToClipboard": "Copy to clipboard"
+    },
+
+    "summary": {
+      "title": "Conversion Summary",
+      "stats": {
+        "total": "Total",
+        "valid": "Valid",
+        "invalid": "Invalid",
+        "withOui": "With OUI"
+      }
+    }
+  },
+
+  "education": {
+    "title": "Understanding MAC Addresses",
+    "quickTips": "Quick Tips"
+  }
+}

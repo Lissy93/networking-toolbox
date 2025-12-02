@@ -53,13 +53,13 @@
     // Client-side validation
     const domain = domainName.trim();
     if (!domain) {
-      error = 'Domain name is required';
+      error = t('diagnostics/dns-caa-effective.errors.domainRequired');
       loading = false;
       return;
     }
 
     if (!isValidDomainName(domain)) {
-      error = 'Invalid domain name format. Use valid domain names like "example.com"';
+      error = t('diagnostics/dns-caa-effective.errors.invalidFormat');
       loading = false;
       return;
     }
@@ -76,7 +76,7 @@
 
       if (!response.ok) {
         const errorText = await response.text();
-        let errorMessage = `CAA check failed (${response.status})`;
+        let errorMessage = t('diagnostics/dns-caa-effective.errors.checkFailed', { status: response.status });
 
         try {
           const errorData = JSON.parse(errorText);
@@ -86,9 +86,9 @@
         } catch {
           // If not JSON, use status-based message
           if (response.status === 400) {
-            errorMessage = 'Invalid request. Please check your domain name.';
+            errorMessage = t('diagnostics/dns-caa-effective.errors.invalidRequest');
           } else if (response.status === 500) {
-            errorMessage = 'CAA check service temporarily unavailable. Please try again.';
+            errorMessage = t('diagnostics/dns-caa-effective.errors.serviceUnavailable');
           }
         }
 
@@ -155,36 +155,36 @@
   function getTagDescription(tag: string): string {
     switch (tag) {
       case 'issue':
-        return 'Authorized to issue certificates';
+        return t('diagnostics/dns-caa-effective.tags.issue');
       case 'issuewild':
-        return 'Authorized to issue wildcard certificates';
+        return t('diagnostics/dns-caa-effective.tags.issuewild');
       case 'iodef':
-        return 'Incident reporting contact';
+        return t('diagnostics/dns-caa-effective.tags.iodef');
       default:
-        return 'Unknown CAA tag';
+        return t('diagnostics/dns-caa-effective.tags.unknown');
     }
   }
 
   async function copyResults() {
     if (!results) return;
 
-    let text = `CAA Check for ${domainName}\n`;
-    text += `Generated at: ${new Date().toISOString()}\n\n`;
+    let text = `${t('diagnostics/dns-caa-effective.copyResults.header', { domain: domainName })}\n`;
+    text += `${t('diagnostics/dns-caa-effective.copyResults.generatedAt')}: ${new Date().toISOString()}\n\n`;
 
     if (results.effective) {
-      text += `Effective CAA Policy:\n`;
-      text += `Domain: ${results.effective.domain}\n`;
-      text += `Records:\n`;
+      text += `${t('diagnostics/dns-caa-effective.copyResults.effectivePolicy')}:\n`;
+      text += `${t('diagnostics/dns-caa-effective.copyResults.domain')}: ${results.effective.domain}\n`;
+      text += `${t('diagnostics/dns-caa-effective.copyResults.records')}:\n`;
       results.effective.records.forEach((record: string) => {
         text += `  ${record}\n`;
       });
       text += '\n';
     } else {
-      text += `No CAA records found in the domain chain.\n\n`;
+      text += `${t('diagnostics/dns-caa-effective.copyResults.noRecords')}\n\n`;
     }
 
     if (results.chain?.length > 0) {
-      text += `CAA Chain (walked up from ${domainName}):\n`;
+      text += `${t('diagnostics/dns-caa-effective.copyResults.chain', { domain: domainName })}:\n`;
       results.chain.forEach((item: unknown, index: number) => {
         text += `${index + 1}. ${(item as any).domain}:\n`;
         (item as any).records.forEach((record: string) => {
@@ -226,7 +226,7 @@
             class="example-card"
             class:selected={selectedExampleIndex === i}
             onclick={() => loadExample(example, i)}
-            use:tooltip={`Check CAA policy for ${example.domain}`}
+            use:tooltip={t('diagnostics/dns-caa-effective.ui.checkTooltip', { domain: example.domain })}
           >
             <h5>{example.domain}</h5>
             <p>{example.description}</p>
@@ -239,12 +239,12 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>CAA Policy Check</h3>
+      <h3>{t('diagnostics/dns-caa-effective.ui.checkTitle')}</h3>
     </div>
     <div class="card-content">
       <div class="form-group">
-        <label for="domain" use:tooltip={'Enter the domain name to check effective CAA policy for'}>
-          Domain Name
+        <label for="domain" use:tooltip={t('diagnostics/dns-caa-effective.ui.domainTooltip')}>
+          {t('diagnostics/dns-caa-effective.ui.domainLabel')}
           <input
             id="domain"
             type="text"
@@ -257,7 +257,7 @@
             }}
           />
           {#if domainName && !isValidDomainName(domainName.trim())}
-            <span class="error-text">Invalid domain name format</span>
+            <span class="error-text">{t('diagnostics/dns-caa-effective.ui.invalidFormat')}</span>
           {/if}
         </label>
       </div>
@@ -266,10 +266,10 @@
         <button class="check-btn lookup-btn" onclick={checkCAA} disabled={loading || !isInputValid}>
           {#if loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Checking CAA...
+            {t('diagnostics/dns-caa-effective.ui.checking')}
           {:else}
             <Icon name="shield-check" size="sm" />
-            Check CAA Policy
+            {t('diagnostics/dns-caa-effective.ui.checkButton')}
           {/if}
         </button>
       </div>
@@ -280,25 +280,30 @@
   {#if results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>CAA Policy Results</h3>
+        <h3>{t('diagnostics/dns-caa-effective.results.title')}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
           <span class={copiedState ? 'text-green-500' : ''}
             ><Icon name={copiedState ? 'check' : 'copy'} size="xs" /></span
           >
-          {copiedState ? 'Copied!' : 'Copy Results'}
+          {copiedState
+            ? t('diagnostics/dns-caa-effective.results.copied')
+            : t('diagnostics/dns-caa-effective.results.copyButton')}
         </button>
       </div>
       <div class="card-content">
         <!-- Effective Policy -->
         <div class="effective-section">
-          <h4>Effective CAA Policy</h4>
+          <h4>{t('diagnostics/dns-caa-effective.results.effectivePolicy')}</h4>
           {#if results.effective}
             <div class="effective-policy">
               <div class="effective-header">
                 <span class="text-success"><Icon name="shield-check" size="md" /></span>
                 <div>
-                  <h5>Policy found at: <span class="domain-name">{results.effective.domain}</span></h5>
-                  <p>This domain has CAA records that control certificate issuance</p>
+                  <h5>
+                    {t('diagnostics/dns-caa-effective.results.policyFoundAt')}:
+                    <span class="domain-name">{results.effective.domain}</span>
+                  </h5>
+                  <p>{t('diagnostics/dns-caa-effective.results.policyDescription')}</p>
                 </div>
               </div>
 
@@ -316,10 +321,10 @@
                         <span
                           class="caa-flag"
                           use:tooltip={parsed.flag === 128
-                            ? 'Critical flag set - unknown properties must be ignored'
-                            : 'Standard flag'}
+                            ? t('diagnostics/dns-caa-effective.results.criticalFlag')
+                            : t('diagnostics/dns-caa-effective.results.standardFlag')}
                         >
-                          Flag: {parsed.flag}
+                          {t('diagnostics/dns-caa-effective.results.flag')}: {parsed.flag}
                         </span>
                       </div>
                       <div class="caa-value">
@@ -340,9 +345,9 @@
             <div class="no-policy">
               <span class="text-warning"><Icon name="shield-off" size="md" /></span>
               <div>
-                <h5>No CAA policy found</h5>
-                <p>No CAA records found in the domain chain for <code>{domainName}</code></p>
-                <p class="implication">This means any Certificate Authority can issue certificates for this domain.</p>
+                <h5>{t('diagnostics/dns-caa-effective.results.noPolicyFound')}</h5>
+                <p>{t('diagnostics/dns-caa-effective.results.noRecordsFound', { domain: domainName })}</p>
+                <p class="implication">{t('diagnostics/dns-caa-effective.results.implication')}</p>
               </div>
             </div>
           {/if}
@@ -354,9 +359,9 @@
             <div class="single-level-info">
               <Icon name="info" size="sm" />
               <div>
-                <h5>Top-level CAA Policy</h5>
+                <h5>{t('diagnostics/dns-caa-effective.results.topLevelPolicy')}</h5>
                 <p>
-                  CAA records found directly on <code>{results.effective.domain}</code> - no domain tree traversal required.
+                  {t('diagnostics/dns-caa-effective.results.topLevelDescription', { domain: results.effective.domain })}
                 </p>
               </div>
             </div>
@@ -366,10 +371,9 @@
         <!-- Domain Chain -->
         {#if results.chain?.length > 1}
           <div class="chain-section">
-            <h4>CAA Lookup Chain</h4>
+            <h4>{t('diagnostics/dns-caa-effective.results.chainTitle')}</h4>
             <p class="chain-description">
-              CAA records are looked up by walking up the domain tree until a CAA record is found or the root is
-              reached.
+              {t('diagnostics/dns-caa-effective.results.chainDescription')}
             </p>
 
             <div class="domain-chain">
@@ -388,23 +392,20 @@
                       <div class="domain-info">
                         <span class="domain-name">{item.domain}</span>
                         <span class="domain-depth">
-                          {getDomainDepth(item.domain, results.chain[results.chain.length - 1].domain)} level{getDomainDepth(
-                            item.domain,
-                            results.chain[results.chain.length - 1].domain,
-                          ) !== 1
-                            ? 's'
-                            : ''} up
+                          {t('diagnostics/dns-caa-effective.results.levelUp', {
+                            count: getDomainDepth(item.domain, results.chain[results.chain.length - 1].domain),
+                          })}
                         </span>
                       </div>
                       {#if isEffective}
                         <span class="effective-badge">
                           <Icon name="shield-check" size="xs" />
-                          Effective
+                          {t('diagnostics/dns-caa-effective.results.effective')}
                         </span>
                       {:else}
                         <span class="empty-badge">
                           <Icon name="minus" size="xs" />
-                          No CAA
+                          {t('diagnostics/dns-caa-effective.results.noCAA')}
                         </span>
                       {/if}
                     </div>
@@ -434,7 +435,7 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="md" />
           <div>
-            <strong>CAA Check Failed</strong>
+            <strong>{t('diagnostics/dns-caa-effective.error.title')}</strong>
             <p>{error}</p>
           </div>
         </div>
@@ -445,61 +446,73 @@
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>Understanding CAA Records</h3>
+      <h3>{t('diagnostics/dns-caa-effective.education.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>CAA Record Format</h4>
+          <h4>{t('diagnostics/dns-caa-effective.education.format.title')}</h4>
           <div class="format-example">
             <code>flag tag "value"</code>
           </div>
           <ul>
-            <li><strong>Flag:</strong> 0 (non-critical) or 128 (critical)</li>
-            <li><strong>Tag:</strong> issue, issuewild, or iodef</li>
-            <li><strong>Value:</strong> CA domain or contact information</li>
+            <li>
+              <strong>{t('diagnostics/dns-caa-effective.education.format.flag.label')}:</strong>
+              {t('diagnostics/dns-caa-effective.education.format.flag.description')}
+            </li>
+            <li>
+              <strong>{t('diagnostics/dns-caa-effective.education.format.tag.label')}:</strong>
+              {t('diagnostics/dns-caa-effective.education.format.tag.description')}
+            </li>
+            <li>
+              <strong>{t('diagnostics/dns-caa-effective.education.format.value.label')}:</strong>
+              {t('diagnostics/dns-caa-effective.education.format.value.description')}
+            </li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>CAA Tags</h4>
+          <h4>{t('diagnostics/dns-caa-effective.education.tags.title')}</h4>
           <div class="tag-explanations">
             <div class="tag-explanation">
-              <strong>issue:</strong> Authorizes a CA to issue certificates for the domain
+              <strong>issue:</strong>
+              {t('diagnostics/dns-caa-effective.education.tags.issue')}
             </div>
             <div class="tag-explanation">
-              <strong>issuewild:</strong> Authorizes a CA to issue wildcard certificates
+              <strong>issuewild:</strong>
+              {t('diagnostics/dns-caa-effective.education.tags.issuewild')}
             </div>
             <div class="tag-explanation">
-              <strong>iodef:</strong> Specifies a URL/email for incident reporting
+              <strong>iodef:</strong>
+              {t('diagnostics/dns-caa-effective.education.tags.iodef')}
             </div>
           </div>
         </div>
 
         <div class="info-section">
-          <h4>CAA Lookup Process</h4>
+          <h4>{t('diagnostics/dns-caa-effective.education.process.title')}</h4>
           <ol>
-            <li>Check for CAA records at the requested domain</li>
-            <li>If none found, check the parent domain</li>
-            <li>Continue up the tree until CAA records are found</li>
-            <li>If no CAA records exist, any CA can issue certificates</li>
+            <li>{t('diagnostics/dns-caa-effective.education.process.step1')}</li>
+            <li>{t('diagnostics/dns-caa-effective.education.process.step2')}</li>
+            <li>{t('diagnostics/dns-caa-effective.education.process.step3')}</li>
+            <li>{t('diagnostics/dns-caa-effective.education.process.step4')}</li>
           </ol>
         </div>
 
         <div class="info-section">
-          <h4>Common CAA Examples</h4>
+          <h4>{t('diagnostics/dns-caa-effective.education.examples.title')}</h4>
           <div class="caa-examples">
             <div class="caa-example">
               <code>0 issue "letsencrypt.org"</code>
-              <span>Allow Let's Encrypt to issue certificates</span>
+              <span>{t('diagnostics/dns-caa-effective.education.examples.letsencrypt')}</span>
             </div>
             <div class="caa-example">
               <code>0 issuewild ";"</code>
-              <span>Prohibit wildcard certificate issuance</span>
+              <span>{t('diagnostics/dns-caa-effective.education.examples.prohibit')}</span>
             </div>
             <div class="caa-example">
               <code>0 iodef "mailto:security@example.com"</code>
-              <span>Report policy violations to security team</span>
+              <span>{t('diagnostics/dns-caa-effective.education.examples.report')}</span>
             </div>
           </div>
         </div>
@@ -639,13 +652,6 @@
     p {
       margin: 0 0 var(--spacing-xs) 0;
       color: var(--text-secondary);
-
-      code {
-        background: var(--bg-secondary);
-        padding: 2px 4px;
-        border-radius: 3px;
-        font-family: var(--font-mono);
-      }
     }
 
     .implication {
@@ -673,13 +679,6 @@
       margin: 0;
       color: var(--text-secondary);
       font-size: var(--font-size-xs);
-
-      code {
-        background: var(--bg-primary);
-        padding: 2px 4px;
-        border-radius: 3px;
-        font-family: var(--font-mono);
-      }
     }
   }
 

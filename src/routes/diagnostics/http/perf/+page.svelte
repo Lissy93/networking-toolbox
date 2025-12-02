@@ -5,8 +5,15 @@
   import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
-  import { t } from '$lib/stores/language';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import '../../../../styles/diagnostics-pages.scss';
+
+  // Load translations for this diagnostic
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics/http-perf');
+  });
 
   let url = $state('https://www.google.com');
   let method = $state('GET');
@@ -17,13 +24,13 @@
   const methods = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE'];
 
   const examplesList = $derived([
-    { url: 'https://www.google.com', description: $t('diagnostics/http-perf.examples.google') },
-    { url: 'https://httpbin.org/delay/2', description: $t('diagnostics/http-perf.examples.delay') },
-    { url: 'https://api.github.com', description: $t('diagnostics/http-perf.examples.github') },
-    { url: 'https://www.cloudflare.com', description: $t('diagnostics/http-perf.examples.cloudflare') },
+    { url: 'https://www.google.com', description: $t('examples.google') },
+    { url: 'https://httpbin.org/delay/2', description: $t('examples.delay') },
+    { url: 'https://api.github.com', description: $t('examples.github') },
+    { url: 'https://www.cloudflare.com', description: $t('examples.cloudflare') },
   ]);
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   // Reactive validation
   const isInputValid = $derived(() => {
@@ -230,12 +237,12 @@
     {@const grade = getPerformanceGrade(diagnosticState.results.timings.total)}
     <div class="card results-card">
       <div class="card-header">
-        <h3>{$t('diagnostics/http-perf.results.title')}</h3>
+        <h3>{$t('results.title')}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
           <span class={clipboard.isCopied() ? 'text-green-500' : ''}
             ><Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" /></span
           >
-          {clipboard.isCopied() ? $t('diagnostics/http-perf.results.copied') : $t('diagnostics/http-perf.results.copy')}
+          {clipboard.isCopied() ? $t('results.copied') : $t('results.copy')}
         </button>
       </div>
       <div class="card-content">
@@ -244,9 +251,9 @@
           <div class="status-item {grade.class}">
             <Icon name="zap" size="sm" />
             <div>
-              <strong>{$t('diagnostics/http-perf.results.grade.label', { grade: grade.grade })}</strong>
+              <strong>{$t('results.grade.label', { grade: grade.grade })}</strong>
               <div class="status-text">
-                {$t('diagnostics/http-perf.results.grade.total', {
+                {$t('results.grade.total', {
                   total: diagnosticState.results.timings.total.toFixed(0),
                 })}
               </div>
@@ -257,7 +264,7 @@
             <Icon name="activity" size="sm" />
             <div>
               <strong>{diagnosticState.results.status}</strong>
-              <div class="status-text">{$t('diagnostics/http-perf.results.overview.httpStatus')}</div>
+              <div class="status-text">{$t('results.overview.http_status')}</div>
             </div>
           </div>
 
@@ -266,7 +273,7 @@
               <Icon name="file" size="sm" />
               <div>
                 <strong>{formatBytes(diagnosticState.results.size)}</strong>
-                <div class="status-text">{$t('diagnostics/http-perf.results.overview.responseSize')}</div>
+                <div class="status-text">{$t('results.overview.response_size')}</div>
               </div>
             </div>
           {/if}
@@ -278,7 +285,7 @@
                 <strong
                   >{calculateThroughput(diagnosticState.results.size, diagnosticState.results.timings.total)}</strong
                 >
-                <div class="status-text">{$t('diagnostics/http-perf.results.overview.throughput')}</div>
+                <div class="status-text">{$t('results.overview.throughput')}</div>
               </div>
             </div>
           {/if}
@@ -286,14 +293,14 @@
 
         <!-- Timing Breakdown -->
         <div class="record-section">
-          <h4>{$t('diagnostics/http-perf.results.timingBreakdown')}</h4>
+          <h4>{$t('results.timing.title')}</h4>
           <div class="timing-chart">
             <div
               class="timing-item {getPerformanceClass(diagnosticState.results.timings.dns, { good: 20, fair: 100 })}"
             >
               <div class="timing-label">
                 <Icon name="globe" size="xs" />
-                <span>{$t('diagnostics/http-perf.results.timing.dns')}</span>
+                <span>{$t('results.timing.dns')}</span>
                 {#if diagnosticState.results.timings.dns_note}
                   <span class="timing-note">({diagnosticState.results.timings.dns_note})</span>
                 {/if}
@@ -312,7 +319,7 @@
             >
               <div class="timing-label">
                 <Icon name="link" size="xs" />
-                <span>{$t('diagnostics/http-perf.results.timing.tcp')}</span>
+                <span>{$t('results.timing.tcp')}</span>
                 {#if diagnosticState.results.timings.tcp_note}
                   <span class="timing-note">({diagnosticState.results.timings.tcp_note})</span>
                 {/if}
@@ -332,7 +339,7 @@
               >
                 <div class="timing-label">
                   <Icon name="lock" size="xs" />
-                  <span>{$t('diagnostics/http-perf.results.timing.tls')}</span>
+                  <span>{$t('results.timing.tls')}</span>
                   {#if diagnosticState.results.timings.tls_note}
                     <span class="timing-note">({diagnosticState.results.timings.tls_note})</span>
                   {/if}
@@ -353,7 +360,7 @@
             >
               <div class="timing-label">
                 <Icon name="clock" size="xs" />
-                <span>{$t('diagnostics/http-perf.results.timing.ttfb')}</span>
+                <span>{$t('results.timing.ttfb')}</span>
               </div>
               <div class="timing-bar">
                 <div
@@ -367,7 +374,7 @@
             <div class="timing-item total">
               <div class="timing-label">
                 <Icon name="zap" size="xs" />
-                <span>{$t('diagnostics/http-perf.results.timing.total')}</span>
+                <span>{$t('results.timing.total')}</span>
               </div>
               <div class="timing-bar">
                 <div class="timing-fill" style="width: 100%"></div>
@@ -379,16 +386,16 @@
 
         <!-- Performance Features -->
         <div class="record-section">
-          <h4>{$t('diagnostics/http-perf.results.connectionFeatures')}</h4>
+          <h4>{$t('results.features.title')}</h4>
           <div class="feature-list">
             <div class="feature-item {diagnosticState.results.performance.isHTTPS ? 'success' : 'warning'}">
               <Icon name={diagnosticState.results.performance.isHTTPS ? 'shield' : 'shield-off'} size="sm" />
               <div>
-                <strong>{$t('diagnostics/http-perf.results.features.https')}</strong>
+                <strong>{$t('results.features.https.name')}</strong>
                 <p>
                   {diagnosticState.results.performance.isHTTPS
-                    ? $t('diagnostics/http-perf.results.features.httpsSecure')
-                    : $t('diagnostics/http-perf.results.features.httpsUnsecure')}
+                    ? $t('results.features.https.secure')
+                    : $t('results.features.https.unsecure')}
                 </p>
               </div>
             </div>
@@ -396,11 +403,11 @@
             <div class="feature-item {diagnosticState.results.performance.hasCompression ? 'success' : 'warning'}">
               <Icon name={diagnosticState.results.performance.hasCompression ? 'archive' : 'file'} size="sm" />
               <div>
-                <strong>{$t('diagnostics/http-perf.results.features.compression')}</strong>
+                <strong>{$t('results.features.compression.name')}</strong>
                 <p>
                   {diagnosticState.results.performance.hasCompression
-                    ? $t('diagnostics/http-perf.results.features.compressionEnabled')
-                    : $t('diagnostics/http-perf.results.features.compressionDisabled')}
+                    ? $t('results.features.compression.enabled')
+                    : $t('results.features.compression.disabled')}
                 </p>
               </div>
             </div>
@@ -408,7 +415,7 @@
             <div class="feature-item">
               <Icon name="server" size="sm" />
               <div>
-                <strong>{$t('diagnostics/http-perf.results.features.httpVersion')}</strong>
+                <strong>{$t('results.features.http_version')}</strong>
                 <p>{diagnosticState.results.performance.httpVersion}</p>
               </div>
             </div>
@@ -416,7 +423,7 @@
             <div class="feature-item">
               <Icon name="repeat" size="sm" />
               <div>
-                <strong>{$t('diagnostics/http-perf.results.features.connectionReuse')}</strong>
+                <strong>{$t('results.features.connection_reuse')}</strong>
                 <p>{diagnosticState.results.performance.connectionReused}</p>
               </div>
             </div>
@@ -426,39 +433,39 @@
     </div>
   {/if}
 
-  <ErrorCard title={$t('diagnostics/http-perf.errors.title')} error={diagnosticState.error} />
+  <ErrorCard title={$t('error.title')} error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>{$t('diagnostics/http-perf.about.title')}</h3>
+      <h3>{$t('info.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>{$t('diagnostics/http-perf.about.timingComponents.title')}</h4>
+          <h4>{$t('info.timing.heading')}</h4>
           <ul>
-            <li><strong>DNS:</strong> {$t('diagnostics/http-perf.about.timingComponents.dns')}</li>
-            <li><strong>TCP:</strong> {$t('diagnostics/http-perf.about.timingComponents.tcp')}</li>
-            <li><strong>TLS:</strong> {$t('diagnostics/http-perf.about.timingComponents.tls')}</li>
-            <li><strong>TTFB:</strong> {$t('diagnostics/http-perf.about.timingComponents.ttfb')}</li>
+            <li><strong>{$t('info.timing.dns.name')}</strong> {$t('info.timing.dns.description')}</li>
+            <li><strong>{$t('info.timing.tcp.name')}</strong> {$t('info.timing.tcp.description')}</li>
+            <li><strong>{$t('info.timing.tls.name')}</strong> {$t('info.timing.tls.description')}</li>
+            <li><strong>{$t('info.timing.ttfb.name')}</strong> {$t('info.timing.ttfb.description')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>{$t('diagnostics/http-perf.about.grades.title')}</h4>
+          <h4>{$t('info.grades.heading')}</h4>
           <ul>
-            <li><strong>A (≤200ms):</strong> {$t('diagnostics/http-perf.about.grades.excellent')}</li>
-            <li><strong>B (≤500ms):</strong> {$t('diagnostics/http-perf.about.grades.good')}</li>
-            <li><strong>C (≤1000ms):</strong> {$t('diagnostics/http-perf.about.grades.acceptable')}</li>
-            <li><strong>D/F (>1000ms):</strong> {$t('diagnostics/http-perf.about.grades.poor')}</li>
+            <li><strong>{$t('info.grades.a.label')}</strong> {$t('info.grades.a.description')}</li>
+            <li><strong>{$t('info.grades.b.label')}</strong> {$t('info.grades.b.description')}</li>
+            <li><strong>{$t('info.grades.c.label')}</strong> {$t('info.grades.c.description')}</li>
+            <li><strong>{$t('info.grades.d.label')}</strong> {$t('info.grades.d.description')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>{$t('diagnostics/http-perf.about.optimization.title')}</h4>
+          <h4>{$t('info.tips.heading')}</h4>
           <p>
-            {$t('diagnostics/http-perf.about.optimization.description')}
+            {$t('info.tips.content')}
           </p>
         </div>
       </div>

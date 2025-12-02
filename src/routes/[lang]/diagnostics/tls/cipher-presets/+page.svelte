@@ -13,7 +13,7 @@
     { host: 'cloudflare.com', port: '443', description: 'Cloudflare cipher support' },
     { host: 'google.com', port: '443', description: 'Google cipher support' },
   ];
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   async function testCiphers() {
     if (!hostname?.trim()) {

@@ -40,7 +40,7 @@
     },
   ]);
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   const commonPorts = $derived([
     {

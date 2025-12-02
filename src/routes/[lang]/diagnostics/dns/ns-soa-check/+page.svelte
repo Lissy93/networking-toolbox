@@ -760,10 +760,6 @@
   .rec-item {
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
-
-    strong {
-      color: var(--text-primary);
-    }
   }
 
   .mono {

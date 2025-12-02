@@ -530,10 +530,6 @@
       align-items: center;
       gap: var(--spacing-sm);
       margin: var(--spacing-md) auto;
-      a {
-        color: var(--color-pink);
-        text-decoration: underline;
-      }
       opacity: 0;
       animation: fadeIn 1s ease-out 10s forwards;
     }

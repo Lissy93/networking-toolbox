@@ -22,7 +22,7 @@
 
   // Load translations for this tool
   onMount(async () => {
-    await loadTranslations(get(locale), 'tools.ip-regex-generator');
+    await loadTranslations(get(locale), 'tools');
   });
 
   let mode = $state<Mode>('simple');
@@ -144,7 +144,7 @@
 
   function validateEditableRegex() {
     if (!editablePattern) {
-      regexValidation = { ok: false, error: $t('tools.ip-regex-generator.errors.patternEmpty') };
+      regexValidation = { ok: false, error: $t('tools.ip_regex_generator.errors.patternEmpty') };
       return;
     }
 
@@ -294,12 +294,12 @@
         valid: validCases.map((text) => ({
           text,
           matches: false,
-          error: $t('tools.ip-regex-generator.errors.invalidRegex'),
+          error: $t('tools.ip_regex_generator.errors.invalidRegex'),
         })),
         invalid: invalidCases.map((text) => ({
           text,
           matches: false,
-          error: $t('tools.ip-regex-generator.errors.invalidRegex'),
+          error: $t('tools.ip_regex_generator.errors.invalidRegex'),
         })),
       };
     }
@@ -378,8 +378,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>{$t('tools.ip-regex-generator.title')}</h2>
-    <p>{$t('tools.ip-regex-generator.description')}</p>
+    <h2>{$t('tools.ip_regex_generator.title')}</h2>
+    <p>{$t('tools.ip_regex_generator.description')}</p>
   </header>
 
   <!-- Mode Selection -->
@@ -393,7 +393,7 @@
         }}
       >
         <Icon name="zap" size="sm" />
-        {$t('tools.ip-regex-generator.modes.simple')}
+        {$t('tools.ip_regex_generator.modes.simple')}
       </button>
       <button
         class="mode-button {mode === 'advanced' ? 'active' : ''}"
@@ -403,20 +403,20 @@
         }}
       >
         <Icon name="settings" size="sm" />
-        {$t('tools.ip-regex-generator.modes.advanced')}
+        {$t('tools.ip_regex_generator.modes.advanced')}
       </button>
     </div>
   </section>
 
   <!-- Type Selection -->
   <section class="type-section">
-    <h4>{$t('tools.ip-regex-generator.types.title')}</h4>
+    <h4>{$t('tools.ip_regex_generator.types.title')}</h4>
     <div class="type-options">
       <label class="type-option">
         <input type="radio" bind:group={regexType} value="ipv4" onchange={handleRegexGeneration} />
         <div class="option-content">
           <Icon name="ipv6-ipv4" size="sm" />
-          <span>{$t('tools.ip-regex-generator.types.ipv4Only')}</span>
+          <span>{$t('tools.ip_regex_generator.types.ipv4Only')}</span>
         </div>
       </label>
 
@@ -424,7 +424,7 @@
         <input type="radio" bind:group={regexType} value="ipv6" onchange={handleRegexGeneration} />
         <div class="option-content">
           <Icon name="ipv4-ipv6" size="sm" />
-          <span>{$t('tools.ip-regex-generator.types.ipv6Only')}</span>
+          <span>{$t('tools.ip_regex_generator.types.ipv6Only')}</span>
         </div>
       </label>
 
@@ -432,7 +432,7 @@
         <input type="radio" bind:group={regexType} value="both" onchange={handleRegexGeneration} />
         <div class="option-content">
           <Icon name="network" size="sm" />
-          <span>{$t('tools.ip-regex-generator.types.both')}</span>
+          <span>{$t('tools.ip_regex_generator.types.both')}</span>
         </div>
       </label>
     </div>
@@ -441,7 +441,7 @@
   <!-- Advanced Options -->
   {#if mode === 'advanced'}
     <section class="options-section">
-      <h4>{$t('tools.ip-regex-generator.options.title')}</h4>
+      <h4>{$t('tools.ip_regex_generator.options.title')}</h4>
       <div class="options-grid">
         {#each ADVANCED_OPTIONS as option (`${option.ipClass}-${option.key}`)}
           {#if option.showForType.includes(regexType)}
@@ -472,7 +472,7 @@
   {#if result}
     <section class="results-section">
       <div class="results-header">
-        <h3>{$t('tools.ip-regex-generator.results.title')}</h3>
+        <h3>{$t('tools.ip_regex_generator.results.title')}</h3>
       </div>
 
       <!-- Regex Pattern -->
@@ -481,50 +481,50 @@
           <!-- Editable Regex -->
           <div class="regex-editor">
             <div class="editor-header">
-              <span class="pattern-label">{$t('tools.ip-regex-generator.editor.title')}</span>
+              <span class="pattern-label">{$t('tools.ip_regex_generator.editor.title')}</span>
               <div class="editor-actions">
                 <button
                   class="apply-button"
                   onclick={applyRegexEdits}
                   disabled={!regexValidation?.ok}
                   use:tooltip={regexValidation?.ok
-                    ? $t('tools.ip-regex-generator.editor.applyChanges')
-                    : $t('tools.ip-regex-generator.editor.fixErrors')}
+                    ? $t('tools.ip_regex_generator.editor.applyChanges')
+                    : $t('tools.ip_regex_generator.editor.fixErrors')}
                 >
                   <Icon name="check" size="sm" />
-                  {$t('tools.ip-regex-generator.editor.apply')}
+                  {$t('tools.ip_regex_generator.editor.apply')}
                 </button>
                 <button
                   class="cancel-button"
                   onclick={cancelRegexEditing}
-                  use:tooltip={$t('tools.ip-regex-generator.editor.cancelEditing')}
+                  use:tooltip={$t('tools.ip_regex_generator.editor.cancelEditing')}
                 >
                   <Icon name="x" size="sm" />
-                  {$t('tools.ip-regex-generator.editor.cancel')}
+                  {$t('tools.ip_regex_generator.editor.cancel')}
                 </button>
               </div>
             </div>
 
             <div class="editor-fields">
               <div class="field-group">
-                <label for="pattern-input">{$t('tools.ip-regex-generator.editor.patternLabel')}</label>
+                <label for="pattern-input">{$t('tools.ip_regex_generator.editor.patternLabel')}</label>
                 <input
                   id="pattern-input"
                   type="text"
                   bind:value={editablePattern}
                   class="pattern-input {regexValidation && !regexValidation.ok ? 'error' : ''}"
-                  placeholder={$t('tools.ip-regex-generator.editor.patternPlaceholder')}
+                  placeholder={$t('tools.ip_regex_generator.editor.patternPlaceholder')}
                 />
               </div>
 
               <div class="field-group">
-                <label for="flags-input">{$t('tools.ip-regex-generator.editor.flagsLabel')}</label>
+                <label for="flags-input">{$t('tools.ip_regex_generator.editor.flagsLabel')}</label>
                 <input
                   id="flags-input"
                   type="text"
                   bind:value={editableFlags}
                   class="flags-input {regexValidation && !regexValidation.ok ? 'error' : ''}"
-                  placeholder={$t('tools.ip-regex-generator.editor.flagsPlaceholder')}
+                  placeholder={$t('tools.ip_regex_generator.editor.flagsPlaceholder')}
                   maxlength="10"
                 />
               </div>
@@ -534,7 +534,7 @@
               {#if regexValidation.ok}
                 <div class="validation-success">
                   <Icon name="check-circle" size="sm" />
-                  {$t('tools.ip-regex-generator.editor.validPattern')}
+                  {$t('tools.ip_regex_generator.editor.validPattern')}
                 </div>
               {:else}
                 <div class="validation-error">
@@ -545,7 +545,7 @@
             {/if}
 
             <div class="pattern-preview">
-              <span class="preview-label">{$t('tools.ip-regex-generator.editor.previewLabel')}</span>
+              <span class="preview-label">{$t('tools.ip_regex_generator.editor.previewLabel')}</span>
               <code class="pattern-code">/{editablePattern || '...'}/{editableFlags}</code>
             </div>
           </div>
@@ -553,17 +553,17 @@
           <!-- Display Mode -->
           <div class="regex-pattern">
             <div class="pattern-header">
-              <h4 class="pattern-label">{$t('tools.ip-regex-generator.results.patternLabel')}</h4>
+              <h4 class="pattern-label">{$t('tools.ip_regex_generator.results.patternLabel')}</h4>
 
               <div class="results-actions">
                 {#if !isEditingRegex}
                   <button
                     class="edit-button"
                     onclick={enableRegexEditing}
-                    use:tooltip={$t('tools.ip-regex-generator.tooltips.editPattern')}
+                    use:tooltip={$t('tools.ip_regex_generator.tooltips.editPattern')}
                   >
                     <Icon name="edit" size="xs" />
-                    {$t('tools.ip-regex-generator.results.edit')}
+                    {$t('tools.ip_regex_generator.results.edit')}
                   </button>
                 {/if}
                 <a
@@ -571,10 +571,10 @@
                   target="_blank"
                   rel="noopener noreferrer"
                   class="regexr-button"
-                  use:tooltip={$t('tools.ip-regex-generator.tooltips.testRegex')}
+                  use:tooltip={$t('tools.ip_regex_generator.tooltips.testRegex')}
                 >
                   <Icon name="regexr" size="xs" />
-                  {$t('tools.ip-regex-generator.results.testUrl')}
+                  {$t('tools.ip_regex_generator.results.testUrl')}
                 </a>
                 <button
                   class="copy-button {clipboard.isCopied('pattern') ? 'copied' : ''}"
@@ -582,8 +582,8 @@
                 >
                   <Icon name={clipboard.isCopied('pattern') ? 'check' : 'copy'} size="sm" />
                   {clipboard.isCopied('pattern')
-                    ? $t('tools.ip-regex-generator.results.copied')
-                    : $t('tools.ip-regex-generator.results.copy')}
+                    ? $t('tools.ip_regex_generator.results.copied')
+                    : $t('tools.ip_regex_generator.results.copy')}
                 </button>
               </div>
             </div>
@@ -593,7 +593,7 @@
 
         {#if result.flags}
           <div class="regex-flags">
-            <span class="flags-label">{$t('tools.ip-regex-generator.editor.flagsLabel')}</span>
+            <span class="flags-label">{$t('tools.ip_regex_generator.editor.flagsLabel')}</span>
             <code class="flags-code">{result.flags}</code>
             <span class="flags-description">
               {#if result.flags.includes('i')}
@@ -612,16 +612,16 @@
       <!-- Test Cases -->
       <div class="test-cases">
         <div class="test-cases-header">
-          <h4 class="pattern-label">{$t('tools.ip-regex-generator.testCases.title')}</h4>
+          <h4 class="pattern-label">{$t('tools.ip_regex_generator.testCases.title')}</h4>
           {#if !isEditingTestCases}
             <div class="results-actions">
               <button
                 class="edit-button"
                 onclick={enableTestCaseEditing}
-                use:tooltip={$t('tools.ip-regex-generator.testCases.editTestCases')}
+                use:tooltip={$t('tools.ip_regex_generator.testCases.editTestCases')}
               >
                 <Icon name="edit" size="xs" />
-                {$t('tools.ip-regex-generator.testCases.editTestCases')}
+                {$t('tools.ip_regex_generator.testCases.editTestCases')}
               </button>
             </div>
           {:else}
@@ -629,18 +629,18 @@
               <button
                 class="apply-button"
                 onclick={applyTestCaseEdits}
-                use:tooltip={$t('tools.ip-regex-generator.testCases.applyTestChanges')}
+                use:tooltip={$t('tools.ip_regex_generator.testCases.applyTestChanges')}
               >
                 <Icon name="check" size="sm" />
-                {$t('tools.ip-regex-generator.editor.apply')}
+                {$t('tools.ip_regex_generator.editor.apply')}
               </button>
               <button
                 class="cancel-button"
                 onclick={cancelTestCaseEditing}
-                use:tooltip={$t('tools.ip-regex-generator.testCases.cancelTestEditing')}
+                use:tooltip={$t('tools.ip_regex_generator.testCases.cancelTestEditing')}
               >
                 <Icon name="x" size="sm" />
-                {$t('tools.ip-regex-generator.editor.cancel')}
+                {$t('tools.ip_regex_generator.editor.cancel')}
               </button>
             </div>
           {/if}
@@ -650,7 +650,7 @@
           <div class="test-group valid">
             <h5>
               <Icon name="check-circle" size="sm" />
-              {$t('tools.ip-regex-generator.testCases.validTitle')} ({isEditingTestCases
+              {$t('tools.ip_regex_generator.testCases.validTitle')} ({isEditingTestCases
                 ? editableValidCases.length
                 : result.testCases.valid.length})
             </h5>
@@ -661,7 +661,7 @@
                   <input
                     type="text"
                     bind:value={newValidCase}
-                    placeholder={$t('tools.ip-regex-generator.testCases.addValidPlaceholder')}
+                    placeholder={$t('tools.ip_regex_generator.testCases.addValidPlaceholder')}
                     class="test-input"
                     onkeydown={(e) => e.key === 'Enter' && addValidTestCase()}
                   />
@@ -669,7 +669,7 @@
                     class="add-button"
                     onclick={addValidTestCase}
                     disabled={!newValidCase.trim()}
-                    use:tooltip={$t('tools.ip-regex-generator.testCases.addValid')}
+                    use:tooltip={$t('tools.ip_regex_generator.testCases.addValid')}
                   >
                     <Icon name="plus" size="sm" />
                   </button>
@@ -706,7 +706,7 @@
           <div class="test-group invalid">
             <h5>
               <Icon name="x-circle" size="sm" />
-              {$t('tools.ip-regex-generator.testCases.invalidTitle')} ({isEditingTestCases
+              {$t('tools.ip_regex_generator.testCases.invalidTitle')} ({isEditingTestCases
                 ? editableInvalidCases.length
                 : result.testCases.invalid.length})
             </h5>
@@ -717,7 +717,7 @@
                   <input
                     type="text"
                     bind:value={newInvalidCase}
-                    placeholder={$t('tools.ip-regex-generator.testCases.addInvalidPlaceholder')}
+                    placeholder={$t('tools.ip_regex_generator.testCases.addInvalidPlaceholder')}
                     class="test-input"
                     onkeydown={(e) => e.key === 'Enter' && addInvalidTestCase()}
                   />
@@ -725,7 +725,7 @@
                     class="add-button"
                     onclick={addInvalidTestCase}
                     disabled={!newInvalidCase.trim()}
-                    use:tooltip={$t('tools.ip-regex-generator.testCases.addInvalid')}
+                    use:tooltip={$t('tools.ip_regex_generator.testCases.addInvalid')}
                   >
                     <Icon name="plus" size="sm" />
                   </button>
@@ -811,7 +811,7 @@
 
       <!-- Implementation Examples -->
       <div class="language-examples">
-        <h4>{$t('tools.ip-regex-generator.languageExamples.title')}</h4>
+        <h4>{$t('tools.ip_regex_generator.languageExamples.title')}</h4>
         <div class="language-accordion">
           {#each getLanguageExamples(result.pattern, result.flags) as example (example.name)}
             <div class="language-item">
@@ -831,7 +831,7 @@
                   <button
                     class="copy-code-btn {clipboard.isCopied(example.name.toLowerCase()) ? 'copied' : ''}"
                     onclick={() => clipboard.copy(example.code, example.name.toLowerCase())}
-                    use:tooltip={$t('tools.ip-regex-generator.languageExamples.copy')}
+                    use:tooltip={$t('tools.ip_regex_generator.languageExamples.copy')}
                   >
                     <Icon name={clipboard.isCopied(example.name.toLowerCase()) ? 'check' : 'copy'} size="xs" />
                   </button>

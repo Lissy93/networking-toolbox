@@ -1,0 +1,86 @@
+{
+  "title": "DNS Glue Check Tool",
+  "description": "Check which NS names require glue records and whether A/AAAA records exist",
+
+  "examples": {
+    "title": "Quick Examples",
+    "items": [
+      {
+        "zone": "cloudflare.com",
+        "description": "Multiple NS with full IPv4+IPv6 glue records"
+      },
+      {
+        "zone": "yahoo.com",
+        "description": "Mixed glue status with warning (missing IPv6 on one NS)"
+      },
+      {
+        "zone": "bbc.co.uk",
+        "description": "Mixed delegation: internal and external nameservers"
+      },
+      {
+        "zone": "github.com",
+        "description": "All external nameservers (NSOne + AWS Route53)"
+      },
+      {
+        "zone": "twitch.tv",
+        "description": "Different TLD (.tv) with external AWS nameservers"
+      },
+      {
+        "zone": "apple.com",
+        "description": "Clean 4-nameserver setup with complete glue records"
+      }
+    ]
+  },
+
+  "form": {
+    "zoneName": {
+      "label": "Zone Name",
+      "placeholder": "example.com"
+    },
+    "checkButton": {
+      "checking": "Checking...",
+      "default": "Check Glue"
+    }
+  },
+
+  "errors": {
+    "emptyZone": "Please enter a zone name",
+    "fetchFailed": "Failed to check glue records",
+    "genericError": "An error occurred"
+  },
+
+  "loading": {
+    "title": "Checking Glue Records",
+    "description": "Analyzing nameservers and checking for required glue records..."
+  },
+
+  "results": {
+    "title": "Glue Check Results",
+    "summary": {
+      "title": "Glue Check Summary",
+      "totalNameservers": "Total Nameservers",
+      "requiringGlue": "Requiring Glue",
+      "withValidGlue": "With Valid Glue",
+      "missingGlue": "Missing Glue"
+    },
+    "nameservers": {
+      "glueRequired": "Glue Required",
+      "external": "External",
+      "aRecords": "A Records",
+      "aaaaRecords": "AAAA Records",
+      "noARecordsFound": "No A records found",
+      "noAaaaRecordsFound": "No AAAA records found",
+      "externalNS": "External nameserver",
+      "externalNSExplanation": "No glue records required as this nameserver is outside the zone"
+    },
+    "status": {
+      "error": "Critical: No glue records found",
+      "warning": "Warning: Incomplete glue records",
+      "success": "Healthy: All glue records present"
+    }
+  },
+
+  "issues": {
+    "title": "Issues Found"
+  }
+}

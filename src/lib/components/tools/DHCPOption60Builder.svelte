@@ -30,7 +30,7 @@
     { preset: 'aruba-ap' as VendorPreset, description: $t('tools/dhcp-option60-builder.examples.arubaAp') },
   ];
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   const importantNotes = $derived([
     $t('tools/dhcp-option60-builder.notes.list.vendorClass'),

@@ -55,6 +55,60 @@
     "copy": "Copy",
     "copied": "Copied!"
   },
+  "strategy": {
+    "title": "Allocation Strategy",
+    "fitBest": {
+      "label": "Best Fit",
+      "description": "Minimize address space waste"
+    },
+    "preserveOrder": {
+      "label": "Preserve Order",
+      "description": "Allocate in the order specified"
+    },
+    "usableHosts": {
+      "label": "Optimize for Usable Hosts",
+      "description": "Account for network and broadcast addresses"
+    }
+  },
+  "parentNetwork": {
+    "label": "Parent Network",
+    "placeholder": "e.g., 192.168.0.0/16"
+  },
+  "requirements": {
+    "title": "Subnet Requirements",
+    "addSubnet": "Add Subnet",
+    "clearAll": "Clear All",
+    "emptyState": "No subnet requirements defined. Add subnets to begin planning."
+  },
+  "examples": {
+    "title": "Example Scenarios",
+    "officeNetwork": {
+      "label": "Small Office Network",
+      "subnets": {
+        "sales": "Sales Department (25 hosts)",
+        "engineering": "Engineering Team (15 hosts)",
+        "servers": "Server VLAN (10 hosts)"
+      }
+    },
+    "largeCorporate": {
+      "label": "Large Corporate Network",
+      "subnets": {
+        "hq": "Headquarters (500 hosts)",
+        "branchOffice": "Branch Office (100 hosts)",
+        "dmz": "DMZ Servers (50 hosts)",
+        "management": "Management Network (20 hosts)"
+      }
+    },
+    "dataCenter": {
+      "label": "Data Center Network",
+      "subnets": {
+        "webServers": "Web Server Farm (200 hosts)",
+        "databaseCluster": "Database Cluster (50 hosts)",
+        "loadBalancers": "Load Balancers (10 hosts)",
+        "monitoring": "Monitoring Systems (30 hosts)"
+      }
+    }
+  },
   "errors": {
     "title": "Planning Error",
     "invalidNetwork": "Invalid parent network",

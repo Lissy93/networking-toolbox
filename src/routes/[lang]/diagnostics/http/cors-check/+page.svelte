@@ -46,7 +46,7 @@
     },
   ]);
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   // Reactive validation
   const isInputValid = $derived(() => {

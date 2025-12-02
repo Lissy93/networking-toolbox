@@ -39,7 +39,7 @@
   let port = $state(587);
 
   const diagnosticState = useDiagnosticState<TLSCheckResult>();
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   async function loadExample(example: (typeof examplesList)[0], index: number) {
     domain = example.domain;

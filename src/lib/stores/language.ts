@@ -184,6 +184,17 @@ export const t = derived([locale, translations], ([_$locale, _$translations]) =>
 });
 
 /**
+ * Reactive raw translation function
+ * Returns raw translation values (arrays, objects) without string conversion
+ * Used by content files that need structured data
+ */
+export const tRaw = derived([locale, translations], ([_$locale, _$translations]) => {
+  return (key: string): any => {
+    return i18n.getRaw(key);
+  };
+});
+
+/**
  * Get localized path for current language
  */
 export function localizedPath(path: string): string {

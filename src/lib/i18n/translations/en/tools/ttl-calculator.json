@@ -1,0 +1,117 @@
+{
+  "title": "TTL Calculator",
+  "description": "Humanize DNS TTL values and compute cache expiry times from now or specific dates",
+
+  "overview": {
+    "humanization": {
+      "title": "TTL Humanization:",
+      "content": "Convert seconds to human-readable formats like '1 hour' or '2 days 3 hours'"
+    },
+    "cacheExpiry": {
+      "title": "Cache Expiry:",
+      "content": "Calculate when DNS records will expire from resolver caches"
+    },
+    "guidelines": {
+      "title": "TTL Guidelines:",
+      "content": "Get recommendations based on record stability and update frequency"
+    }
+  },
+
+  "examples": {
+    "commonValues": {
+      "title": "Common TTL Values"
+    },
+    "useCases": {
+      "title": "TTL by Use Case",
+      "scenarios": {
+        "loadBalancer": "Load Balancer IP",
+        "webServer": "Web Server A Record",
+        "mxRecord": "MX Record",
+        "nsRecord": "NS Record"
+      },
+      "descriptions": {
+        "loadBalancer": "Short TTL for quick failover capability",
+        "webServer": "Standard TTL for web services",
+        "mxRecord": "Stable mail server configuration",
+        "nsRecord": "Authoritative name servers rarely change"
+      }
+    }
+  },
+
+  "input": {
+    "label": "TTL Value",
+    "placeholder": "Enter TTL value in seconds",
+    "tooltip": "Enter TTL value in seconds",
+    "customDateLabel": "Calculate expiry from custom date/time"
+  },
+
+  "results": {
+    "title": "TTL Analysis",
+    "copyTTL": "Copy TTL",
+    "humanReadable": "Human Readable",
+    "secondsLabel": "seconds",
+    "cacheExpiry": "Cache Expiry Times",
+    "fromNow": "From Now",
+    "fromCustomDate": "From Custom Date",
+    "summary": "Summary",
+    "guidelinesTitle": "TTL Guidelines by Category",
+    "recommendations": "Recommendations",
+    "details": "TTL Details"
+  },
+
+  "errors": {
+    "invalidValue": "Invalid TTL value",
+    "mustBePositive": "TTL must be a positive number",
+    "tooLarge": "TTL value is too large"
+  },
+
+  "units": {
+    "seconds": "seconds",
+    "minutes": "minutes",
+    "hours": "hours",
+    "days": "days",
+    "weeks": "weeks"
+  },
+
+  "guidelines": {
+    "veryShort": {
+      "label": "Very Short (< 5 min)",
+      "description": "High DNS load, instant propagation"
+    },
+    "short": {
+      "label": "Short (5 min - 1 hr)",
+      "description": "Frequent changes, good for testing"
+    },
+    "medium": {
+      "label": "Medium (1 hr - 1 day)",
+      "description": "Balanced performance and flexibility"
+    },
+    "long": {
+      "label": "Long (1 day - 1 week)",
+      "description": "Stable records, reduced DNS queries"
+    },
+    "veryLong": {
+      "label": "Very Long (> 1 week)",
+      "description": "Infrastructure, rarely changes"
+    }
+  },
+
+  "education": {
+    "tradeoffs": {
+      "title": "TTL Trade-offs",
+      "content": "Lower TTLs allow faster propagation of DNS changes but increase DNS query load. Higher TTLs reduce DNS traffic but slow down change propagation. Balance based on your needs."
+    },
+    "cacheBehavior": {
+      "title": "Cache Behavior",
+      "content": "DNS resolvers cache records for the TTL duration. Once expired, they must query authoritative servers again. Some resolvers may cache slightly longer or shorter than the exact TTL."
+    },
+    "changePlanning": {
+      "title": "Change Planning",
+      "content": "Before making DNS changes, consider lowering TTLs in advance. This reduces the time users see old records. After changes stabilize, you can increase TTLs again."
+    },
+    "monitoringImpact": {
+      "title": "Monitoring Impact",
+      "content": "Monitor DNS query volumes when changing TTLs. Very short TTLs can significantly increase load on authoritative servers and may impact DNS provider costs."
+    }
+  }
+}

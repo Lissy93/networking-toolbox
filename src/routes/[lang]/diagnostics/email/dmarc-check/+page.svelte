@@ -38,7 +38,7 @@
     },
   ]);
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   async function checkDMARC() {
     diagnosticState.startOperation();
@@ -767,13 +767,6 @@
       p {
         margin: 0 0 var(--spacing-md) 0;
         color: var(--text-secondary);
-
-        code {
-          background: var(--bg-secondary);
-          padding: 2px 4px;
-          border-radius: 3px;
-          font-family: var(--font-mono);
-        }
       }
 
       .deliverability-impact {

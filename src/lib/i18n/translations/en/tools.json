@@ -44,24 +44,30 @@
 
     "explainer": {
       "title": "Understanding Subnet Calculations",
-
-      "network_address_title": "Network Address",
-      "network_address_content": "The first IP address in a subnet, used to identify the network itself. Hosts cannot be assigned this address as it represents the entire network segment.",
-
-      "broadcast_address_title": "Broadcast Address",
-      "broadcast_address_content": "The last IP address in a subnet, used to send messages to all devices on the network. When a packet is sent to this address, it reaches every host in the subnet.",
-
-      "subnet_mask_title": "Subnet Mask",
-      "subnet_mask_content": "Defines which portion of an IP address represents the network and which represents the host. A mask of /24 means the first 24 bits identify the network.",
-
-      "wildcard_mask_title": "Wildcard Mask",
-      "wildcard_mask_content": "The inverse of a subnet mask, used in access control lists. Where the subnet mask has 1s, the wildcard has 0s, and vice versa.",
-
-      "usable_hosts_title": "Usable Hosts",
-      "usable_hosts_content": "The number of IP addresses available for devices. Always 2 less than total addresses because network and broadcast addresses are reserved.",
-
-      "cidr_notation_title": "CIDR Notation",
-      "cidr_notation_content": "Classless Inter-Domain Routing notation (e.g., /24) indicates how many bits are used for the network portion. Higher numbers mean smaller subnets with fewer hosts."
+      "network_address": {
+        "title": "Network Address",
+        "description": "The first IP address in a subnet, used to identify the network itself. Hosts cannot be assigned this address as it represents the entire network segment."
+      },
+      "broadcast_address": {
+        "title": "Broadcast Address",
+        "description": "The last IP address in a subnet, used to send messages to all devices on the network. When a packet is sent to this address, it reaches every host in the subnet."
+      },
+      "subnet_mask": {
+        "title": "Subnet Mask",
+        "description": "Defines which portion of an IP address represents the network and which represents the host. A mask of /24 means the first 24 bits identify the network."
+      },
+      "wildcard_mask": {
+        "title": "Wildcard Mask",
+        "description": "The inverse of a subnet mask, used in access control lists. Where the subnet mask has 1s, the wildcard has 0s, and vice versa."
+      },
+      "usable_hosts": {
+        "title": "Usable Hosts",
+        "description": "The number of IP addresses available for devices. Always 2 less than total addresses because network and broadcast addresses are reserved."
+      },
+      "cidr_notation": {
+        "title": "CIDR Notation",
+        "description": "Classless Inter-Domain Routing notation (e.g., /24) indicates how many bits are used for the network portion. Higher numbers mean smaller subnets with fewer hosts."
+      }
     },
 
     "tips": {
@@ -70,6 +76,1993 @@
       "binary_understanding": "Binary Understanding: Learning binary helps understand how subnetting works",
       "common_sizes": "Common Sizes: /24 (254 hosts), /25 (126 hosts), /26 (62 hosts), /30 (2 hosts for point-to-point)",
       "private_networks": "Private Networks: Use RFC 1918 addresses (10.x.x.x, 172.16-31.x.x, 192.168.x.x) for internal networks"
+    },
+
+    "actions": {
+      "copied": "Copied!",
+      "copy_network": "Copy network address to clipboard",
+      "copy_broadcast": "Copy broadcast address to clipboard",
+      "copy_network_aria": "Copy network address",
+      "copy_broadcast_aria": "Copy broadcast address",
+      "calculating": "Calculating subnet..."
+    },
+
+    "binary": {
+      "network_label": "Network:",
+      "mask_label": "Mask:",
+      "broadcast_label": "Broadcast:"
+    }
+  },
+
+  "ipv6_subnet_calculator": {
+    "title": "IPv6 Subnet Calculator",
+    "description": "Calculate IPv6 subnet information with 128-bit addressing and modern network prefix notation.",
+
+    "sections": {
+      "networkConfiguration": "Network Configuration",
+      "commonNetworks": "Common IPv6 Networks",
+      "subnetInfo": "IPv6 Subnet Information",
+      "networkDetails": "Network Details",
+      "addressStructure": "IPv6 Address Structure",
+      "addressBreakdown": "128-bit Address Breakdown",
+      "calculationError": "Calculation Error"
+    },
+
+    "form": {
+      "networkAddressLabel": "IPv6 Network Address",
+      "networkAddressPlaceholder": "2001:db8::/64",
+      "prefixLengthLabel": "Prefix Length",
+      "customPrefixLength": "Custom prefix length"
+    },
+
+    "tooltips": {
+      "networkAddressHelp": "Enter IPv6 address with prefix (e.g., 2001:db8::/64) or address only",
+      "compressedNotation": "Compressed IPv6 notation using :: for consecutive zero groups",
+      "expandedNotation": "Full 128-bit IPv6 representation with all zero groups shown",
+      "subnetMask": "IPv6 subnet mask showing network portion (compressed format)",
+      "addressRange": "First and last assignable addresses in the subnet",
+      "assignableAddresses": "Number of addresses available for host assignment (excluding network/broadcast concepts)",
+      "reverseDns": "PTR record zone for reverse DNS lookups",
+      "binaryRepresentation": "128-bit binary representation showing network (1) and host (0) bits"
+    },
+
+    "presets": {
+      "documentation48": "Documentation /48",
+      "standardSubnet64": "Standard Subnet /64",
+      "linkLocal64": "Link-Local /64",
+      "loopback128": "Loopback /128",
+      "googleDns48": "Google DNS /48",
+      "multicastAllNodes": "Multicast All Nodes"
+    },
+
+    "results": {
+      "network": "Network",
+      "totalAddresses": "Total Addresses",
+      "networkCompressed": "Network Address (Compressed)",
+      "networkExpanded": "Network Address (Expanded)",
+      "subnetMask": "Subnet Mask",
+      "addressRange": "Address Range",
+      "assignableAddresses": "Assignable Addresses",
+      "reverseDnsZone": "Reverse DNS Zone",
+      "binaryPrefix": "Binary Prefix Representation"
+    },
+
+    "actions": {
+      "hide": "Hide",
+      "show": "Show",
+      "binary": "Binary"
+    },
+
+    "visualization": {
+      "networkPortion": "Network Portion",
+      "hostPortion": "Host Portion",
+      "bits": "bits",
+      "showingPortionsFor": "Showing network and host portions for"
+    },
+
+    "format": {
+      "digits": "digits"
+    }
+  },
+
+  "vlsm_calculator": {
+    "title": "VLSM Calculator",
+    "description": "Design efficient subnets with Variable Length Subnet Masking for optimal address space utilization.",
+
+    "networkConfig": {
+      "title": "Network Configuration",
+      "networkAddress": {
+        "label": "Network Address",
+        "placeholder": "192.168.1.0"
+      },
+      "cidrNotation": {
+        "label": "CIDR Notation"
+      }
+    },
+
+    "subnetRequirements": {
+      "title": "Subnet Requirements",
+      "addSubnet": "Add Subnet",
+      "subnetName": {
+        "placeholder": "Subnet name"
+      },
+      "hostsNeeded": "Hosts needed:",
+      "description": {
+        "placeholder": "Description (optional)"
+      }
+    },
+
+    "summary": {
+      "title": "VLSM Summary",
+      "totalSubnets": "Total Subnets",
+      "hostsRequested": "Hosts Requested",
+      "hostsProvided": "Hosts Provided",
+      "wastedHosts": "Wasted Hosts",
+      "efficiency": "Efficiency",
+      "remainingAddresses": "Remaining Addresses"
+    },
+
+    "table": {
+      "title": "Subnet Allocation Table",
+      "columns": {
+        "subnet": "Subnet",
+        "network": "Network",
+        "hosts": "Hosts",
+        "mask": "Mask",
+        "efficiency": "Efficiency",
+        "actions": "Actions"
+      },
+      "hostsNeeded": "{count} needed",
+      "hostsProvided": "{count} provided",
+      "hostsWasted": "{count} wasted"
+    },
+
+    "details": {
+      "networkAddress": {
+        "label": "Network Address",
+        "tooltip": "First IP address in the subnet - identifies the network"
+      },
+      "broadcastAddress": {
+        "label": "Broadcast Address",
+        "tooltip": "Last IP address in the subnet - sends to all hosts"
+      },
+      "firstUsableHost": {
+        "label": "First Usable Host",
+        "tooltip": "First IP address available for host assignment"
+      },
+      "lastUsableHost": {
+        "label": "Last Usable Host",
+        "tooltip": "Last IP address available for host assignment"
+      },
+      "subnetMask": {
+        "label": "Subnet Mask",
+        "tooltip": "Defines which portion of IP represents network vs host"
+      },
+      "wildcardMask": {
+        "label": "Wildcard Mask",
+        "tooltip": "Inverse of subnet mask - used in access control lists"
+      },
+      "binaryMask": {
+        "label": "Binary Mask",
+        "tooltip": "Binary representation of the subnet mask"
+      },
+      "hostBits": {
+        "label": "Host Bits",
+        "tooltip": "Number of bits available for host addressing",
+        "value": "{count} bits"
+      }
+    },
+
+    "actions": {
+      "expandDetails": "Expand subnet details",
+      "collapseDetails": "Collapse subnet details",
+      "copyNetworkInfo": "Copy network info"
+    },
+
+    "error": {
+      "title": "Calculation Error"
+    },
+
+    "defaultSubnetName": "Subnet {number}"
+  },
+
+  "subnet_planner": {
+    "title": "Subnet Planner",
+    "description": "Plan and design subnet allocation for networks with optimal address space utilization.",
+
+    "strategy": {
+      "title": "Allocation Strategy",
+      "fitBest": {
+        "label": "Best Fit",
+        "description": "Minimize address space waste"
+      },
+      "preserveOrder": {
+        "label": "Preserve Order",
+        "description": "Allocate in the order specified"
+      },
+      "usableHosts": {
+        "label": "Optimize for Usable Hosts",
+        "description": "Account for network and broadcast addresses"
+      }
+    },
+
+    "parentNetwork": {
+      "label": "Parent Network",
+      "placeholder": "e.g., 192.168.0.0/16"
+    },
+
+    "requirements": {
+      "title": "Subnet Requirements",
+      "addSubnet": "Add Subnet",
+      "clearAll": "Clear All",
+      "emptyState": "No subnet requirements defined. Add subnets to begin planning."
+    },
+
+    "examples": {
+      "title": "Example Scenarios",
+      "officeNetwork": {
+        "label": "Small Office Network",
+        "subnets": {
+          "sales": "Sales Department (25 hosts)",
+          "engineering": "Engineering Team (15 hosts)",
+          "servers": "Server VLAN (10 hosts)"
+        }
+      },
+      "largeCorporate": {
+        "label": "Large Corporate Network",
+        "subnets": {
+          "hq": "Headquarters (500 hosts)",
+          "branchOffice": "Branch Office (100 hosts)",
+          "dmz": "DMZ Servers (50 hosts)",
+          "management": "Management Network (20 hosts)"
+        }
+      },
+      "dataCenter": {
+        "label": "Data Center Network",
+        "subnets": {
+          "webServers": "Web Server Farm (200 hosts)",
+          "databaseCluster": "Database Cluster (50 hosts)",
+          "loadBalancers": "Load Balancers (10 hosts)",
+          "monitoring": "Monitoring Systems (30 hosts)"
+        }
+      }
+    },
+
+    "actions": {
+      "plan": "Generate Plan",
+      "planning": "Planning...",
+      "export": "Export Plan",
+      "copy": "Copy",
+      "copied": "Copied!"
+    },
+
+    "results": {
+      "title": "Subnet Plan",
+      "summary": {
+        "title": "Planning Summary",
+        "totalSubnets": "Total Subnets",
+        "addressesUsed": "Addresses Used",
+        "addressesWasted": "Addresses Wasted",
+        "efficiency": "Efficiency"
+      },
+      "plan": {
+        "title": "Subnet Allocation Plan",
+        "subnet": "Subnet",
+        "network": "Network",
+        "hosts": "Hosts",
+        "size": "Size",
+        "utilization": "Utilization"
+      }
+    },
+
+    "errors": {
+      "title": "Planning Error",
+      "invalidNetwork": "Invalid parent network",
+      "insufficientSpace": "Insufficient address space",
+      "planningFailed": "Subnet planning failed"
+    }
+  },
+
+  "ptr_generator": {
+    "title": "PTR Record Generator",
+    "description": "Generate reverse DNS PTR records for IP addresses and CIDR blocks with proper zone file formatting.",
+
+    "overview": {
+      "reverseDNS": {
+        "title": "Reverse DNS",
+        "content": "PTR records provide reverse DNS lookups, mapping IP addresses back to hostnames"
+      },
+      "zoneStructure": {
+        "title": "Zone Structure",
+        "content": "IPv4 uses .in-addr.arpa zones, IPv6 uses .ip6.arpa with nibble boundaries"
+      },
+      "zoneFiles": {
+        "title": "Zone Files",
+        "content": "Generated records can be used directly in BIND9 and other DNS server configurations"
+      }
+    },
+
+    "input": {
+      "label": "IP Address or CIDR Block",
+      "placeholder": "192.168.1.100 or 192.168.1.0/24",
+      "singleMode": "Single Address",
+      "cidrMode": "CIDR Block",
+      "help": "Enter an IP address for single PTR record or CIDR block for bulk generation",
+      "type": {
+        "label": "Input Type",
+        "singleIP": "Single IP Address",
+        "cidrBlock": "CIDR Block"
+      },
+      "address": {
+        "labelSingle": "IP Address",
+        "placeholderSingle": "e.g., 192.168.1.100"
+      },
+      "options": {
+        "generateZoneFiles": "Generate Zone Files",
+        "zoneFilesHint": "Include complete zone file format for DNS servers"
+      }
+    },
+
+    "examples": {
+      "title": "Quick Examples",
+      "singleIPv4": {
+        "label": "Single IPv4",
+        "description": "Generate PTR for single IPv4 address"
+      },
+      "singleIPv6": {
+        "label": "Single IPv6",
+        "description": "Generate PTR for single IPv6 address"
+      },
+      "ipv4Subnet24": {
+        "label": "IPv4 /24 Subnet",
+        "description": "Generate PTRs for entire /24 subnet"
+      },
+      "ipv4SmallBlock": {
+        "label": "IPv4 /28 Small Block",
+        "description": "Generate PTRs for /28 block (16 addresses)"
+      },
+      "ipv6Network": {
+        "label": "IPv6 /64 Network",
+        "description": "Generate PTRs for IPv6 network block"
+      },
+      "largeBlock": {
+        "label": "Large Block (/16)",
+        "description": "Demonstration of large block generation"
+      },
+      "types": {
+        "singleIP": "Single IP Address",
+        "cidrBlock": "CIDR Block"
+      }
+    },
+
+    "options": {
+      "showZoneFiles": "Show zone file format",
+      "showZoneFilesTooltip": "Display complete zone file content for DNS server configuration"
+    },
+
+    "actions": {
+      "generate": "Generate PTR Records",
+      "generating": "Generating...",
+      "copyAll": "Copy All",
+      "exportTxt": "Export TXT",
+      "exportBind": "Export BIND",
+      "exportJson": "Export JSON",
+      "copied": "Copied!",
+      "copyZoneFile": "Copy Zone File"
+    },
+
+    "results": {
+      "title": "PTR Records",
+      "summary": {
+        "totalPTRs": "Total PTR Records",
+        "ipv4": "IPv4 Records",
+        "zones": "DNS Zones",
+        "totalEntries": "Total Entries",
+        "ipv4Entries": "IPv4 Entries",
+        "ipv6Entries": "IPv6 Entries",
+        "uniqueZones": "Unique Zones"
+      },
+      "records": {
+        "title": "PTR Record Details",
+        "ipAddress": "IP Address",
+        "ptrName": "PTR Record Name",
+        "type": "Type",
+        "zone": "Zone"
+      },
+      "entries": {
+        "title": "PTR Entries",
+        "count": "({count})",
+        "ipAddress": "IP Address",
+        "ptrRecord": "PTR Record",
+        "reverseZone": "Reverse Zone",
+        "type": "Type",
+        "copyTooltip": "Copy PTR record"
+      },
+      "zoneFiles": {
+        "title": "Zone File Contents",
+        "count": "({count})",
+        "zoneName": "Zone: {name}",
+        "zoneType": "Type: {type}",
+        "entriesCount": "{count} entries",
+        "copyZoneTooltip": "Copy zone file content"
+      }
+    },
+
+    "errors": {
+      "title": "Error",
+      "invalidInput": "Invalid input format",
+      "unsupportedFormat": "Unsupported IP format",
+      "tooManyEntries": "Too many entries (maximum {max})",
+      "processingError": "Error processing input"
+    },
+
+    "warnings": {
+      "largeBlock": "Large CIDR block will generate many records",
+      "performanceNote": "Generation may take some time for large blocks"
+    },
+
+    "education": {
+      "whatArePTRRecords": {
+        "title": "What are PTR Records?",
+        "content": "PTR records provide reverse DNS lookups, mapping IP addresses back to domain names for verification and logging purposes"
+      },
+      "zoneStructure": {
+        "title": "Zone Structure",
+        "content": "IPv4 reverse zones use .in-addr.arpa (e.g., 1.168.192.in-addr.arpa), IPv6 uses .ip6.arpa with nibble boundaries"
+      },
+      "zoneDelegation": {
+        "title": "Zone Delegation",
+        "content": "Reverse DNS zones must be properly delegated by your ISP or hosting provider to function correctly"
+      },
+      "bestPractices": {
+        "title": "Best Practices",
+        "content": "Always set up reverse DNS for mail servers, use descriptive hostnames, and ensure forward/reverse DNS match"
+      }
+    }
+  },
+
+  "rp_builder": {
+    "title": "RP Record Builder",
+    "subtitle": "Create RP (Responsible Person) records to specify administrative contacts for your domains",
+
+    "examples": {
+      "title": "Common Role Examples",
+      "roles": {
+        "systemAdmin": {
+          "name": "System Administrator",
+          "description": "Primary system administrator contact"
+        },
+        "webmaster": {
+          "name": "Webmaster",
+          "description": "Website administrator contact"
+        },
+        "security": {
+          "name": "Security Contact",
+          "description": "Security incident response contact"
+        },
+        "dnsAdmin": {
+          "name": "DNS Administrator",
+          "description": "DNS zone administrator"
+        }
+      }
+    },
+
+    "form": {
+      "domain": {
+        "label": "Domain Name",
+        "placeholder": "example.com",
+        "help": "The domain name for this RP record",
+        "tooltip": "The domain name for which this RP record will be created"
+      },
+      "converter": {
+        "title": "Email to Domain Name Converter",
+        "placeholder": "admin@example.com",
+        "button": "Convert",
+        "help": "Enter an email to automatically convert to domain name format"
+      },
+      "mailbox": {
+        "label": "Mailbox Domain Name",
+        "placeholder": "admin.example.com.",
+        "help": "Domain name encoding the email address (use \".\" for no contact)",
+        "tooltip": "Domain name encoding the email address. Use '.' for no contact specified.",
+        "emailPreview": "Email:"
+      },
+      "txt": {
+        "label": "TXT Domain Name",
+        "placeholder": "admin-info.example.com.",
+        "help": "Domain name where TXT record with contact info can be found (use \".\" for none)",
+        "tooltip": "Domain name where TXT record with additional contact information can be found. Use '.' for no additional info."
+      }
+    },
+
+    "output": {
+      "rpRecord": "Generated RP Record",
+      "txtRecord": "Suggested TXT Record",
+      "txtHelp": "This TXT record should be created at the specified domain",
+      "placeholder": "Fill in the required fields to generate the RP record",
+      "invalidFormat": "Invalid format"
+    },
+
+    "buttons": {
+      "copy": "Copy Records",
+      "copied": "Copied!",
+      "download": "Download",
+      "downloaded": "Downloaded!"
+    },
+
+    "alerts": {
+      "info": {
+        "title": "Information",
+        "noMailbox": "Using \".\" for mailbox means no mailbox is specified",
+        "noTxt": "Using \".\" for TXT means no additional text information is provided",
+        "txtRecord": "Remember to create the TXT record at {txtDname} with contact information"
+      },
+      "warnings": {
+        "title": "Configuration Warnings",
+        "mailboxFqdn": "Mailbox domain name should be a fully qualified domain name",
+        "txtFqdn": "TXT domain name should be a fully qualified domain name or \".\"",
+        "mailboxDot": "Domain names in RP records should end with a dot (.) for absolute names",
+        "txtDot": "TXT domain name should end with a dot (.) for absolute names"
+      }
+    },
+
+    "info": {
+      "about": {
+        "title": "About RP Records",
+        "description": "RP (Responsible Person) records identify the responsible person for a domain or host. They specify both a mailbox (encoded as a domain name) and optionally point to a TXT record with additional contact information. This allows automated discovery of administrative contacts."
+      },
+      "encoding": {
+        "title": "Email Encoding",
+        "description": "Email addresses are encoded as domain names:",
+        "examples": {
+          "simple": {
+            "email": "admin@example.com",
+            "encoded": "admin.example.com."
+          },
+          "complex": {
+            "email": "user.name@example.com",
+            "encoded": "user\\.name.example.com."
+          }
+        },
+        "note": "Dots in the local part are escaped with backslashes"
+      },
+      "useCases": {
+        "title": "Common Use Cases",
+        "items": {
+          "zone": "Zone administrator contact",
+          "server": "Server administrator contact",
+          "security": "Security incident response",
+          "automated": "Automated contact discovery",
+          "compliance": "Compliance requirements"
+        }
+      },
+      "bestPractices": {
+        "title": "Best Practices",
+        "items": {
+          "fqdn": "Always use fully qualified domain names ending with a dot",
+          "txtRecords": "Create corresponding TXT records with detailed contact information",
+          "upToDate": "Keep contact information up to date and monitored",
+          "rolesBased": "Consider creating role-based contacts rather than personal ones"
+        }
+      }
+    }
+  },
+
+  "ipv6_teredo": {
+    "title": "IPv6 Teredo Parser",
+    "description": "Parse Teredo IPv6 addresses to extract server IPv4, flags, mapped port, and client IPv4",
+
+    "overview": {
+      "tunneling": {
+        "title": "Teredo Tunneling:",
+        "description": "Allows IPv6 connectivity for hosts behind IPv4 NATs by encapsulating IPv6 packets in IPv4 UDP."
+      },
+      "format": {
+        "title": "Address Format:",
+        "description": "where components are encoded and obfuscated."
+      },
+      "obfuscation": {
+        "title": "Obfuscation:",
+        "description": "Client IP and port are XOR'ed to prevent some NATs from interfering with the tunnel."
+      }
+    },
+
+    "examples": {
+      "title": "Quick Examples",
+      "microsoftTeredo": "Microsoft Teredo",
+      "microsoftTeredoDesc": "Microsoft Teredo server example",
+      "compressedForm": "Compressed Form",
+      "compressedFormDesc": "Same address in compressed format",
+      "behindNATCone": "Behind NAT (Cone)",
+      "behindNATConeDesc": "Client behind cone NAT",
+      "directConnection": "Direct Connection",
+      "directConnectionDesc": "Direct connection without NAT"
+    },
+
+    "input": {
+      "label": "Teredo IPv6 Address",
+      "placeholder": "Enter IPv6 Teredo address...",
+      "help": "Enter a Teredo IPv6 address (starts with 2001::/32)"
+    },
+
+    "results": {
+      "validAddress": "Valid Teredo Address",
+      "invalidAddress": "Invalid Address"
+    },
+
+    "breakdown": {
+      "title": "Address Structure",
+      "prefix": {
+        "label": "Prefix",
+        "description": "Teredo identifier"
+      },
+      "server": {
+        "label": "Server",
+        "description": "IPv4:"
+      },
+      "flags": {
+        "label": "Flags"
+      },
+      "port": {
+        "label": "Port",
+        "description": "Actual:"
+      },
+      "client": {
+        "label": "Client",
+        "description": "IPv4:"
+      }
+    },
+
+    "components": {
+      "title": "Extracted Components",
+      "teredoServer": {
+        "title": "Teredo Server",
+        "description": "The Teredo relay server handling this tunnel"
+      },
+      "clientIPv4": {
+        "title": "Client IPv4",
+        "description": "The client's public IPv4 address (may be NAT address)"
+      },
+      "clientPort": {
+        "title": "Client Port",
+        "description": "The UDP port used by the client (may be NAT-mapped)"
+      },
+      "natType": {
+        "title": "NAT Detection",
+        "description": "Indicates the type of NAT the client is behind"
+      }
+    },
+
+    "natTypes": {
+      "cone": "Cone NAT",
+      "symmetric": "Symmetric NAT",
+      "direct": "Direct connection (no NAT)"
+    },
+
+    "explanation": {
+      "title": "Parsing Steps",
+      "step1": "1. Teredo prefix: {prefix} (identifies this as a Teredo tunnel)",
+      "step2": "2. Server IPv4: {hex} → {ipv4}",
+      "step3": "3. Flags: {hex} → {flags}",
+      "step4": "4. Client port: {hex} XOR FFFF → {port}",
+      "step5": "5. Client IPv4: {hex} XOR FFFFFFFF → {ipv4}"
+    },
+
+    "errors": {
+      "invalidFormat": "Invalid IPv6 address format",
+      "notTeredo": "Not a valid Teredo address (must start with 2001::/32)",
+      "invalidComponents": "Invalid address components detected"
+    },
+
+    "actions": {
+      "parse": "Parse",
+      "clear": "Clear",
+      "copy": "Copy",
+      "copied": "Copied!"
+    }
+  },
+
+  "ipv6_notation_converter": {
+    "title": "IPv6 Notation Converter",
+    "description": "Convert between compressed and expanded IPv6 notation formats with validation.",
+    "input": {
+      "label": "IPv6 Address",
+      "placeholder": "2001:db8::1",
+      "help": "Enter IPv6 address in any valid format",
+      "tooltipExpand": "Enter compressed IPv6 address to expand",
+      "tooltipCompress": "Enter expanded IPv6 address to compress"
+    },
+    "output": {
+      "label": "Converted Address",
+      "expandedForm": "Expanded Form",
+      "compressedForm": "Compressed Form"
+    },
+    "examples": {
+      "title": "Quick Examples",
+      "documentationPrefix": "Documentation Prefix",
+      "loopbackAddress": "Loopback Address",
+      "linkLocalAddress": "Link-Local Address",
+      "globalUnicast": "Global Unicast",
+      "ipv4MappedIPv6": "IPv4-mapped IPv6",
+      "multicastAddress": "Multicast Address"
+    },
+    "actions": {
+      "convert": "Convert",
+      "copy": "Copy",
+      "copied": "Copied!"
+    },
+    "errors": {
+      "title": "Conversion Error",
+      "enterAddress": "Please enter an IPv6 address",
+      "invalidFormat": "Invalid IPv6 address format",
+      "conversionFailed": "Conversion failed"
+    }
+  },
+
+  "ip_enumerate": {
+    "title": "IP Address Enumerator",
+    "description": "Generate all IP addresses in a CIDR block, range, or network with customizable display limits.",
+    "input": {
+      "placeholder": "192.168.1.0/28 or 10.0.0.1-10.0.0.50",
+      "maxDisplay": {
+        "label": "Maximum addresses to display"
+      }
+    },
+    "options": {
+      "network": "Network",
+      "broadcast": "Broadcast"
+    },
+    "examples": {
+      "title": "Quick Examples",
+      "smallSubnet": {
+        "label": "Small Subnet",
+        "description": "16 addresses in /28 subnet"
+      },
+      "standardSubnet": {
+        "label": "Standard Subnet",
+        "description": "256 addresses in /24 subnet"
+      },
+      "ipRange": {
+        "label": "IP Range",
+        "description": "Custom IP address range"
+      },
+      "singleAddress": {
+        "label": "Single Address",
+        "description": "Single IP address"
+      },
+      "largeBlock": {
+        "label": "Large Block",
+        "description": "Large subnet demonstration"
+      }
+    },
+    "safety": {
+      "title": "Safety Warning",
+      "message": "Large address ranges may impact browser performance"
+    },
+    "actions": {
+      "generating": "Generating addresses..."
+    }
+  },
+
+  "free_space_finder": {
+    "title": "Free Space Finder",
+    "description": "Find available address space within IP pools by analyzing allocated subnets.",
+    "examples": {
+      "title": "Example Scenarios",
+      "officeNetworkGaps": {
+        "label": "Office Network Gaps"
+      },
+      "largePoolAnalysis": {
+        "label": "Large Pool Analysis"
+      },
+      "homeNetworkSpace": {
+        "label": "Home Network Space"
+      },
+      "ipv6Planning": {
+        "label": "IPv6 Planning"
+      },
+      "datacenterInventory": {
+        "label": "Datacenter Inventory"
+      }
+    },
+    "input": {
+      "pools": {
+        "label": "IP Pools",
+        "placeholder": "192.168.0.0/16\\n10.0.0.0/8"
+      },
+      "allocations": {
+        "label": "Allocated Subnets",
+        "placeholder": "192.168.1.0/24\\n192.168.10.0/24"
+      },
+      "targetPrefix": {
+        "label": "Target Prefix Length",
+        "placeholder": "24"
+      }
+    },
+    "actions": {
+      "clearFilter": "Clear Filter"
+    },
+    "results": {
+      "title": "Available Space",
+      "blocks": "Free Blocks",
+      "addresses": "Available Addresses"
+    },
+    "visualization": {
+      "title": "Address Space Visualization"
+    }
+  },
+
+  "next_available": {
+    "title": "Next Available Subnet Finder",
+    "description": "Find the next available subnet within IP pools based on existing allocations.",
+    "searchCriteria": {
+      "title": "Search Criteria",
+      "byPrefix": {
+        "label": "By Prefix Length"
+      },
+      "byHosts": {
+        "label": "By Host Count"
+      }
+    },
+    "input": {
+      "pools": {
+        "label": "Available Pools",
+        "placeholder": "192.168.0.0/16\\n10.0.0.0/8"
+      },
+      "allocations": {
+        "label": "Existing Allocations",
+        "placeholder": "192.168.1.0/24\\n192.168.10.0/24"
+      },
+      "targetPrefix": {
+        "label": "Target Prefix Length"
+      },
+      "policy": {
+        "label": "Allocation Policy",
+        "options": {
+          "firstFit": "First Fit",
+          "bestFit": "Best Fit"
+        }
+      },
+      "maxCandidates": {
+        "label": "Max Candidates"
+      },
+      "options": {
+        "usableHosts": {
+          "label": "Calculate usable hosts"
+        }
+      }
+    },
+    "examples": {
+      "title": "Example Scenarios",
+      "officeSubnets": {
+        "label": "Office Subnets"
+      },
+      "hostBasedSearch": {
+        "label": "Host-based Search"
+      },
+      "multiplePools": {
+        "label": "Multiple Pools"
+      },
+      "ipv6Example": {
+        "label": "IPv6 Example"
+      }
+    }
+  },
+
+  "nth_ip": {
+    "title": "Nth IP Address Calculator",
+    "description": "Calculate the nth IP address from network ranges using flexible syntax.",
+    "input": {
+      "title": "Network Ranges",
+      "label": "Input",
+      "placeholder": "192.168.1.0/24 @ 10\\n10.0.0.0-10.0.0.255 [50]",
+      "help": "Support for CIDR, ranges, and various offset syntaxes",
+      "globalOffset": {
+        "label": "Global Offset",
+        "placeholder": "0",
+        "help": "Apply offset to all calculations"
+      }
+    },
+    "examples": {
+      "title": "Example Patterns",
+      "tenthFromSubnet": {
+        "description": "10th address from subnet"
+      },
+      "multipleRanges": {
+        "description": "Multiple network ranges"
+      },
+      "ipv6Networks": {
+        "description": "IPv6 network support"
+      },
+      "largeNetworks": {
+        "description": "Large network handling"
+      },
+      "firstLastIP": {
+        "description": "First and last IP patterns"
+      },
+      "sequentialRanges": {
+        "description": "Sequential range processing"
+      },
+      "largeIPv6": {
+        "description": "Large IPv6 networks"
+      },
+      "specialUse": {
+        "description": "Special use addresses"
+      }
+    }
+  },
+
+  "ip_regex_generator": {
+    "title": "IP Address Regex Generator",
+    "description": "Generate regular expressions for IP address validation with customizable options.",
+    "modes": {
+      "simple": "Simple Mode",
+      "advanced": "Advanced Mode"
+    },
+    "types": {
+      "title": "IP Address Types",
+      "ipv4Only": "IPv4 Only",
+      "ipv6Only": "IPv6 Only",
+      "both": "Both IPv4 & IPv6"
+    },
+    "results": {
+      "title": "Generated Regex",
+      "patternLabel": "Regular Expression Pattern",
+      "edit": "Edit Pattern",
+      "testUrl": "Test on Regex101",
+      "copy": "Copy Regex"
+    },
+    "testCases": {
+      "title": "Test Cases",
+      "editTestCases": "Edit Test Cases",
+      "validTitle": "Should Match",
+      "invalidTitle": "Should Not Match"
+    },
+    "languageExamples": {
+      "title": "Language Examples"
+    }
+  },
+
+  "cidr_overlap": {
+    "title": "CIDR Overlap Checker",
+    "description": "Analyze overlapping IP ranges between two sets of CIDR blocks with detailed comparison.",
+    "examples": {
+      "basicOverlap": "Basic Overlap",
+      "noOverlap": "No Overlap",
+      "partialOverlap": "Partial Overlap",
+      "ipv6Overlap": "IPv6 Overlap"
+    },
+    "options": {
+      "title": "Analysis Options",
+      "mergeInputs": "Merge overlapping inputs",
+      "mergeInputsTooltip": "Combine overlapping ranges in input sets",
+      "showOnlyBoolean": "Show only boolean result",
+      "showOnlyBooleanTooltip": "Display simple yes/no overlap results"
+    },
+    "input": {
+      "setALabel": "Set A (Networks)",
+      "setATooltip": "First set of CIDR blocks to compare",
+      "setAPlaceholder": "192.168.1.0/24\\n10.0.0.0/16",
+      "setBLabel": "Set B (Networks)",
+      "setBTooltip": "Second set of CIDR blocks to compare",
+      "setBPlaceholder": "192.168.1.128/25\\n10.0.1.0/24",
+      "clearAll": "Clear All"
+    },
+    "results": {
+      "title": "Overlap Analysis"
+    },
+    "visualization": {
+      "title": "Network Overlap Visualization"
+    }
+  },
+
+  "cidr_contains": {
+    "title": "CIDR Containment Checker",
+    "description": "Check if IP ranges and CIDR blocks are contained within other ranges",
+    "examples": {
+      "basicContainment": "Basic Containment",
+      "mixedResults": "Mixed Results",
+      "partialOverlap": "Partial Overlap",
+      "ipv6Containment": "IPv6 Containment"
+    },
+    "options": {
+      "title": "Analysis Options",
+      "mergeContainers": "Merge overlapping containers",
+      "mergeContainersTooltip": "Combine overlapping ranges in container set",
+      "strictEquality": "Strict equality check",
+      "strictEqualityTooltip": "Require exact matches for containment"
+    },
+    "input": {
+      "setALabel": "Containers (Larger Networks)",
+      "setATooltip": "Networks that may contain others",
+      "setAPlaceholder": "192.168.0.0/16\\n10.0.0.0/8",
+      "setBLabel": "Candidates (Networks to Check)",
+      "setBTooltip": "Networks to check for containment",
+      "setBPlaceholder": "192.168.1.0/24\\n192.168.1.100/32"
+    },
+    "results": {
+      "title": "Containment Results"
+    },
+    "errors": {
+      "unknownError": "Unknown error occurred"
+    }
+  },
+
+  "reverse_zones_calculator": {
+    "title": "Reverse DNS Zone Calculator",
+    "description": "Calculate reverse DNS zone files and delegation requirements for IP address ranges.",
+    "examples": {
+      "ipv4_24": {
+        "label": "IPv4 /24 Network",
+        "description": "Standard class C network"
+      },
+      "ipv4_16": {
+        "label": "IPv4 /16 Network",
+        "description": "Class B network with multiple zones"
+      },
+      "ipv6_64": {
+        "label": "IPv6 /64 Network",
+        "description": "Standard IPv6 subnet"
+      },
+      "small_block": {
+        "label": "Small Block (/28)",
+        "description": "Small IPv4 block"
+      }
+    },
+    "results": {
+      "title": "Reverse Zone Analysis",
+      "zones": "Required Zones",
+      "delegation": "Delegation Requirements",
+      "totalZones": "Total Zones",
+      "ipv4Zones": "IPv4 Zones",
+      "ipv6Zones": "IPv6 Zones"
+    }
+  },
+
+  "ula_generator": {
+    "title": "ULA Generator",
+    "description": "Generate Unique Local IPv6 addresses with proper fc00::/7 prefix allocation.",
+    "form": {
+      "count": {
+        "label": "Number of addresses",
+        "placeholder": "1"
+      },
+      "subnetIds": {
+        "label": "Subnet IDs",
+        "placeholder": "1, 2, 3",
+        "helpText": "Comma-separated subnet identifiers"
+      }
+    },
+    "buttons": {
+      "generate": "Generate ULA Addresses"
+    },
+    "parser": {
+      "title": "ULA Parser",
+      "description": "Parse and analyze existing ULA addresses",
+      "form": {
+        "address": {
+          "label": "ULA Address",
+          "placeholder": "fc00::/7"
+        }
+      }
+    }
+  },
+
+  "ipv6_zone_id": {
+    "title": "IPv6 Zone ID Processor",
+    "description": "Process IPv6 addresses with zone identifiers for link-local and multicast address scoping.",
+    "input": {
+      "label": "IPv6 Addresses",
+      "placeholder": "fe80::1\\nfe80::1%eth0\\nff02::1%eth0",
+      "help": "Enter IPv6 addresses with or without zone identifiers (%), one per line"
+    },
+    "results": {
+      "title": "Zone ID Processing Results",
+      "input": "Input",
+      "address": "Address",
+      "zoneId": "Zone ID",
+      "scope": "Scope",
+      "recommendation": "Recommendation",
+      "status": "Status",
+      "valid": "Valid",
+      "invalid": "Invalid"
+    },
+    "scope": {
+      "linkLocal": "Link-Local",
+      "siteLocal": "Site-Local",
+      "multicast": "Multicast",
+      "global": "Global",
+      "loopback": "Loopback",
+      "unspecified": "Unspecified"
+    },
+    "recommendations": {
+      "zoneRequired": "Zone ID required for this scope",
+      "zoneOptional": "Zone ID optional",
+      "zoneNotNeeded": "Zone ID not needed",
+      "addZone": "Add zone ID for clarity"
+    },
+    "info": {
+      "title": "IPv6 Zone Identifiers",
+      "description": "Zone identifiers specify the network interface for link-local and multicast addresses",
+      "whenRequired": {
+        "title": "When Zone IDs Are Required",
+        "linkLocal": {
+          "type": "Link-Local Addresses",
+          "description": "Required to specify which network interface"
+        },
+        "multicast": {
+          "type": "Multicast Addresses",
+          "description": "Required for link-local and site-local multicast"
+        }
+      },
+      "commonIdentifiers": {
+        "title": "Common Zone Identifiers",
+        "examples": "eth0, wlan0, lo0, 1, 2, 3"
+      }
+    }
+  },
+
+  "ipv6_normalize": {
+    "title": "IPv6 Normalizer",
+    "description": "Normalize IPv6 addresses to RFC 5952 canonical representation.",
+    "input": {
+      "label": "IPv6 Addresses",
+      "placeholder": "2001:0db8:0000:0000:0000:ff00:0042:8329",
+      "help": "Enter IPv6 addresses to normalize, one per line"
+    },
+    "rfc": {
+      "title": "RFC 5952 Normalization",
+      "description": "Canonical IPv6 address representation rules",
+      "rules": {
+        "lowercase": "Use lowercase hexadecimal",
+        "leadingZeros": "Remove leading zeros",
+        "compression": "Use :: for longest zero sequence",
+        "singleZero": "Represent single zero fields as 0"
+      }
+    }
+  },
+
+  "eui64": {
+    "title": "EUI-64 IPv6 Generator",
+    "description": "Generate IPv6 addresses using EUI-64 interface identifiers from MAC addresses.",
+    "input": {
+      "title": "Configuration",
+      "addresses": {
+        "label": "MAC Addresses",
+        "placeholder": "00:1A:2B:3C:4D:5E",
+        "help": "Enter MAC addresses, one per line"
+      },
+      "globalPrefix": {
+        "label": "Global IPv6 Prefix",
+        "placeholder": "2001:db8::/64",
+        "help": "IPv6 network prefix for address generation"
+      }
+    },
+    "info": {
+      "title": "EUI-64 Process",
+      "description": "Extended Unique Identifier conversion process for IPv6",
+      "steps": {
+        "split": "Split MAC address in half",
+        "insert": "Insert FF:FE in the middle",
+        "flip": "Flip universal/local bit",
+        "result": "Combine with IPv6 prefix"
+      }
+    }
+  },
+
+  "cidr_overlap": {
+    "examples": {
+      "title": "Example Networks",
+      "basicOverlap": "Basic network overlap test",
+      "noOverlap": "Non-overlapping networks",
+      "partialOverlap": "Partial network overlap",
+      "ipv6Overlap": "IPv6 network overlap"
+    },
+    "options": {
+      "title": "Options",
+      "mergeInputs": "Merge overlapping inputs",
+      "mergeInputsTooltip": "Automatically merge overlapping input networks",
+      "showOnlyBoolean": "Show only boolean result",
+      "showOnlyBooleanTooltip": "Display only overlap status without detailed analysis"
+    },
+    "input": {
+      "setALabel": "Network Set A",
+      "setATooltip": "Enter CIDR networks for set A, one per line",
+      "setAPlaceholder": "192.168.1.0/24\n10.0.0.0/16",
+      "setBLabel": "Network Set B",
+      "setBTooltip": "Enter CIDR networks for set B, one per line",
+      "setBPlaceholder": "172.16.0.0/12\n192.168.0.0/16",
+      "clearAll": "Clear All"
+    }
+  },
+
+  "ip-validator": {
+    "title": "IP Address Validator",
+    "description": "Validate IPv4 and IPv6 addresses with detailed error analysis and format checking",
+    "examples": {
+      "validIPv4": "Valid IPv4 address",
+      "validIPv6": "Valid IPv6 address",
+      "ipv4LeadingZeros": "IPv4 with leading zeros",
+      "ipv4OctetTooLarge": "IPv4 octet out of range",
+      "ipv6MultipleDoubleColon": "IPv6 with multiple double colons",
+      "ipv6TooManyGroups": "IPv6 with too many groups"
+    },
+    "form": {
+      "enterLabel": "Enter IP Address",
+      "placeholder": "e.g., 192.168.1.1 or 2001:db8::1",
+      "hint": "Supports IPv4 (192.168.1.1), IPv6 (2001:db8::1), and various formats"
+    },
+    "testCases": {
+      "title": "Quick Test Cases"
+    },
+    "results": {
+      "valid": "Valid",
+      "invalid": "Invalid",
+      "ipAddress": "IP Address",
+      "normalized": "Normalized:",
+      "issuesFound": "Issues Found ({{count}})",
+      "warnings": "Warnings ({{count}})",
+      "addressDetails": "Address Details",
+      "type": "Type:",
+      "scope": "Scope:",
+      "routing": "Routing:",
+      "private": "Private",
+      "public": "Public",
+      "compressed": "Compressed:",
+      "embeddedIPv4": "Embedded IPv4:",
+      "zoneId": "Zone ID:",
+      "additionalInfo": "Additional Information"
+    },
+    "errors": {
+      "general": {
+        "unknownFormat": "Unknown IP address format - must be IPv4 or IPv6"
+      },
+      "ipv4": {
+        "mustContainDots": "IPv4 addresses must contain dots (.) to separate octets",
+        "wrongOctetCount": "IPv4 addresses must have exactly {{expected}} octets, found {{found}}",
+        "octetEmpty": "Octet {{number}} is empty",
+        "nonNumericCharacters": "Octet {{number}} contains non-numeric characters: '{{part}}'",
+        "leadingZeros": "Octet {{number}} has leading zeros: '{{part}}'",
+        "outOfRange": "Octet {{number}} value {{value}} is out of range (0-255)"
+      },
+      "ipv6": {
+        "invalidCharacter": "Invalid character '{{char}}' in IPv6 address",
+        "multipleDoubleColon": "IPv6 addresses can only contain one '::' compression sequence",
+        "invalidFormat": "Invalid IPv6 format",
+        "tooManyGroups": "IPv6 addresses must have exactly 8 groups, found {{count}}",
+        "embeddedIPv4Error": "Invalid embedded IPv4 address: {{error}}",
+        "emptyGroup": "IPv6 group cannot be empty (except when using ::)",
+        "groupTooLong": "IPv6 group '{{group}}' is too long (maximum 4 characters)",
+        "invalidHexadecimal": "IPv6 group '{{group}}' contains invalid hexadecimal characters"
+      }
+    },
+    "warnings": {
+      "ipv4": {
+        "networkAddress": "This appears to be a network address (host portion is 0)",
+        "broadcastAddress": "This appears to be a broadcast address (host portion is all 1s)"
+      },
+      "ipv6": {
+        "siteLocalDeprecated": "Site-local addresses are deprecated (RFC 3879)",
+        "documentationAddress": "This is a documentation address (not for production use)"
+      }
+    },
+    "addressTypes": {
+      "ipv4": {
+        "loopback": "Loopback",
+        "privateA": "Private (Class A)",
+        "privateB": "Private (Class B)",
+        "privateC": "Private (Class C)",
+        "linkLocal": "Link-Local (APIPA)",
+        "multicast": "Multicast (Class D)",
+        "reserved": "Reserved (Class E)",
+        "networkAddress": "Network Address",
+        "broadcastAddress": "Broadcast Address",
+        "public": "Public"
+      },
+      "ipv6": {
+        "loopback": "Loopback",
+        "unspecified": "Unspecified",
+        "linkLocal": "Link-Local",
+        "siteLocal": "Site-Local (Deprecated)",
+        "uniqueLocal": "Unique Local",
+        "multicast": "Multicast",
+        "documentation": "Documentation",
+        "globalUnicast": "Global Unicast",
+        "reserved": "Reserved"
+      }
+    },
+    "scopes": {
+      "host": "Host",
+      "privateNetwork": "Private Network",
+      "linkLocal": "Link-Local",
+      "multicast": "Multicast",
+      "reserved": "Reserved",
+      "specialUse": "Special Use",
+      "network": "Network",
+      "internet": "Internet",
+      "siteLocal": "Site-Local",
+      "documentation": "Documentation"
+    },
+    "info": {
+      "loopbackCommunications": "Used for local loopback communications",
+      "rfc1918Private": "RFC 1918 private address space",
+      "apipa": "Automatic Private IP Addressing",
+      "multicastCommunications": "Used for multicast communications",
+      "reservedFuture": "Reserved for future use",
+      "thisNetwork": "\"This network\" address",
+      "publiclyRoutable": "Publicly routable address",
+      "zoneIdSpecified": "Zone ID specified: %{{zoneId}}",
+      "embeddedIPv4": "Contains embedded IPv4 address: {{ipv4}}",
+      "ipv6Loopback": "IPv6 loopback address (::1)",
+      "ipv6Unspecified": "IPv6 unspecified address (::)",
+      "ipv6LinkLocal": "IPv6 link-local address",
+      "deprecatedSiteLocal": "Deprecated site-local address",
+      "rfc4193UniqueLocal": "RFC 4193 Unique Local Address",
+      "ipv6Multicast": "IPv6 multicast address",
+      "rfc3849Documentation": "RFC 3849 documentation address",
+      "globallyRoutable": "Globally routable IPv6 address",
+      "reservedAddressSpace": "Reserved address space",
+      "standardCompressed": "Standard compressed form: {{form}}"
+    },
+    "education": {
+      "howToTell": {
+        "title": "How to Tell if an IP Address is Valid",
+        "description": "Valid IP addresses follow specific rules. For IPv4, you need exactly four numbers (0-255) separated by dots, like 192.168.1.1. For IPv6, you need eight groups of hex digits separated by colons, though you can compress consecutive zeros with :: (like 2001:db8::1). The validator checks these rules and tells you exactly what's wrong when something doesn't match."
+      },
+      "whatHappens": {
+        "title": "What Happens When Addresses Are Invalid",
+        "description": "Invalid IP addresses cause real problems. Your router might reject them, network connections fail, or software crashes. Common mistakes include typos like \"192.168.1.256\" (256 is too big), missing parts like \"192.168.1\", or extra zeros like \"192.168.01.01\". This tool catches these errors before they break your network setup."
+      },
+      "whyWarnings": {
+        "title": "Why Some Addresses Have Warnings",
+        "description": "Some valid addresses come with warnings because they have special meanings. For example, addresses ending in .0 are usually network addresses, and ones ending in .255 are broadcast addresses. Private addresses like 192.168.x.x won't work on the internet. The tool explains what each address type means so you know if it's right for your use case."
+      }
+    }
+  },
+
+  "ip_enumerate": {
+    "title": "IP Address Enumerator",
+    "description": "Generate and list all IP addresses in a network range or CIDR block",
+    "examples": {
+      "title": "Example Networks",
+      "smallSubnet": {
+        "label": "/30 Network (4 IPs)",
+        "description": "Small point-to-point subnet with minimal hosts"
+      },
+      "standardSubnet": {
+        "label": "/24 Network (256 IPs)",
+        "description": "Standard Class C subnet for typical LAN"
+      },
+      "ipRange": {
+        "label": "IP Range",
+        "description": "Continuous range of IP addresses"
+      },
+      "singleAddress": {
+        "label": "Single IP",
+        "description": "Individual IP address (/32)"
+      },
+      "largeBlock": {
+        "label": "/16 Network (65,536 IPs)",
+        "description": "Large enterprise network block"
+      }
+    },
+    "input": {
+      "placeholder": "Enter CIDR network or IP range (e.g., 192.168.1.0/24)",
+      "maxDisplay": {
+        "label": "Maximum IPs to display"
+      },
+      "options": {
+        "network": "Include network address",
+        "broadcast": "Include broadcast address"
+      }
+    },
+    "safety": {
+      "title": "Large Network Warning",
+      "message": "This network contains a large number of IP addresses. Displaying all IPs may affect performance."
+    },
+    "actions": {
+      "generating": "Generating IP list..."
+    }
+  },
+
+  "reverse_zones_calculator": {
+    "title": "Reverse Zone Calculator",
+    "description": "Calculate DNS reverse zones for IP ranges",
+    "examples": {
+      "title": "Common Examples",
+      "ipv4_20": {
+        "label": "/20 Network (16 Class C)",
+        "description": "Large enterprise network requiring multiple reverse zones"
+      },
+      "ipv4_24": {
+        "label": "/24 Network (Class C)",
+        "description": "Standard LAN subnet with single reverse zone"
+      },
+      "ipv4_16": {
+        "label": "/16 Network (Class B)",
+        "description": "Large network requiring Class B reverse delegation"
+      },
+      "ipv4_28": {
+        "label": "/28 Network (16 IPs)",
+        "description": "Small subnet with single reverse zone delegation"
+      },
+      "ipv6_48": {
+        "label": "/48 IPv6 Network",
+        "description": "Standard IPv6 site prefix with hierarchical zones"
+      },
+      "ipv6_64": {
+        "label": "/64 IPv6 Network",
+        "description": "Standard IPv6 subnet for single network segment"
+      }
+    },
+    "delegationTypes": {
+      "classC": "Class C Delegation"
+    },
+    "overview": {
+      "zoneBoundaries": {
+        "title": "Zone Boundaries",
+        "description": "Understanding where reverse DNS zones align with network boundaries"
+      },
+      "delegation": {
+        "title": "DNS Delegation",
+        "description": "How reverse DNS authority is delegated to authoritative servers"
+      },
+      "optimization": {
+        "title": "Zone Optimization",
+        "description": "Best practices for efficient reverse DNS zone management"
+      }
+    },
+    "input": {
+      "label": "IP Network",
+      "placeholder": "Enter CIDR network (e.g., 192.168.1.0/24)"
+    },
+    "results": {
+      "title": "Reverse Zone Results",
+      "analysis": {
+        "totalZones": "Total Reverse Zones",
+        "delegationType": "Delegation Type"
+      },
+      "zones": {
+        "title": "Reverse Zones"
+      },
+      "configuration": {
+        "title": "DNS Configuration",
+        "bindConfig": "BIND Zone Configuration",
+        "delegationCommands": "Delegation Commands"
+      }
+    }
+  },
+
+  "tlsa_generator": {
+    "title": "TLSA Record Generator",
+    "subtitle": "Generate TLSA DNS records for certificate pinning",
+    "service": {
+      "title": "Service Information",
+      "domain": {
+        "label": "Domain Name",
+        "placeholder": "example.com",
+        "tooltip": "The domain name for which to create the TLSA record"
+      },
+      "port": {
+        "label": "Port Number",
+        "placeholder": "443",
+        "tooltip": "The port number for the service (e.g., 443 for HTTPS)"
+      },
+      "protocol": {
+        "label": "Protocol",
+        "tooltip": "The transport protocol (TCP or UDP)",
+        "options": {
+          "tcp": "TCP",
+          "udp": "UDP"
+        }
+      }
+    },
+    "parameters": {
+      "title": "TLSA Parameters",
+      "usage": {
+        "label": "Certificate Usage",
+        "tooltip": "Certificate usage - how the certificate should be used for authentication",
+        "options": {
+          "caConstraint": "0 - CA Constraint",
+          "serviceConstraint": "1 - Service Certificate Constraint",
+          "trustAnchor": "2 - Trust Anchor Assertion",
+          "domainIssued": "3 - Domain-Issued Certificate"
+        },
+        "descriptions": {
+          "caConstraint": "CA Constraint - Certificate must be issued by the CA represented in the TLSA record",
+          "serviceConstraint": "Service Certificate Constraint - Certificate must match the one in the TLSA record",
+          "trustAnchor": "Trust Anchor Assertion - Certificate must chain to the CA in the TLSA record",
+          "domainIssued": "Domain-Issued Certificate - Certificate must match the one specified (most common)"
+        }
+      },
+      "selector": {
+        "label": "Selector",
+        "tooltip": "Which part of the certificate to use",
+        "options": {
+          "fullCert": "0 - Full Certificate",
+          "spki": "1 - Subject Public Key Info"
+        },
+        "descriptions": {
+          "fullCert": "Full Certificate - Use the entire certificate",
+          "spki": "Subject Public Key Info - Use only the public key portion (recommended)"
+        }
+      },
+      "matching": {
+        "label": "Matching Type",
+        "tooltip": "How to process the certificate data",
+        "options": {
+          "exact": "0 - Exact Match",
+          "sha256": "1 - SHA-256 Hash",
+          "sha512": "2 - SHA-512 Hash"
+        },
+        "descriptions": {
+          "exact": "Exact Match - Use the certificate/key data as-is (not recommended)",
+          "sha256": "SHA-256 Hash - Use SHA-256 hash of the certificate/key (recommended)",
+          "sha512": "SHA-512 Hash - Use SHA-512 hash of the certificate/key"
+        }
+      }
+    },
+    "certificate": {
+      "title": "Certificate Data",
+      "pemOption": "Certificate/Public Key (PEM)",
+      "hashOption": "Hash Value",
+      "pemLabel": "Certificate/Public Key",
+      "pemTooltip": "Paste the PEM-encoded certificate or public key",
+      "hashLabel": "Hash Value",
+      "hashTooltip": "Enter the {{type}} hash value",
+      "exact": "exact",
+      "generateButton": "Generate Hash",
+      "generateTooltip": "Generate hash from certificate (demo mode)"
+    },
+    "output": {
+      "title": "Generated TLSA Record",
+      "generated_hash_placeholder": "Generated hash would appear here (requires certificate parsing)",
+      "copy": {
+        "button": "Copy Record",
+        "copied": "Copied!",
+        "tooltip": "Copy TLSA record to clipboard"
+      },
+      "export": {
+        "button": "Export Zone",
+        "downloaded": "Downloaded",
+        "tooltip": "Download as zone file"
+      },
+      "breakdown": {
+        "title": "Record Breakdown:",
+        "service": "Service:",
+        "usage": "Usage:",
+        "selector": "Selector:",
+        "matching": "Matching:"
+      }
+    },
+    "validation": {
+      "title": "Validation",
+      "status": {
+        "label": "Status:",
+        "valid": "Valid",
+        "invalid": "Invalid"
+      },
+      "readyToDeploy": "TLSA record is valid and ready to deploy!",
+      "errors": {
+        "domainRequired": "Domain is required",
+        "portRange": "Port must be between 1 and 65535",
+        "certificateRequired": "Certificate data is required",
+        "hashRequired": "Hash value is required",
+        "hexOnly": "Hash must contain only hexadecimal characters"
+      },
+      "warnings": {
+        "domainTld": "Domain should include TLD (e.g., .com, .org)",
+        "pemFormat": "Certificate should be in PEM format",
+        "sha256Length": "SHA-256 hash should be exactly 64 hexadecimal characters",
+        "sha512Length": "SHA-512 hash should be exactly 128 hexadecimal characters",
+        "usageTypes02": "Usage types 0 and 2 require careful CA certificate management",
+        "selectorFull": "Full certificate selector (0) is less flexible than SPKI selector (1)",
+        "exactMatch": "Exact match (0) is not recommended - use SHA-256 (1) or SHA-512 (2)"
+      }
+    },
+    "security": {
+      "title": "Security Best Practices",
+      "tips": {
+        "usage3": "Use usage type 3 (Domain-Issued Certificate) for most scenarios",
+        "selectorSpki": "Prefer selector 1 (SPKI) over selector 0 (full certificate) for flexibility",
+        "hashTypes": "Use SHA-256 (1) or SHA-512 (2) matching types, avoid exact match (0)",
+        "multipleCerts": "Pin multiple certificates to avoid service disruption during certificate rotation",
+        "testRecords": "Test TLSA records with DANE validation tools before deployment"
+      }
+    },
+    "examples": {
+      "title": "Example Configurations",
+      "https": {
+        "name": "HTTPS Certificate Pin",
+        "description": "Pin a specific certificate for HTTPS"
+      },
+      "smtp": {
+        "name": "SMTP TLS Certificate",
+        "description": "DANE for email server TLS"
+      },
+      "ca": {
+        "name": "CA Trust Anchor",
+        "description": "Trust anchor for certificate authority"
+      },
+      "config": {
+        "port": "Port",
+        "usage": "Usage",
+        "selector": "Selector",
+        "type": "Type"
+      }
+    }
+  },
+
+  "edns_size_estimator": {
+    "title": "EDNS Size Estimator",
+    "subtitle": "Estimate DNS message size and UDP fragmentation risk with EDNS buffer recommendations",
+    "overview": {
+      "sizeEstimation": {
+        "title": "Size Estimation:",
+        "description": "Calculate total DNS message size including headers and record data."
+      },
+      "fragmentationRisk": {
+        "title": "Fragmentation Risk:",
+        "description": "Assess likelihood of UDP packet fragmentation and delivery issues."
+      },
+      "ednsRecommendations": {
+        "title": "EDNS Recommendations:",
+        "description": "Get buffer size recommendations for optimal DNS performance."
+      }
+    },
+    "examples": {
+      "title": "Response Examples",
+      "recordCount": "{{count}} record{{count === 1 ? '' : 's'}}",
+      "simple": {
+        "name": "Simple A Record",
+        "description": "Basic single A record response"
+      },
+      "multiple": {
+        "name": "Multiple A Records",
+        "description": "Load-balanced web servers"
+      },
+      "txt": {
+        "name": "Long TXT Records",
+        "description": "SPF and DMARC policies"
+      },
+      "mx": {
+        "name": "MX Records",
+        "description": "Mail server configuration"
+      },
+      "large": {
+        "name": "Large Response",
+        "description": "Many A records causing fragmentation risk"
+      }
+    },
+    "config": {
+      "title": "Query Configuration",
+      "includeQuery": {
+        "label": "Include query section in estimate",
+        "tooltip": "Include the DNS query section in size calculations. Queries add ~20-50 bytes depending on name length."
+      },
+      "queryName": {
+        "label": "Query Name",
+        "tooltip": "The domain name being queried. Longer names result in larger message sizes."
+      },
+      "queryType": {
+        "label": "Query Type",
+        "tooltip": "The type of DNS record being requested (A, AAAA, MX, etc.)."
+      }
+    },
+    "records": {
+      "title": "Response Records",
+      "addRecord": "Add Record",
+      "empty": "No records added. Click \"Add Record\" to start building your DNS response.",
+      "removeTooltip": "Remove this record",
+      "fields": {
+        "name": "Name",
+        "type": "Type",
+        "value": "Value",
+        "valuePlaceholder": "Record value",
+        "priority": "Priority",
+        "ttl": "TTL"
+      }
+    },
+    "results": {
+      "title": "Size Analysis",
+      "copyText": "DNS Message Size Estimate:\nTotal Size: {{totalSize}} bytes\nUDP Safe: {{udpSafe}}\nFragmentation Risk: {{fragmentationRisk}}",
+      "copySummary": "Copy Summary",
+      "yes": "Yes",
+      "no": "No",
+      "unknown": "unknown",
+      "udpSafe": "UDP Safe",
+      "requiresEdns": "Requires EDNS0",
+      "sizeBreakdown": {
+        "title": "Size Breakdown",
+        "dnsHeader": "DNS Header",
+        "recordsData": "Records Data",
+        "totalSize": "Total Size"
+      },
+      "fragmentation": {
+        "title": "Fragmentation Analysis",
+        "risk": "RISK",
+        "riskLevels": {
+          "low": "LOW",
+          "medium": "MEDIUM",
+          "high": "HIGH"
+        },
+        "thresholds": {
+          "classic": "≤ 512 bytes (Classic DNS)",
+          "safe": "≤ 1232 bytes (Safe for most networks)",
+          "edns": "≤ 4096 bytes (Common EDNS buffer)"
+        }
+      },
+      "recommendations": {
+        "title": "Recommendations",
+        "tcp": "Consider using TCP for queries expecting large responses",
+        "fragment": "Some networks may fragment packets - monitor delivery success",
+        "edns0": "EDNS0 support required - advertise appropriate buffer size"
+      }
+    },
+    "education": {
+      "udpLimitations": {
+        "title": "UDP Limitations",
+        "description": "Classic DNS over UDP is limited to 512 bytes. Larger responses require EDNS0 extension to advertise bigger buffer sizes. Without EDNS0, servers must truncate responses."
+      },
+      "fragmentationIssues": {
+        "title": "Fragmentation Issues",
+        "description": "UDP packets larger than ~1232 bytes may be fragmented by network devices. Fragmented packets are more likely to be dropped, causing DNS resolution failures."
+      },
+      "ednsBufferSizes": {
+        "title": "EDNS Buffer Sizes",
+        "description": "Common EDNS buffer sizes are 1232, 4096, and 8192 bytes. Larger buffers allow bigger responses but increase fragmentation risk. Choose based on your network environment."
+      },
+      "optimizationStrategies": {
+        "title": "Optimization Strategies",
+        "description": "Minimize record sizes with shorter names and values. Use separate queries for large responses. Consider TCP for consistently large responses like DNSSEC-signed zones."
+      }
+    }
+  },
+
+  "idn-punycode-converter": {
+    "title": "IDN Punycode Converter",
+    "description": "Convert between internationalized domain names and Punycode",
+    "examples": {
+      "german": "German (Umlaut)",
+      "japanese": "Japanese (Hiragana)",
+      "russian": "Russian (Cyrillic)",
+      "arabic": "Arabic Script",
+      "korean": "Korean (Hangul)",
+      "greek": "Greek Script"
+    },
+    "modes": {
+      "unicodeToPunycode": "Unicode to Punycode",
+      "punycodeToUnicode": "Punycode to Unicode"
+    },
+    "conversion": {
+      "error": "Conversion error"
+    }
+  },
+
+  "loc_builder": {
+    "title": "LOC Record Builder",
+    "description": "Convert latitude/longitude coordinates ↔ DNS LOC records for geographic positioning",
+    "modes": {
+      "coordsToLoc": "Coordinates → LOC",
+      "locToCoords": "LOC → Coordinates"
+    },
+    "examples": {
+      "title": "City Examples",
+      "sanFrancisco": {
+        "label": "San Francisco"
+      },
+      "newYork": {
+        "label": "New York"
+      },
+      "london": {
+        "label": "London"
+      },
+      "tokyo": {
+        "label": "Tokyo"
+      },
+      "sydney": {
+        "label": "Sydney"
+      }
+    },
+    "form": {
+      "domain": {
+        "label": "Domain Name",
+        "placeholder": "example.com",
+        "tooltip": "Domain name for the LOC record"
+      },
+      "locString": {
+        "label": "LOC Record String",
+        "placeholder": "example.com. IN LOC 37 46 29.000 N 122 25 10.000 W 10.00m 1m 10000m 10m",
+        "tooltip": "Paste existing LOC record to parse"
+      },
+      "latitude": {
+        "label": "Latitude *",
+        "placeholder": "37.7749",
+        "tooltip": "Latitude in decimal degrees (-90 to 90)"
+      },
+      "longitude": {
+        "label": "Longitude *",
+        "placeholder": "-122.4194",
+        "tooltip": "Longitude in decimal degrees (-180 to 180)"
+      },
+      "altitude": {
+        "label": "Altitude (m) *",
+        "placeholder": "10",
+        "tooltip": "Altitude in meters above sea level"
+      },
+      "size": {
+        "label": "Size (m)",
+        "placeholder": "1",
+        "tooltip": "Size/diameter of the location in meters"
+      },
+      "horizontalPrecision": {
+        "label": "H. Precision (m)",
+        "placeholder": "10000",
+        "tooltip": "Horizontal precision in meters"
+      },
+      "verticalPrecision": {
+        "label": "V. Precision (m)",
+        "placeholder": "10",
+        "tooltip": "Vertical precision in meters"
+      }
+    },
+    "output": {
+      "parsedCoords": "Parsed Coordinates",
+      "generatedLoc": "Generated LOC Record",
+      "placeholder": "Fill in the required fields to generate the LOC record"
+    },
+    "actions": {
+      "copyRecord": "Copy Record"
+    },
+    "about": {
+      "title": "About LOC Records"
+    }
+  },
+
+  "mx_planner": {
+    "title": "MX Record Planner",
+    "description": "Plan and generate MX (Mail Exchange) records with proper priority configuration"
+  },
+
+  "naptr_builder": {
+    "title": "NAPTR Record Builder",
+    "description": "Generate NAPTR (Name Authority Pointer) records for advanced DNS resolution"
+  },
+
+  "ptr_sweep_planner": {
+    "title": "PTR Sweep Planner",
+    "description": "Analyze PTR record coverage for network blocks and identify missing or extra records",
+
+    "overview": {
+      "coverageAnalysis": {
+        "title": "Coverage Analysis",
+        "description": "Compare expected PTR records for a CIDR block against actual existing records."
+      },
+      "patternMatching": {
+        "title": "Pattern Matching",
+        "description": "Validate existing PTR records against regex naming patterns for compliance."
+      },
+      "gapAnalysis": {
+        "title": "Gap Analysis",
+        "description": "Identify missing PTRs, extra PTRs, and generate remediation plans."
+      }
+    },
+
+    "examples": {
+      "title": "Quick Examples",
+      "partialCoverage": {
+        "label": "Partial Coverage",
+        "description": "Network with some missing PTRs"
+      },
+      "mixedNaming": {
+        "label": "Mixed Naming",
+        "description": "Check pattern compliance"
+      },
+      "ipv6Network": {
+        "label": "IPv6 Network",
+        "description": "IPv6 PTR coverage analysis"
+      }
+    },
+
+    "form": {
+      "cidrBlock": {
+        "label": "CIDR Block to Analyze",
+        "placeholder": "192.168.1.0/24 or 2001:db8::/64",
+        "tooltip": "Enter the CIDR block to analyze PTR coverage for"
+      },
+      "existingPtrs": {
+        "label": "Existing PTR Records",
+        "placeholder": "100.1.168.192.in-addr.arpa\n101.1.168.192.in-addr.arpa\n...",
+        "tooltip": "Paste existing PTR record names, one per line"
+      },
+      "namingPattern": {
+        "label": "Naming Pattern (Optional)",
+        "placeholder": ".*\\.example\\.com\\.$",
+        "tooltip": "Optional regex pattern to validate PTR target naming"
+      }
+    },
+
+    "patternHelp": {
+      "title": "Common Patterns",
+      "anyExample": "Any hostname ending in .example.com.",
+      "hostCorp": "Hostnames starting with \"host-\" in corp.com",
+      "ipBased": "IP-based hostnames in net.example.com",
+      "serverWorkstation": "Names starting with \"server-\" or \"workstation-\""
+    },
+
+    "results": {
+      "title": "Coverage Analysis Results",
+      "coverage": "{{percentage}}% Coverage",
+      "copyList": "Copy List",
+
+      "stats": {
+        "expectedPtrs": "Expected PTRs",
+        "foundPtrs": "Found PTRs",
+        "missingPtrs": "Missing PTRs",
+        "extraPtrs": "Extra PTRs",
+        "patternMatches": "Pattern Matches"
+      },
+
+      "sections": {
+        "missingPtrs": {
+          "title": "Missing PTR Records ({{count}})",
+          "truncated": "... and {{count}} more missing records"
+        },
+        "extraPtrs": {
+          "title": "Extra PTR Records ({{count}})",
+          "truncated": "... and {{count}} more extra records"
+        }
+      },
+
+      "actions": {
+        "title": "Recommended Actions",
+        "createMissing": {
+          "title": "Create Missing PTR Records",
+          "description": "Add {{count}} missing PTR records to your reverse zone files.",
+          "copyZoneLines": "Copy Zone Lines"
+        },
+        "reviewExtra": {
+          "title": "Review Extra Records",
+          "description": "Review {{count}} extra PTR records that don't correspond to addresses in this CIDR block."
+        },
+        "fixPattern": {
+          "title": "Fix Naming Pattern Violations",
+          "description": "{{count}} existing PTR records don't match the naming pattern."
+        },
+        "excellentCoverage": {
+          "title": "Excellent Coverage!",
+          "description": "Your reverse DNS coverage is excellent with {{percentage}}% completeness."
+        }
+      }
+    },
+
+    "error": {
+      "title": "Analysis Error",
+      "checkInput": "Check your input",
+      "help": {
+        "cidr": "CIDR notation: 192.168.1.0/24, 2001:db8::/64",
+        "ptrRecords": "PTR records: One per line, proper format",
+        "pattern": "Pattern: Valid JavaScript regex syntax"
+      }
+    },
+
+    "education": {
+      "ptrCoverage": {
+        "title": "PTR Coverage Planning",
+        "description": "PTR coverage analysis helps identify gaps in reverse DNS configuration. Complete coverage ensures all IPs in your network blocks have proper reverse DNS entries for troubleshooting and compliance requirements."
+      },
+      "namingPattern": {
+        "title": "Naming Pattern Validation",
+        "description": "Use regex patterns to enforce consistent hostname naming conventions. Patterns like .*\\.corp\\.example\\.com\\.$ ensure all PTR records point to properly formatted hostnames within your domain structure."
+      },
+      "commonIssues": {
+        "title": "Common PTR Issues",
+        "description": "Missing PTRs can cause mail delivery problems and failed reverse lookups. Extra PTRs may indicate outdated records or configuration drift. Regular PTR sweeps help maintain DNS hygiene and network documentation accuracy."
+      },
+      "remediation": {
+        "title": "Remediation Best Practices",
+        "description": "Create missing PTRs in batches, verify forward/reverse consistency (A/AAAA records), and establish monitoring to detect future gaps. Use descriptive hostnames that include network or service information for easier troubleshooting."
+      }
     }
   }
 }

@@ -16,6 +16,9 @@
       "label": "Target Prefix Length (optional)",
       "placeholder": "24",
       "help": "Filter results to show only blocks of specific size"
+    },
+    "actions": {
+      "clearFilter": "Clear Filter"
     }
   },
   "examples": {
@@ -50,6 +53,8 @@
   },
   "results": {
     "title": "Available Address Space",
+    "blocks": "Available Blocks",
+    "addresses": "Total Addresses",
     "summary": {
       "title": "Space Analysis Summary",
       "totalBlocks": "Available Blocks",

@@ -8,7 +8,7 @@
 
   // Load translations for this tool
   onMount(async () => {
-    await loadTranslations(get(locale), 'tools.ipv6-zone-id');
+    await loadTranslations(get(locale), 'tools');
   });
 
   let inputText = $state('fe80::1\nfe80::1%eth0\nfe80::1234:5678:90ab:cdef%wlan0\n::1\n2001:db8::1\nff02::1%eth0');
@@ -37,7 +37,7 @@
           addressesWithZones: 0,
           addressesRequiringZones: 0,
         },
-        errors: [error instanceof Error ? error.message : $t('tools.ipv6-zone-id.errors.unknownError')],
+        errors: [error instanceof Error ? error.message : $t('tools.ipv6_zone_id.errors.unknownError')],
       };
     } finally {
       isLoading = false;
@@ -53,16 +53,16 @@
 
     if (format === 'csv') {
       const headers = [
-        $t('tools.ipv6-zone-id.export.headers.input'),
-        $t('tools.ipv6-zone-id.export.headers.hasZoneId'),
-        $t('tools.ipv6-zone-id.export.headers.address'),
-        $t('tools.ipv6-zone-id.export.headers.zoneId'),
-        $t('tools.ipv6-zone-id.export.headers.addressType'),
-        $t('tools.ipv6-zone-id.export.headers.requiresZoneId'),
-        $t('tools.ipv6-zone-id.export.headers.withZone'),
-        $t('tools.ipv6-zone-id.export.headers.withoutZone'),
-        $t('tools.ipv6-zone-id.export.headers.valid'),
-        $t('tools.ipv6-zone-id.export.headers.error'),
+        $t('tools.ipv6_zone_id.export.headers.input'),
+        $t('tools.ipv6_zone_id.export.headers.hasZoneId'),
+        $t('tools.ipv6_zone_id.export.headers.address'),
+        $t('tools.ipv6_zone_id.export.headers.zoneId'),
+        $t('tools.ipv6_zone_id.export.headers.addressType'),
+        $t('tools.ipv6_zone_id.export.headers.requiresZoneId'),
+        $t('tools.ipv6_zone_id.export.headers.withZone'),
+        $t('tools.ipv6_zone_id.export.headers.withoutZone'),
+        $t('tools.ipv6_zone_id.export.headers.valid'),
+        $t('tools.ipv6_zone_id.export.headers.error'),
       ].join(',');
       const rows = result.processings.map(
         (proc) =>
@@ -106,19 +106,19 @@
   function getAddressTypeDescription(type: string): string {
     switch (type) {
       case 'link-local':
-        return $t('tools.ipv6-zone-id.addressTypes.linkLocal');
+        return $t('tools.ipv6_zone_id.addressTypes.linkLocal');
       case 'unique-local':
-        return $t('tools.ipv6-zone-id.addressTypes.uniqueLocal');
+        return $t('tools.ipv6_zone_id.addressTypes.uniqueLocal');
       case 'multicast':
-        return $t('tools.ipv6-zone-id.addressTypes.multicast');
+        return $t('tools.ipv6_zone_id.addressTypes.multicast');
       case 'global':
-        return $t('tools.ipv6-zone-id.addressTypes.global');
+        return $t('tools.ipv6_zone_id.addressTypes.global');
       case 'loopback':
-        return $t('tools.ipv6-zone-id.addressTypes.loopback');
+        return $t('tools.ipv6_zone_id.addressTypes.loopback');
       case 'unspecified':
-        return $t('tools.ipv6-zone-id.addressTypes.unspecified');
+        return $t('tools.ipv6_zone_id.addressTypes.unspecified');
       default:
-        return $t('tools.ipv6-zone-id.addressTypes.unknown');
+        return $t('tools.ipv6_zone_id.addressTypes.unknown');
     }
   }
 
@@ -133,38 +133,38 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>{$t('tools.ipv6-zone-id.title')}</h2>
-    <p>{$t('tools.ipv6-zone-id.description')}</p>
+    <h2>{$t('tools.ipv6_zone_id.title')}</h2>
+    <p>{$t('tools.ipv6_zone_id.description')}</p>
   </header>
 
   <div class="input-section">
     <div class="input-group">
-      <label for="inputs">{$t('tools.ipv6-zone-id.input.label')}</label>
-      <textarea id="inputs" bind:value={inputText} placeholder={$t('tools.ipv6-zone-id.input.placeholder')} rows="6"
+      <label for="inputs">{$t('tools.ipv6_zone_id.input.label')}</label>
+      <textarea id="inputs" bind:value={inputText} placeholder={$t('tools.ipv6_zone_id.input.placeholder')} rows="6"
       ></textarea>
       <div class="input-help">
-        {$t('tools.ipv6-zone-id.input.help')}
+        {$t('tools.ipv6_zone_id.input.help')}
       </div>
     </div>
 
     <div class="zone-info">
-      <h3>{$t('tools.ipv6-zone-id.info.title')}</h3>
+      <h3>{$t('tools.ipv6_zone_id.info.title')}</h3>
       <div class="info-section">
-        <h4>{$t('tools.ipv6-zone-id.info.whenRequired.title')}</h4>
+        <h4>{$t('tools.ipv6_zone_id.info.whenRequired.title')}</h4>
         <ul>
           <li>
-            <strong>{$t('tools.ipv6-zone-id.info.whenRequired.linkLocal.type')}</strong>
-            {$t('tools.ipv6-zone-id.info.whenRequired.linkLocal.description')}
+            <strong>{$t('tools.ipv6_zone_id.info.whenRequired.linkLocal.type')}</strong>
+            {$t('tools.ipv6_zone_id.info.whenRequired.linkLocal.description')}
           </li>
           <li>
-            <strong>{$t('tools.ipv6-zone-id.info.whenRequired.multicast.type')}</strong>
-            {$t('tools.ipv6-zone-id.info.whenRequired.multicast.description')}
+            <strong>{$t('tools.ipv6_zone_id.info.whenRequired.multicast.type')}</strong>
+            {$t('tools.ipv6_zone_id.info.whenRequired.multicast.description')}
           </li>
         </ul>
       </div>
 
       <div class="info-section">
-        <h4>{$t('tools.ipv6-zone-id.info.commonIdentifiers.title')}</h4>
+        <h4>{$t('tools.ipv6_zone_id.info.commonIdentifiers.title')}</h4>
         <div class="zone-examples">
           <code>eth0</code>
           <code>wlan0</code>
@@ -180,7 +180,7 @@
   {#if isLoading}
     <div class="loading">
       <Icon name="loader" />
-      {$t('tools.ipv6-zone-id.processing')}
+      {$t('tools.ipv6_zone_id.processing')}
     </div>
   {/if}
 
@@ -188,7 +188,7 @@
     <div class="results">
       {#if result.errors.length > 0}
         <div class="errors">
-          <h3><Icon name="alert-triangle" /> {$t('tools.ipv6-zone-id.results.errors.title')}</h3>
+          <h3><Icon name="alert-triangle" /> {$t('tools.ipv6_zone_id.results.errors.title')}</h3>
           {#each result.errors as error (error)}
             <div class="error-item">{error}</div>
           {/each}
@@ -197,42 +197,42 @@
 
       {#if result.processings.length > 0}
         <div class="summary">
-          <h3>{$t('tools.ipv6-zone-id.results.summary.title')}</h3>
+          <h3>{$t('tools.ipv6_zone_id.results.summary.title')}</h3>
           <div class="summary-stats">
             <div class="stat">
               <span class="stat-value">{result.summary.totalInputs}</span>
-              <span class="stat-label">{$t('tools.ipv6-zone-id.results.summary.totalInputs')}</span>
+              <span class="stat-label">{$t('tools.ipv6_zone_id.results.summary.totalInputs')}</span>
             </div>
             <div class="stat valid">
               <span class="stat-value">{result.summary.validInputs}</span>
-              <span class="stat-label">{$t('tools.ipv6-zone-id.results.summary.valid')}</span>
+              <span class="stat-label">{$t('tools.ipv6_zone_id.results.summary.valid')}</span>
             </div>
             <div class="stat invalid">
               <span class="stat-value">{result.summary.invalidInputs}</span>
-              <span class="stat-label">{$t('tools.ipv6-zone-id.results.summary.invalid')}</span>
+              <span class="stat-label">{$t('tools.ipv6_zone_id.results.summary.invalid')}</span>
             </div>
             <div class="stat with-zone">
               <span class="stat-value">{result.summary.addressesWithZones}</span>
-              <span class="stat-label">{$t('tools.ipv6-zone-id.results.summary.withZones')}</span>
+              <span class="stat-label">{$t('tools.ipv6_zone_id.results.summary.withZones')}</span>
             </div>
             <div class="stat require-zone">
               <span class="stat-value">{result.summary.addressesRequiringZones}</span>
-              <span class="stat-label">{$t('tools.ipv6-zone-id.results.summary.requireZones')}</span>
+              <span class="stat-label">{$t('tools.ipv6_zone_id.results.summary.requireZones')}</span>
             </div>
           </div>
         </div>
 
         <div class="processings">
           <div class="processings-header">
-            <h3>{$t('tools.ipv6-zone-id.results.processing.title')}</h3>
+            <h3>{$t('tools.ipv6_zone_id.results.processing.title')}</h3>
             <div class="export-buttons">
               <button onclick={() => exportResults('csv')}>
                 <Icon name="csv-file" />
-                {$t('tools.ipv6-zone-id.actions.exportCSV')}
+                {$t('tools.ipv6_zone_id.actions.exportCSV')}
               </button>
               <button onclick={() => exportResults('json')}>
                 <Icon name="json-file" />
-                {$t('tools.ipv6-zone-id.actions.exportJSON')}
+                {$t('tools.ipv6_zone_id.actions.exportJSON')}
               </button>
             </div>
           </div>
@@ -243,14 +243,14 @@
                 <div class="card-header row">
                   <div class="address-info">
                     <div class="original-input">
-                      <span class="input-label">{$t('tools.ipv6-zone-id.results.processing.input')}:</span>
+                      <span class="input-label">{$t('tools.ipv6_zone_id.results.processing.input')}:</span>
                       <div class="input-with-copy">
                         <code>{processing.input}</code>
                         <button
                           type="button"
                           class:copied={clipboard.isCopied(`input-${processing.input}`)}
                           onclick={() => clipboard.copy(processing.input, `input-${processing.input}`)}
-                          title={$t('tools.ipv6-zone-id.actions.copyInput')}
+                          title={$t('tools.ipv6_zone_id.actions.copyInput')}
                         >
                           <Icon name={clipboard.isCopied(`input-${processing.input}`) ? 'check' : 'copy'} size="xs" />
                         </button>
@@ -271,14 +271,14 @@
                   <div class="processing-details">
                     <div class="address-breakdown">
                       <div class="breakdown-item">
-                        <span class="breakdown-label">{$t('tools.ipv6-zone-id.results.processing.address')}:</span>
+                        <span class="breakdown-label">{$t('tools.ipv6_zone_id.results.processing.address')}:</span>
                         <div class="input-with-copy">
                           <code>{processing.address}</code>
                           <button
                             type="button"
                             class:copied={clipboard.isCopied(`address-${processing.address}`)}
                             onclick={() => clipboard.copy(processing.address, `address-${processing.address}`)}
-                            title={$t('tools.ipv6-zone-id.actions.copyAddress')}
+                            title={$t('tools.ipv6_zone_id.actions.copyAddress')}
                           >
                             <Icon
                               name={clipboard.isCopied(`address-${processing.address}`) ? 'check' : 'copy'}
@@ -290,14 +290,14 @@
 
                       {#if processing.hasZoneId}
                         <div class="breakdown-item">
-                          <span class="breakdown-label">{$t('tools.ipv6-zone-id.results.processing.zoneId')}:</span>
+                          <span class="breakdown-label">{$t('tools.ipv6_zone_id.results.processing.zoneId')}:</span>
                           <div class="input-with-copy">
                             <code>{processing.zoneId}</code>
                             <button
                               type="button"
                               class:copied={clipboard.isCopied(`zone-${processing.zoneId}`)}
                               onclick={() => clipboard.copy(processing.zoneId, `zone-${processing.zoneId}`)}
-                              title={$t('tools.ipv6-zone-id.actions.copyZoneId')}
+                              title={$t('tools.ipv6_zone_id.actions.copyZoneId')}
                             >
                               <Icon
                                 name={clipboard.isCopied(`zone-${processing.zoneId}`) ? 'check' : 'copy'}
@@ -308,19 +308,19 @@
                           {#if processing.processing.zoneIdValid}
                             <span class="zone-status valid">
                               <Icon name="check" />
-                              {$t('tools.ipv6-zone-id.results.processing.zoneStatus.valid')}
+                              {$t('tools.ipv6_zone_id.results.processing.zoneStatus.valid')}
                             </span>
                           {:else}
                             <span class="zone-status invalid">
                               <Icon name="x" />
-                              {$t('tools.ipv6-zone-id.results.processing.zoneStatus.invalid')}
+                              {$t('tools.ipv6_zone_id.results.processing.zoneStatus.invalid')}
                             </span>
                           {/if}
                         </div>
                       {:else}
                         <div class="breakdown-item">
-                          <span class="breakdown-label">{$t('tools.ipv6-zone-id.results.processing.zoneId')}:</span>
-                          <span class="no-zone">{$t('tools.ipv6-zone-id.results.processing.noZone')}</span>
+                          <span class="breakdown-label">{$t('tools.ipv6_zone_id.results.processing.zoneId')}:</span>
+                          <span class="no-zone">{$t('tools.ipv6_zone_id.results.processing.noZone')}</span>
                         </div>
                       {/if}
                     </div>
@@ -328,7 +328,7 @@
                     <div class="address-classification">
                       <div class="classification-item">
                         <span class="classification-label"
-                          >{$t('tools.ipv6-zone-id.results.processing.addressType')}:</span
+                          >{$t('tools.ipv6_zone_id.results.processing.addressType')}:</span
                         >
                         <span
                           class="address-type"
@@ -342,7 +342,7 @@
 
                       <div class="classification-item">
                         <span class="classification-label"
-                          >{$t('tools.ipv6-zone-id.results.processing.requiresZone')}:</span
+                          >{$t('tools.ipv6_zone_id.results.processing.requiresZone')}:</span
                         >
                         <span
                           class="zone-requirement"
@@ -350,15 +350,15 @@
                           class:optional={!processing.requiresZoneId}
                         >
                           {processing.requiresZoneId
-                            ? $t('tools.ipv6-zone-id.common.yes')
-                            : $t('tools.ipv6-zone-id.common.no')}
+                            ? $t('tools.ipv6_zone_id.common.yes')
+                            : $t('tools.ipv6_zone_id.common.no')}
                         </span>
                       </div>
                     </div>
 
                     <div class="processing-results">
                       <div class="result-item">
-                        <span class="result-label">{$t('tools.ipv6-zone-id.results.processing.withZone')}:</span>
+                        <span class="result-label">{$t('tools.ipv6_zone_id.results.processing.withZone')}:</span>
                         <div class="input-with-copy">
                           <code>{processing.processing.withZone}</code>
                           <button
@@ -369,7 +369,7 @@
                                 processing.processing.withZone,
                                 `with-zone-${processing.processing.withZone}`,
                               )}
-                            title={$t('tools.ipv6-zone-id.actions.copyWithZone')}
+                            title={$t('tools.ipv6_zone_id.actions.copyWithZone')}
                           >
                             <Icon
                               name={clipboard.isCopied(`with-zone-${processing.processing.withZone}`)
@@ -382,7 +382,7 @@
                       </div>
 
                       <div class="result-item">
-                        <span class="result-label">{$t('tools.ipv6-zone-id.results.processing.withoutZone')}:</span>
+                        <span class="result-label">{$t('tools.ipv6_zone_id.results.processing.withoutZone')}:</span>
                         <div class="input-with-copy">
                           <code>{processing.processing.withoutZone}</code>
                           <button
@@ -393,7 +393,7 @@
                                 processing.processing.withoutZone,
                                 `without-zone-${processing.processing.withoutZone}`,
                               )}
-                            title={$t('tools.ipv6-zone-id.actions.copyWithoutZone')}
+                            title={$t('tools.ipv6_zone_id.actions.copyWithoutZone')}
                           >
                             <Icon
                               name={clipboard.isCopied(`without-zone-${processing.processing.withoutZone}`)
@@ -408,7 +408,7 @@
 
                     {#if processing.processing.suggestedZones.length > 0}
                       <div class="suggested-zones">
-                        <h4>{$t('tools.ipv6-zone-id.results.processing.suggestedZones')}:</h4>
+                        <h4>{$t('tools.ipv6_zone_id.results.processing.suggestedZones')}:</h4>
                         <div class="zones-list">
                           {#each processing.processing.suggestedZones as zone (zone)}
                             <button
@@ -416,7 +416,7 @@
                               class="zone-button"
                               class:copied={clipboard.isCopied(`suggested-${zone}`)}
                               onclick={() => clipboard.copy(`${processing.address}%${zone}`, `suggested-${zone}`)}
-                              title={$t('tools.ipv6-zone-id.actions.copyFullAddress')}
+                              title={$t('tools.ipv6_zone_id.actions.copyFullAddress')}
                             >
                               <code>{zone}</code>
                               <Icon name={clipboard.isCopied(`suggested-${zone}`) ? 'check' : 'copy'} size="xs" />
@@ -429,7 +429,7 @@
                     {#if processing.requiresZoneId && !processing.hasZoneId}
                       <div class="zone-warning">
                         <Icon name="alert-triangle" />
-                        {$t('tools.ipv6-zone-id.results.processing.zoneWarning')}
+                        {$t('tools.ipv6_zone_id.results.processing.zoneWarning')}
                       </div>
                     {/if}
                   </div>

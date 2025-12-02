@@ -16,7 +16,7 @@
 
   // Load translations for this tool
   onMount(async () => {
-    await loadTranslations(get(locale), 'tools.next-available');
+    await loadTranslations(get(locale), 'tools');
   });
 
   let pools = $state(`192.168.0.0/16
@@ -38,7 +38,7 @@
 
   const examples = $derived([
     {
-      label: $t('tools.next-available.examples.officeSubnets.label'),
+      label: $t('tools.next_available.examples.officeSubnets.label'),
       pools: '192.168.0.0/16',
       allocations: `192.168.1.0/24
 192.168.10.0/24
@@ -48,7 +48,7 @@
       policy: 'first-fit' as AllocationPolicy,
     },
     {
-      label: $t('tools.next-available.examples.hostBasedSearch.label'),
+      label: $t('tools.next_available.examples.hostBasedSearch.label'),
       pools: '10.0.0.0/8',
       allocations: `10.0.0.0/16
 10.1.0.0/16`,
@@ -57,7 +57,7 @@
       policy: 'best-fit' as AllocationPolicy,
     },
     {
-      label: $t('tools.next-available.examples.multiplePools.label'),
+      label: $t('tools.next_available.examples.multiplePools.label'),
       pools: `172.16.0.0/12
 192.168.0.0/16`,
       allocations: `172.16.1.0/24
@@ -67,7 +67,7 @@
       policy: 'first-fit' as AllocationPolicy,
     },
     {
-      label: $t('tools.next-available.examples.ipv6Example.label'),
+      label: $t('tools.next_available.examples.ipv6Example.label'),
       pools: '2001:db8::/32',
       allocations: `2001:db8:1::/48
 2001:db8:10::/48`,
@@ -113,14 +113,14 @@
       );
     } else {
       const headers = [
-        $t('tools.next-available.export.headers.rank'),
-        $t('tools.next-available.export.headers.cidr'),
-        $t('tools.next-available.export.headers.network'),
-        $t('tools.next-available.export.headers.broadcast'),
-        $t('tools.next-available.export.headers.size'),
-        $t('tools.next-available.export.headers.usableHosts'),
-        $t('tools.next-available.export.headers.parentPool'),
-        $t('tools.next-available.export.headers.gapSize'),
+        $t('tools.next_available.export.headers.rank'),
+        $t('tools.next_available.export.headers.cidr'),
+        $t('tools.next_available.export.headers.network'),
+        $t('tools.next_available.export.headers.broadcast'),
+        $t('tools.next_available.export.headers.size'),
+        $t('tools.next_available.export.headers.usableHosts'),
+        $t('tools.next_available.export.headers.parentPool'),
+        $t('tools.next_available.export.headers.gapSize'),
       ];
       const rows = result.candidates.map((candidate, i) => [
         (i + 1).toString(),
@@ -188,17 +188,17 @@
     type: 'pool' | 'allocation' | 'free' | 'candidate',
   ): string {
     const labels = {
-      pool: $t('tools.next-available.visualization.pool'),
-      allocation: $t('tools.next-available.visualization.allocation'),
-      free: $t('tools.next-available.visualization.freeSpace'),
-      candidate: $t('tools.next-available.visualization.candidate'),
+      pool: $t('tools.next_available.visualization.pool'),
+      allocation: $t('tools.next_available.visualization.allocation'),
+      free: $t('tools.next_available.visualization.freeSpace'),
+      candidate: $t('tools.next_available.visualization.candidate'),
     };
 
     const size =
       range.start && range.end
         ? formatNumber(Number(range.end - range.start + 1n))
-        : $t('tools.next-available.visualization.unknown');
-    return `${labels[type]}\n${range.cidr}\n${$t('tools.next-available.visualization.sizeLabel')}: ${size} ${$t('tools.next-available.visualization.addresses')}`;
+        : $t('tools.next_available.visualization.unknown');
+    return `${labels[type]}\n${range.cidr}\n${$t('tools.next_available.visualization.sizeLabel')}: ${size} ${$t('tools.next_available.visualization.addresses')}`;
   }
 
   // Track user modifications
@@ -229,15 +229,15 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>{$t('tools.next-available.title')}</h2>
+    <h2>{$t('tools.next_available.title')}</h2>
     <p>
-      {$t('tools.next-available.description')}
+      {$t('tools.next_available.description')}
     </p>
   </header>
 
   <!-- Search Mode -->
   <div class="mode-section">
-    <h3>{$t('tools.next-available.searchCriteria.title')}</h3>
+    <h3>{$t('tools.next_available.searchCriteria.title')}</h3>
     <div class="tabs">
       <button
         type="button"
@@ -247,9 +247,9 @@
           searchMode = 'prefix';
           userModified = true;
         }}
-        use:tooltip={{ text: $t('tools.next-available.searchCriteria.byPrefix.tooltip'), position: 'top' }}
+        use:tooltip={{ text: $t('tools.next_available.searchCriteria.byPrefix.tooltip'), position: 'top' }}
       >
-        {$t('tools.next-available.searchCriteria.byPrefix.label')}
+        {$t('tools.next_available.searchCriteria.byPrefix.label')}
       </button>
       <button
         type="button"
@@ -259,9 +259,9 @@
           searchMode = 'hosts';
           userModified = true;
         }}
-        use:tooltip={{ text: $t('tools.next-available.searchCriteria.byHosts.tooltip'), position: 'top' }}
+        use:tooltip={{ text: $t('tools.next_available.searchCriteria.byHosts.tooltip'), position: 'top' }}
       >
-        {$t('tools.next-available.searchCriteria.byHosts.label')}
+        {$t('tools.next_available.searchCriteria.byHosts.label')}
       </button>
     </div>
   </div>
@@ -270,14 +270,14 @@
   <div class="input-section">
     <div class="input-grid">
       <div class="input-group">
-        <label for="pools" use:tooltip={{ text: $t('tools.next-available.input.pools.tooltip'), position: 'top' }}>
-          {$t('tools.next-available.input.pools.label')}
+        <label for="pools" use:tooltip={{ text: $t('tools.next_available.input.pools.tooltip'), position: 'top' }}>
+          {$t('tools.next_available.input.pools.label')}
         </label>
         <textarea
           id="pools"
           bind:value={pools}
           oninput={() => (userModified = true)}
-          placeholder={$t('tools.next-available.input.pools.placeholder')}
+          placeholder={$t('tools.next_available.input.pools.placeholder')}
           class="input-textarea pools"
           rows="4"
         ></textarea>
@@ -286,15 +286,15 @@
       <div class="input-group">
         <label
           for="allocations"
-          use:tooltip={{ text: $t('tools.next-available.input.allocations.tooltip'), position: 'top' }}
+          use:tooltip={{ text: $t('tools.next_available.input.allocations.tooltip'), position: 'top' }}
         >
-          {$t('tools.next-available.input.allocations.label')}
+          {$t('tools.next_available.input.allocations.label')}
         </label>
         <textarea
           id="allocations"
           bind:value={allocations}
           oninput={() => (userModified = true)}
-          placeholder={$t('tools.next-available.input.allocations.placeholder')}
+          placeholder={$t('tools.next_available.input.allocations.placeholder')}
           class="input-textarea allocations"
           rows="4"
         ></textarea>
@@ -307,9 +307,9 @@
         <div class="input-group">
           <label
             for="desired-prefix"
-            use:tooltip={{ text: $t('tools.next-available.input.targetPrefix.tooltip'), position: 'top' }}
+            use:tooltip={{ text: $t('tools.next_available.input.targetPrefix.tooltip'), position: 'top' }}
           >
-            {$t('tools.next-available.input.targetPrefix.label')}
+            {$t('tools.next_available.input.targetPrefix.label')}
           </label>
           <input
             id="desired-prefix"
@@ -325,9 +325,9 @@
         <div class="input-group">
           <label
             for="desired-hosts"
-            use:tooltip={{ text: $t('tools.next-available.input.requiredHosts.tooltip'), position: 'top' }}
+            use:tooltip={{ text: $t('tools.next_available.input.requiredHosts.tooltip'), position: 'top' }}
           >
-            {$t('tools.next-available.input.requiredHosts.label')}
+            {$t('tools.next_available.input.requiredHosts.label')}
           </label>
           <input
             id="desired-hosts"
@@ -341,21 +341,21 @@
       {/if}
 
       <div class="input-group">
-        <label for="policy" use:tooltip={{ text: $t('tools.next-available.input.policy.tooltip'), position: 'top' }}>
-          {$t('tools.next-available.input.policy.label')}
+        <label for="policy" use:tooltip={{ text: $t('tools.next_available.input.policy.tooltip'), position: 'top' }}>
+          {$t('tools.next_available.input.policy.label')}
         </label>
         <select id="policy" bind:value={policy} onchange={() => (userModified = true)} class="input-field">
-          <option value="first-fit">{$t('tools.next-available.input.policy.options.firstFit')}</option>
-          <option value="best-fit">{$t('tools.next-available.input.policy.options.bestFit')}</option>
+          <option value="first-fit">{$t('tools.next_available.input.policy.options.firstFit')}</option>
+          <option value="best-fit">{$t('tools.next_available.input.policy.options.bestFit')}</option>
         </select>
       </div>
 
       <div class="input-group">
         <label
           for="max-candidates"
-          use:tooltip={{ text: $t('tools.next-available.input.maxCandidates.tooltip'), position: 'top' }}
+          use:tooltip={{ text: $t('tools.next_available.input.maxCandidates.tooltip'), position: 'top' }}
         >
-          {$t('tools.next-available.input.maxCandidates.label')}
+          {$t('tools.next_available.input.maxCandidates.label')}
         </label>
         <input
           id="max-candidates"
@@ -373,10 +373,10 @@
     <div class="options-section">
       <label
         class="checkbox-label"
-        use:tooltip={{ text: $t('tools.next-available.input.options.usableHosts.tooltip'), position: 'top' }}
+        use:tooltip={{ text: $t('tools.next_available.input.options.usableHosts.tooltip'), position: 'top' }}
       >
         <input type="checkbox" bind:checked={ipv4UsableHosts} onchange={() => (userModified = true)} />
-        <span class="checkbox-text"> {$t('tools.next-available.input.options.usableHosts.label')} </span>
+        <span class="checkbox-text"> {$t('tools.next_available.input.options.usableHosts.label')} </span>
       </label>
     </div>
 
@@ -385,7 +385,7 @@
         type="button"
         class="btn btn-secondary btn-sm"
         onclick={clearInputs}
-        use:tooltip={{ text: $t('tools.next-available.actions.clearInputs'), position: 'top' }}
+        use:tooltip={{ text: $t('tools.next_available.actions.clearInputs'), position: 'top' }}
       >
         <Icon name="trash" size="sm" />
       </button>
@@ -393,7 +393,7 @@
 
     <!-- Examples -->
     <div class="examples-section">
-      <h4>{$t('tools.next-available.examples.title')}</h4>
+      <h4>{$t('tools.next_available.examples.title')}</h4>
       <div class="examples-grid">
         {#each examples as example (example.label)}
           <button
@@ -415,7 +415,7 @@
       <!-- Errors -->
       {#if result.errors.length > 0}
         <div class="info-panel error">
-          <h3>{$t('tools.next-available.results.errors.title')}</h3>
+          <h3>{$t('tools.next_available.results.errors.title')}</h3>
           <ul>
             {#each result.errors as error, index (index)}
               <li>{error}</li>
@@ -427,7 +427,7 @@
       <!-- Warnings -->
       {#if result.warnings.length > 0}
         <div class="info-panel warning">
-          <h3>{$t('tools.next-available.results.warnings.title')}</h3>
+          <h3>{$t('tools.next_available.results.warnings.title')}</h3>
           <ul>
             {#each result.warnings as warning, index (index)}
               <li>{warning}</li>
@@ -440,7 +440,7 @@
         <!-- Statistics -->
         <div class="stats-section">
           <div class="summary-header">
-            <h3>{$t('tools.next-available.results.title')}</h3>
+            <h3>{$t('tools.next_available.results.title')}</h3>
             <div class="export-buttons">
               <button
                 type="button"

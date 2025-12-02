@@ -3,21 +3,28 @@
   import { useDiagnosticState, useExamples } from '$lib/composables';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import '../../../../../styles/diagnostics-pages.scss';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics');
+  });
 
   let hostname = $state('example.com');
   let port = $state('443');
   const diagnosticState = useDiagnosticState<any>();
-  const examplesList = [
-    { host: 'cloudflare.com', port: '443', description: 'Cloudflare - OCSP stapling enabled' },
-    { host: 'www.digicert.com', port: '443', description: 'DigiCert - OCSP stapling enabled' },
-    { host: 'github.com', port: '443', description: 'GitHub - OCSP stapling disabled' },
-  ];
-  const examples = useExamples(examplesList);
+  const examplesList = $derived([
+    { host: 'cloudflare.com', port: '443', description: $t('diagnostics.ocsp-stapling.examples.cloudflare') },
+    { host: 'www.digicert.com', port: '443', description: $t('diagnostics.ocsp-stapling.examples.digicert') },
+    { host: 'github.com', port: '443', description: $t('diagnostics.ocsp-stapling.examples.github') },
+  ]);
+  const examples = useExamples(() => examplesList);
 
   async function checkOCSP() {
     if (!hostname?.trim()) {
-      diagnosticState.setError('Please enter a hostname');
+      diagnosticState.setError($t('diagnostics.ocsp-stapling.form.hostname.error'));
       return;
     }
 
@@ -37,12 +44,12 @@
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to check OCSP stapling');
+        throw new Error(data.message || $t('diagnostics.ocsp-stapling.errors.failedToCheck'));
       }
 
       diagnosticState.setResults(data);
     } catch (err) {
-      diagnosticState.setError(err instanceof Error ? err.message : 'An error occurred');
+      diagnosticState.setError(err instanceof Error ? err.message : $t('common.errors.unknownError'));
     }
   }
 
@@ -61,8 +68,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>OCSP Stapling Check</h1>
-    <p>Report if server staples OCSP and basic status info</p>
+    <h1>{$t('diagnostics.ocsp-stapling.title')}</h1>
+    <p>{$t('diagnostics.ocsp-stapling.description')}</p>
   </header>
 
   <!-- Examples -->
@@ -78,17 +85,17 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>OCSP Stapling Configuration</h3>
+      <h3>{$t('diagnostics.ocsp-stapling.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-group">
-        <label for="hostname">Hostname and Port</label>
+        <label for="hostname">{$t('diagnostics.ocsp-stapling.form.hostname.label')}</label>
         <div class="input-flex-container">
           <input
             id="hostname"
             type="text"
             bind:value={hostname}
-            placeholder="example.com"
+            placeholder={$t('diagnostics.ocsp-stapling.form.hostname.placeholder')}
             disabled={diagnosticState.loading}
             onchange={() => examples.clear()}
             onkeydown={(e) => e.key === 'Enter' && checkOCSP()}
@@ -98,7 +105,7 @@
             id="port"
             type="text"
             bind:value={port}
-            placeholder="443"
+            placeholder={$t('diagnostics.ocsp-stapling.form.port.placeholder')}
             disabled={diagnosticState.loading}
             onchange={() => examples.clear()}
             onkeydown={(e) => e.key === 'Enter' && checkOCSP()}
@@ -107,10 +114,10 @@
           <button onclick={checkOCSP} disabled={diagnosticState.loading} class="primary">
             {#if diagnosticState.loading}
               <Icon name="loader" size="sm" animate="spin" />
-              Checking...
+              {$t('diagnostics.ocsp-stapling.form.checking')}
             {:else}
               <Icon name="search" size="sm" />
-              Check
+              {$t('diagnostics.ocsp-stapling.form.check')}
             {/if}
           </button>
         </div>
@@ -118,7 +125,7 @@
     </div>
   </div>
 
-  <ErrorCard title="OCSP Check Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('diagnostics.ocsp-stapling.errors.checkFailed')} error={diagnosticState.error} />
 
   {#if diagnosticState.loading}
     <div class="card">
@@ -126,8 +133,8 @@
         <div class="loading-state">
           <Icon name="loader" size="lg" animate="spin" />
           <div class="loading-text">
-            <h3>Checking OCSP Stapling</h3>
-            <p>Connecting to server and analyzing OCSP response stapling...</p>
+            <h3>{$t('diagnostics.ocsp-stapling.loading.title')}</h3>
+            <p>{$t('diagnostics.ocsp-stapling.loading.description')}</p>
           </div>
         </div>
       </div>
@@ -137,30 +144,30 @@
   {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header">
-        <h3>OCSP Stapling Results</h3>
+        <h3>{$t('diagnostics.ocsp-stapling.results.title')}</h3>
       </div>
       <div class="card-content">
         <div class="results-section">
           <!-- OCSP Stapling Status Section -->
           <div class="card status-section">
             <div class="card-header">
-              <h3>OCSP Stapling Status</h3>
+              <h3>{$t('diagnostics.ocsp-stapling.results.status.title')}</h3>
             </div>
             <div class="card-content">
               {#if diagnosticState.results.staplingEnabled}
                 <div class="status-card enabled">
                   <Icon name="check-circle" size="lg" />
                   <div class="status-content">
-                    <h4>OCSP Stapling Enabled</h4>
-                    <p>This server provides OCSP responses with the TLS handshake</p>
+                    <h4>{$t('diagnostics.ocsp-stapling.results.status.enabled.title')}</h4>
+                    <p>{$t('diagnostics.ocsp-stapling.results.status.enabled.description')}</p>
                   </div>
                 </div>
               {:else}
                 <div class="status-card disabled">
                   <Icon name="x-circle" size="lg" />
                   <div class="status-content">
-                    <h4>OCSP Stapling Not Enabled</h4>
-                    <p>This server does not staple OCSP responses</p>
+                    <h4>{$t('diagnostics.ocsp-stapling.results.status.disabled.title')}</h4>
+                    <p>{$t('diagnostics.ocsp-stapling.results.status.disabled.description')}</p>
                   </div>
                 </div>
               {/if}
@@ -171,12 +178,12 @@
           {#if diagnosticState.results.staplingEnabled && diagnosticState.results.ocspResponse}
             <div class="card response-section">
               <div class="card-header">
-                <h3>OCSP Response Details</h3>
+                <h3>{$t('diagnostics.ocsp-stapling.results.details.title')}</h3>
               </div>
               <div class="card-content">
                 <div class="stats-grid">
                   <div class="stat-card">
-                    <div class="stat-label">Certificate Status</div>
+                    <div class="stat-label">{$t('diagnostics.ocsp-stapling.results.details.certificateStatus')}</div>
                     <div class="stat-value status-{diagnosticState.results.ocspResponse.certStatus.toLowerCase()}">
                       <Icon
                         name={diagnosticState.results.ocspResponse.certStatus.toLowerCase() === 'good'
@@ -189,7 +196,7 @@
                   </div>
 
                   <div class="stat-card">
-                    <div class="stat-label">Response Status</div>
+                    <div class="stat-label">{$t('diagnostics.ocsp-stapling.results.details.responseStatus')}</div>
                     <div class="stat-value">
                       <Icon name="check-circle" size="sm" />
                       {diagnosticState.results.ocspResponse.responseStatus}
@@ -198,28 +205,28 @@
 
                   {#if diagnosticState.results.ocspResponse.thisUpdate}
                     <div class="stat-card">
-                      <div class="stat-label">This Update</div>
+                      <div class="stat-label">{$t('diagnostics.ocsp-stapling.results.details.thisUpdate')}</div>
                       <div class="stat-value mono">{formatDate(diagnosticState.results.ocspResponse.thisUpdate)}</div>
                     </div>
                   {/if}
 
                   {#if diagnosticState.results.ocspResponse.nextUpdate}
                     <div class="stat-card">
-                      <div class="stat-label">Next Update</div>
+                      <div class="stat-label">{$t('diagnostics.ocsp-stapling.results.details.nextUpdate')}</div>
                       <div class="stat-value mono">{formatDate(diagnosticState.results.ocspResponse.nextUpdate)}</div>
                     </div>
                   {/if}
 
                   {#if diagnosticState.results.ocspResponse.producedAt}
                     <div class="stat-card">
-                      <div class="stat-label">Produced At</div>
+                      <div class="stat-label">{$t('diagnostics.ocsp-stapling.results.details.producedAt')}</div>
                       <div class="stat-value mono">{formatDate(diagnosticState.results.ocspResponse.producedAt)}</div>
                     </div>
                   {/if}
 
                   {#if diagnosticState.results.ocspResponse.responderUrl}
                     <div class="stat-card full-width">
-                      <div class="stat-label">Responder URL</div>
+                      <div class="stat-label">{$t('diagnostics.ocsp-stapling.results.details.responderUrl')}</div>
                       <div class="stat-value mono">{diagnosticState.results.ocspResponse.responderUrl}</div>
                     </div>
                   {/if}
@@ -231,19 +238,19 @@
             {#if diagnosticState.results.ocspResponse.validity}
               <div class="card validity-section">
                 <div class="card-header">
-                  <h3>Response Validity</h3>
+                  <h3>{$t('diagnostics.ocsp-stapling.results.validity.title')}</h3>
                 </div>
                 <div class="card-content">
                   <div class="validity-info">
                     <div class="validity-stats">
                       <div class="stat-card">
-                        <div class="stat-label">Valid For</div>
+                        <div class="stat-label">{$t('diagnostics.ocsp-stapling.results.validity.validFor')}</div>
                         <div class="stat-value">{diagnosticState.results.ocspResponse.validity.validFor}</div>
                       </div>
 
                       {#if diagnosticState.results.ocspResponse.validity.expiresIn}
                         <div class="stat-card">
-                          <div class="stat-label">Expires In</div>
+                          <div class="stat-label">{$t('diagnostics.ocsp-stapling.results.validity.expiresIn')}</div>
                           <div
                             class="stat-value"
                             class:expiring={diagnosticState.results.ocspResponse.validity.expiringSoon}
@@ -263,7 +270,9 @@
                     {#if diagnosticState.results.ocspResponse.validity.percentage !== undefined}
                       <div class="validity-progress">
                         <div class="progress-header">
-                          <span class="progress-label">Validity Period Progress</span>
+                          <span class="progress-label"
+                            >{$t('diagnostics.ocsp-stapling.results.validity.progressLabel')}</span
+                          >
                           <span class="progress-percentage"
                             >{diagnosticState.results.ocspResponse.validity.percentage}%</span
                           >
@@ -286,23 +295,23 @@
           {#if diagnosticState.results.certificate}
             <div class="card certificate-section">
               <div class="card-header">
-                <h3>Certificate Information</h3>
+                <h3>{$t('diagnostics.ocsp-stapling.results.certificate.title')}</h3>
               </div>
               <div class="card-content">
                 <div class="cert-details">
                   <div class="cert-item">
-                    <div class="cert-label">Subject</div>
+                    <div class="cert-label">{$t('diagnostics.ocsp-stapling.results.certificate.subject')}</div>
                     <div class="cert-value mono">{diagnosticState.results.certificate.subject}</div>
                   </div>
 
                   <div class="cert-item">
-                    <div class="cert-label">Issuer</div>
+                    <div class="cert-label">{$t('diagnostics.ocsp-stapling.results.certificate.issuer')}</div>
                     <div class="cert-value mono">{diagnosticState.results.certificate.issuer}</div>
                   </div>
 
                   {#if diagnosticState.results.certificate.ocspUrls && diagnosticState.results.certificate.ocspUrls.length > 0}
                     <div class="cert-item">
-                      <div class="cert-label">OCSP URLs</div>
+                      <div class="cert-label">{$t('diagnostics.ocsp-stapling.results.certificate.ocspUrls')}</div>
                       <div class="cert-urls">
                         {#each diagnosticState.results.certificate.ocspUrls as url (url)}
                           <div class="cert-url mono">{url}</div>
@@ -319,7 +328,7 @@
           {#if diagnosticState.results.recommendations && diagnosticState.results.recommendations.length > 0}
             <div class="card recommendations-section">
               <div class="card-header">
-                <h3>Recommendations</h3>
+                <h3>{$t('diagnostics.ocsp-stapling.results.recommendations.title')}</h3>
               </div>
               <div class="card-content">
                 <div class="recommendations-list">
@@ -341,44 +350,38 @@
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>Understanding OCSP Stapling</h3>
+      <h3>{$t('diagnostics.ocsp-stapling.educational.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>What is OCSP Stapling?</h4>
+          <h4>{$t('diagnostics.ocsp-stapling.educational.whatIs.title')}</h4>
           <p>
-            OCSP Stapling is a security feature where the server includes a certificate status response during the TLS
-            handshake. This eliminates the need for clients to contact the Certificate Authority directly to check if a
-            certificate has been revoked.
+            {$t('diagnostics.ocsp-stapling.educational.whatIs.description')}
           </p>
         </div>
 
         <div class="info-section">
-          <h4>Why is it Important?</h4>
+          <h4>{$t('diagnostics.ocsp-stapling.educational.whyImportant.title')}</h4>
           <ul>
-            <li><strong>Privacy:</strong> Prevents CA from tracking user browsing</li>
-            <li><strong>Performance:</strong> Faster connections, no extra DNS lookups</li>
-            <li><strong>Reliability:</strong> Works even if OCSP responder is down</li>
-            <li><strong>Security:</strong> Real-time certificate validation</li>
+            <li><strong>{$t('diagnostics.ocsp-stapling.educational.whyImportant.privacy')}</strong></li>
+            <li><strong>{$t('diagnostics.ocsp-stapling.educational.whyImportant.performance')}</strong></li>
+            <li><strong>{$t('diagnostics.ocsp-stapling.educational.whyImportant.reliability')}</strong></li>
+            <li><strong>{$t('diagnostics.ocsp-stapling.educational.whyImportant.security')}</strong></li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>How It Works</h4>
+          <h4>{$t('diagnostics.ocsp-stapling.educational.howItWorks.title')}</h4>
           <p>
-            The server periodically queries the OCSP responder and caches the response. During TLS handshake, the server
-            "staples" this cached response to the certificate, proving its validity without requiring the client to make
-            additional network requests.
+            {$t('diagnostics.ocsp-stapling.educational.howItWorks.description')}
           </p>
         </div>
 
         <div class="info-section">
-          <h4>Checking Status</h4>
+          <h4>{$t('diagnostics.ocsp-stapling.educational.checkingStatus.title')}</h4>
           <p>
-            This tool connects to servers with OCSP stapling enabled and analyzes the stapled response. It checks
-            certificate status, response validity, timing information, and provides recommendations for servers without
-            stapling enabled.
+            {$t('diagnostics.ocsp-stapling.educational.checkingStatus.description')}
           </p>
         </div>
       </div>

@@ -3,6 +3,9 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { calculateReverseZones, type ReverseZoneInfo } from '$lib/utils/reverse-dns.js';
   import { useClipboard } from '$lib/composables';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
 
   let cidrInput = $state('192.168.1.0/24');
   let results = $state<{
@@ -21,38 +24,43 @@
   let selectedExample = $state<string | null>(null);
   let _userModified = $state(false);
 
-  const examples = [
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools');
+  });
+
+  const examples = $derived([
     {
-      label: 'IPv4 /24 Network',
+      label: $t('tools.reverse_zones_calculator.examples.ipv4_24.label'),
       cidr: '192.168.1.0/24',
-      description: 'Single class C zone delegation',
+      description: $t('tools.reverse_zones_calculator.examples.ipv4_24.description'),
     },
     {
-      label: 'IPv4 /16 Network',
+      label: $t('tools.reverse_zones_calculator.examples.ipv4_16.label'),
       cidr: '10.0.0.0/16',
-      description: 'Class B with multiple /24 zones',
+      description: $t('tools.reverse_zones_calculator.examples.ipv4_16.description'),
     },
     {
-      label: 'IPv4 /20 Block',
+      label: $t('tools.reverse_zones_calculator.examples.ipv4_20.label'),
       cidr: '172.16.32.0/20',
-      description: '16 class C zones needed',
+      description: $t('tools.reverse_zones_calculator.examples.ipv4_20.description'),
     },
     {
-      label: 'IPv4 /28 Subnet',
+      label: $t('tools.reverse_zones_calculator.examples.ipv4_28.label'),
       cidr: '192.168.1.16/28',
-      description: 'Small subnet within /24 zone',
+      description: $t('tools.reverse_zones_calculator.examples.ipv4_28.description'),
     },
     {
-      label: 'IPv6 /64 Network',
+      label: $t('tools.reverse_zones_calculator.examples.ipv6_64.label'),
       cidr: '2001:db8:1000::/64',
-      description: 'IPv6 nibble boundary delegation',
+      description: $t('tools.reverse_zones_calculator.examples.ipv6_64.description'),
     },
     {
-      label: 'IPv6 /48 Prefix',
+      label: $t('tools.reverse_zones_calculator.examples.ipv6_48.label'),
       cidr: '2001:db8::/48',
-      description: 'IPv6 /48 delegation zone',
+      description: $t('tools.reverse_zones_calculator.examples.ipv6_48.description'),
     },
-  ];
+  ]);
 
   function loadExample(example: (typeof examples)[0]) {
     cidrInput = example.cidr;
@@ -72,7 +80,7 @@
       const zones = calculateReverseZones(trimmed);
 
       if (zones.length === 0) {
-        throw new Error('No reverse zones could be calculated for this CIDR');
+        throw new Error($t('tools.reverse_zones_calculator.error.noZones'));
       }
 
       // Analyze the results
@@ -82,13 +90,15 @@
       let delegationType = '';
       if (ipv4Zones > 0) {
         if (ipv4Zones === 1) {
-          delegationType = zones[0].delegation.includes('/24') ? 'Class C (/24)' : `Custom (${zones[0].delegation})`;
+          delegationType = zones[0].delegation.includes('/24')
+            ? $t('tools.reverse_zones_calculator.delegationTypes.classC')
+            : `${$t('tools.reverse_zones_calculator.delegationTypes.custom')} (${zones[0].delegation})`;
         } else {
-          delegationType = `Multiple zones (${ipv4Zones} x /24)`;
+          delegationType = `${$t('tools.reverse_zones_calculator.delegationTypes.multipleZones')} (${ipv4Zones} x /24)`;
         }
       } else if (ipv6Zones > 0) {
         const nibbleDepth = zones[0].nibbleDepth || 0;
-        delegationType = `IPv6 nibble boundary (${nibbleDepth} nibbles)`;
+        delegationType = `${$t('tools.reverse_zones_calculator.delegationTypes.ipv6Nibble')} (${nibbleDepth} nibbles)`;
       }
 
       results = {
@@ -147,8 +157,8 @@ chmod 644 /etc/bind/zones/${zone.zone}`;
 
 <div class="card">
   <header class="card-header">
-    <h1>Reverse Zones Calculator</h1>
-    <p>Calculate the minimal set of reverse DNS zones needed to delegate a CIDR block</p>
+    <h1>{$t('tools.reverse_zones_calculator.title')}</h1>
+    <p>{$t('tools.reverse_zones_calculator.description')}</p>
   </header>
 
   <!-- Educational Overview Card -->
@@ -157,20 +167,22 @@ chmod 644 /etc/bind/zones/${zone.zone}`;
       <div class="overview-item">
         <Icon name="layers" size="sm" />
         <div>
-          <strong>Zone Boundaries:</strong> IPv4 uses octet boundaries (/8, /16, /24) and IPv6 uses nibble boundaries (4-bit
-          increments).
+          <strong>{$t('tools.reverse_zones_calculator.overview.zoneBoundaries.title')}:</strong>
+          {$t('tools.reverse_zones_calculator.overview.zoneBoundaries.description')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="share" size="sm" />
         <div>
-          <strong>Delegation:</strong> DNS zones must be properly delegated by upstream providers at natural boundaries.
+          <strong>{$t('tools.reverse_zones_calculator.overview.delegation.title')}:</strong>
+          {$t('tools.reverse_zones_calculator.overview.delegation.description')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="calculator" size="sm" />
         <div>
-          <strong>Optimization:</strong> Calculate the minimal number of zones needed to avoid unnecessary complexity.
+          <strong>{$t('tools.reverse_zones_calculator.overview.optimization.title')}:</strong>
+          {$t('tools.reverse_zones_calculator.overview.optimization.description')}
         </div>
       </div>
     </div>
@@ -181,7 +193,7 @@ chmod 644 /etc/bind/zones/${zone.zone}`;
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="sm" />
-        <h3>Quick Examples</h3>
+        <h3>{$t('tools.reverse_zones_calculator.examples.title')}</h3>
       </summary>
       <div class="examples-grid">
         {#each examples as example (example.label)}
@@ -203,16 +215,16 @@ chmod 644 /etc/bind/zones/${zone.zone}`;
   <!-- Input Card -->
   <div class="card input-card">
     <div class="input-group">
-      <label for="cidr-input" use:tooltip={'Enter a CIDR block to calculate reverse zones for'}>
+      <label for="cidr-input" use:tooltip={$t('tools.reverse_zones_calculator.input.help')}>
         <Icon name="network" size="sm" />
-        CIDR Block
+        {$t('tools.reverse_zones_calculator.input.label')}
       </label>
       <input
         id="cidr-input"
         type="text"
         bind:value={cidrInput}
         oninput={handleInputChange}
-        placeholder="192.168.1.0/24 or 2001:db8::/64"
+        placeholder={$t('tools.reverse_zones_calculator.input.placeholder')}
         class="cidr-input {results?.success === true ? 'valid' : results?.success === false ? 'invalid' : ''}"
         spellcheck="false"
       />
@@ -224,15 +236,15 @@ chmod 644 /etc/bind/zones/${zone.zone}`;
     <div class="card results-card">
       {#if results.success}
         <div class="results-header">
-          <h3>Reverse Zone Analysis</h3>
+          <h3>{$t('tools.reverse_zones_calculator.results.title')}</h3>
           <div class="summary-stats">
             <div class="stat-item">
               <span class="stat-value">{results.analysis.totalZones}</span>
-              <span class="stat-label">Total Zones</span>
+              <span class="stat-label">{$t('tools.reverse_zones_calculator.results.analysis.totalZones')}</span>
             </div>
             <div class="stat-item">
               <span class="stat-value">{results.analysis.delegationType}</span>
-              <span class="stat-label">Delegation Type</span>
+              <span class="stat-label">{$t('tools.reverse_zones_calculator.results.analysis.delegationType')}</span>
             </div>
           </div>
         </div>
@@ -241,7 +253,7 @@ chmod 644 /etc/bind/zones/${zone.zone}`;
         <div class="zones-section">
           <h4>
             <Icon name="list" size="sm" />
-            Required Reverse Zones
+            {$t('tools.reverse_zones_calculator.results.zones.title')}
           </h4>
           <div class="zones-grid">
             {#each results.zones as zone, index (zone.zone)}
@@ -290,20 +302,20 @@ chmod 644 /etc/bind/zones/${zone.zone}`;
         <div class="config-section">
           <h4>
             <Icon name="settings" size="sm" />
-            Configuration Examples
+            {$t('tools.reverse_zones_calculator.results.configuration.title')}
           </h4>
 
           <div class="config-examples">
             <!-- BIND Configuration -->
             <div class="config-example">
               <div class="config-header">
-                <h5>BIND9 Configuration</h5>
+                <h5>{$t('tools.reverse_zones_calculator.results.configuration.bindConfig')}</h5>
                 <button
                   class="copy-button {clipboard.isCopied('bind-config') ? 'copied' : ''}"
                   onclick={() => results && clipboard.copy(generateBindConfig(results.zones), 'bind-config')}
                 >
                   <Icon name={clipboard.isCopied('bind-config') ? 'check' : 'copy'} size="sm" />
-                  Copy Config
+                  {$t('common.buttons.copy')}
                 </button>
               </div>
               <pre class="config-content"><code>{generateBindConfig(results.zones)}</code></pre>
@@ -312,13 +324,13 @@ chmod 644 /etc/bind/zones/${zone.zone}`;
             <!-- Delegation Commands -->
             <div class="config-example">
               <div class="config-header">
-                <h5>Zone File Setup Commands</h5>
+                <h5>{$t('tools.reverse_zones_calculator.results.configuration.delegationCommands')}</h5>
                 <button
                   class="copy-button {clipboard.isCopied('setup-commands') ? 'copied' : ''}"
                   onclick={() => results && clipboard.copy(generateDelegationCommands(results.zones), 'setup-commands')}
                 >
                   <Icon name={clipboard.isCopied('setup-commands') ? 'check' : 'copy'} size="sm" />
-                  Copy Commands
+                  {$t('common.buttons.copy')}
                 </button>
               </div>
               <pre class="config-content"><code>{generateDelegationCommands(results.zones)}</code></pre>
@@ -328,7 +340,7 @@ chmod 644 /etc/bind/zones/${zone.zone}`;
       {:else}
         <div class="error-result">
           <Icon name="alert-triangle" size="lg" />
-          <h4>Calculation Error</h4>
+          <h4>{$t('tools.reverse_zones_calculator.error.title')}</h4>
           <p>{results.error}</p>
           <div class="error-help">
             <strong>Valid formats:</strong>

@@ -2,6 +2,13 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import '../../../../../styles/diagnostics-pages.scss';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics');
+  });
 
   let domain = $state('example.com');
   let recordType = $state('A');
@@ -12,15 +19,15 @@
   let copiedState = $state(false);
   let selectedExampleIndex = $state<number | null>(null);
 
-  const recordTypes = [
-    { value: 'A', label: 'A', description: 'IPv4 address records' },
-    { value: 'AAAA', label: 'AAAA', description: 'IPv6 address records' },
-    { value: 'CNAME', label: 'CNAME', description: 'Canonical name records' },
-    { value: 'MX', label: 'MX', description: 'Mail exchange records' },
-    { value: 'TXT', label: 'TXT', description: 'Text records' },
-    { value: 'NS', label: 'NS', description: 'Name server records' },
-    { value: 'SOA', label: 'SOA', description: 'Start of authority records' },
-  ];
+  const recordTypes = $derived([
+    { value: 'A', label: 'A', description: $t('diagnostics.dnssec-adflag.recordTypes.a') },
+    { value: 'AAAA', label: 'AAAA', description: $t('diagnostics.dnssec-adflag.recordTypes.aaaa') },
+    { value: 'CNAME', label: 'CNAME', description: $t('diagnostics.dnssec-adflag.recordTypes.cname') },
+    { value: 'MX', label: 'MX', description: $t('diagnostics.dnssec-adflag.recordTypes.mx') },
+    { value: 'TXT', label: 'TXT', description: $t('diagnostics.dnssec-adflag.recordTypes.txt') },
+    { value: 'NS', label: 'NS', description: $t('diagnostics.dnssec-adflag.recordTypes.ns') },
+    { value: 'SOA', label: 'SOA', description: $t('diagnostics.dnssec-adflag.recordTypes.soa') },
+  ]);
 
   const resolvers = [
     { value: 'cloudflare', label: 'Cloudflare (1.1.1.1)' },
@@ -29,13 +36,13 @@
     { value: 'opendns', label: 'OpenDNS (208.67.222.222)' },
   ];
 
-  const examples = [
-    { domain: 'cloudflare.com', type: 'A', description: 'DNSSEC-signed domain' },
-    { domain: 'dnssec-failed.org', type: 'A', description: 'DNSSEC validation failure test' },
-    { domain: 'example.com', type: 'A', description: 'Unsigned domain example' },
-    { domain: 'google.com', type: 'A', description: 'Popular signed domain' },
-    { domain: 'iana.org', type: 'A', description: 'Internet registry domain' },
-  ];
+  const examples = $derived([
+    { domain: 'cloudflare.com', type: 'A', description: $t('diagnostics.dnssec-adflag.examples.cloudflare') },
+    { domain: 'dnssec-failed.org', type: 'A', description: $t('diagnostics.dnssec-adflag.examples.dnssecFailed') },
+    { domain: 'example.com', type: 'A', description: $t('diagnostics.dnssec-adflag.examples.example') },
+    { domain: 'google.com', type: 'A', description: $t('diagnostics.dnssec-adflag.examples.google') },
+    { domain: 'iana.org', type: 'A', description: $t('diagnostics.dnssec-adflag.examples.iana') },
+  ]);
 
   async function checkDNSSEC() {
     loading = true;
@@ -93,10 +100,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>DNSSEC AD Flag Checker</h1>
+    <h1>{$t('diagnostics.dnssec-adflag.title')}</h1>
     <p>
-      Query DNS records via DoH and report if the AD (Authenticated Data) bit is set. The AD bit indicates whether the
-      DNS response has been cryptographically verified through DNSSEC validation.
+      {$t('diagnostics.dnssec-adflag.description')}
     </p>
   </header>
 
@@ -105,7 +111,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Example DNSSEC Tests</h4>
+        <h4>{$t('diagnostics.dnssec-adflag.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -127,13 +133,13 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>DNSSEC Query Configuration</h3>
+      <h3>{$t('diagnostics.dnssec-adflag.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-grid">
         <div class="form-group">
-          <label for="domain" use:tooltip={'Enter a domain name to check DNSSEC validation status'}>
-            Domain Name
+          <label for="domain" use:tooltip={$t('diagnostics.dnssec-adflag.form.domain.tooltip')}>
+            {$t('diagnostics.dnssec-adflag.form.domain.label')}
             <input
               id="domain"
               type="text"
@@ -148,8 +154,8 @@
         </div>
 
         <div class="form-group">
-          <label for="recordType" use:tooltip={'Select the DNS record type to query'}>
-            Record Type
+          <label for="recordType" use:tooltip={$t('diagnostics.dnssec-adflag.form.recordType.tooltip')}>
+            {$t('diagnostics.dnssec-adflag.form.recordType.label')}
             <select
               id="recordType"
               bind:value={recordType}
@@ -166,8 +172,8 @@
         </div>
 
         <div class="form-group">
-          <label for="resolver" use:tooltip={'Choose a DNS-over-HTTPS resolver for the query'}>
-            DoH Resolver
+          <label for="resolver" use:tooltip={$t('diagnostics.dnssec-adflag.form.resolver.tooltip')}>
+            {$t('diagnostics.dnssec-adflag.form.resolver.label')}
             <select
               id="resolver"
               bind:value={resolver}
@@ -187,10 +193,10 @@
         <button class="lookup-btn" onclick={checkDNSSEC} disabled={loading || !domain.trim()}>
           {#if loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Checking DNSSEC...
+            {$t('diagnostics.dnssec-adflag.form.button.checking')}
           {:else}
             <Icon name="search" size="sm" />
-            Check DNSSEC
+            {$t('diagnostics.dnssec-adflag.form.button.check')}
           {/if}
         </button>
       </div>
@@ -201,36 +207,42 @@
   {#if results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>DNSSEC Status for {results.name}</h3>
+        <h3>{$t('diagnostics.dnssec-adflag.results.title', { domain: results.name })}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
           <span class={copiedState ? 'text-green-500' : ''}
             ><Icon name={copiedState ? 'check' : 'copy'} size="xs" /></span
           >
-          {copiedState ? 'Copied!' : 'Copy Raw JSON'}
+          {copiedState ? $t('common.copied') : $t('diagnostics.dnssec-adflag.results.copyRawJson')}
         </button>
       </div>
       <div class="card-content">
         <div class="lookup-info">
           <div class="info-item">
-            <span class="info-label" use:tooltip={'The domain and record type that was queried'}>Query:</span>
+            <span class="info-label" use:tooltip={$t('diagnostics.dnssec-adflag.results.query.tooltip')}
+              >{$t('diagnostics.dnssec-adflag.results.query.label')}:</span
+            >
             <span class="info-value mono">{results.name} ({results.type})</span>
           </div>
           <div class="info-item">
-            <span class="info-label" use:tooltip={'DNS-over-HTTPS resolver used for the query'}>DoH Resolver:</span>
+            <span class="info-label" use:tooltip={$t('diagnostics.dnssec-adflag.results.resolver.tooltip')}
+              >{$t('diagnostics.dnssec-adflag.results.resolver.label')}:</span
+            >
             <span class="info-value">{results.resolver}</span>
           </div>
         </div>
 
         <!-- DNSSEC Status -->
         <div class="result-section">
-          <h4>DNSSEC Validation Status</h4>
+          <h4>{$t('diagnostics.dnssec-adflag.results.validation.title')}</h4>
           <div class="dnssec-status">
             <div class="status-item {results.authenticated ? 'success' : 'warning'}">
               <Icon name={results.authenticated ? 'shield-check' : 'shield-alert'} size="md" />
               <div>
-                <strong>AD (Authenticated Data) Flag</strong>
+                <strong>{$t('diagnostics.dnssec-adflag.results.validation.adFlag.title')}</strong>
                 <p>
-                  {results.authenticated ? 'SET - Response is DNSSEC validated' : 'NOT SET - Response is not validated'}
+                  {results.authenticated
+                    ? $t('diagnostics.dnssec-adflag.results.validation.adFlag.set')
+                    : $t('diagnostics.dnssec-adflag.results.validation.adFlag.notSet')}
                 </p>
               </div>
             </div>
@@ -239,8 +251,8 @@
               <div class="status-item info">
                 <Icon name="info" size="md" />
                 <div>
-                  <strong>CD (Checking Disabled) Flag</strong>
-                  <p>SET - DNSSEC validation was disabled for this query</p>
+                  <strong>{$t('diagnostics.dnssec-adflag.results.validation.cdFlag.title')}</strong>
+                  <p>{$t('diagnostics.dnssec-adflag.results.validation.cdFlag.message')}</p>
                 </div>
               </div>
             {/if}
@@ -248,14 +260,14 @@
             <div class="status-item {results.rcode === 0 ? 'success' : 'error'}">
               <Icon name={results.rcode === 0 ? 'check-circle' : 'x-circle'} size="md" />
               <div>
-                <strong>Response Code</strong>
+                <strong>{$t('diagnostics.dnssec-adflag.results.validation.responseCode.title')}</strong>
                 <p>{results.rcodeText}</p>
               </div>
             </div>
           </div>
 
           <div class="explanation">
-            <h5>Explanation</h5>
+            <h5>{$t('diagnostics.dnssec-adflag.results.explanation.title')}</h5>
             <p>{results.explanation}</p>
           </div>
         </div>
@@ -303,15 +315,15 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="md" />
           <div>
-            <strong>DNSSEC Check Failed</strong>
+            <strong>{$t('diagnostics.dnssec-adflag.error.title')}</strong>
             <p>{error}</p>
             <div class="troubleshooting">
-              <p><strong>Troubleshooting Tips:</strong></p>
+              <p><strong>{$t('diagnostics.dnssec-adflag.error.troubleshooting.title')}:</strong></p>
               <ul>
-                <li>Ensure the domain name is valid and exists</li>
-                <li>Try a different record type if the current one doesn't exist</li>
-                <li>Switch to a different DoH resolver</li>
-                <li>Some domains may not have the requested record type</li>
+                <li>{$t('diagnostics.dnssec-adflag.error.troubleshooting.domain')}</li>
+                <li>{$t('diagnostics.dnssec-adflag.error.troubleshooting.recordType')}</li>
+                <li>{$t('diagnostics.dnssec-adflag.error.troubleshooting.resolver')}</li>
+                <li>{$t('diagnostics.dnssec-adflag.error.troubleshooting.records')}</li>
               </ul>
             </div>
           </div>
@@ -323,41 +335,50 @@
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>About DNSSEC and the AD Flag</h3>
+      <h3>{$t('diagnostics.dnssec-adflag.education.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>What is DNSSEC?</h4>
+          <h4>{$t('diagnostics.dnssec-adflag.education.dnssec.title')}</h4>
           <p>
-            DNS Security Extensions (DNSSEC) adds cryptographic authentication to DNS responses, protecting against DNS
-            spoofing and cache poisoning attacks by ensuring response integrity.
+            {$t('diagnostics.dnssec-adflag.education.dnssec.description')}
           </p>
         </div>
 
         <div class="info-section">
-          <h4>The AD (Authenticated Data) Flag</h4>
+          <h4>{$t('diagnostics.dnssec-adflag.education.adFlag.title')}</h4>
           <p>
-            The AD bit in DNS responses indicates that the resolver has successfully validated the response using
-            DNSSEC. When set, you can trust the response hasn't been tampered with.
+            {$t('diagnostics.dnssec-adflag.education.adFlag.description')}
           </p>
         </div>
 
         <div class="info-section">
-          <h4>Why Use DoH for DNSSEC?</h4>
+          <h4>{$t('diagnostics.dnssec-adflag.education.doh.title')}</h4>
           <p>
-            DNS-over-HTTPS preserves DNSSEC validation status in the AD flag, while traditional DNS queries may not
-            expose this information clearly to clients.
+            {$t('diagnostics.dnssec-adflag.education.doh.description')}
           </p>
         </div>
 
         <div class="info-section">
-          <h4>Interpreting Results</h4>
+          <h4>{$t('diagnostics.dnssec-adflag.education.interpreting.title')}</h4>
           <ul>
-            <li><strong>AD Set:</strong> Response is cryptographically verified</li>
-            <li><strong>AD Not Set:</strong> Domain unsigned, validation failed, or resolver doesn't validate</li>
-            <li><strong>CD Set:</strong> Validation was disabled for this query</li>
-            <li><strong>SERVFAIL:</strong> May indicate DNSSEC validation failure</li>
+            <li>
+              <strong>{$t('diagnostics.dnssec-adflag.education.interpreting.adSet.title')}:</strong>
+              {$t('diagnostics.dnssec-adflag.education.interpreting.adSet.description')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics.dnssec-adflag.education.interpreting.adNotSet.title')}:</strong>
+              {$t('diagnostics.dnssec-adflag.education.interpreting.adNotSet.description')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics.dnssec-adflag.education.interpreting.cdSet.title')}:</strong>
+              {$t('diagnostics.dnssec-adflag.education.interpreting.cdSet.description')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics.dnssec-adflag.education.interpreting.servfail.title')}:</strong>
+              {$t('diagnostics.dnssec-adflag.education.interpreting.servfail.description')}
+            </li>
           </ul>
         </div>
       </div>

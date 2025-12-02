@@ -1,12 +1,40 @@
 {
-  "title": "PTR Record Generator",
-  "description": "Generate reverse DNS PTR records for IP addresses and CIDR blocks with proper zone file formatting.",
+  "title": "Reverse PTR Generator",
+  "description": "Convert IP addresses and CIDR blocks to PTR record names and zone file examples",
+
+  "overview": {
+    "reverseDNS": {
+      "title": "Reverse DNS",
+      "content": "PTR records provide reverse DNS lookups, mapping IP addresses back to hostnames"
+    },
+    "zoneStructure": {
+      "title": "Zone Structure",
+      "content": "IPv4 uses .in-addr.arpa zones, IPv6 uses .ip6.arpa with nibble boundaries"
+    },
+    "zoneFiles": {
+      "title": "Zone Files",
+      "content": "Generated records can be used directly in BIND9 and other DNS server configurations"
+    }
+  },
   "input": {
     "label": "IP Address or CIDR Block",
     "placeholder": "192.168.1.100 or 192.168.1.0/24",
     "singleMode": "Single Address",
     "cidrMode": "CIDR Block",
-    "help": "Enter an IP address for single PTR record or CIDR block for bulk generation"
+    "help": "Enter an IP address for single PTR record or CIDR block for bulk generation",
+    "type": {
+      "label": "Input Type",
+      "singleIP": "Single IP Address",
+      "cidrBlock": "CIDR Block"
+    },
+    "address": {
+      "labelSingle": "IP Address",
+      "placeholderSingle": "e.g., 192.168.1.100"
+    },
+    "options": {
+      "generateZoneFiles": "Generate Zone Files",
+      "zoneFilesHint": "Include complete zone file format for DNS servers"
+    }
   },
   "examples": {
     "title": "Quick Examples",
@@ -33,6 +61,10 @@
     "largeBlock": {
       "label": "Large Block (/16)",
       "description": "Demonstration of large block generation"
+    },
+    "types": {
+      "singleIP": "Single IP Address",
+      "cidrBlock": "CIDR Block"
     }
   },
   "options": {
@@ -46,10 +78,26 @@
     "exportTxt": "Export TXT",
     "exportBind": "Export BIND",
     "exportJson": "Export JSON",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "copyZoneFile": "Copy Zone File"
   },
   "results": {
     "title": "PTR Records",
+    "summary": {
+      "totalPTRs": "Total PTR Records",
+      "ipv4": "IPv4 Records",
+      "zones": "DNS Zones"
+    },
+    "records": {
+      "title": "PTR Record Details",
+      "ipAddress": "IP Address",
+      "ptrName": "PTR Record Name",
+      "type": "Type",
+      "zone": "Zone"
+    },
+    "zoneFiles": {
+      "title": "Zone File Contents"
+    },
     "summary": {
       "title": "Generation Summary",
       "totalEntries": "Total Entries",
@@ -85,5 +133,24 @@
   "warnings": {
     "largeBlock": "Large CIDR block will generate many records",
     "performanceNote": "Generation may take some time for large blocks"
+  },
+
+  "education": {
+    "whatArePTRRecords": {
+      "title": "What are PTR Records?",
+      "content": "PTR records provide reverse DNS lookups, mapping IP addresses back to domain names for verification and logging purposes"
+    },
+    "zoneStructure": {
+      "title": "Zone Structure",
+      "content": "IPv4 reverse zones use .in-addr.arpa (e.g., 1.168.192.in-addr.arpa), IPv6 uses .ip6.arpa with nibble boundaries"
+    },
+    "zoneDelegation": {
+      "title": "Zone Delegation",
+      "content": "Reverse DNS zones must be properly delegated by your ISP or hosting provider to function correctly"
+    },
+    "bestPractices": {
+      "title": "Best Practices",
+      "content": "Always set up reverse DNS for mail servers, use descriptive hostnames, and ensure forward/reverse DNS match"
+    }
   }
 }

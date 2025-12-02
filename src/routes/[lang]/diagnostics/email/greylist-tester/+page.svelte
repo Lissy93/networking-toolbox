@@ -3,7 +3,14 @@
   import { greylistContent as content } from '$lib/content/greylist';
   import { useDiagnosticState } from '$lib/composables';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import '../../../../../styles/diagnostics-pages.scss';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics/email-greylist-tester');
+  });
 
   interface GreylistAttempt {
     attemptNumber: number;
@@ -29,14 +36,14 @@
     timestamp: string;
   }
 
-  const examplesList = [
-    { domain: 'mail.protonmail.ch', port: 25, desc: 'ProtonMail (privacy-focused)' },
-    { domain: 'mail.tutanota.de', port: 25, desc: 'Tutanota (encrypted email)' },
-    { domain: 'mx01.mail.icloud.com', port: 25, desc: 'iCloud Mail' },
-    { domain: 'mx.zoho.com', port: 25, desc: 'Zoho Mail (business)' },
-    { domain: 'aspmx.l.google.com', port: 25, desc: 'Google Workspace MX' },
-    { domain: 'smtp.runbox.com', port: 25, desc: 'Runbox (Exim-based)' },
-  ];
+  const examplesList = $derived([
+    { domain: 'mail.protonmail.ch', port: 25, desc: $t('examples.protonmail') },
+    { domain: 'mail.tutanota.de', port: 25, desc: $t('examples.tutanota') },
+    { domain: 'mx01.mail.icloud.com', port: 25, desc: $t('examples.icloud') },
+    { domain: 'mx.zoho.com', port: 25, desc: $t('examples.zoho') },
+    { domain: 'aspmx.l.google.com', port: 25, desc: $t('examples.google') },
+    { domain: 'smtp.runbox.com', port: 25, desc: $t('examples.runbox') },
+  ]);
 
   let domain = $state('');
   let port = $state(25);
@@ -55,7 +62,7 @@
 
   async function testGreylist() {
     if (!domain.trim()) {
-      diagnosticState.setError('Please enter a domain name');
+      diagnosticState.setError($t('form.error'));
       return;
     }
 
@@ -75,13 +82,13 @@
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
-        throw new Error(errorData.message || 'Greylisting test failed');
+        throw new Error(errorData.message || $t('form.errors.testFailed'));
       }
 
       const data = await response.json();
       diagnosticState.setResults(data);
     } catch (err: unknown) {
-      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      diagnosticState.setError(err instanceof Error ? err.message : $t('form.errors.unknownError'));
     }
   }
 
@@ -122,28 +129,28 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>Test Mail Server Greylisting</h3>
+      <h3>{$t('form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-grid">
         <div class="form-group">
-          <label for="domain">Domain</label>
+          <label for="domain">{$t('form.domain.label')}</label>
           <input
             type="text"
             id="domain"
             bind:value={domain}
-            placeholder="smtp.example.com"
+            placeholder={$t('form.domain.placeholder')}
             onkeydown={(e) => e.key === 'Enter' && testGreylist()}
             disabled={diagnosticState.loading}
           />
         </div>
         <div class="form-group port-group">
-          <label for="port">Port</label>
+          <label for="port">{$t('form.port.label')}</label>
           <input
             type="number"
             id="port"
             bind:value={port}
-            placeholder="25"
+            placeholder={$t('form.port.placeholder')}
             min="1"
             max="65535"
             disabled={diagnosticState.loading}
@@ -153,11 +160,11 @@
 
       <div class="form-grid">
         <div class="form-group">
-          <label for="attempts">Connection Attempts</label>
+          <label for="attempts">{$t('form.attempts.label')}</label>
           <input type="number" id="attempts" bind:value={attempts} min="2" max="5" disabled={diagnosticState.loading} />
         </div>
         <div class="form-group">
-          <label for="delay">Delay Between Attempts (seconds)</label>
+          <label for="delay">{$t('form.delay.label')}</label>
           <input
             type="number"
             id="delay"
@@ -175,7 +182,7 @@
           size="sm"
           animate={diagnosticState.loading ? 'spin' : undefined}
         />
-        {diagnosticState.loading ? 'Testing...' : 'Test Greylisting'}
+        {diagnosticState.loading ? $t('form.testing') : $t('form.test')}
       </button>
     </div>
   </div>
@@ -187,13 +194,18 @@
         <div class="loading-state">
           <Icon name="loader" size="lg" animate="spin" />
           <div class="loading-text">
-            <h3>Testing Greylisting</h3>
+            <h3>{$t('loading.title')}</h3>
             <p>
-              Testing {attempts} connection{attempts > 1 ? 's' : ''} to {domain}:{port} with {delayBetweenAttempts}s
-              delay...
+              {$t('loading.description', {
+                attempts,
+                plural: attempts > 1 ? 's' : '',
+                domain,
+                port,
+                delay: delayBetweenAttempts,
+              })}
             </p>
             <p class="loading-note">
-              This will take approximately {attempts * delayBetweenAttempts + 10} seconds to complete
+              {$t('loading.note', { duration: attempts * delayBetweenAttempts + 10 })}
             </p>
           </div>
         </div>
@@ -208,7 +220,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="sm" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examplesList as example (example.domain)}
@@ -231,7 +243,7 @@
   {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header">
-        <h3>Test Results for {diagnosticState.results.domain}:{diagnosticState.results.port}</h3>
+        <h3>{$t('results.title', { domain: diagnosticState.results.domain, port: diagnosticState.results.port })}</h3>
       </div>
       <div class="card-content">
         <!-- Greylisting Status -->
@@ -240,16 +252,20 @@
             <div class="status-item success">
               <Icon name="check-circle" size="md" />
               <div>
-                <h4>Greylisting Detected</h4>
-                <p>Server implements greylisting (Confidence: {diagnosticState.results.analysis.confidence})</p>
+                <h4>{$t('results.status.detected.title')}</h4>
+                <p>
+                  {$t('results.status.detected.description', {
+                    confidence: diagnosticState.results.analysis.confidence,
+                  })}
+                </p>
               </div>
             </div>
           {:else}
             <div class="status-item error">
               <Icon name="x-circle" size="md" />
               <div>
-                <h4>No Greylisting Detected</h4>
-                <p>Server does not appear to implement greylisting</p>
+                <h4>{$t('results.status.not_detected.title')}</h4>
+                <p>{$t('results.status.not_detected.description')}</p>
               </div>
             </div>
           {/if}
@@ -258,8 +274,12 @@
             <div class="status-item info">
               <Icon name="clock" size="md" />
               <div>
-                <h4>Typical Delay</h4>
-                <p>{diagnosticState.results.analysis.typicalDelay} seconds between rejection and acceptance</p>
+                <h4>{$t('results.status.typical_delay.title')}</h4>
+                <p>
+                  {$t('results.status.typical_delay.description', {
+                    delay: diagnosticState.results.analysis.typicalDelay,
+                  })}
+                </p>
               </div>
             </div>
           {/if}
@@ -269,7 +289,7 @@
         <div class="subsection">
           <h4>
             <Icon name="activity" size="sm" />
-            Connection Attempts
+            {$t('results.attempts.title')}
           </h4>
           <div class="attempts-list">
             {#each diagnosticState.results.attempts as attempt (attempt.attemptNumber)}
@@ -277,7 +297,7 @@
                 <div class="attempt-header">
                   <span class="attempt-number">#{attempt.attemptNumber}</span>
                   <span class="badge {getAttemptBadgeClass(attempt.responseCode)}"
-                    >{attempt.responseCode || 'Failed'}</span
+                    >{attempt.responseCode || $t('results.attempts.failed')}</span
                   >
                   <span class="attempt-time">{new Date(attempt.timestamp).toLocaleTimeString()}</span>
                 </div>
@@ -287,18 +307,18 @@
                       {#if attempt.responseCode?.startsWith('2')}
                         <Icon name="check-circle" size="sm" />
                       {/if}
-                      <span class="detail-label">Response:</span>
+                      <span class="detail-label">{$t('results.attempts.response')}</span>
                       <span class="detail-value mono">
                         {attempt.response}
                       </span>
                     </div>
                     <div class="detail-row">
-                      <span class="detail-label">Duration:</span>
+                      <span class="detail-label">{$t('results.attempts.duration')}</span>
                       <span class="detail-value">{attempt.duration}ms</span>
                     </div>
                   {:else}
                     <div class="detail-row">
-                      <span class="detail-label">Error:</span>
+                      <span class="detail-label">{$t('results.attempts.error')}</span>
                       <span class="detail-value error">
                         <Icon name="x-circle" size="sm" />
                         {attempt.error}
@@ -315,65 +335,69 @@
         <div class="subsection">
           <h4>
             <Icon name="search" size="sm" />
-            Analysis
+            {$t('results.analysis.title')}
           </h4>
           <div class="analysis-details">
             <div class="detail-row">
-              <span class="detail-label">Server:</span>
+              <span class="detail-label">{$t('results.analysis.server')}</span>
               <span class="detail-value">
                 <Icon name="server" size="sm" />
                 {diagnosticState.results.domain}:{diagnosticState.results.port}
               </span>
             </div>
             <div class="detail-row">
-              <span class="detail-label">Total Attempts:</span>
+              <span class="detail-label">{$t('results.analysis.total_attempts')}</span>
               <span class="detail-value">
                 <Icon name="activity" size="sm" />
                 {diagnosticState.results.attempts.length}
               </span>
             </div>
             <div class="detail-row">
-              <span class="detail-label">Successful Connections:</span>
+              <span class="detail-label">{$t('results.analysis.successful_connections')}</span>
               <span class="detail-value {connectedCount > 0 ? 'success' : 'error'}">
                 <Icon name={connectedCount > 0 ? 'check-circle' : 'x-circle'} size="sm" />
                 {connectedCount} / {diagnosticState.results.attempts.length}
               </span>
             </div>
             <div class="detail-row">
-              <span class="detail-label">Test Duration:</span>
+              <span class="detail-label">{$t('results.analysis.test_duration')}</span>
               <span class="detail-value info">
                 <Icon name="clock" size="sm" />
                 {testDuration}s
               </span>
             </div>
             <div class="detail-row">
-              <span class="detail-label">Initial Connection:</span>
+              <span class="detail-label">{$t('results.analysis.initial_connection')}</span>
               <span class="detail-value {diagnosticState.results.analysis.initialRejected ? 'warning' : 'success'}">
                 <Icon name={diagnosticState.results.analysis.initialRejected ? 'x-circle' : 'check-circle'} size="sm" />
-                {diagnosticState.results.analysis.initialRejected ? 'Temporarily rejected' : 'Accepted immediately'}
+                {diagnosticState.results.analysis.initialRejected
+                  ? $t('results.analysis.temporarily_rejected')
+                  : $t('results.analysis.accepted_immediately')}
               </span>
             </div>
             <div class="detail-row">
-              <span class="detail-label">Subsequent Attempts:</span>
+              <span class="detail-label">{$t('results.analysis.subsequent_attempts')}</span>
               <span class="detail-value {diagnosticState.results.analysis.subsequentAccepted ? 'success' : 'error'}">
                 <Icon
                   name={diagnosticState.results.analysis.subsequentAccepted ? 'check-circle' : 'x-circle'}
                   size="sm"
                 />
-                {diagnosticState.results.analysis.subsequentAccepted ? 'Accepted after delay' : 'Still rejected'}
+                {diagnosticState.results.analysis.subsequentAccepted
+                  ? $t('results.analysis.accepted_after_delay')
+                  : $t('results.analysis.still_rejected')}
               </span>
             </div>
             {#if diagnosticState.results.analysis.typicalDelay}
               <div class="detail-row">
-                <span class="detail-label">Delay Duration:</span>
+                <span class="detail-label">{$t('results.analysis.delay_duration')}</span>
                 <span class="detail-value info">
                   <Icon name="clock" size="sm" />
-                  {diagnosticState.results.analysis.typicalDelay} seconds
+                  {$t('results.analysis.delay_seconds', { delay: diagnosticState.results.analysis.typicalDelay })}
                 </span>
               </div>
             {/if}
             <div class="detail-row">
-              <span class="detail-label">Confidence Level:</span>
+              <span class="detail-label">{$t('results.analysis.confidence_level')}</span>
               <span class="detail-value {getConfidenceBadgeClass(diagnosticState.results.analysis.confidence)}">
                 <Icon name={getConfidenceIcon(diagnosticState.results.analysis.confidence)} size="sm" />
                 {diagnosticState.results.analysis.confidence.charAt(0).toUpperCase() +
@@ -389,10 +413,10 @@
   <!-- Documentation -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>Understanding Greylisting</h3>
+      <h3>{$t('info.title')}</h3>
     </div>
     <div class="card-content">
-      {#each [{ title: content.sections.whatIsGreylisting.title, content: content.sections.whatIsGreylisting.content, open: true }, { title: content.sections.howItWorks.title, list: content.sections.howItWorks.steps, listKey: 'step' }, { title: content.sections.smtpCodes.title, codes: content.sections.smtpCodes.codes }, { title: content.sections.confidenceLevels.title, list: content.sections.confidenceLevels.levels, listKey: 'level' }, { title: content.sections.benefits.title, list: content.sections.benefits.points, listKey: 'point' }, { title: content.sections.drawbacks.title, list: content.sections.drawbacks.points, listKey: 'point' }, { title: content.sections.bestPractices.title, simpleList: content.sections.bestPractices.practices }, { title: 'Quick Tips', simpleList: content.quickTips }] as section (section.title)}
+      {#each [{ title: content.sections.whatIsGreylisting.title, content: content.sections.whatIsGreylisting.content, open: true }, { title: content.sections.howItWorks.title, list: content.sections.howItWorks.steps, listKey: 'step' }, { title: content.sections.smtpCodes.title, codes: content.sections.smtpCodes.codes }, { title: content.sections.confidenceLevels.title, list: content.sections.confidenceLevels.levels, listKey: 'level' }, { title: content.sections.benefits.title, list: content.sections.benefits.points, listKey: 'point' }, { title: content.sections.drawbacks.title, list: content.sections.drawbacks.points, listKey: 'point' }, { title: content.sections.bestPractices.title, simpleList: content.sections.bestPractices.practices }, { title: $t('info.quick_tips.title'), simpleList: content.quickTips }] as section (section.title)}
         <details class="info-accordion" open={section.open}>
           <summary class="accordion-summary">
             <Icon name="chevron-right" size="sm" />

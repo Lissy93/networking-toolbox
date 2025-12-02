@@ -1,7 +1,14 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+  import { locale, loadTranslations, t } from '$lib/stores/language.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
   import { useClipboard } from '$lib/composables';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools/svcb-https-builder');
+  });
 
   interface ServiceParameter {
     key: string;
@@ -37,15 +44,15 @@
   // Button success states
   const clipboard = useClipboard();
 
-  const parameterDescriptions = {
-    mandatory: 'Mandatory parameters that must be understood by the client',
-    alpn: 'Application-Layer Protocol Negotiation identifiers (e.g., h2, h3)',
-    'no-default-alpn': 'Indicates that no default ALPN should be assumed',
-    port: 'Alternative port number for the service',
-    ipv4hint: 'IPv4 address hints to avoid additional DNS lookups',
-    ech: 'Encrypted Client Hello configuration',
-    ipv6hint: 'IPv6 address hints to avoid additional DNS lookups',
-  };
+  const parameterDescriptions = $derived({
+    mandatory: $t('parameters.descriptions.mandatory'),
+    alpn: $t('parameters.descriptions.alpn'),
+    'no-default-alpn': $t('parameters.descriptions.no-default-alpn'),
+    port: $t('parameters.descriptions.port'),
+    ipv4hint: $t('parameters.descriptions.ipv4hint'),
+    ech: $t('parameters.descriptions.ech'),
+    ipv6hint: $t('parameters.descriptions.ipv6hint'),
+  });
 
   const parameterKeyMap: Record<string, number> = {
     mandatory: 0,
@@ -110,23 +117,23 @@
 
     // Check domain format
     if (!domain.trim()) {
-      errors.push('Domain is required');
+      errors.push($t('validation.errors.domainRequired'));
     } else if (!domain.includes('.')) {
-      warnings.push('Domain should include TLD (e.g., .com, .org)');
+      warnings.push($t('validation.errors.domainTld'));
     }
 
     // Check priority
     if (priority < 0 || priority > 65535) {
-      errors.push('Priority must be between 0 and 65535');
+      errors.push($t('validation.errors.priorityRange'));
     }
 
     if (priority === 0 && targetName !== '.') {
-      warnings.push('Priority 0 should typically use "." as target (alias mode)');
+      warnings.push($t('validation.errors.priorityZeroTarget'));
     }
 
     // Check target name
     if (targetName && targetName !== '.' && !targetName.includes('.')) {
-      warnings.push('Target name should be a FQDN or "." for same domain');
+      warnings.push($t('validation.errors.targetFqdn'));
     }
 
     // Validate parameters
@@ -136,19 +143,19 @@
       if (param.key === 'port') {
         const port = parseInt(param.value);
         if (isNaN(port) || port < 1 || port > 65535) {
-          errors.push('Port must be a number between 1 and 65535');
+          errors.push($t('validation.errors.portRange'));
         }
       }
 
       if (param.key === 'alpn' && !param.value.trim()) {
-        errors.push('ALPN parameter requires at least one protocol identifier');
+        errors.push($t('validation.errors.alpnRequired'));
       }
 
       if (param.key === 'ipv4hint') {
         const ips = param.value.split(',').map((ip) => ip.trim());
         for (const ip of ips) {
           if (ip && !/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
-            errors.push(`Invalid IPv4 address in ipv4hint: ${ip}`);
+            errors.push($t('validation.errors.invalidIPv4', { ip }));
           }
         }
       }
@@ -157,7 +164,7 @@
         const ips = param.value.split(',').map((ip) => ip.trim());
         for (const ip of ips) {
           if (ip && !ip.includes(':')) {
-            errors.push(`Invalid IPv6 address in ipv6hint: ${ip}`);
+            errors.push($t('validation.errors.invalidIPv6', { ip }));
           }
         }
       }
@@ -168,14 +175,14 @@
     const hasNoDefaultAlpn = enabledParams.some((p) => p.key === 'no-default-alpn');
 
     if (hasAlpn && hasNoDefaultAlpn) {
-      warnings.push('Using both alpn and no-default-alpn may cause conflicts');
+      warnings.push($t('validation.errors.alpnConflict'));
     }
 
     // Check record type specific recommendations
     if (recordType === 'HTTPS' && priority > 0) {
       const hasPort = enabledParams.some((p) => p.key === 'port');
       if (!hasPort) {
-        warnings.push('HTTPS records typically benefit from port parameter');
+        warnings.push($t('validation.errors.httpsPortRecommendation'));
       }
     }
 
@@ -211,10 +218,10 @@
     }
   }
 
-  const exampleConfigurations = [
+  const exampleConfigurations = $derived([
     {
-      name: 'HTTPS with HTTP/2',
-      description: 'Basic HTTPS service with HTTP/2 support',
+      name: $t('examples.items.0.name'),
+      description: $t('examples.items.0.description'),
       recordType: 'HTTPS' as const,
       domain: 'example.com',
       priority: 1,
@@ -225,8 +232,8 @@
       ],
     },
     {
-      name: 'CDN Endpoint',
-      description: 'HTTPS service pointing to CDN with IP hints',
+      name: $t('examples.items.1.name'),
+      description: $t('examples.items.1.description'),
       recordType: 'HTTPS' as const,
       domain: 'www.example.com',
       priority: 1,
@@ -238,8 +245,8 @@
       ],
     },
     {
-      name: 'Alternative Service',
-      description: 'Alternative HTTPS service on different port',
+      name: $t('examples.items.2.name'),
+      description: $t('examples.items.2.description'),
       recordType: 'HTTPS' as const,
       domain: 'api.example.com',
       priority: 2,
@@ -250,7 +257,7 @@
         { key: 'ipv4hint', value: '203.0.113.10', enabled: true },
       ],
     },
-  ];
+  ]);
 
   function loadExample(example: (typeof exampleConfigurations)[0]): void {
     domain = example.domain;
@@ -273,21 +280,14 @@
     selectedExample = example.name;
   }
 
-  const usageNotes = [
-    'Priority 0 creates an alias record (AliasMode), priority >0 creates a service record (ServiceMode)',
-    'Use "." as target name to indicate the same domain as the owner name',
-    'ALPN values should match the protocols actually supported by the service',
-    'IP hints can improve connection performance by avoiding additional DNS lookups',
-    'ECH parameter enables Encrypted Client Hello for enhanced privacy',
-  ];
+  const usageNotes = $derived($t('usageNotes'));
 </script>
 
 <div class="card">
   <div class="card-header">
-    <h1>SVCB/HTTPS Builder</h1>
+    <h1>{$t('title')}</h1>
     <p class="card-subtitle">
-      Build SVCB and HTTPS resource records with service parameters for enhanced service discovery and connection
-      optimization.
+      {$t('description')}
     </p>
   </div>
 
@@ -297,19 +297,19 @@
         <div class="section-header">
           <h3>
             <Icon name="globe" size="sm" />
-            Service Configuration
+            {$t('sections.serviceConfiguration')}
           </h3>
         </div>
 
         <div class="service-config-grid">
           <div class="input-group">
-            <label for="domain" use:tooltip={'Domain name for the SVCB/HTTPS record'}> Domain: </label>
-            <input id="domain" type="text" bind:value={domain} placeholder="example.com" />
+            <label for="domain" use:tooltip={$t('form.domain.tooltip')}> {$t('form.domain.label')} </label>
+            <input id="domain" type="text" bind:value={domain} placeholder={$t('form.domain.placeholder')} />
           </div>
 
           <div class="input-group">
-            <label for="recordType" use:tooltip={'Record type: HTTPS for HTTP services, SVCB for general services'}>
-              Record Type:
+            <label for="recordType" use:tooltip={$t('form.recordType.tooltip')}>
+              {$t('form.recordType.label')}
             </label>
             <select id="recordType" bind:value={recordType}>
               <option value="HTTPS">HTTPS</option>
@@ -318,13 +318,25 @@
           </div>
 
           <div class="input-group">
-            <label for="priority" use:tooltip={'Priority: 0 for alias mode, >0 for service mode'}> Priority: </label>
-            <input id="priority" type="number" bind:value={priority} min="0" max="65535" placeholder="1" />
+            <label for="priority" use:tooltip={$t('form.priority.tooltip')}> {$t('form.priority.label')} </label>
+            <input
+              id="priority"
+              type="number"
+              bind:value={priority}
+              min="0"
+              max="65535"
+              placeholder={$t('form.priority.placeholder')}
+            />
           </div>
 
           <div class="input-group">
-            <label for="targetName" use:tooltip={"Target domain name or '.' for same domain"}> Target Name: </label>
-            <input id="targetName" type="text" bind:value={targetName} placeholder=". (same domain)" />
+            <label for="targetName" use:tooltip={$t('form.targetName.tooltip')}> {$t('form.targetName.label')} </label>
+            <input
+              id="targetName"
+              type="text"
+              bind:value={targetName}
+              placeholder={$t('form.targetName.placeholder')}
+            />
           </div>
         </div>
       </div>
@@ -333,7 +345,7 @@
         <div class="section-header">
           <h3>
             <Icon name="settings" size="sm" />
-            Service Parameters
+            {$t('sections.serviceParameters')}
           </h3>
         </div>
 
@@ -360,18 +372,18 @@
                     bind:value={parameter.value}
                     disabled={!parameter.enabled}
                     placeholder={parameter.key === 'alpn'
-                      ? 'h2,h3'
+                      ? $t('parameters.placeholders.alpn')
                       : parameter.key === 'port'
-                        ? '443'
+                        ? $t('parameters.placeholders.port')
                         : parameter.key === 'ipv4hint'
-                          ? '203.0.113.1,203.0.113.2'
+                          ? $t('parameters.placeholders.ipv4hint')
                           : parameter.key === 'ipv6hint'
-                            ? '2001:db8::1,2001:db8::2'
+                            ? $t('parameters.placeholders.ipv6hint')
                             : parameter.key === 'ech'
-                              ? 'base64-encoded-config'
+                              ? $t('parameters.placeholders.ech')
                               : parameter.key === 'mandatory'
-                                ? '1,3'
-                                : 'value'}
+                                ? $t('parameters.placeholders.mandatory')
+                                : $t('parameters.placeholders.default')}
                     class="parameter-input"
                   />
                 </div>
@@ -385,27 +397,29 @@
     <div class="results-section">
       <div class="record-section">
         <div class="section-header">
-          <h3>Generated {recordType} Record</h3>
+          <h3>{$t('results.generatedRecord', { recordType })}</h3>
           <div class="actions">
             <button
               type="button"
               class="copy-btn"
               class:success={clipboard.isCopied('copy-svcb')}
               onclick={() => clipboard.copy(dnsRecord, 'copy-svcb')}
-              use:tooltip={'Copy record to clipboard'}
+              use:tooltip={$t('results.actions.copy.tooltip')}
             >
               <Icon name={clipboard.isCopied('copy-svcb') ? 'check' : 'copy'} size="sm" />
-              {clipboard.isCopied('copy-svcb') ? 'Copied!' : 'Copy'}
+              {clipboard.isCopied('copy-svcb') ? $t('results.actions.copy.copied') : $t('results.actions.copy.button')}
             </button>
             <button
               type="button"
               class="export-btn"
               class:success={clipboard.isCopied('export-svcb')}
               onclick={exportAsZoneFile}
-              use:tooltip={'Download as zone file'}
+              use:tooltip={$t('results.actions.export.tooltip')}
             >
               <Icon name={clipboard.isCopied('export-svcb') ? 'check' : 'download'} size="sm" />
-              {clipboard.isCopied('export-svcb') ? 'Downloaded!' : 'Export'}
+              {clipboard.isCopied('export-svcb')
+                ? $t('results.actions.export.downloaded')
+                : $t('results.actions.export.button')}
             </button>
           </div>
         </div>
@@ -417,22 +431,22 @@
         </div>
 
         <div class="record-breakdown">
-          <h4>Record Breakdown:</h4>
+          <h4>{$t('results.recordBreakdown')}</h4>
           <div class="breakdown-grid">
             <div class="breakdown-item">
-              <strong>Type:</strong>
+              <strong>{$t('results.breakdown.type')}</strong>
               {recordType}
             </div>
             <div class="breakdown-item">
-              <strong>Priority:</strong>
-              {priority} ({priority === 0 ? 'Alias Mode' : 'Service Mode'})
+              <strong>{$t('results.breakdown.priority')}</strong>
+              {priority} ({priority === 0 ? $t('results.breakdown.aliasMode') : $t('results.breakdown.serviceMode')})
             </div>
             <div class="breakdown-item">
-              <strong>Target:</strong>
+              <strong>{$t('results.breakdown.target')}</strong>
               {serviceRecord.targetName}
             </div>
             <div class="breakdown-item">
-              <strong>Parameters:</strong>
+              <strong>{$t('results.breakdown.parameters')}</strong>
               {validation.parameterCount}
             </div>
           </div>
@@ -443,15 +457,15 @@
         <div class="section-header">
           <h3>
             <Icon name="bar-chart" size="sm" />
-            Validation
+            {$t('validation.title')}
           </h3>
         </div>
 
         <div class="validation-status">
           <div class="status-item">
-            <span class="status-label">Status:</span>
+            <span class="status-label">{$t('validation.status.label')}</span>
             <span class="status-value" class:success={validation.isValid} class:error={!validation.isValid}>
-              {validation.isValid ? 'Valid' : 'Invalid'}
+              {validation.isValid ? $t('validation.status.valid') : $t('validation.status.invalid')}
             </span>
           </div>
         </div>
@@ -481,7 +495,7 @@
         {#if validation.isValid && validation.errors.length === 0 && validation.warnings.length === 0}
           <div class="validation-messages success">
             <Icon name="check-circle" size="sm" />
-            <div class="message">{recordType} record is valid and ready to deploy!</div>
+            <div class="message">{$t('validation.success', { recordType })}</div>
           </div>
         {/if}
       </div>
@@ -490,7 +504,7 @@
         <div class="section-header">
           <h3>
             <Icon name="info" size="sm" />
-            Usage Notes
+            {$t('sections.usageNotes')}
           </h3>
         </div>
 
@@ -509,7 +523,7 @@
     <details class="examples-toggle" bind:open={showExamples}>
       <summary>
         <Icon name="lightbulb" size="sm" />
-        Example Configurations
+        {$t('examples.title')}
       </summary>
       <div class="examples-grid">
         {#each exampleConfigurations as example (example.name)}
@@ -524,10 +538,14 @@
             </div>
             <p class="example-description">{example.description}</p>
             <div class="example-config">
-              <div>Type: <code>{example.recordType}</code>, Priority: <code>{example.priority}</code></div>
-              <div>Target: <code>{example.targetName}</code></div>
+              <div>
+                {$t('examples.config.type')} <code>{example.recordType}</code>, {$t('examples.config.priority')}
+                <code>{example.priority}</code>
+              </div>
+              <div>{$t('examples.config.target')} <code>{example.targetName}</code></div>
               <div class="example-params">
-                Params: {example.parameters.map((p) => `${p.key}=${p.value}`).join(', ')}
+                {$t('examples.config.params')}
+                {example.parameters.map((p) => `${p.key}=${p.value}`).join(', ')}
               </div>
             </div>
           </button>

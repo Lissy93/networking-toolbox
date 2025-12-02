@@ -11,7 +11,7 @@
 
   // Load translations for this tool
   onMount(async () => {
-    await loadTranslations(get(locale), 'tools.free-space-finder');
+    await loadTranslations(get(locale), 'tools');
   });
 
   let pools = $state(`192.168.0.0/16
@@ -36,7 +36,7 @@
 
   const examples = $derived([
     {
-      label: $t('tools.free-space-finder.examples.officeNetworkGaps.label'),
+      label: $t('tools.free_space_finder.examples.officeNetworkGaps.label'),
       pools: '192.168.0.0/16',
       allocations: `192.168.1.0/24
 192.168.10.0/24
@@ -44,7 +44,7 @@
       targetPrefix: 24,
     },
     {
-      label: $t('tools.free-space-finder.examples.largePoolAnalysis.label'),
+      label: $t('tools.free_space_finder.examples.largePoolAnalysis.label'),
       pools: '10.0.0.0/8',
       allocations: `10.0.0.0/16
 10.1.0.0/16
@@ -52,7 +52,7 @@
       targetPrefix: null,
     },
     {
-      label: $t('tools.free-space-finder.examples.homeNetworkSpace.label'),
+      label: $t('tools.free_space_finder.examples.homeNetworkSpace.label'),
       pools: `172.16.0.0/12
 192.168.0.0/16`,
       allocations: `172.16.1.0/24
@@ -60,7 +60,7 @@
       targetPrefix: 28,
     },
     {
-      label: $t('tools.free-space-finder.examples.ipv6Planning.label'),
+      label: $t('tools.free_space_finder.examples.ipv6Planning.label'),
       pools: `10.10.0.0/16
 10.20.0.0/16`,
       allocations: `10.10.1.0/24
@@ -69,7 +69,7 @@
       targetPrefix: 25,
     },
     {
-      label: $t('tools.free-space-finder.examples.datacenterInventory.label'),
+      label: $t('tools.free_space_finder.examples.datacenterInventory.label'),
       pools: '172.20.0.0/14',
       allocations: `172.20.0.0/16
 172.21.0.0/16
@@ -147,7 +147,7 @@
     } catch (error) {
       result = {
         success: false,
-        error: error instanceof Error ? error.message : $t('tools.free-space-finder.errors.unknownError'),
+        error: error instanceof Error ? error.message : $t('tools.free_space_finder.errors.unknownError'),
         availableBlocks: [],
         totalBlocks: 0,
         totalAddresses: 0,
@@ -198,8 +198,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>{$t('tools.free-space-finder.title')}</h2>
-    <p>{$t('tools.free-space-finder.description')}</p>
+    <h2>{$t('tools.free_space_finder.title')}</h2>
+    <p>{$t('tools.free_space_finder.description')}</p>
   </header>
 
   <!-- Examples -->
@@ -207,7 +207,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>{$t('tools.free-space-finder.examples.title')}</h4>
+        <h4>{$t('tools.free_space_finder.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -231,28 +231,28 @@
   <section class="input-section">
     <div class="input-grid">
       <div class="input-group">
-        <label for="pools" use:tooltip={$t('tools.free-space-finder.input.pools.tooltip')}>
-          {$t('tools.free-space-finder.input.pools.label')}
+        <label for="pools" use:tooltip={$t('tools.free_space_finder.input.pools.tooltip')}>
+          {$t('tools.free_space_finder.input.pools.label')}
         </label>
         <textarea
           id="pools"
           bind:value={pools}
           oninput={handleInputChange}
-          placeholder={$t('tools.free-space-finder.input.pools.placeholder')}
+          placeholder={$t('tools.free_space_finder.input.pools.placeholder')}
           rows="4"
           required
         ></textarea>
       </div>
 
       <div class="input-group">
-        <label for="allocations" use:tooltip={$t('tools.free-space-finder.input.allocations.tooltip')}>
-          {$t('tools.free-space-finder.input.allocations.label')}
+        <label for="allocations" use:tooltip={$t('tools.free_space_finder.input.allocations.tooltip')}>
+          {$t('tools.free_space_finder.input.allocations.label')}
         </label>
         <textarea
           id="allocations"
           bind:value={allocations}
           oninput={handleInputChange}
-          placeholder={$t('tools.free-space-finder.input.allocations.placeholder')}
+          placeholder={$t('tools.free_space_finder.input.allocations.placeholder')}
           rows="4"
         ></textarea>
       </div>
@@ -260,8 +260,8 @@
 
     <div class="filter-section">
       <div class="input-group">
-        <label for="target-prefix" use:tooltip={$t('tools.free-space-finder.input.targetPrefix.tooltip')}>
-          {$t('tools.free-space-finder.input.targetPrefix.label')}
+        <label for="target-prefix" use:tooltip={$t('tools.free_space_finder.input.targetPrefix.tooltip')}>
+          {$t('tools.free_space_finder.input.targetPrefix.label')}
         </label>
         <div class="prefix-input-wrapper">
           <input
@@ -271,7 +271,7 @@
             oninput={handleInputChange}
             min="1"
             max="32"
-            placeholder={$t('tools.free-space-finder.input.targetPrefix.placeholder')}
+            placeholder={$t('tools.free_space_finder.input.targetPrefix.placeholder')}
           />
           <span class="prefix-hint">/{targetPrefix || 'xx'}</span>
           <button
@@ -280,7 +280,7 @@
               targetPrefix = null;
               handleInputChange();
             }}
-            aria-label={$t('tools.free-space-finder.actions.clearFilter')}
+            aria-label={$t('tools.free_space_finder.actions.clearFilter')}
           >
             <Icon name="x" size="xs" />
           </button>
@@ -294,15 +294,15 @@
     <section class="results-section">
       {#if result.success}
         <div class="results-header">
-          <h3>{$t('tools.free-space-finder.results.title')}</h3>
+          <h3>{$t('tools.free_space_finder.results.title')}</h3>
           <div class="results-summary">
             <span class="metric">
               <Icon name="free-blocks" size="sm" />
-              {$t('tools.free-space-finder.results.blocks', { count: result.totalBlocks })}
+              {$t('tools.free_space_finder.results.blocks', { count: result.totalBlocks })}
             </span>
             <span class="metric">
               <Icon name="network" size="sm" />
-              {$t('tools.free-space-finder.results.addresses', { count: formatNumber(result.totalAddresses) })}
+              {$t('tools.free_space_finder.results.addresses', { count: formatNumber(result.totalAddresses) })}
             </span>
           </div>
         </div>
@@ -310,7 +310,7 @@
         <!-- Address Space Visualization -->
         {#if result.availableBlocks.length > 0 && result.visualization}
           <div class="visualization-section">
-            <h4>{$t('tools.free-space-finder.visualization.title')}</h4>
+            <h4>{$t('tools.free_space_finder.visualization.title')}</h4>
             <div class="visualization-container">
               <div class="viz-legend">
                 <div class="legend-item">

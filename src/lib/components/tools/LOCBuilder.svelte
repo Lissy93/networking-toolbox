@@ -2,6 +2,13 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
   import { useClipboard } from '$lib/composables';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools');
+  });
 
   let domain = $state('');
   let latitude = $state('37.7749');
@@ -17,13 +24,13 @@
 
   const clipboard = useClipboard();
 
-  const cityExamples = [
-    { name: 'San Francisco', lat: 37.7749, lng: -122.4194, alt: 10 },
-    { name: 'New York', lat: 40.7128, lng: -74.006, alt: 10 },
-    { name: 'London', lat: 51.5074, lng: -0.1278, alt: 11 },
-    { name: 'Tokyo', lat: 35.6762, lng: 139.6503, alt: 40 },
-    { name: 'Sydney', lat: -33.8688, lng: 151.2093, alt: 58 },
-  ];
+  const cityExamples = $derived([
+    { name: $t('tools.loc_builder.examples.sanFrancisco.label'), lat: 37.7749, lng: -122.4194, alt: 10 },
+    { name: $t('tools.loc_builder.examples.newYork.label'), lat: 40.7128, lng: -74.006, alt: 10 },
+    { name: $t('tools.loc_builder.examples.london.label'), lat: 51.5074, lng: -0.1278, alt: 11 },
+    { name: $t('tools.loc_builder.examples.tokyo.label'), lat: 35.6762, lng: 139.6503, alt: 40 },
+    { name: $t('tools.loc_builder.examples.sydney.label'), lat: -33.8688, lng: 151.2093, alt: 58 },
+  ]);
 
   function degreesToLOC(degrees: number, isLongitude = false) {
     const hemisphere = isLongitude ? (degrees >= 0 ? 'E' : 'W') : degrees >= 0 ? 'N' : 'S';
@@ -143,8 +150,8 @@
 <div class="container">
   <div class="card">
     <div class="card-header">
-      <h1>LOC Record Builder</h1>
-      <p>Convert latitude/longitude coordinates ↔ DNS LOC records for geographic positioning</p>
+      <h1>{$t('tools.loc_builder.title')}</h1>
+      <p>{$t('tools.loc_builder.description')}</p>
     </div>
 
     <div class="content">
@@ -152,11 +159,11 @@
       <div class="mode-toggle">
         <button class="mode-btn" class:active={!parseMode} onclick={() => (parseMode = false)}>
           <Icon name="map-pin" size="sm" />
-          Coordinates → LOC
+          {$t('tools.loc_builder.modes.coordsToLoc')}
         </button>
         <button class="mode-btn" class:active={parseMode} onclick={() => (parseMode = true)}>
           <Icon name="file" size="sm" />
-          LOC → Coordinates
+          {$t('tools.loc_builder.modes.locToCoords')}
         </button>
       </div>
 
@@ -165,7 +172,7 @@
         <details bind:open={showExamples}>
           <summary class="examples-summary">
             <Icon name="lightbulb" size="sm" />
-            City Examples
+            {$t('tools.loc_builder.examples.title')}
             <Icon name="chevron-down" size="sm" />
           </summary>
           <div class="examples-grid">
@@ -182,24 +189,33 @@
         <!-- Input Form -->
         <div class="input-section card">
           <div class="input-group">
-            <label for="domain" use:tooltip={'Domain name for the LOC record'}>Domain Name *</label>
-            <input id="domain" type="text" bind:value={domain} placeholder="example.com" />
+            <label for="domain" use:tooltip={$t('tools.loc_builder.form.domain.tooltip')}>Domain Name *</label>
+            <input
+              id="domain"
+              type="text"
+              bind:value={domain}
+              placeholder={$t('tools.loc_builder.form.domain.placeholder')}
+            />
           </div>
 
           {#if parseMode}
             <div class="input-group">
-              <label for="locString" use:tooltip={'Paste existing LOC record to parse'}>LOC Record String</label>
+              <label for="locString" use:tooltip={$t('tools.loc_builder.form.locString.tooltip')}
+                >{$t('tools.loc_builder.form.locString.label')}</label
+              >
               <textarea
                 id="locString"
                 bind:value={locString}
-                placeholder="example.com. IN LOC 37 46 29.000 N 122 25 10.000 W 10.00m 1m 10000m 10m"
+                placeholder={$t('tools.loc_builder.form.locString.placeholder')}
                 rows="3"
               ></textarea>
             </div>
           {:else}
             <div class="coord-grid">
               <div class="input-group">
-                <label for="latitude" use:tooltip={'Latitude in decimal degrees (-90 to 90)'}>Latitude *</label>
+                <label for="latitude" use:tooltip={$t('tools.loc_builder.form.latitude.tooltip')}
+                  >{$t('tools.loc_builder.form.latitude.label')}</label
+                >
                 <input
                   id="latitude"
                   type="number"
@@ -207,12 +223,14 @@
                   step="0.000001"
                   min="-90"
                   max="90"
-                  placeholder="37.7749"
+                  placeholder={$t('tools.loc_builder.form.latitude.placeholder')}
                 />
               </div>
 
               <div class="input-group">
-                <label for="longitude" use:tooltip={'Longitude in decimal degrees (-180 to 180)'}>Longitude *</label>
+                <label for="longitude" use:tooltip={$t('tools.loc_builder.form.longitude.tooltip')}
+                  >{$t('tools.loc_builder.form.longitude.label')}</label
+                >
                 <input
                   id="longitude"
                   type="number"
@@ -220,43 +238,64 @@
                   step="0.000001"
                   min="-180"
                   max="180"
-                  placeholder="-122.4194"
+                  placeholder={$t('tools.loc_builder.form.longitude.placeholder')}
                 />
               </div>
             </div>
 
             <div class="input-group">
-              <label for="altitude" use:tooltip={'Altitude in meters above sea level'}>Altitude (m) *</label>
-              <input id="altitude" type="number" bind:value={altitude} step="0.1" placeholder="10" />
+              <label for="altitude" use:tooltip={$t('tools.loc_builder.form.altitude.tooltip')}
+                >{$t('tools.loc_builder.form.altitude.label')}</label
+              >
+              <input
+                id="altitude"
+                type="number"
+                bind:value={altitude}
+                step="0.1"
+                placeholder={$t('tools.loc_builder.form.altitude.placeholder')}
+              />
             </div>
 
             <div class="precision-grid">
               <div class="input-group">
-                <label for="size" use:tooltip={'Size/diameter of the location in meters'}>Size (m)</label>
-                <input id="size" type="number" bind:value={size} step="0.1" min="0" placeholder="1" />
+                <label for="size" use:tooltip={$t('tools.loc_builder.form.size.tooltip')}
+                  >{$t('tools.loc_builder.form.size.label')}</label
+                >
+                <input
+                  id="size"
+                  type="number"
+                  bind:value={size}
+                  step="0.1"
+                  min="0"
+                  placeholder={$t('tools.loc_builder.form.size.placeholder')}
+                />
               </div>
 
               <div class="input-group">
-                <label for="horizontalPrecision" use:tooltip={'Horizontal precision in meters'}>H. Precision (m)</label>
+                <label for="horizontalPrecision" use:tooltip={$t('tools.loc_builder.form.horizontalPrecision.tooltip')}
+                  >{$t('tools.loc_builder.form.horizontalPrecision.label')}</label
+                >
                 <input
                   id="horizontalPrecision"
                   type="number"
                   bind:value={horizontalPrecision}
                   step="1"
                   min="0"
-                  placeholder="10000"
+                  placeholder={$t('tools.loc_builder.form.horizontalPrecision.placeholder')}
                 />
               </div>
 
               <div class="input-group">
-                <label for="verticalPrecision" use:tooltip={'Vertical precision in meters'}>V. Precision (m)</label>
+                <label for="verticalPrecision" use:tooltip={$t('tools.loc_builder.form.verticalPrecision.tooltip')}
+                  >{$t('tools.loc_builder.form.verticalPrecision.label')}</label
+                >
                 <input
                   id="verticalPrecision"
                   type="number"
                   bind:value={verticalPrecision}
                   step="0.1"
                   min="0"
-                  placeholder="10"
+                  placeholder={$t('tools.loc_builder.form.verticalPrecision.placeholder')}
                 />
               </div>
             </div>
@@ -267,13 +306,13 @@
         <div class="output-section">
           <div class="card">
             <h3 class="section-title">
-              {parseMode ? 'Parsed Coordinates' : 'Generated LOC Record'}
+              {parseMode ? $t('tools.loc_builder.output.parsedCoords') : $t('tools.loc_builder.output.generatedLoc')}
             </h3>
             <div class="code-block">
               {#if isValid}
                 <code>{locRecord}</code>
               {:else}
-                <p class="placeholder">Fill in the required fields to generate the LOC record</p>
+                <p class="placeholder">{$t('tools.loc_builder.output.placeholder')}</p>
               {/if}
             </div>
           </div>
@@ -282,11 +321,11 @@
             <div class="actions">
               <button onclick={copyToClipboard} class="btn btn-primary" class:success={clipboard.isCopied('copy')}>
                 <Icon name={clipboard.isCopied('copy') ? 'check' : 'copy'} size="sm" />
-                {clipboard.isCopied('copy') ? 'Copied!' : 'Copy Record'}
+                {clipboard.isCopied('copy') ? $t('common.actions.copied') : $t('tools.loc_builder.actions.copyRecord')}
               </button>
               <button onclick={downloadRecord} class="btn btn-success" class:success={clipboard.isCopied('download')}>
                 <Icon name={clipboard.isCopied('download') ? 'check' : 'download'} size="sm" />
-                {clipboard.isCopied('download') ? 'Downloaded!' : 'Download'}
+                {clipboard.isCopied('download') ? $t('common.actions.downloaded') : $t('common.actions.download')}
               </button>
             </div>
           {/if}
@@ -296,7 +335,7 @@
       <!-- Information Section -->
       <div class="info-section">
         <div class="card info-card">
-          <h3>About LOC Records</h3>
+          <h3>{$t('tools.loc_builder.about.title')}</h3>
           <p>
             LOC (Location) records store geographic location information in DNS. They specify latitude, longitude,
             altitude, and precision values, allowing applications to discover the physical location associated with a

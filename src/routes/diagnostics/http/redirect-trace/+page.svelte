@@ -5,7 +5,14 @@
   import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import '../../../../styles/diagnostics-pages.scss';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics/http-redirect-trace');
+  });
 
   let url = $state('https://bit.ly/3example');
   let maxRedirects = $state(10);
@@ -15,14 +22,14 @@
 
   const examplesList = [
     { url: 'https://httpbin.org/redirect/3', description: '3-hop redirect chain' },
-    { url: 'https://bit.ly/3example', description: 'URL shortener redirect' },
-    { url: 'https://httpbin.org/absolute-redirect/2', description: 'Absolute redirects' },
-    { url: 'https://httpbin.org/redirect-to?url=https://example.com', description: 'Redirect to external site' },
+    { url: 'https://bit.ly/3example', description: $t('examples.types.urlShortener') },
+    { url: 'https://httpbin.org/absolute-redirect/2', description: $t('examples.types.absolute') },
+    { url: 'https://httpbin.org/redirect-to?url=https://example.com', description: $t('examples.types.external') },
     { url: 'https://httpbin.org/redirect/5', description: '5-hop redirect chain' },
-    { url: 'https://httpbin.org/relative-redirect/2', description: 'Relative path redirects' },
+    { url: 'https://httpbin.org/relative-redirect/2', description: $t('examples.types.relative') },
   ];
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   // Reactive validation
   const isInputValid = $derived(() => {
@@ -40,14 +47,14 @@
     // Validation
     const trimmedUrl = url.trim();
     if (!trimmedUrl) {
-      diagnosticState.setError('URL is required');
+      diagnosticState.setError($t('form.url.required'));
       return;
     }
 
     try {
       new URL(trimmedUrl);
     } catch {
-      diagnosticState.setError('Invalid URL format');
+      diagnosticState.setError($t('form.url.invalidFormat'));
       return;
     }
 
@@ -150,7 +157,7 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>HTTP Redirect Tracer</h1>
+    <h1>{$t('title')}</h1>
     <p>
       Follow and analyze HTTP redirect chains to understand the complete journey from initial URL to final destination.
       Track status codes, locations, and security implications.
@@ -162,7 +169,7 @@
     examples={examplesList}
     selectedIndex={examples.selectedIndex}
     onSelect={loadExample}
-    title="Redirect Examples"
+    title={$t('examples.title')}
     getLabel={(ex) => ex.url}
     getDescription={(ex) => ex.description}
     getTooltip={(ex) => `Trace redirects for ${ex.url}`}
@@ -171,13 +178,13 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>Redirect Trace Configuration</h3>
+      <h3>{$t('form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-grid">
         <div class="form-group">
-          <label for="url" use:tooltip={'Enter the URL to trace redirects for'}>
-            URL
+          <label for="url" use:tooltip={$t('form.url.tooltip')}>
+            {$t('form.url.label')}
             <input
               id="url"
               type="url"
@@ -189,14 +196,14 @@
               }}
             />
             {#if url && !isInputValid()}
-              <span class="error-text">Invalid URL format</span>
+              <span class="error-text">{$t('form.url.invalidFormat')}</span>
             {/if}
           </label>
         </div>
 
         <div class="form-group">
-          <label for="maxRedirects" use:tooltip={'Maximum number of redirects to follow'}>
-            Max Redirects
+          <label for="maxRedirects" use:tooltip={$t('form.maxRedirects.tooltip')}>
+            {$t('form.maxRedirects.label')}
             <input
               id="maxRedirects"
               type="number"
@@ -215,10 +222,10 @@
         <button class="lookup-btn" onclick={traceRedirects} disabled={diagnosticState.loading || !isInputValid}>
           {#if diagnosticState.loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Tracing Redirects...
+            {$t('form.tracing')}
           {:else}
             <Icon name="link" size="sm" />
-            Trace Redirects
+            {$t('form.trace')}
           {/if}
         </button>
       </div>
@@ -229,12 +236,12 @@
   {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header">
-        <h3>Redirect Chain Analysis</h3>
+        <h3>{$t('results.title')}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
           <span class={clipboard.isCopied() ? 'text-green-500' : ''}
             ><Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" /></span
           >
-          {clipboard.isCopied() ? 'Copied!' : 'Copy Chain'}
+          {clipboard.isCopied() ? $t('results.copied') : $t('results.copyChain')}
         </button>
       </div>
       <div class="card-content">
@@ -244,7 +251,7 @@
             <Icon name="link" size="sm" />
             <div>
               <strong>{diagnosticState.results.totalRedirects}</strong>
-              <div class="status-text">Total Redirects</div>
+              <div class="status-text">{$t('results.stats.totalRedirects')}</div>
             </div>
           </div>
 
@@ -252,7 +259,7 @@
             <Icon name={getStatusIcon(diagnosticState.results.finalStatus)} size="sm" />
             <div>
               <strong>{diagnosticState.results.finalStatus}</strong>
-              <div class="status-text">Final Status</div>
+              <div class="status-text">{$t('results.stats.finalStatus')}</div>
             </div>
           </div>
 
@@ -261,7 +268,7 @@
               <Icon name="clock" size="sm" />
               <div>
                 <strong>{diagnosticState.results.timings.total.toFixed(0)}ms</strong>
-                <div class="status-text">Total Time</div>
+                <div class="status-text">{$t('results.stats.totalTime')}</div>
               </div>
             </div>
           {/if}
@@ -270,7 +277,7 @@
         <!-- Redirect Chain -->
         {#if diagnosticState.results.redirectChain?.length > 0}
           <div class="record-section">
-            <h4>Redirect Chain</h4>
+            <h4>{$t('results.chain.title')}</h4>
             <div class="redirect-chain">
               {#each diagnosticState.results.redirectChain as step, i (i)}
                 <div class="redirect-step">
@@ -282,13 +289,13 @@
                         {step.status}
                       </div>
                       {#if hasHSTS(step.headers)}
-                        <div class="security-badge" use:tooltip={'HSTS header present'}>
+                        <div class="security-badge" use:tooltip={$t('results.security.hstsPresent')}>
                           <Icon name="shield" size="xs" />
                           HSTS
                         </div>
                       {/if}
                       {#if i < diagnosticState.results.redirectChain.length - 1 && isSecureRedirect(step.url, step.location)}
-                        <div class="security-badge success" use:tooltip={'HTTP to HTTPS upgrade'}>
+                        <div class="security-badge success" use:tooltip={$t('results.security.httpsUpgrade')}>
                           <Icon name="shield-check" size="xs" />
                           Secure Upgrade
                         </div>
@@ -314,7 +321,7 @@
           </div>
 
           <div class="record-section">
-            <h4>Final Destination</h4>
+            <h4>{$t('results.chain.finalDestination')}</h4>
             <div class="final-destination">
               <div class="final-status {getStatusClass(diagnosticState.results.finalStatus)}">
                 <Icon name={getStatusIcon(diagnosticState.results.finalStatus)} size="sm" />
@@ -326,7 +333,7 @@
         {:else}
           <div class="no-records">
             <Icon name="info" size="md" />
-            <p>No redirects found - URL resolved directly</p>
+            <p>{$t('results.chain.noRedirects')}</p>
             <p class="help-text">Final URL: {diagnosticState.results.finalUrl}</p>
           </div>
         {/if}
@@ -334,17 +341,17 @@
     </div>
   {/if}
 
-  <ErrorCard title="Redirect Trace Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('results.chain.failed')} error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>About HTTP Redirects</h3>
+      <h3>{$t('education.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>Redirect Types</h4>
+          <h4>{$t('education.redirectTypes.title')}</h4>
           <ul>
             <li><strong>301:</strong> Permanent redirect</li>
             <li><strong>302:</strong> Temporary redirect</li>
@@ -355,17 +362,23 @@
         </div>
 
         <div class="info-section">
-          <h4>Security Considerations</h4>
+          <h4>{$t('education.security.title')}</h4>
           <ul>
-            <li><strong>HSTS:</strong> Prevents downgrade attacks</li>
-            <li><strong>HTTP → HTTPS:</strong> Security upgrades</li>
-            <li><strong>Open Redirects:</strong> Potential security risk</li>
-            <li><strong>Redirect Loops:</strong> Infinite chains</li>
+            <li><strong>{$t('education.security.hsts')}</strong> {$t('education.security.hstsDescription')}</li>
+            <li>
+              <strong>{$t('education.security.httpsUpgrade')}</strong>
+              {$t('education.security.httpsDescription')}
+            </li>
+            <li>
+              <strong>{$t('education.security.openRedirects')}</strong>
+              {$t('education.security.openDescription')}
+            </li>
+            <li><strong>{$t('education.security.loops')}</strong> {$t('education.security.loopsDescription')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Performance Impact</h4>
+          <h4>{$t('education.performance.title')}</h4>
           <p>
             Each redirect adds latency. Minimize redirect chains for better performance. Use 301/308 for permanent moves
             and 302/307 for temporary ones.

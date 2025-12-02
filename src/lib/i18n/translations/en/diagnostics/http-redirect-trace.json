@@ -1,27 +1,88 @@
 {
-  "title": "HTTP Redirect Trace",
+  "title": "HTTP Redirect Tracer",
   "description": "Trace HTTP redirects and analyze redirect chains for a URL",
 
   "form": {
-    "title": "Redirect Trace",
+    "title": "Redirect Trace Configuration",
     "url": {
       "label": "URL",
-      "placeholder": "https://example.com"
+      "placeholder": "https://example.com",
+      "tooltip": "Enter the URL to trace redirects for",
+      "required": "URL is required",
+      "invalidFormat": "Invalid URL format"
+    },
+    "maxRedirects": {
+      "label": "Max Redirects",
+      "tooltip": "Maximum number of redirects to follow"
     },
     "trace": "Trace Redirects",
     "tracing": "Tracing...",
     "error": "Please enter a valid URL"
   },
 
+  "examples": {
+    "title": "Redirect Examples",
+    "types": {
+      "urlShortener": "URL shortener redirect",
+      "absolute": "Absolute redirects",
+      "external": "Redirect to external site",
+      "relative": "Relative path redirects"
+    }
+  },
+
   "results": {
-    "title": "Redirect Chain",
+    "title": "Redirect Chain Analysis",
+    "copyChain": "Copy Chain",
+    "copied": "Copied!",
+
+    "stats": {
+      "totalRedirects": "Total Redirects",
+      "finalStatus": "Final Status",
+      "totalTime": "Total Time"
+    },
+
+    "chain": {
+      "title": "Redirect Chain",
+      "finalDestination": "Final Destination",
+      "noRedirects": "No redirects found - URL resolved directly",
+      "failed": "Redirect Trace Failed"
+    },
+
+    "security": {
+      "hstsPresent": "HSTS header present",
+      "httpsUpgrade": "HTTP to HTTPS upgrade"
+    },
+
     "redirect_count": "{count} redirects",
-    "final_destination": "Final Destination",
     "status_code": "Status Code",
     "location": "Location",
     "redirect_time": "Redirect Time",
     "total_time": "Total Time",
     "redirect_loop": "Redirect Loop Detected",
     "too_many_redirects": "Too Many Redirects"
+  },
+
+  "education": {
+    "title": "About HTTP Redirects",
+
+    "redirectTypes": {
+      "title": "Redirect Types"
+    },
+
+    "security": {
+      "title": "Security Considerations",
+      "hsts": "HSTS:",
+      "hstsDescription": "Prevents downgrade attacks",
+      "httpsUpgrade": "HTTP → HTTPS:",
+      "httpsDescription": "Security upgrades",
+      "openRedirects": "Open Redirects:",
+      "openDescription": "Potential security risk",
+      "loops": "Redirect Loops:",
+      "loopsDescription": "Infinite chains"
+    },
+
+    "performance": {
+      "title": "Performance Impact"
+    }
   }
 }

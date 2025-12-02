@@ -11,7 +11,7 @@
 
   // Load translations for this tool
   onMount(async () => {
-    await loadTranslations(get(locale), 'tools/cidr-contains');
+    await loadTranslations(get(locale), 'tools');
   });
 
   let setA = $state(`192.168.0.0/16
@@ -28,13 +28,13 @@
 
   const examples = $derived([
     {
-      label: $t('tools.cidr-contains.examples.basicContainment'),
+      label: $t('tools.cidr_contains.examples.basicContainment'),
       setA: '192.168.0.0/16',
       setB: `192.168.1.0/24
 192.168.2.0/24`,
     },
     {
-      label: $t('tools.cidr-contains.examples.mixedResults'),
+      label: $t('tools.cidr_contains.examples.mixedResults'),
       setA: `192.168.1.0/24
 10.0.0.0/16`,
       setB: `192.168.1.100/32
@@ -42,12 +42,12 @@
 172.16.0.0/24`,
     },
     {
-      label: $t('tools.cidr-contains.examples.partialOverlap'),
+      label: $t('tools.cidr_contains.examples.partialOverlap'),
       setA: '192.168.1.0/25',
       setB: '192.168.1.0/24',
     },
     {
-      label: $t('tools.cidr-contains.examples.ipv6Containment'),
+      label: $t('tools.cidr_contains.examples.ipv6Containment'),
       setA: '2001:db8::/32',
       setB: `2001:db8:1::/48
 2001:db8:2::/64`,
@@ -119,7 +119,7 @@
         checks: [],
         stats: { setA: { count: 0, addresses: '0' }, totalChecked: 0, inside: 0, equal: 0, partial: 0, outside: 0 },
         visualization: [],
-        errors: [error instanceof Error ? error.message : $t('tools.cidr-contains.errors.unknownError')],
+        errors: [error instanceof Error ? error.message : $t('tools.cidr_contains.errors.unknownError')],
       };
     }
   }
@@ -128,13 +128,13 @@
   function getStatusInfo(status: ContainmentStatus) {
     switch (status) {
       case 'inside':
-        return { icon: 'check-circle', color: 'var(--color-success)', label: $t('tools.cidr-contains.status.inside') };
+        return { icon: 'check-circle', color: 'var(--color-success)', label: $t('tools.cidr_contains.status.inside') };
       case 'equal':
-        return { icon: 'equals', color: 'var(--color-info)', label: $t('tools.cidr-contains.status.equal') };
+        return { icon: 'equals', color: 'var(--color-info)', label: $t('tools.cidr_contains.status.equal') };
       case 'partial':
-        return { icon: 'alert-circle', color: 'var(--color-warning)', label: $t('tools.cidr-contains.status.partial') };
+        return { icon: 'alert-circle', color: 'var(--color-warning)', label: $t('tools.cidr_contains.status.partial') };
       case 'outside':
-        return { icon: 'x-circle', color: 'var(--color-error)', label: $t('tools.cidr-contains.status.outside') };
+        return { icon: 'x-circle', color: 'var(--color-error)', label: $t('tools.cidr_contains.status.outside') };
     }
   }
 
@@ -161,7 +161,7 @@
     const labelPart = range.label ? ` (${range.label})` : '';
     const cidrPart = range.cidr ? `\nCIDR: ${range.cidr}` : '';
 
-    return $t(`tools.cidr-contains.visualization.${type}Tooltip`, {
+    return $t(`tools.cidr_contains.visualization.${type}Tooltip`, {
       label: labelPart,
       size: formatNumber(Number(size)),
       cidr: cidrPart,
@@ -178,13 +178,13 @@
 
 <!-- Options -->
 <div class="options-section">
-  <h3>{$t('tools.cidr-contains.options.title')}</h3>
+  <h3>{$t('tools.cidr_contains.options.title')}</h3>
   <div class="options-grid">
     <label class="checkbox-label">
       <input type="checkbox" bind:checked={mergeContainers} />
       <span class="checkbox-text">
-        {$t('tools.cidr-contains.options.mergeContainers')}
-        <Tooltip text={$t('tools.cidr-contains.options.mergeContainersTooltip')}>
+        {$t('tools.cidr_contains.options.mergeContainers')}
+        <Tooltip text={$t('tools.cidr_contains.options.mergeContainersTooltip')}>
           <Icon name="help" size="sm" />
         </Tooltip>
       </span>
@@ -192,8 +192,8 @@
     <label class="checkbox-label">
       <input type="checkbox" bind:checked={strictEquality} />
       <span class="checkbox-text">
-        {$t('tools.cidr-contains.options.strictEquality')}
-        <Tooltip text={$t('tools.cidr-contains.options.strictEqualityTooltip')}>
+        {$t('tools.cidr_contains.options.strictEquality')}
+        <Tooltip text={$t('tools.cidr_contains.options.strictEqualityTooltip')}>
           <Icon name="help" size="sm" />
         </Tooltip>
       </span>
@@ -207,15 +207,15 @@
     <!-- Set A -->
     <div class="input-group">
       <h3>
-        {$t('tools.cidr-contains.input.setALabel')}
-        <Tooltip text={$t('tools.cidr-contains.input.setATooltip')}>
+        {$t('tools.cidr_contains.input.setALabel')}
+        <Tooltip text={$t('tools.cidr_contains.input.setATooltip')}>
           <Icon name="help" size="sm" />
         </Tooltip>
       </h3>
       <div class="input-wrapper">
         <textarea
           bind:value={setA}
-          placeholder={$t('tools.cidr-contains.input.setAPlaceholder')}
+          placeholder={$t('tools.cidr_contains.input.setAPlaceholder')}
           class="input-textarea set-a"
           rows="6"
           oninput={handleInputChange}

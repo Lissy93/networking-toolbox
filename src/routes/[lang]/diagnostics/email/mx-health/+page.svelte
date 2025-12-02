@@ -1,9 +1,16 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../../styles/diagnostics-pages.scss';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics');
+  });
 
   let domain = $state('gmail.com');
   let checkPorts = $state(false);
@@ -12,15 +19,15 @@
   const clipboard = useClipboard();
 
   const examplesList = [
-    { domain: 'gmail.com', description: 'Google Gmail MX infrastructure' },
-    { domain: 'outlook.com', description: 'Microsoft Outlook mail servers' },
-    { domain: 'yahoo.com', description: 'Yahoo Mail MX configuration' },
-    { domain: 'protonmail.com', description: 'ProtonMail secure email setup' },
-    { domain: 'fastmail.com', description: 'FastMail professional hosting' },
-    { domain: 'github.com', description: 'GitHub enterprise email setup' },
+    { domain: 'gmail.com', description: $t('diagnostics.mx-health.examples.gmail') },
+    { domain: 'outlook.com', description: $t('diagnostics.mx-health.examples.outlook') },
+    { domain: 'yahoo.com', description: $t('diagnostics.mx-health.examples.yahoo') },
+    { domain: 'protonmail.com', description: $t('diagnostics.mx-health.examples.protonmail') },
+    { domain: 'fastmail.com', description: $t('diagnostics.mx-health.examples.fastmail') },
+    { domain: 'github.com', description: $t('diagnostics.mx-health.examples.github') },
   ];
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   async function checkMXHealth() {
     diagnosticState.startOperation();
@@ -43,7 +50,7 @@
       const data = await response.json();
       diagnosticState.setResults(data);
     } catch (err: unknown) {
-      diagnosticState.setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      diagnosticState.setError(err instanceof Error ? err.message : $t('diagnostics.mx-health.error.unknown'));
     }
   }
 
@@ -65,13 +72,13 @@
   function getPortDescription(port: number): string {
     switch (port) {
       case 25:
-        return 'SMTP (Standard)';
+        return $t('diagnostics.mx-health.ports.smtp');
       case 587:
-        return 'Submission (TLS)';
+        return $t('diagnostics.mx-health.ports.submission');
       case 465:
-        return 'SMTPS (SSL)';
+        return $t('diagnostics.mx-health.ports.smtps');
       default:
-        return `Port ${port}`;
+        return $t('diagnostics.mx-health.ports.custom', { port });
     }
   }
 
@@ -87,7 +94,7 @@
     if (diagnosticState.results.summary.reachableMX !== null) {
       text += `  Reachable MX records: ${diagnosticState.results.summary.reachableMX}\n`;
     }
-    text += `  Overall health: ${diagnosticState.results.summary.healthy ? 'Healthy' : 'Issues detected'}\n`;
+    text += `  Overall health: ${diagnosticState.results.summary.healthy ? $t('diagnostics.mx-health.results.healthy') : $t('diagnostics.mx-health.results.issuesDetected')}\n`;
     text += `  Redundancy: ${diagnosticState.results.summary.hasRedundancy ? 'Yes' : 'No'}\n\n`;
 
     text += `MX Records (by priority):\n`;
@@ -124,10 +131,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>Email MX Health Checker</h1>
+    <h1>{$t('diagnostics.mx-health.title')}</h1>
     <p>
-      Check mail server (MX) health including DNS resolution and optional SMTP port connectivity testing. Verify your
-      email infrastructure is properly configured and reachable.
+      {$t('diagnostics.mx-health.description')}
     </p>
   </header>
 
@@ -136,21 +142,21 @@
     examples={examplesList}
     selectedIndex={examples.selectedIndex}
     onSelect={loadExample}
-    title="MX Health Examples"
+    title={$t('diagnostics.mx-health.examples.title')}
     getLabel={(ex) => ex.domain}
     getDescription={(ex) => ex.description}
-    getTooltip={(ex) => `Check MX health for ${ex.domain}`}
+    getTooltip={(ex) => $t('diagnostics.mx-health.examples.tooltip', { domain: ex.domain })}
   />
 
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>MX Health Check</h3>
+      <h3>{$t('diagnostics.mx-health.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-group">
         <label for="domain">
-          Domain Name
+          {$t('diagnostics.mx-health.form.domain.label')}
           <input
             id="domain"
             type="text"
@@ -167,7 +173,7 @@
       <div class="form-group checkbox-group">
         <label class="checkbox-label">
           <input type="checkbox" bind:checked={checkPorts} />
-          <span class="checkbox-text">Check SMTP port connectivity (25, 587, 465)</span>
+          <span class="checkbox-text">{$t('diagnostics.mx-health.form.checkPorts.label')}</span>
         </label>
       </div>
 
@@ -179,10 +185,10 @@
         >
           {#if diagnosticState.loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Checking MX Health...
+            {$t('diagnostics.mx-health.form.button.checking')}
           {:else}
             <Icon name="mail-check" size="sm" />
-            Check MX Health
+            {$t('diagnostics.mx-health.form.button.check')}
           {/if}
         </button>
       </div>
@@ -193,10 +199,10 @@
   {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>MX Health Results</h3>
+        <h3>{$t('diagnostics.mx-health.results.title')}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
           <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
-          {clipboard.isCopied() ? 'Copied!' : 'Copy Results'}
+          {clipboard.isCopied() ? $t('common.copied') : $t('diagnostics.mx-health.results.copy')}
         </button>
       </div>
       <div class="card-content">
@@ -207,9 +213,9 @@
             <div>
               <h4>
                 {#if diagnosticState.results.summary.healthy}
-                  Mail Infrastructure Healthy
+                  {$t('diagnostics.mx-health.results.summary.healthy')}
                 {:else}
-                  Mail Infrastructure Issues
+                  {$t('diagnostics.mx-health.results.summary.issues')}
                 {/if}
               </h4>
               <p>
@@ -226,7 +232,7 @@
             <div class="stat-item">
               <Icon name="server" size="sm" />
               <div>
-                <span class="stat-label">MX Records</span>
+                <span class="stat-label">{$t('diagnostics.mx-health.results.stats.mxRecords')}</span>
                 <span class="stat-value">{diagnosticState.results.summary.totalMX}</span>
               </div>
             </div>
@@ -234,7 +240,7 @@
             <div class="stat-item">
               <Icon name="shield-check" size="sm" />
               <div>
-                <span class="stat-label">Healthy</span>
+                <span class="stat-label">{$t('diagnostics.mx-health.results.stats.healthy')}</span>
                 <span class="stat-value {getHealthColor(diagnosticState.results.summary.healthy)}"
                   >{diagnosticState.results.summary.healthyMX}</span
                 >
@@ -245,7 +251,7 @@
               <div class="stat-item">
                 <Icon name="wifi" size="sm" />
                 <div>
-                  <span class="stat-label">Reachable</span>
+                  <span class="stat-label">{$t('diagnostics.mx-health.results.stats.reachable')}</span>
                   <span class="stat-value {getHealthColor(diagnosticState.results.summary.reachableMX > 0)}"
                     >{diagnosticState.results.summary.reachableMX}</span
                   >
@@ -256,9 +262,9 @@
             <div class="stat-item">
               <Icon name="copy" size="sm" />
               <div>
-                <span class="stat-label">Redundancy</span>
+                <span class="stat-label">{$t('diagnostics.mx-health.results.stats.redundancy')}</span>
                 <span class="stat-value {getHealthColor(diagnosticState.results.summary.hasRedundancy)}"
-                  >{diagnosticState.results.summary.hasRedundancy ? 'Yes' : 'No'}</span
+                  >{diagnosticState.results.summary.hasRedundancy ? $t('common.yes') : $t('common.no')}</span
                 >
               </div>
             </div>
@@ -267,7 +273,7 @@
 
         <!-- MX Records -->
         <div class="mx-section">
-          <h4>MX Records (by priority)</h4>
+          <h4>{$t('diagnostics.mx-health.results.mxRecords.title')}</h4>
           <div class="mx-list">
             {#each (diagnosticState.results as { mxRecords: Array<{ error?: string; exchange: string; priority: number; addresses?: { ipv4: string[]; ipv6: string[] }; portChecks?: Array<{ port: number; open: boolean; latency?: number }> }> }).mxRecords as mx, _index (_index)}
               <div class="mx-record {mx.error ? 'error' : 'success'}">
@@ -300,7 +306,7 @@
                       <div class="address-group">
                         <div class="address-header">
                           <Icon name="globe" size="xs" />
-                          <span>IPv4 Addresses</span>
+                          <span>{$t('diagnostics.mx-health.results.mxRecords.ipv4')}</span>
                         </div>
                         <div class="address-list">
                           {#if mx.addresses.ipv4.length > 0}
@@ -308,7 +314,7 @@
                               <code class="ip-address">{ip}</code>
                             {/each}
                           {:else}
-                            <span class="no-addresses">None</span>
+                            <span class="no-addresses">{$t('common.none')}</span>
                           {/if}
                         </div>
                       </div>
@@ -316,7 +322,7 @@
                       <div class="address-group">
                         <div class="address-header">
                           <Icon name="globe" size="xs" />
-                          <span>IPv6 Addresses</span>
+                          <span>{$t('diagnostics.mx-health.results.mxRecords.ipv6')}</span>
                         </div>
                         <div class="address-list">
                           {#if mx.addresses.ipv6.length > 0}
@@ -324,7 +330,7 @@
                               <code class="ip-address">{ip}</code>
                             {/each}
                           {:else}
-                            <span class="no-addresses">None</span>
+                            <span class="no-addresses">{$t('common.none')}</span>
                           {/if}
                         </div>
                       </div>
@@ -335,7 +341,7 @@
                       <div class="ports-section">
                         <div class="ports-header">
                           <Icon name="wifi" size="xs" />
-                          <span>SMTP Port Connectivity</span>
+                          <span>{$t('diagnostics.mx-health.results.mxRecords.portConnectivity')}</span>
                         </div>
                         <div class="port-checks">
                           {#each mx.portChecks || [] as portCheck, portIndex (portIndex)}
@@ -346,7 +352,11 @@
                               </div>
                               <div class="port-result">
                                 <Icon name={portCheck.open ? 'check' : 'x'} size="xs" />
-                                <span class="port-status">{portCheck.open ? 'Open' : 'Closed'}</span>
+                                <span class="port-status"
+                                  >{portCheck.open
+                                    ? $t('diagnostics.mx-health.results.mxRecords.open')
+                                    : $t('diagnostics.mx-health.results.mxRecords.closed')}</span
+                                >
                                 {#if portCheck.latency}
                                   <span class="port-latency">({portCheck.latency}ms)</span>
                                 {/if}
@@ -366,57 +376,72 @@
     </div>
   {/if}
 
-  <ErrorCard title="MX Health Check Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('diagnostics.mx-health.error.title')} error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>Understanding MX Records</h3>
+      <h3>{$t('diagnostics.mx-health.education.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>MX Record Basics</h4>
+          <h4>{$t('diagnostics.mx-health.education.basics.title')}</h4>
           <ul>
-            <li><strong>Priority:</strong> Lower numbers have higher priority</li>
-            <li><strong>Exchange:</strong> The mail server hostname</li>
-            <li><strong>Redundancy:</strong> Multiple MX records provide failover</li>
-            <li><strong>Load balancing:</strong> Equal priorities distribute load</li>
+            <li>
+              <strong>{$t('diagnostics.mx-health.education.basics.priority.title')}:</strong>
+              {$t('diagnostics.mx-health.education.basics.priority.description')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics.mx-health.education.basics.exchange.title')}:</strong>
+              {$t('diagnostics.mx-health.education.basics.exchange.description')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics.mx-health.education.basics.redundancy.title')}:</strong>
+              {$t('diagnostics.mx-health.education.basics.redundancy.description')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics.mx-health.education.basics.loadBalancing.title')}:</strong>
+              {$t('diagnostics.mx-health.education.basics.loadBalancing.description')}
+            </li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>SMTP Ports</h4>
+          <h4>{$t('diagnostics.mx-health.education.smtpPorts.title')}</h4>
           <div class="port-explanations">
             <div class="port-explanation">
-              <strong>Port 25:</strong> Standard SMTP (server-to-server)
+              <strong>{$t('diagnostics.mx-health.education.smtpPorts.port25.title')}:</strong>
+              {$t('diagnostics.mx-health.education.smtpPorts.port25.description')}
             </div>
             <div class="port-explanation">
-              <strong>Port 587:</strong> Mail submission (client-to-server, TLS)
+              <strong>{$t('diagnostics.mx-health.education.smtpPorts.port587.title')}:</strong>
+              {$t('diagnostics.mx-health.education.smtpPorts.port587.description')}
             </div>
             <div class="port-explanation">
-              <strong>Port 465:</strong> SMTPS (deprecated but still used)
+              <strong>{$t('diagnostics.mx-health.education.smtpPorts.port465.title')}:</strong>
+              {$t('diagnostics.mx-health.education.smtpPorts.port465.description')}
             </div>
           </div>
         </div>
 
         <div class="info-section">
-          <h4>Health Indicators</h4>
+          <h4>{$t('diagnostics.mx-health.education.healthIndicators.title')}</h4>
           <ul>
-            <li>All MX records should resolve to IP addresses</li>
-            <li>At least one SMTP port should be reachable</li>
-            <li>Multiple MX records provide redundancy</li>
-            <li>Lower priority servers should be reachable</li>
+            <li>{$t('diagnostics.mx-health.education.healthIndicators.allResolve')}</li>
+            <li>{$t('diagnostics.mx-health.education.healthIndicators.oneReachable')}</li>
+            <li>{$t('diagnostics.mx-health.education.healthIndicators.multipleRedundancy')}</li>
+            <li>{$t('diagnostics.mx-health.education.healthIndicators.lowerPriority')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Common Issues</h4>
+          <h4>{$t('diagnostics.mx-health.education.commonIssues.title')}</h4>
           <ul>
-            <li>MX pointing to non-existent hosts</li>
-            <li>All SMTP ports blocked by firewall</li>
-            <li>Single point of failure (one MX record)</li>
-            <li>Incorrect priority configuration</li>
+            <li>{$t('diagnostics.mx-health.education.commonIssues.nonExistentHosts')}</li>
+            <li>{$t('diagnostics.mx-health.education.commonIssues.portsBlocked')}</li>
+            <li>{$t('diagnostics.mx-health.education.commonIssues.singlePoint')}</li>
+            <li>{$t('diagnostics.mx-health.education.commonIssues.incorrectPriority')}</li>
           </ul>
         </div>
       </div>

@@ -5,6 +5,13 @@
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics');
+  });
 
   let host = $state('google.com:443');
   let servername = $state('');
@@ -14,23 +21,31 @@
   const diagnosticState = useDiagnosticState<any>();
   const clipboard = useClipboard();
 
-  const examplesList = [
-    { host: 'google.com:443', protocols: 'h2,http/1.1', description: 'Google HTTP/2 support' },
-    { host: 'github.com:443', protocols: 'h2,http/1.1', description: 'GitHub ALPN negotiation' },
-    { host: 'cloudflare.com:443', protocols: 'h2,http/1.1,h3', description: 'Cloudflare HTTP/3 support' },
-    { host: 'wikipedia.org:443', protocols: 'h2,http/1.1', description: 'Wikipedia HTTP/2 support' },
-    { host: 'cdn.jsdelivr.net:443', protocols: 'h2,http/1.1', description: 'CDN ALPN support' },
-    { host: 'api.github.com:443', protocols: 'h2,http/1.1', description: 'API server ALPN' },
-  ];
+  const examplesList = $derived([
+    { host: 'google.com:443', protocols: 'h2,http/1.1', description: $t('diagnostics.alpn.examples.google') },
+    { host: 'github.com:443', protocols: 'h2,http/1.1', description: $t('diagnostics.alpn.examples.github') },
+    {
+      host: 'cloudflare.com:443',
+      protocols: 'h2,http/1.1,h3',
+      description: $t('diagnostics.alpn.examples.cloudflare'),
+    },
+    { host: 'wikipedia.org:443', protocols: 'h2,http/1.1', description: $t('diagnostics.alpn.examples.wikipedia') },
+    { host: 'cdn.jsdelivr.net:443', protocols: 'h2,http/1.1', description: $t('diagnostics.alpn.examples.cdn') },
+    { host: 'api.github.com:443', protocols: 'h2,http/1.1', description: $t('diagnostics.alpn.examples.api') },
+  ]);
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
-  const commonProtocols = [
-    { value: 'h2,http/1.1', label: 'HTTP/2 + HTTP/1.1', description: 'Standard web protocols' },
-    { value: 'h3,h2,http/1.1', label: 'HTTP/3 + HTTP/2 + HTTP/1.1', description: 'Including experimental HTTP/3' },
-    { value: 'h2', label: 'HTTP/2 only', description: 'Test HTTP/2 exclusively' },
-    { value: 'http/1.1', label: 'HTTP/1.1 only', description: 'Fallback protocol only' },
-  ];
+  const commonProtocols = $derived([
+    { value: 'h2,http/1.1', label: 'HTTP/2 + HTTP/1.1', description: $t('diagnostics.alpn.protocols.standard') },
+    {
+      value: 'h3,h2,http/1.1',
+      label: 'HTTP/3 + HTTP/2 + HTTP/1.1',
+      description: $t('diagnostics.alpn.protocols.experimental'),
+    },
+    { value: 'h2', label: 'HTTP/2 only', description: $t('diagnostics.alpn.protocols.http2Only') },
+    { value: 'http/1.1', label: 'HTTP/1.1 only', description: $t('diagnostics.alpn.protocols.fallback') },
+  ]);
 
   // Reactive validation
   const isInputValid = $derived(() => {
@@ -96,43 +111,68 @@
   function getProtocolInfo(protocol: string): { name: string; description: string; version: string } {
     switch (protocol) {
       case 'h3':
-        return { name: 'HTTP/3', description: 'Latest HTTP version over QUIC', version: 'HTTP/3' };
+        return {
+          name: $t('diagnostics.alpn.protocolInfo.h3.name'),
+          description: $t('diagnostics.alpn.protocolInfo.h3.description'),
+          version: $t('diagnostics.alpn.protocolInfo.h3.name'),
+        };
       case 'h2':
-        return { name: 'HTTP/2', description: 'Binary, multiplexed HTTP protocol', version: 'HTTP/2' };
+        return {
+          name: $t('diagnostics.alpn.protocolInfo.h2.name'),
+          description: $t('diagnostics.alpn.protocolInfo.h2.description'),
+          version: $t('diagnostics.alpn.protocolInfo.h2.name'),
+        };
       case 'http/1.1':
-        return { name: 'HTTP/1.1', description: 'Traditional HTTP protocol', version: 'HTTP/1.1' };
+        return {
+          name: $t('diagnostics.alpn.protocolInfo.http11.name'),
+          description: $t('diagnostics.alpn.protocolInfo.http11.description'),
+          version: $t('diagnostics.alpn.protocolInfo.http11.name'),
+        };
       case 'http/1.0':
-        return { name: 'HTTP/1.0', description: 'Legacy HTTP protocol', version: 'HTTP/1.0' };
+        return {
+          name: $t('diagnostics.alpn.protocolInfo.http10.name'),
+          description: $t('diagnostics.alpn.protocolInfo.http10.description'),
+          version: $t('diagnostics.alpn.protocolInfo.http10.name'),
+        };
       default:
-        return { name: protocol, description: 'Custom or unknown protocol', version: protocol };
+        return {
+          name: protocol,
+          description: $t('diagnostics.alpn.protocolInfo.unknown.description'),
+          version: protocol,
+        };
     }
   }
 
   function getNegotiationStatus(): { status: string; icon: string; class: string; description: string } {
     if (!diagnosticState.results)
-      return { status: 'Unknown', icon: 'help-circle', class: 'secondary', description: 'No results available' };
+      return {
+        status: $t('diagnostics.alpn.status.unknown'),
+        icon: 'help-circle',
+        class: 'secondary',
+        description: $t('diagnostics.alpn.status.noResults'),
+      };
 
     if (diagnosticState.results.success && diagnosticState.results.negotiatedProtocol) {
       const protocol = getProtocolInfo(diagnosticState.results.negotiatedProtocol);
       return {
-        status: 'Successful',
+        status: $t('diagnostics.alpn.status.successful'),
         icon: 'check-circle',
         class: 'success',
-        description: `Server selected ${protocol.name}`,
+        description: $t('diagnostics.alpn.status.serverSelected', { protocol: protocol.name }),
       };
     } else if (!diagnosticState.results.success) {
       return {
-        status: 'Failed',
+        status: $t('diagnostics.alpn.status.failed'),
         icon: 'x-circle',
         class: 'error',
-        description: 'No protocol was negotiated',
+        description: $t('diagnostics.alpn.status.noNegotiation'),
       };
     } else {
       return {
-        status: 'No Selection',
+        status: $t('diagnostics.alpn.status.noSelection'),
         icon: 'minus-circle',
         class: 'warning',
-        description: 'Server did not select any protocol',
+        description: $t('diagnostics.alpn.status.noProtocolSelected'),
       };
     }
   }
@@ -140,22 +180,34 @@
   async function copyALPNInfo() {
     if (!diagnosticState.results) return;
 
-    let text = `ALPN Negotiation Results for ${host}\n`;
-    text += `Generated at: ${new Date().toISOString()}\n\n`;
-    text += `Requested Protocols: ${diagnosticState.results.requestedProtocols.join(', ')}\n`;
-    text += `Negotiated Protocol: ${diagnosticState.results.negotiatedProtocol || 'None'}\n`;
-    text += `TLS Version: ${diagnosticState.results.tlsVersion || 'Unknown'}\n`;
-    text += `Success: ${diagnosticState.results.success ? 'Yes' : 'No'}\n`;
+    let text = $t('diagnostics.alpn.copy.header', { host }) + '\n';
+    text += $t('diagnostics.alpn.copy.generatedAt', { timestamp: new Date().toISOString() }) + '\n\n';
+    text +=
+      $t('diagnostics.alpn.copy.requestedProtocols', {
+        protocols: diagnosticState.results.requestedProtocols.join(', '),
+      }) + '\n';
+    text +=
+      $t('diagnostics.alpn.copy.negotiatedProtocol', {
+        protocol: diagnosticState.results.negotiatedProtocol || $t('diagnostics.alpn.copy.none'),
+      }) + '\n';
+    text +=
+      $t('diagnostics.alpn.copy.tlsVersion', {
+        version: diagnosticState.results.tlsVersion || $t('diagnostics.alpn.copy.unknown'),
+      }) + '\n';
+    text +=
+      $t('diagnostics.alpn.copy.success', {
+        success: diagnosticState.results.success ? $t('diagnostics.alpn.copy.yes') : $t('diagnostics.alpn.copy.no'),
+      }) + '\n';
 
     const status = getNegotiationStatus();
-    text += `\nNegotiation Status: ${status.status}\n`;
-    text += `Description: ${status.description}\n`;
+    text += '\n' + $t('diagnostics.alpn.copy.negotiationStatus', { status: status.status }) + '\n';
+    text += $t('diagnostics.alpn.copy.description', { description: status.description }) + '\n';
 
     if (diagnosticState.results.negotiatedProtocol) {
       const protocolInfo = getProtocolInfo(diagnosticState.results.negotiatedProtocol);
-      text += `\nSelected Protocol Info:\n`;
-      text += `  Name: ${protocolInfo.name}\n`;
-      text += `  Description: ${protocolInfo.description}\n`;
+      text += '\n' + $t('diagnostics.alpn.copy.selectedProtocolInfo') + '\n';
+      text += $t('diagnostics.alpn.copy.name', { name: protocolInfo.name }) + '\n';
+      text += $t('diagnostics.alpn.copy.protocolDescription', { description: protocolInfo.description }) + '\n';
     }
 
     await clipboard.copy(text);
@@ -164,10 +216,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>TLS ALPN Negotiation</h1>
+    <h1>{$t('diagnostics.alpn.title')}</h1>
     <p>
-      Test Application-Layer Protocol Negotiation (ALPN) to see which protocol a server selects from your offered list.
-      Commonly used to negotiate HTTP/2, HTTP/3, or other application protocols during TLS handshake.
+      {$t('diagnostics.alpn.description')}
     </p>
   </header>
 
@@ -176,22 +227,22 @@
     examples={examplesList}
     selectedIndex={examples.selectedIndex}
     onSelect={loadExample}
-    title="ALPN Examples"
+    title={$t('diagnostics.alpn.examples.title')}
     getLabel={(ex) => ex.host}
     getDescription={(ex) => ex.description}
-    getTooltip={(ex) => `Test ALPN for ${ex.host} (${ex.description})`}
+    getTooltip={(ex) => $t('diagnostics.alpn.examples.tooltip', { host: ex.host, description: ex.description })}
   />
 
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>ALPN Negotiation Configuration</h3>
+      <h3>{$t('diagnostics.alpn.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-row">
         <div class="form-group">
-          <label for="host" use:tooltip={'Enter hostname:port (e.g., google.com:443)'}>
-            Host:Port
+          <label for="host" use:tooltip={$t('diagnostics.alpn.form.hostTooltip')}>
+            {$t('diagnostics.alpn.form.hostLabel')}
             <input
               id="host"
               type="text"
@@ -204,7 +255,7 @@
               }}
             />
             {#if host && !isInputValid}
-              <span class="error-text">Invalid host:port format</span>
+              <span class="error-text">{$t('diagnostics.alpn.form.invalidHost')}</span>
             {/if}
           </label>
         </div>
@@ -213,8 +264,8 @@
       <!-- Protocol Selection -->
       <div class="form-row">
         <div class="form-group">
-          <label for="protocols" use:tooltip={'Comma-separated list of protocols to offer (e.g., h2,http/1.1)'}>
-            ALPN Protocols
+          <label for="protocols" use:tooltip={$t('diagnostics.alpn.form.protocolsTooltip')}>
+            {$t('diagnostics.alpn.form.protocolsLabel')}
             <input
               id="protocols"
               type="text"
@@ -227,7 +278,7 @@
             />
           </label>
           <div class="protocol-presets">
-            <span class="preset-label">Quick select:</span>
+            <span class="preset-label">{$t('diagnostics.alpn.form.quickSelect')}</span>
             {#each commonProtocols as preset, index (index)}
               <button
                 type="button"
@@ -253,14 +304,14 @@
                 if (isInputValid()) probeALPN();
               }}
             />
-            Use custom SNI servername
+            {$t('diagnostics.alpn.form.customSni')}
           </label>
           {#if useCustomServername}
             <input
               type="text"
               bind:value={servername}
               placeholder="example.com"
-              use:tooltip={'Custom servername for SNI (Server Name Indication)'}
+              use:tooltip={$t('diagnostics.alpn.form.sniTooltip')}
               onchange={() => {
                 examples.clear();
                 if (isInputValid()) probeALPN();
@@ -274,10 +325,10 @@
         <button class="lookup-btn" onclick={probeALPN} disabled={diagnosticState.loading || !isInputValid}>
           {#if diagnosticState.loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Testing ALPN...
+            {$t('diagnostics.alpn.form.testing')}
           {:else}
             <Icon name="shuffle" size="sm" />
-            Test ALPN Negotiation
+            {$t('diagnostics.alpn.form.testButton')}
           {/if}
         </button>
       </div>
@@ -288,10 +339,10 @@
   {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>ALPN Negotiation Results</h3>
+        <h3>{$t('diagnostics.alpn.results.title')}</h3>
         <button class="copy-btn" onclick={copyALPNInfo} disabled={clipboard.isCopied()}>
           <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
-          {clipboard.isCopied() ? 'Copied!' : 'Copy Results'}
+          {clipboard.isCopied() ? $t('diagnostics.alpn.results.copied') : $t('diagnostics.alpn.results.copyButton')}
         </button>
       </div>
       <div class="card-content">
@@ -302,7 +353,9 @@
             <div class="status-item {status.class}">
               <Icon name={status.icon} size="sm" />
               <div>
-                <span class="status-title">Negotiation: {status.status}</span>
+                <span class="status-title"
+                  >{$t('diagnostics.alpn.results.negotiationStatus', { status: status.status })}</span
+                >
                 <p class="status-desc">{status.description}</p>
               </div>
             </div>
@@ -310,8 +363,10 @@
               <div class="status-item success">
                 <Icon name="shield-check" size="sm" />
                 <div>
-                  <span class="status-title">TLS Version: {diagnosticState.results.tlsVersion}</span>
-                  <p class="status-desc">Connection established successfully</p>
+                  <span class="status-title"
+                    >{$t('diagnostics.alpn.results.tlsVersion', { version: diagnosticState.results.tlsVersion })}</span
+                  >
+                  <p class="status-desc">{$t('diagnostics.alpn.results.connectionEstablished')}</p>
                 </div>
               </div>
             {/if}
@@ -320,11 +375,11 @@
 
         <!-- Protocol Details -->
         <div class="protocols-section">
-          <h4>Protocol Negotiation Details</h4>
+          <h4>{$t('diagnostics.alpn.results.protocolDetails')}</h4>
 
           <div class="protocol-details">
             <div class="detail-section">
-              <h5>Requested Protocols</h5>
+              <h5>{$t('diagnostics.alpn.results.requestedProtocols')}</h5>
               <div class="protocol-list">
                 {#each diagnosticState.results.requestedProtocols as protocol, i (i)}
                   {@const protocolInfo = getProtocolInfo(protocol)}
@@ -332,7 +387,9 @@
                     <div class="protocol-header">
                       <span class="protocol-name">{protocolInfo.name}</span>
                       <span class="protocol-id mono">({protocol})</span>
-                      <span class="protocol-priority">Priority {i + 1}</span>
+                      <span class="protocol-priority"
+                        >{$t('diagnostics.alpn.results.priority', { priority: i + 1 })}</span
+                      >
                     </div>
                     <p class="protocol-desc">{protocolInfo.description}</p>
                   </div>
@@ -343,7 +400,7 @@
             {#if diagnosticState.results.negotiatedProtocol}
               {@const selectedProtocol = getProtocolInfo(diagnosticState.results.negotiatedProtocol)}
               <div class="detail-section">
-                <h5>Selected Protocol</h5>
+                <h5>{$t('diagnostics.alpn.results.selectedProtocol')}</h5>
                 <div class="selected-protocol">
                   <div class="protocol-item selected">
                     <div class="protocol-header">
@@ -357,10 +414,10 @@
               </div>
             {:else}
               <div class="detail-section">
-                <h5>Selected Protocol</h5>
+                <h5>{$t('diagnostics.alpn.results.selectedProtocol')}</h5>
                 <div class="no-selection">
                   <Icon name="x-circle" size="sm" />
-                  <span>No protocol was selected by the server</span>
+                  <span>{$t('diagnostics.alpn.results.noProtocolSelected')}</span>
                 </div>
               </div>
             {/if}
@@ -370,15 +427,15 @@
         <!-- Connection Info -->
         {#if diagnosticState.results.servername || diagnosticState.results.tlsVersion}
           <div class="connection-section">
-            <h4>Connection Information</h4>
+            <h4>{$t('diagnostics.alpn.results.connectionInfo')}</h4>
             <div class="detail-grid">
               <div class="detail-item">
-                <span class="detail-label">Server Name:</span>
+                <span class="detail-label">{$t('diagnostics.alpn.results.serverName')}</span>
                 <span class="detail-value mono">{diagnosticState.results.servername}</span>
               </div>
               {#if diagnosticState.results.tlsVersion}
                 <div class="detail-item">
-                  <span class="detail-label">TLS Version:</span>
+                  <span class="detail-label">{$t('diagnostics.alpn.results.tlsVersionLabel')}</span>
                   <span class="detail-value">{diagnosticState.results.tlsVersion}</span>
                 </div>
               {/if}
@@ -389,38 +446,36 @@
     </div>
   {/if}
 
-  <ErrorCard title="ALPN Negotiation Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('diagnostics.alpn.error.title')} error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>Understanding ALPN</h3>
+      <h3>{$t('diagnostics.alpn.info.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>What is ALPN?</h4>
+          <h4>{$t('diagnostics.alpn.info.whatIsAlpn.title')}</h4>
           <p>
-            Application-Layer Protocol Negotiation (ALPN) is a TLS extension that allows the client and server to
-            negotiate which application protocol to use during the TLS handshake.
+            {$t('diagnostics.alpn.info.whatIsAlpn.description')}
           </p>
         </div>
 
         <div class="info-section">
-          <h4>Common Protocols</h4>
+          <h4>{$t('diagnostics.alpn.info.commonProtocols.title')}</h4>
           <ul>
-            <li><strong>h2:</strong> HTTP/2 - Binary, multiplexed protocol</li>
-            <li><strong>h3:</strong> HTTP/3 - Latest HTTP over QUIC</li>
-            <li><strong>http/1.1:</strong> Traditional HTTP/1.1</li>
-            <li><strong>spdy/3.1:</strong> Legacy SPDY protocol</li>
+            <li><strong>h2:</strong> {$t('diagnostics.alpn.info.commonProtocols.h2')}</li>
+            <li><strong>h3:</strong> {$t('diagnostics.alpn.info.commonProtocols.h3')}</li>
+            <li><strong>http/1.1:</strong> {$t('diagnostics.alpn.info.commonProtocols.http11')}</li>
+            <li><strong>spdy/3.1:</strong> {$t('diagnostics.alpn.info.commonProtocols.spdy')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Protocol Priority</h4>
+          <h4>{$t('diagnostics.alpn.info.priority.title')}</h4>
           <p>
-            Protocols are offered in preference order. The server selects the first protocol from your list that it
-            supports. Order matters!
+            {$t('diagnostics.alpn.info.priority.description')}
           </p>
         </div>
       </div>

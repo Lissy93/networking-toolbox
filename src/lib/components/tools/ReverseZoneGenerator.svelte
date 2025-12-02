@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+  import { locale, loadTranslations, t } from '$lib/stores/language.js';
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
@@ -9,6 +12,10 @@
     type PTRRecord as _PTRRecord,
     type ZoneFileOptions,
   } from '$lib/utils/reverse-dns';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools/reverse-zone-generator');
+  });
 
   let cidrInput = $state('192.168.1.0/24');
   let hostnameTemplate = $state('host-{ip-dashes}.example.com.');
@@ -35,38 +42,38 @@
   let selectedExample = $state<string | null>(null);
   let _userModified = $state(false);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'IPv4 /24 Network',
+      label: $t('examples.items.0.label'),
       cidr: '192.168.1.0/24',
       template: 'host-{ip-dashes}.example.com.',
-      description: 'Generate zone for full /24 subnet',
+      description: $t('examples.items.0.description'),
     },
     {
-      label: 'IPv4 /28 Block',
+      label: $t('examples.items.1.label'),
       cidr: '10.0.0.16/28',
       template: 'server{ip}.lan.example.com.',
-      description: 'Small block with custom naming',
+      description: $t('examples.items.1.description'),
     },
     {
-      label: 'IPv6 /64 Network',
+      label: $t('examples.items.2.label'),
       cidr: '2001:db8:1000::/64',
       template: 'host-{ip-dashes}.ipv6.example.com.',
-      description: 'IPv6 reverse zone generation',
+      description: $t('examples.items.2.description'),
     },
     {
-      label: 'Corporate Network',
+      label: $t('examples.items.3.label'),
       cidr: '172.16.100.0/24',
       template: 'workstation-{ip-dashes}.corp.example.com.',
-      description: 'Corporate naming convention',
+      description: $t('examples.items.3.description'),
     },
-  ];
+  ]);
 
-  const templateHelp = [
-    { placeholder: '{ip}', description: 'Original IP address (192.168.1.100)' },
-    { placeholder: '{ip-dashes}', description: 'IP with dashes (192-168-1-100)' },
-    { placeholder: '{domain}', description: 'Base domain from settings' },
-  ];
+  const templateHelp = $derived([
+    { placeholder: '{ip}', description: $t('templateHelp.placeholders.0.description') },
+    { placeholder: '{ip-dashes}', description: $t('templateHelp.placeholders.1.description') },
+    { placeholder: '{domain}', description: $t('templateHelp.placeholders.2.description') },
+  ]);
 
   function loadExample(example: (typeof examples)[0]) {
     cidrInput = example.cidr;
@@ -155,8 +162,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>Reverse Zone Generator</h1>
-    <p>Generate complete reverse DNS zone files from CIDR blocks with customizable hostname templates</p>
+    <h1>{$t('title')}</h1>
+    <p>{$t('description')}</p>
   </header>
 
   <!-- Educational Overview Card -->
@@ -165,21 +172,22 @@
       <div class="overview-item">
         <Icon name="file" size="sm" />
         <div>
-          <strong>Full Zone Files:</strong> Complete DNS zone files with SOA, NS, and PTR records ready for deployment.
+          <strong>{$t('overview.fullZoneFiles.title')}</strong>
+          {$t('overview.fullZoneFiles.description')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="template" size="sm" />
         <div>
-          <strong>Hostname Templates:</strong> Customize hostname patterns using placeholders like
-          <code>{'{'}ip}</code>
-          and <code>{'{'}ip-dashes}</code>.
+          <strong>{$t('overview.hostnameTemplates.title')}</strong>
+          {$t('overview.hostnameTemplates.description')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="settings" size="sm" />
         <div>
-          <strong>Zone Configuration:</strong> Configure name servers, contact email, TTL values, and domain settings.
+          <strong>{$t('overview.zoneConfiguration.title')}</strong>
+          {$t('overview.zoneConfiguration.description')}
         </div>
       </div>
     </div>
@@ -190,7 +198,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="sm" />
-        <h3>Quick Examples</h3>
+        <h3>{$t('examples.title')}</h3>
       </summary>
       <div class="examples-grid">
         {#each examples as example (example.label)}
@@ -214,16 +222,16 @@
   <div class="card input-card">
     <!-- CIDR Input -->
     <div class="input-group">
-      <label for="cidr-input" use:tooltip={'Enter a CIDR block to generate reverse zones for'}>
+      <label for="cidr-input" use:tooltip={$t('form.cidrBlock.tooltip')}>
         <Icon name="network" size="sm" />
-        CIDR Block
+        {$t('form.cidrBlock.label')}
       </label>
       <input
         id="cidr-input"
         type="text"
         bind:value={cidrInput}
         oninput={handleInputChange}
-        placeholder="192.168.1.0/24 or 2001:db8::/64"
+        placeholder={$t('form.cidrBlock.placeholder')}
         class="cidr-input {results?.success === true ? 'valid' : results?.success === false ? 'invalid' : ''}"
         spellcheck="false"
       />
@@ -231,26 +239,23 @@
 
     <!-- Hostname Template -->
     <div class="input-group">
-      <label
-        for="template-input"
-        use:tooltip={"Use placeholders like ${'{ip}'}, ${'{ip-dashes}'} to customize hostnames"}
-      >
+      <label for="template-input" use:tooltip={$t('form.hostnameTemplate.tooltip')}>
         <Icon name="tag" size="sm" />
-        Hostname Template
+        {$t('form.hostnameTemplate.label')}
       </label>
       <input
         id="template-input"
         type="text"
         bind:value={hostnameTemplate}
         oninput={handleInputChange}
-        placeholder="host-[ip-dashes].example.com."
+        placeholder={$t('form.hostnameTemplate.placeholder')}
         class="template-input"
         spellcheck="false"
       />
 
       <!-- Template Help -->
       <div class="template-help">
-        <h4>Available Placeholders:</h4>
+        <h4>{$t('templateHelp.title')}</h4>
         <div class="placeholder-grid">
           {#each templateHelp as item (item.placeholder)}
             <div class="placeholder-item">
@@ -264,19 +269,19 @@
 
     <!-- Zone Configuration -->
     <div class="config-section">
-      <h3>Zone Configuration</h3>
+      <h3>{$t('form.zoneConfiguration')}</h3>
 
       <div class="config-grid">
         <div class="config-group">
-          <label for="nameservers-input" use:tooltip={'One name server per line, automatically adds trailing dots'}>
+          <label for="nameservers-input" use:tooltip={$t('form.nameServers.tooltip')}>
             <Icon name="server" size="sm" />
-            Name Servers
+            {$t('form.nameServers.label')}
           </label>
           <textarea
             id="nameservers-input"
             bind:value={nameServers}
             oninput={handleInputChange}
-            placeholder="ns1.example.com&#10;ns2.example.com"
+            placeholder={$t('form.nameServers.placeholder')}
             class="nameservers-input"
             rows="3"
             spellcheck="false"
@@ -284,32 +289,32 @@
         </div>
 
         <div class="config-group">
-          <label for="contact-input" use:tooltip={'DNS zone contact email address'}>
+          <label for="contact-input" use:tooltip={$t('form.contactEmail.tooltip')}>
             <Icon name="mail" size="sm" />
-            Contact Email
+            {$t('form.contactEmail.label')}
           </label>
           <input
             id="contact-input"
             type="email"
             bind:value={contactEmail}
             oninput={handleInputChange}
-            placeholder="hostmaster.example.com."
+            placeholder={$t('form.contactEmail.placeholder')}
             class="contact-input"
             spellcheck="false"
           />
         </div>
 
         <div class="config-group">
-          <label for="ttl-input" use:tooltip={'Default TTL for zone records in seconds'}>
+          <label for="ttl-input" use:tooltip={$t('form.defaultTTL.tooltip')}>
             <Icon name="clock" size="sm" />
-            Default TTL (seconds)
+            {$t('form.defaultTTL.label')}
           </label>
           <input
             id="ttl-input"
             type="number"
             bind:value={ttl}
             oninput={handleInputChange}
-            placeholder="86400"
+            placeholder={$t('form.defaultTTL.placeholder')}
             class="ttl-input"
             min="60"
             max="2147483647"
@@ -324,15 +329,15 @@
     <div class="card results-card">
       {#if results.success}
         <div class="results-header">
-          <h3>Generated Zone Files</h3>
+          <h3>{$t('results.title')}</h3>
           <div class="summary-stats">
             <div class="stat-item">
               <span class="stat-value">{results.summary.totalZones}</span>
-              <span class="stat-label">Zone Files</span>
+              <span class="stat-label">{$t('results.summary.zoneFiles')}</span>
             </div>
             <div class="stat-item">
               <span class="stat-value">{results.summary.totalRecords}</span>
-              <span class="stat-label">PTR Records</span>
+              <span class="stat-label">{$t('results.summary.ptrRecords')}</span>
             </div>
           </div>
         </div>
@@ -346,7 +351,7 @@
                   <h4>{zone.zone}</h4>
                   <div class="zone-meta">
                     <span class="zone-type {zone.type.toLowerCase()}">{zone.type}</span>
-                    <span class="record-count">{zone.recordCount} records</span>
+                    <span class="record-count">{$t('results.recordCount', { count: zone.recordCount })}</span>
                   </div>
                 </div>
                 <button
@@ -354,7 +359,7 @@
                   onclick={() => clipboard.copy(zone.content, `zone-${index}`)}
                 >
                   <Icon name={clipboard.isCopied(`zone-${index}`) ? 'check' : 'copy'} size="sm" />
-                  Copy Zone File
+                  {$t('results.copyZoneFile')}
                 </button>
               </div>
 
@@ -367,13 +372,13 @@
       {:else}
         <div class="error-result">
           <Icon name="alert-triangle" size="lg" />
-          <h4>Generation Error</h4>
+          <h4>{$t('results.error.title')}</h4>
           <p>{results.error}</p>
           <div class="error-help">
-            <strong>Valid formats:</strong>
+            <strong>{$t('results.error.validFormats')}</strong>
             <ul>
-              <li>IPv4 CIDR: 192.168.1.0/24, 10.0.0.0/16</li>
-              <li>IPv6 CIDR: 2001:db8::/64, fe80::/10</li>
+              <li>{$t('results.error.ipv4CIDR')}</li>
+              <li>{$t('results.error.ipv6CIDR')}</li>
             </ul>
           </div>
         </div>
@@ -385,34 +390,30 @@
   <div class="education-card">
     <div class="education-grid">
       <div class="education-item info-panel">
-        <h4>Zone File Structure</h4>
+        <h4>{$t('education.zoneFileStructure.title')}</h4>
         <p>
-          Generated zone files include proper SOA records with serial numbers, refresh/retry/expire timers, and NS
-          records for delegation. All PTR records are automatically generated based on your template.
+          {$t('education.zoneFileStructure.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Hostname Templates</h4>
+        <h4>{$t('education.hostnameTemplates.title')}</h4>
         <p>
-          Use placeholders to create consistent naming patterns. <code>[ip-dashes]</code> is popular for creating
-          hostnames like <code>host-192-168-1-100.example.com</code> from IP addresses.
+          {$t('education.hostnameTemplates.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Zone Delegation</h4>
+        <h4>{$t('education.zoneDelegation.title')}</h4>
         <p>
-          The generated zones need to be properly delegated by your ISP or DNS provider. Ensure your name servers are
-          configured to serve these zones and are reachable from the internet.
+          {$t('education.zoneDelegation.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Best Practices</h4>
+        <h4>{$t('education.bestPractices.title')}</h4>
         <p>
-          Keep TTL values reasonable (3600-86400 seconds). Use descriptive hostnames that help with network
-          troubleshooting. Ensure forward DNS (A/AAAA) records exist for consistency.
+          {$t('education.bestPractices.content')}
         </p>
       </div>
     </div>
@@ -435,14 +436,6 @@
     align-items: flex-start;
     gap: var(--spacing-sm);
     color: var(--text-secondary);
-
-    code {
-      background-color: var(--bg-tertiary);
-      color: var(--text-primary);
-      padding: 2px var(--spacing-xs);
-      border-radius: var(--radius-sm);
-      font-family: var(--font-mono);
-    }
 
     strong {
       color: var(--text-primary);
@@ -931,14 +924,6 @@
       color: var(--text-secondary);
       line-height: 1.6;
       margin: 0;
-    }
-
-    code {
-      background-color: var(--bg-tertiary);
-      color: var(--text-primary);
-      padding: 2px var(--spacing-xs);
-      border-radius: var(--radius-sm);
-      font-family: var(--font-mono);
     }
   }
 

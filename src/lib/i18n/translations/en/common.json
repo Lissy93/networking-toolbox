@@ -35,6 +35,10 @@
     "excellent": "Excellent"
   },
 
+  "buttons": {
+    "copy": "Copy"
+  },
+
   "actions": {
     "save": "Save",
     "cancel": "Cancel",
@@ -42,6 +46,7 @@
     "edit": "Edit",
     "copy": "Copy",
     "copied": "Copied!",
+    "copyResults": "Copy Results",
     "close": "Close",
     "back": "Back",
     "next": "Next",
@@ -292,5 +297,73 @@
     "bits": "bits",
     "packets": "packets",
     "requests": "requests"
+  },
+
+  "meta": {
+    "titleSuffix": "Networking Toolbox",
+    "titleSeparator": " | ",
+    "defaultDescription": "All-in-one networking toolbox with 100+ tools for network analysis, IP calculations, DNS lookups, and system diagnostics",
+    "keywords": "networking tools, IP calculator, DNS lookup, subnet calculator, CIDR, IPv6, network diagnostics"
+  },
+
+  "content": {
+    "keyConceptsTitle": "Key Concepts",
+    "aboutTitle": "About {toolName}",
+    "examplesTitle": "Examples",
+    "usageTipsTitle": "Usage Tips",
+    "quickExamplesTitle": "Quick Examples",
+    "commonUseCasesTitle": "Common Use Cases",
+    "bestPracticesTitle": "Best Practices",
+    "relatedToolsTitle": "Related Tools",
+    "technicalDetailsTitle": "Technical Details",
+    "implementationNotesTitle": "Implementation Notes",
+    "learningResourcesTitle": "Learning Resources",
+    "troubleshootingTitle": "Troubleshooting",
+    "faqTitle": "Frequently Asked Questions"
+  },
+
+  "network": {
+    "networkAddress": "Network Address",
+    "broadcastAddress": "Broadcast Address",
+    "subnetMask": "Subnet Mask",
+    "wildcardMask": "Wildcard Mask",
+    "defaultGateway": "Default Gateway",
+    "dnsServer": "DNS Server",
+    "dhcpServer": "DHCP Server",
+    "ipAddress": "IP Address",
+    "ipv4Address": "IPv4 Address",
+    "ipv6Address": "IPv6 Address",
+    "macAddress": "MAC Address",
+    "hostsAvailable": "Hosts Available",
+    "usableHosts": "Usable Hosts",
+    "totalHosts": "Total Hosts",
+    "cidrNotation": "CIDR Notation",
+    "prefixLength": "Prefix Length",
+    "subnetRange": "Subnet Range",
+    "addressSpace": "Address Space",
+    "privateNetwork": "Private Network",
+    "publicNetwork": "Public Network",
+    "multicast": "Multicast",
+    "anycast": "Anycast",
+    "unicast": "Unicast",
+    "linkLocal": "Link Local",
+    "loopback": "Loopback"
+  },
+
+  "form": {
+    "placeholder": "Enter value...",
+    "selectOption": "Select an option",
+    "enterValue": "Enter a value",
+    "chooseFile": "Choose file",
+    "dropFileHere": "Drop file here",
+    "optional": "Optional",
+    "required": "Required",
+    "recommended": "Recommended",
+    "advanced": "Advanced options",
+    "basic": "Basic options",
+    "moreOptions": "More options",
+    "lessOptions": "Fewer options",
+    "showAdvanced": "Show advanced options",
+    "hideAdvanced": "Hide advanced options"
   }
 }
