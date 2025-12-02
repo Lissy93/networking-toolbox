@@ -1,0 +1,918 @@
+{
+  "dns-dmarc-check": {
+    "title": "DMARC Policy Checker",
+    "subtitle": "Analyze DMARC (Domain-based Message Authentication, Reporting & Conformance) policies",
+    "examples": {
+      "title": "DMARC Examples",
+      "items": {
+        "google": {
+          "description": "Google's comprehensive DMARC policy with strict enforcement"
+        },
+        "github": {
+          "description": "GitHub's enterprise DMARC configuration for developer platform security"
+        },
+        "microsoft": {
+          "description": "Microsoft's DMARC setup for Office 365 and enterprise email"
+        },
+        "paypal": {
+          "description": "PayPal's strict DMARC policy for financial service protection"
+        },
+        "amazon": {
+          "description": "Amazon's DMARC implementation for e-commerce platform security"
+        },
+        "salesforce": {
+          "description": "Salesforce's DMARC configuration for CRM and business email"
+        }
+      }
+    },
+    "form": {
+      "title": "DMARC Policy Check",
+      "domainLabel": "Domain Name",
+      "domainPlaceholder": "example.com",
+      "checkButton": "Check DMARC Policy"
+    },
+    "educational": {
+      "title": "Understanding DMARC",
+      "policies": {
+        "title": "DMARC Policies",
+        "none": "Monitor mode - collect data but take no action on failures",
+        "quarantine": "Mark suspicious messages, often sent to spam folder",
+        "reject": "Reject non-compliant messages outright (strongest security)"
+      },
+      "alignmentModes": {
+        "title": "Alignment Modes",
+        "relaxed": "Allows organizational domain matching (default)",
+        "strict": "Requires exact domain matching (more secure)"
+      },
+      "reportingTypes": {
+        "title": "Reporting Types",
+        "aggregate": "Daily summary reports of DMARC activity",
+        "forensic": "Real-time failure reports with message samples"
+      },
+      "bestPractices": {
+        "title": "Best Practices",
+        "items": {
+          "startMonitoring": "Start with p=none to monitor before enforcement",
+          "gradualEnforcement": "Gradually increase to p=quarantine then p=reject",
+          "setupReporting": "Set up aggregate reporting to monitor DMARC activity",
+          "strictAlignment": "Use strict alignment for enhanced security when possible",
+          "subdomainPolicy": "Consider subdomain policy for comprehensive coverage"
+        }
+      }
+    }
+  },
+
+  "httpPerf": {
+    "examples": {
+      "google": "Google homepage performance test",
+      "delay": "Delayed response simulation (2s)",
+      "github": "GitHub API response time analysis",
+      "cloudflare": "Cloudflare CDN performance measurement"
+    }
+  },
+
+  "email-spf-check": {
+    "title": "Email SPF Policy Checker",
+    "description": "Check SPF (Sender Policy Framework) records for email authentication and deliverability",
+    "examples": {
+      "title": "SPF Examples",
+      "gmail": "Google Gmail SPF policy analysis",
+      "outlook": "Microsoft Outlook SPF configuration",
+      "salesforce": "Salesforce SPF setup for CRM emails",
+      "mailchimp": "MailChimp email service SPF record",
+      "github": "GitHub enterprise SPF policy check",
+      "sendgrid": "SendGrid email platform SPF analysis"
+    },
+    "form": {
+      "title": "SPF Policy Check",
+      "domain": {
+        "label": "Domain Name",
+        "placeholder": "example.com"
+      },
+      "check": "Check SPF Policy"
+    }
+  },
+
+  "tls-versions": {
+    "title": "TLS Versions Probe",
+    "description": "Test which TLS protocol versions a server supports by attempting connections with different TLS version constraints. Identify deprecated versions and assess overall TLS security posture.",
+    "examples": {
+      "title": "TLS Version Examples",
+      "google": "Google TLS version support",
+      "github": "GitHub TLS versions",
+      "cloudflare": "Cloudflare TLS support",
+      "microsoft": "Microsoft TLS versions",
+      "amazon": "Amazon TLS configuration",
+      "facebook": "Facebook TLS versions"
+    },
+    "form": {
+      "title": "TLS Version Test",
+      "host": {
+        "label": "Host",
+        "placeholder": "google.com:443",
+        "tooltip": "Enter hostname with optional port (defaults to 443)",
+        "error": "Invalid host:port format"
+      },
+      "servername": {
+        "label": "Custom Server Name",
+        "placeholder": "example.com",
+        "tooltip": "Override SNI server name for virtual hosting",
+        "checkbox": "Use custom SNI servername"
+      },
+      "probe": "Probe TLS Versions",
+      "probing": "Probing TLS versions..."
+    },
+    "results": {
+      "title": "TLS Version Support Results",
+      "security": {
+        "title": "Overall Security Assessment",
+        "levels": {
+          "excellent": "Excellent",
+          "good": "Good",
+          "warning": "Needs Attention",
+          "poor": "Poor",
+          "critical": "Critical",
+          "unknown": "Unknown"
+        },
+        "descriptions": {
+          "excellent": "Only modern TLS versions supported",
+          "good": "Secure TLS versions only",
+          "warning": "Deprecated versions still supported",
+          "poor": "Only deprecated versions supported",
+          "critical": "No TLS versions detected",
+          "unknown": "No results available"
+        }
+      },
+      "versions": {
+        "title": "Version Support Details",
+        "supported": "Supported",
+        "supportedDeprecated": "Supported (Deprecated)",
+        "notSupported": "Not Supported"
+      },
+      "summary": {
+        "title": "Connection Summary",
+        "minVersion": "Minimum supported version",
+        "maxVersion": "Maximum supported version",
+        "preferredCipher": "Preferred cipher",
+        "certificateIssuer": "Certificate issuer",
+        "outOfTested": "Out of {count} tested"
+      }
+    },
+    "versions": {
+      "tls10": "TLS 1.0",
+      "tls11": "TLS 1.1",
+      "tls12": "TLS 1.2",
+      "tls13": "TLS 1.3"
+    },
+    "educational": {
+      "title": "Understanding TLS Versions",
+      "versionSecurity": {
+        "title": "TLS Version Security",
+        "tls13": "TLS 1.3: Latest version with improved security and performance",
+        "tls12": "TLS 1.2: Widely supported, secure when properly configured",
+        "tls11": "TLS 1.1: Deprecated, should not be used",
+        "tls10": "TLS 1.0: Deprecated, contains security vulnerabilities"
+      },
+      "bestPractices": {
+        "title": "Best Practices",
+        "enableModern": "Enable TLS 1.2 and 1.3 only",
+        "disableDeprecated": "Disable deprecated versions (TLS 1.0, 1.1)",
+        "updateRegularly": "Regularly update TLS implementations",
+        "strongCiphers": "Use strong cipher suites"
+      },
+      "compliance": {
+        "title": "Compliance Requirements",
+        "description": "Many compliance standards (PCI DSS, HIPAA) require disabling deprecated TLS versions. Check your specific requirements."
+      }
+    },
+    "warnings": {
+      "deprecated": "This version is deprecated and should not be used"
+    }
+  },
+
+  "http-ping": {
+    "title": "HTTP Ping",
+    "description": "Test HTTP response times and connectivity by sending multiple requests to a URL. Analyze latency, response times, and success rates for web services and APIs.",
+    "examples": {
+      "google": "Google homepage",
+      "github": "GitHub homepage",
+      "githubApi": "GitHub API",
+      "delay": "Simulated 1s delay",
+      "cloudflare": "Cloudflare CDN",
+      "stackoverflow": "Stack Overflow"
+    },
+    "form": {
+      "title": "HTTP Ping Configuration",
+      "url": {
+        "label": "Target URL",
+        "placeholder": "https://example.com",
+        "tooltip": "Enter the URL to test"
+      },
+      "method": {
+        "label": "HTTP Method",
+        "options": {
+          "head": "HEAD - Headers only, fastest",
+          "get": "GET - Full response, more realistic"
+        }
+      },
+      "count": {
+        "label": "Ping Count",
+        "tooltip": "Number of requests to send"
+      },
+      "timeout": {
+        "label": "Timeout (ms)",
+        "tooltip": "Maximum time to wait for each request"
+      },
+      "start": "Start HTTP Ping",
+      "starting": "Starting HTTP ping...",
+      "stop": "Stop Ping",
+      "pinging": "Pinging..."
+    },
+    "results": {
+      "title": "HTTP Ping Results",
+      "summary": {
+        "title": "Statistics Summary",
+        "requests": "Requests",
+        "successful": "Successful",
+        "failed": "Failed",
+        "successRate": "Success Rate",
+        "avgResponseTime": "Average Response Time",
+        "minResponseTime": "Minimum Response Time",
+        "maxResponseTime": "Maximum Response Time",
+        "totalTime": "Total Time"
+      },
+      "details": {
+        "title": "Request Details",
+        "request": "Request",
+        "status": "Status",
+        "responseTime": "Response Time",
+        "error": "Error"
+      },
+      "status": {
+        "success": "Success",
+        "failed": "Failed",
+        "timeout": "Timeout"
+      }
+    },
+    "educational": {
+      "title": "Understanding HTTP Ping",
+      "whatIs": {
+        "title": "What is HTTP Ping?",
+        "description": "HTTP Ping tests web service availability and performance by sending HTTP requests and measuring response times. Unlike ICMP ping, it tests the actual web service functionality."
+      },
+      "methods": {
+        "title": "HTTP Methods",
+        "head": "HEAD: Retrieves headers only, minimal bandwidth usage",
+        "get": "GET: Downloads full response, more realistic test"
+      },
+      "useCase": {
+        "title": "Common Use Cases",
+        "monitoring": "Web service monitoring and health checks",
+        "performance": "Performance testing and optimization",
+        "troubleshooting": "Network and application troubleshooting",
+        "api": "API endpoint testing and validation"
+      }
+    }
+  },
+
+  "mx-health": {
+    "title": "Email MX Health Checker",
+    "description": "Check mail server (MX) health including DNS resolution and optional SMTP port connectivity testing. Verify your email infrastructure is properly configured and reachable.",
+    "examples": {
+      "title": "MX Health Examples",
+      "gmail": "Google Gmail MX infrastructure",
+      "outlook": "Microsoft Outlook mail servers",
+      "yahoo": "Yahoo Mail MX configuration",
+      "protonmail": "ProtonMail secure email setup",
+      "fastmail": "FastMail professional hosting",
+      "github": "GitHub enterprise email setup"
+    },
+    "form": {
+      "title": "MX Health Check",
+      "domain": {
+        "label": "Domain Name",
+        "placeholder": "example.com"
+      },
+      "checkPorts": {
+        "label": "Check SMTP port connectivity (25, 587, 465)"
+      },
+      "check": "Check MX Health",
+      "checking": "Checking MX Health..."
+    },
+    "results": {
+      "title": "MX Health Results",
+      "summary": {
+        "healthy": "Mail Infrastructure Healthy",
+        "issues": "Mail Infrastructure Issues",
+        "resolvedSuccessfully": "{healthy} of {total} MX records resolved successfully",
+        "reachableViaSmtp": "• {reachable} reachable via SMTP"
+      },
+      "stats": {
+        "mxRecords": "MX Records",
+        "healthy": "Healthy",
+        "reachable": "Reachable"
+      }
+    },
+    "ports": {
+      "25": "SMTP (Standard)",
+      "587": "Submission (TLS)",
+      "465": "SMTPS (SSL)",
+      "generic": "Port {port}"
+    },
+    "copy": {
+      "title": "MX Health Check for {domain}",
+      "summary": "Summary:",
+      "totalMx": "Total MX records: {count}",
+      "healthyMx": "Healthy MX records: {count}",
+      "reachableMx": "Reachable MX records: {count}",
+      "overallHealth": "Overall health: {status}",
+      "redundancy": "Redundancy: {status}",
+      "mxRecordsByPriority": "MX Records (by priority):",
+      "priority": "(Priority: {priority})",
+      "error": "Error: {error}",
+      "ipv4": "IPv4: {addresses}",
+      "ipv6": "IPv6: {addresses}",
+      "none": "None",
+      "portChecks": "Port checks:",
+      "open": "Open",
+      "closed": "Closed",
+      "healthy": "Healthy",
+      "issuesDetected": "Issues detected",
+      "yes": "Yes",
+      "no": "No"
+    }
+  },
+
+  "ocsp-stapling": {
+    "title": "OCSP Stapling Check",
+    "description": "Report if server staples OCSP and basic status info",
+    "examples": {
+      "cloudflare": "Cloudflare - OCSP stapling enabled",
+      "digicert": "DigiCert - OCSP stapling enabled",
+      "github": "GitHub - OCSP stapling disabled"
+    },
+    "form": {
+      "title": "OCSP Stapling Configuration",
+      "hostname": {
+        "label": "Hostname and Port",
+        "placeholder": "example.com",
+        "tooltip": "Enter hostname to test OCSP stapling",
+        "error": "Please enter a hostname"
+      },
+      "port": {
+        "label": "Port",
+        "placeholder": "443",
+        "tooltip": "TLS port to test (default: 443)"
+      },
+      "check": "Check",
+      "checking": "Checking..."
+    },
+    "results": {
+      "title": "OCSP Stapling Results",
+      "status": {
+        "title": "OCSP Stapling Status",
+        "enabled": {
+          "title": "OCSP Stapling Enabled",
+          "description": "This server provides OCSP responses with the TLS handshake"
+        },
+        "disabled": {
+          "title": "OCSP Stapling Not Enabled",
+          "description": "This server does not staple OCSP responses"
+        }
+      },
+      "details": {
+        "title": "OCSP Response Details",
+        "certificateStatus": "Certificate Status",
+        "responseStatus": "Response Status",
+        "thisUpdate": "This Update",
+        "nextUpdate": "Next Update",
+        "producedAt": "Produced At",
+        "responderUrl": "Responder URL"
+      },
+      "validity": {
+        "title": "Response Validity",
+        "validFor": "Valid For",
+        "expiresIn": "Expires In",
+        "progressLabel": "Validity Period Progress"
+      },
+      "certificate": {
+        "title": "Certificate Information",
+        "subject": "Subject",
+        "issuer": "Issuer",
+        "ocspUrls": "OCSP URLs"
+      },
+      "recommendations": {
+        "title": "Recommendations"
+      }
+    },
+    "loading": {
+      "title": "Checking OCSP Stapling",
+      "description": "Connecting to server and analyzing OCSP response stapling..."
+    },
+    "educational": {
+      "title": "Understanding OCSP Stapling",
+      "whatIs": {
+        "title": "What is OCSP Stapling?",
+        "description": "OCSP Stapling is a security feature where the server includes a certificate status response during the TLS handshake. This eliminates the need for clients to contact the Certificate Authority directly to check if a certificate has been revoked."
+      },
+      "whyImportant": {
+        "title": "Why is it Important?",
+        "privacy": "Privacy: Prevents CA from tracking user browsing",
+        "performance": "Performance: Faster connections, no extra DNS lookups",
+        "reliability": "Reliability: Works even if OCSP responder is down",
+        "security": "Security: Real-time certificate validation"
+      },
+      "howItWorks": {
+        "title": "How It Works",
+        "description": "The server periodically queries the OCSP responder and caches the response. During TLS handshake, the server \"staples\" this cached response to the certificate, proving its validity without requiring the client to make additional network requests."
+      },
+      "checkingStatus": {
+        "title": "Checking Status",
+        "description": "This tool connects to servers with OCSP stapling enabled and analyzes the stapled response. It checks certificate status, response validity, timing information, and provides recommendations for servers without stapling enabled."
+      }
+    },
+    "errors": {
+      "checkFailed": "OCSP Check Failed",
+      "failedToCheck": "Failed to check OCSP stapling"
+    }
+  },
+
+  "dnssec-adflag": {
+    "title": "DNSSEC AD Flag Checker",
+    "description": "Query DNS records via DoH and report if the AD (Authenticated Data) bit is set. The AD bit indicates whether the DNS response has been cryptographically verified through DNSSEC validation.",
+
+    "recordTypes": {
+      "a": "IPv4 address records",
+      "aaaa": "IPv6 address records",
+      "cname": "Canonical name records",
+      "mx": "Mail exchange records",
+      "txt": "Text records",
+      "ns": "Name server records",
+      "soa": "Start of authority records"
+    },
+
+    "examples": {
+      "title": "Example DNSSEC Tests",
+      "cloudflare": "DNSSEC-signed domain",
+      "dnssecFailed": "DNSSEC validation failure test",
+      "example": "Unsigned domain example",
+      "google": "Popular signed domain",
+      "iana": "Internet registry domain"
+    },
+
+    "form": {
+      "title": "DNSSEC Query Configuration",
+      "domain": {
+        "label": "Domain Name",
+        "tooltip": "Enter a domain name to check DNSSEC validation status"
+      },
+      "recordType": {
+        "label": "Record Type",
+        "tooltip": "Select the DNS record type to query"
+      },
+      "resolver": {
+        "label": "DoH Resolver",
+        "tooltip": "Choose a DNS-over-HTTPS resolver for the query"
+      },
+      "button": {
+        "check": "Check DNSSEC",
+        "checking": "Checking DNSSEC..."
+      }
+    },
+
+    "results": {
+      "title": "DNSSEC Status for {{domain}}",
+      "copyRawJson": "Copy Raw JSON",
+      "query": {
+        "label": "Query",
+        "tooltip": "The domain and record type that was queried"
+      },
+      "resolver": {
+        "label": "DoH Resolver",
+        "tooltip": "DNS-over-HTTPS resolver used for the query"
+      },
+      "validation": {
+        "title": "DNSSEC Validation Status",
+        "adFlag": {
+          "title": "AD (Authenticated Data) Flag",
+          "set": "SET - Response is DNSSEC validated",
+          "notSet": "NOT SET - Response is not validated"
+        },
+        "cdFlag": {
+          "title": "CD (Checking Disabled) Flag",
+          "message": "SET - DNSSEC validation was disabled for this query"
+        },
+        "responseCode": {
+          "title": "Response Code"
+        }
+      },
+      "explanation": {
+        "title": "Explanation"
+      }
+    },
+
+    "error": {
+      "title": "DNSSEC Check Failed",
+      "troubleshooting": {
+        "title": "Troubleshooting Tips",
+        "domain": "Ensure the domain name is valid and exists",
+        "recordType": "Try a different record type if the current one doesn't exist",
+        "resolver": "Switch to a different DoH resolver",
+        "records": "Some domains may not have the requested record type"
+      }
+    },
+
+    "education": {
+      "title": "About DNSSEC and the AD Flag",
+      "dnssec": {
+        "title": "What is DNSSEC?",
+        "description": "DNS Security Extensions (DNSSEC) adds cryptographic authentication to DNS responses, protecting against DNS spoofing and cache poisoning attacks by ensuring response integrity."
+      },
+      "adFlag": {
+        "title": "The AD (Authenticated Data) Flag",
+        "description": "The AD bit in DNS responses indicates that the resolver has successfully validated the response using DNSSEC. When set, you can trust the response hasn't been tampered with."
+      },
+      "doh": {
+        "title": "Why Use DoH for DNSSEC?",
+        "description": "DNS-over-HTTPS preserves DNSSEC validation status in the AD flag, while traditional DNS queries may not expose this information clearly to clients."
+      },
+      "interpreting": {
+        "title": "Interpreting Results",
+        "adSet": {
+          "title": "AD Set",
+          "description": "Response is cryptographically verified"
+        },
+        "adNotSet": {
+          "title": "AD Not Set",
+          "description": "Domain unsigned, validation failed, or resolver doesn't validate"
+        },
+        "cdSet": {
+          "title": "CD Set",
+          "description": "Validation was disabled for this query"
+        },
+        "servfail": {
+          "title": "SERVFAIL",
+          "description": "May indicate DNSSEC validation failure"
+        }
+      }
+    }
+  },
+
+  "http-ping": {
+    "title": "HTTP Ping",
+    "description": "Measure HTTP/HTTPS response latency by sending repeated requests and analyzing timing statistics. Alternative to ICMP ping for web services and APIs.",
+
+    "examples": {
+      "title": "HTTP Ping Examples",
+      "google": "Search engine response test",
+      "github": "Developer platform connectivity",
+      "githubApi": "API endpoint performance",
+      "delay": "Simulated delay testing",
+      "cloudflare": "CDN response analysis",
+      "stackoverflow": "Community site performance"
+    },
+
+    "form": {
+      "title": "HTTP Ping Configuration",
+      "url": {
+        "label": "Target URL",
+        "tooltip": "Enter a complete HTTP or HTTPS URL",
+        "error": "Must be a valid HTTP or HTTPS URL"
+      },
+      "method": {
+        "label": "HTTP Method",
+        "options": {
+          "head": "Headers only, fastest and most efficient",
+          "get": "Full response, more realistic timing",
+          "options": "Preflight requests"
+        }
+      },
+      "count": {
+        "label": "Request Count",
+        "tooltip": "Number of requests to send (1-20)"
+      },
+      "timeout": {
+        "label": "Timeout (ms)",
+        "tooltip": "Timeout per request in milliseconds"
+      },
+      "button": {
+        "start": "Start HTTP Ping",
+        "pinging": "Pinging..."
+      }
+    },
+
+    "results": {
+      "title": "HTTP Ping Results",
+      "copy": "Copy Results",
+      "latency": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "fair": "Fair",
+        "poor": "Poor"
+      },
+      "summary": {
+        "successful": "Successful requests",
+        "failed": "Failed requests"
+      },
+      "statistics": {
+        "title": "Latency Statistics",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "average": "Average",
+        "median": "Median",
+        "p95": "95th Percentile",
+        "range": "Range"
+      },
+      "individual": {
+        "title": "Individual Request Results"
+      },
+      "errors": {
+        "title": "Request Errors ({{count}})"
+      },
+      "info": {
+        "title": "Request Information",
+        "url": "URL",
+        "method": "Method",
+        "successRate": "Success Rate"
+      }
+    },
+
+    "error": {
+      "title": "HTTP Ping Failed"
+    },
+
+    "education": {
+      "title": "Understanding HTTP Ping",
+      "httpVsIcmp": {
+        "title": "HTTP vs ICMP Ping",
+        "http": {
+          "title": "HTTP",
+          "description": "Tests application layer connectivity"
+        },
+        "icmp": {
+          "title": "ICMP",
+          "description": "Tests network layer connectivity"
+        },
+        "userExperience": "HTTP ping better reflects real user experience",
+        "firewalls": "Works through firewalls that block ICMP"
+      },
+      "methods": {
+        "title": "Request Methods",
+        "head": {
+          "title": "HEAD",
+          "description": "Headers only, fastest and most efficient"
+        },
+        "get": {
+          "title": "GET",
+          "description": "Full response, more realistic timing"
+        },
+        "options": {
+          "title": "OPTIONS",
+          "description": "Check allowed methods and CORS"
+        }
+      },
+      "latencyGuide": {
+        "title": "Latency Guidelines"
+      }
+    }
+  },
+
+  "mx-health": {
+    "title": "Email MX Health Checker",
+    "description": "Check mail server (MX) health including DNS resolution and optional SMTP port connectivity testing. Verify your email infrastructure is properly configured and reachable.",
+
+    "examples": {
+      "title": "MX Health Examples",
+      "tooltip": "Check MX health for {{domain}}",
+      "gmail": "Google's email infrastructure",
+      "outlook": "Microsoft's email service",
+      "yahoo": "Yahoo's mail system",
+      "protonmail": "ProtonMail secure email",
+      "fastmail": "FastMail email service",
+      "github": "GitHub's email system"
+    },
+
+    "form": {
+      "title": "MX Health Check",
+      "domain": {
+        "label": "Domain Name",
+        "placeholder": "example.com"
+      },
+      "checkPorts": {
+        "label": "Check SMTP port connectivity (25, 587, 465)"
+      },
+      "button": {
+        "check": "Check MX Health",
+        "checking": "Checking MX Health..."
+      },
+      "check": "Check MX Health"
+    },
+
+    "results": {
+      "title": "MX Health Results",
+      "copy": "Copy Results",
+      "healthy": "Healthy",
+      "issuesDetected": "Issues detected",
+      "summary": {
+        "healthy": "Mail Infrastructure Healthy",
+        "issues": "Mail Infrastructure Issues"
+      },
+      "stats": {
+        "mxRecords": "MX Records",
+        "healthy": "Healthy",
+        "reachable": "Reachable",
+        "redundancy": "Redundancy"
+      },
+      "mxRecords": {
+        "title": "MX Records (by priority)",
+        "ipv4": "IPv4 Addresses",
+        "ipv6": "IPv6 Addresses",
+        "portConnectivity": "SMTP Port Connectivity",
+        "open": "Open",
+        "closed": "Closed"
+      }
+    },
+
+    "ports": {
+      "smtp": "SMTP (Standard)",
+      "submission": "Submission (TLS)",
+      "smtps": "SMTPS (SSL)",
+      "custom": "Port {{port}}"
+    },
+
+    "error": {
+      "title": "MX Health Check Failed",
+      "unknown": "Unknown error occurred"
+    },
+
+    "education": {
+      "title": "Understanding MX Records",
+      "basics": {
+        "title": "MX Record Basics",
+        "priority": {
+          "title": "Priority",
+          "description": "Lower numbers have higher priority"
+        },
+        "exchange": {
+          "title": "Exchange",
+          "description": "The mail server hostname"
+        },
+        "redundancy": {
+          "title": "Redundancy",
+          "description": "Multiple MX records provide failover"
+        },
+        "loadBalancing": {
+          "title": "Load balancing",
+          "description": "Equal priorities distribute load"
+        }
+      },
+      "smtpPorts": {
+        "title": "SMTP Ports",
+        "port25": {
+          "title": "Port 25",
+          "description": "Standard SMTP (server-to-server)"
+        },
+        "port587": {
+          "title": "Port 587",
+          "description": "Mail submission (client-to-server, TLS)"
+        },
+        "port465": {
+          "title": "Port 465",
+          "description": "SMTPS (deprecated but still used)"
+        }
+      },
+      "healthIndicators": {
+        "title": "Health Indicators",
+        "allResolve": "All MX records should resolve to IP addresses",
+        "oneReachable": "At least one SMTP port should be reachable",
+        "multipleRedundancy": "Multiple MX records provide redundancy",
+        "lowerPriority": "Lower priority servers should be reachable"
+      },
+      "commonIssues": {
+        "title": "Common Issues",
+        "nonExistentHosts": "MX pointing to non-existent hosts",
+        "portsBlocked": "All SMTP ports blocked by firewall",
+        "singlePoint": "Single point of failure (one MX record)",
+        "incorrectPriority": "Incorrect priority configuration"
+      }
+    }
+  },
+  "alpn": {
+    "title": "TLS ALPN Negotiation",
+    "description": "Test Application-Layer Protocol Negotiation (ALPN) to see which protocol a server selects from your offered list. Commonly used to negotiate HTTP/2, HTTP/3, or other application protocols during TLS handshake.",
+    "examples": {
+      "title": "ALPN Examples",
+      "google": "Test Google's HTTP/2 support",
+      "github": "Check GitHub's modern protocol support",
+      "cloudflare": "Test Cloudflare's HTTP/3 implementation",
+      "wikipedia": "Check Wikipedia's protocol negotiation",
+      "cdn": "Test CDN protocol optimization",
+      "api": "Check API endpoint protocol support",
+      "tooltip": "Test ALPN for {{host}} ({{description}})"
+    },
+    "protocols": {
+      "standard": "Most common combination for modern web",
+      "experimental": "Includes experimental HTTP/3 support",
+      "http2Only": "HTTP/2 only, no fallback to HTTP/1.1",
+      "fallback": "HTTP/1.1 fallback for legacy servers"
+    },
+    "protocolInfo": {
+      "h3": {
+        "name": "HTTP/3",
+        "description": "Latest HTTP version over QUIC"
+      },
+      "h2": {
+        "name": "HTTP/2",
+        "description": "Binary, multiplexed HTTP protocol"
+      },
+      "http11": {
+        "name": "HTTP/1.1",
+        "description": "Traditional HTTP protocol"
+      },
+      "http10": {
+        "name": "HTTP/1.0",
+        "description": "Legacy HTTP protocol"
+      },
+      "unknown": {
+        "description": "Custom or unknown protocol"
+      }
+    },
+    "status": {
+      "unknown": "Unknown",
+      "successful": "Successful",
+      "failed": "Failed",
+      "noSelection": "No Selection",
+      "noResults": "No results available",
+      "serverSelected": "Server selected {{protocol}}",
+      "noNegotiation": "No protocol was negotiated",
+      "noProtocolSelected": "Server did not select any protocol"
+    },
+    "form": {
+      "title": "ALPN Negotiation Configuration",
+      "hostLabel": "Host:Port",
+      "hostTooltip": "Enter hostname:port (e.g., google.com:443)",
+      "invalidHost": "Invalid host:port format",
+      "protocolsLabel": "ALPN Protocols",
+      "protocolsTooltip": "Comma-separated list of protocols to offer (e.g., h2,http/1.1)",
+      "quickSelect": "Quick select:",
+      "customSni": "Use custom SNI servername",
+      "sniTooltip": "Custom servername for SNI (Server Name Indication)",
+      "testing": "Testing ALPN...",
+      "testButton": "Test ALPN Negotiation"
+    },
+    "results": {
+      "title": "ALPN Negotiation Results",
+      "copied": "Copied!",
+      "copyButton": "Copy Results",
+      "negotiationStatus": "Negotiation: {{status}}",
+      "tlsVersion": "TLS Version: {{version}}",
+      "connectionEstablished": "Connection established successfully",
+      "protocolDetails": "Protocol Negotiation Details",
+      "requestedProtocols": "Requested Protocols",
+      "priority": "Priority {{priority}}",
+      "selectedProtocol": "Selected Protocol",
+      "noProtocolSelected": "No protocol was selected by the server",
+      "connectionInfo": "Connection Information",
+      "serverName": "Server Name:",
+      "tlsVersionLabel": "TLS Version:"
+    },
+    "copy": {
+      "header": "ALPN Negotiation Results for {{host}}",
+      "generatedAt": "Generated at: {{timestamp}}",
+      "requestedProtocols": "Requested Protocols: {{protocols}}",
+      "negotiatedProtocol": "Negotiated Protocol: {{protocol}}",
+      "tlsVersion": "TLS Version: {{version}}",
+      "success": "Success: {{success}}",
+      "none": "None",
+      "unknown": "Unknown",
+      "yes": "Yes",
+      "no": "No",
+      "negotiationStatus": "Negotiation Status: {{status}}",
+      "description": "Description: {{description}}",
+      "selectedProtocolInfo": "Selected Protocol Info:",
+      "name": "  Name: {{name}}",
+      "protocolDescription": "  Description: {{description}}"
+    },
+    "error": {
+      "title": "ALPN Negotiation Failed"
+    },
+    "info": {
+      "title": "Understanding ALPN",
+      "whatIsAlpn": {
+        "title": "What is ALPN?",
+        "description": "Application-Layer Protocol Negotiation (ALPN) is a TLS extension that allows the client and server to negotiate which application protocol to use during the TLS handshake."
+      },
+      "commonProtocols": {
+        "title": "Common Protocols",
+        "h2": "HTTP/2 - Binary, multiplexed protocol",
+        "h3": "HTTP/3 - Latest HTTP over QUIC",
+        "http11": "Traditional HTTP/1.1",
+        "spdy": "Legacy SPDY protocol"
+      },
+      "priority": {
+        "title": "Protocol Priority",
+        "description": "Protocols are offered in preference order. The server selects the first protocol from your list that it supports. Order matters!"
+      }
+    }
+  }
+}

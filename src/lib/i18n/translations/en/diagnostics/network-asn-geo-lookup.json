@@ -1,0 +1,95 @@
+{
+  "title": "ASN & Geolocation Lookup",
+  "subtitle": "Look up IP address geolocation, ISP, and autonomous system information",
+
+  "examples": {
+    "title": "Example Lookups",
+    "items": {
+      "googleDNS": {
+        "ip": "8.8.8.8",
+        "description": "Google Public DNS",
+        "tooltip": "Look up 8.8.8.8"
+      },
+      "m247": {
+        "ip": "2.58.47.0",
+        "description": "M247 Proton",
+        "tooltip": "Look up 2.58.47.0"
+      },
+      "cloudflareDNS": {
+        "ip": "1.1.1.1",
+        "description": "Cloudflare DNS",
+        "tooltip": "Look up 1.1.1.1"
+      },
+      "github": {
+        "ip": "140.82.121.4",
+        "description": "GitHub",
+        "tooltip": "Look up 140.82.121.4"
+      },
+      "fastly": {
+        "ip": "151.101.1.140",
+        "description": "Fastly CDN",
+        "tooltip": "Look up 151.101.1.140"
+      },
+      "cloudflareIPv6": {
+        "ip": "2606:4700:4700::1111",
+        "description": "Cloudflare IPv6",
+        "tooltip": "Look up 2606:4700:4700::1111"
+      }
+    }
+  },
+
+  "form": {
+    "title": "IP Lookup",
+    "ipLabel": "IP Address",
+    "ipTooltip": "Enter an IPv4 or IPv6 address",
+    "ipPlaceholder": "8.8.8.8 or 2001:4860:4860::8888",
+    "lookingUp": "Looking up...",
+    "lookupButton": "Lookup"
+  },
+
+  "results": {
+    "title": "Results for {ip}",
+    "copyButton": "Copy Results",
+    "copied": "Copied!",
+
+    "networkInfo": {
+      "title": "Network Information",
+      "asn": "ASN",
+      "organization": "Organization",
+      "isp": "ISP"
+    },
+
+    "geoLocation": {
+      "title": "Geographic Location",
+      "country": "Country",
+      "region": "Region",
+      "city": "City",
+      "timezone": "Timezone"
+    },
+
+    "coordinates": {
+      "title": "Coordinates",
+      "latitude": "Latitude:",
+      "longitude": "Longitude:",
+      "viewMap": "View full map"
+    },
+
+    "connectionType": {
+      "title": "Connection Type",
+      "mobile": "Mobile Network",
+      "proxy": "Proxy/VPN",
+      "hosting": "Hosting/Datacenter"
+    }
+  },
+
+  "error": {
+    "title": "Lookup Failed"
+  },
+
+  "info": {
+    "title": "About ASN & Geolocation",
+    "quickTips": {
+      "title": "Quick Tips"
+    }
+  }
+}

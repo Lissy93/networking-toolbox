@@ -4,6 +4,7 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
   import {
     buildOption121,
     parseOption121,
@@ -13,10 +14,10 @@
     type ParsedClasslessRoutes,
   } from '$lib/utils/dhcp-option121.js';
 
-  const modeOptions = [
-    { value: 'encode' as const, label: 'Encode', icon: 'wrench' },
-    { value: 'decode' as const, label: 'Decode', icon: 'search' },
-  ];
+  const modeOptions = $derived([
+    { value: 'encode' as const, label: $t('tools/dhcp-option121-builder.modes.encode'), icon: 'wrench' },
+    { value: 'decode' as const, label: $t('tools/dhcp-option121-builder.modes.decode'), icon: 'search' },
+  ]);
 
   let mode = $state<'encode' | 'decode'>('encode');
   let config = $state<ClasslessRoutesConfig>({
@@ -49,51 +50,51 @@
     description: string;
   }
 
-  const encodeExamples: EncodeExample[] = [
+  const encodeExamples = $derived<EncodeExample[]>([
     {
-      label: 'Private Networks',
+      label: $t('tools/dhcp-option121-builder.encodeExamples.privateNetworks.label'),
       routes: [
         { destination: '10.0.0.0/8', gateway: '192.168.1.1' },
         { destination: '172.16.0.0/12', gateway: '192.168.1.1' },
       ],
-      description: 'Routes to RFC 1918 private networks',
+      description: $t('tools/dhcp-option121-builder.encodeExamples.privateNetworks.description'),
     },
     {
-      label: 'Default + Specific',
+      label: $t('tools/dhcp-option121-builder.encodeExamples.defaultSpecific.label'),
       routes: [
         { destination: '0.0.0.0/0', gateway: '192.168.1.1' },
         { destination: '10.10.0.0/16', gateway: '192.168.1.254' },
       ],
-      description: 'Default route with specific override',
+      description: $t('tools/dhcp-option121-builder.encodeExamples.defaultSpecific.description'),
     },
     {
-      label: 'Multi-site VPN',
+      label: $t('tools/dhcp-option121-builder.encodeExamples.multiSiteVPN.label'),
       routes: [
         { destination: '10.1.0.0/16', gateway: '192.168.1.10' },
         { destination: '10.2.0.0/16', gateway: '192.168.1.20' },
         { destination: '10.3.0.0/16', gateway: '192.168.1.30' },
       ],
-      description: 'Multiple VPN site routes',
+      description: $t('tools/dhcp-option121-builder.encodeExamples.multiSiteVPN.description'),
     },
-  ];
+  ]);
 
-  const decodeExamples: DecodeExample[] = [
+  const decodeExamples = $derived<DecodeExample[]>([
     {
-      label: 'Private Networks',
+      label: $t('tools/dhcp-option121-builder.decodeExamples.privateNetworks.label'),
       hexInput: '080ac0a801010cac10c0a80101',
-      description: '10.0.0.0/8 and 172.16.0.0/12 via 192.168.1.1',
+      description: $t('tools/dhcp-option121-builder.decodeExamples.privateNetworks.description'),
     },
     {
-      label: 'Default Route',
+      label: $t('tools/dhcp-option121-builder.decodeExamples.defaultRoute.label'),
       hexInput: '00c0a80101',
-      description: '0.0.0.0/0 via 192.168.1.1',
+      description: $t('tools/dhcp-option121-builder.decodeExamples.defaultRoute.description'),
     },
     {
-      label: 'Specific /24',
+      label: $t('tools/dhcp-option121-builder.decodeExamples.specific24.label'),
       hexInput: '18c0a80ac0a80101',
-      description: '192.168.10.0/24 via 192.168.1.1',
+      description: $t('tools/dhcp-option121-builder.decodeExamples.specific24.description'),
     },
-  ];
+  ]);
 
   // Reactive generation - use untrack to prevent infinite loop
   $effect(() => {
@@ -130,26 +131,26 @@
 
     // Validate routes
     if (cfg.routes.length === 0) {
-      routeErrors.push('At least one route is required');
+      routeErrors.push($t('tools/dhcp-option121-builder.errors.atLeastOneRoute'));
     }
 
     for (let i = 0; i < cfg.routes.length; i++) {
       const route = cfg.routes[i];
 
       if (!route.destination.trim()) {
-        routeErrors.push(`Route ${i + 1}: Destination is required`);
+        routeErrors.push($t('tools/dhcp-option121-builder.errors.destinationRequired', { number: i + 1 }));
         continue;
       }
 
       if (!route.gateway.trim()) {
-        routeErrors.push(`Route ${i + 1}: Gateway is required`);
+        routeErrors.push($t('tools/dhcp-option121-builder.errors.gatewayRequired', { number: i + 1 }));
         continue;
       }
 
       // Validate CIDR format
       const cidrMatch = route.destination.match(/^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\/(\d{1,2})$/);
       if (!cidrMatch) {
-        routeErrors.push(`Route ${i + 1}: Invalid CIDR notation (use format: x.x.x.x/y)`);
+        routeErrors.push($t('tools/dhcp-option121-builder.errors.invalidCIDR', { number: i + 1 }));
         continue;
       }
 
@@ -157,32 +158,32 @@
       const prefixLen = parseInt(prefixLenStr, 10);
 
       if (prefixLen < 0 || prefixLen > 32) {
-        routeErrors.push(`Route ${i + 1}: Prefix length must be 0-32`);
+        routeErrors.push($t('tools/dhcp-option121-builder.errors.invalidPrefixLength', { number: i + 1 }));
         continue;
       }
 
       // Validate IPv4 address in CIDR
       const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
       if (!ipv4Regex.test(prefix)) {
-        routeErrors.push(`Route ${i + 1}: Invalid IPv4 address in destination`);
+        routeErrors.push($t('tools/dhcp-option121-builder.errors.invalidIPv4Dest', { number: i + 1 }));
         continue;
       }
 
       const octets = prefix.split('.').map((o) => parseInt(o, 10));
       if (octets.some((o) => o > 255)) {
-        routeErrors.push(`Route ${i + 1}: Invalid IPv4 address (octets must be 0-255)`);
+        routeErrors.push($t('tools/dhcp-option121-builder.errors.invalidIPv4Octets', { number: i + 1 }));
         continue;
       }
 
       // Validate gateway
       if (!ipv4Regex.test(route.gateway)) {
-        routeErrors.push(`Route ${i + 1}: Invalid gateway IPv4 address`);
+        routeErrors.push($t('tools/dhcp-option121-builder.errors.invalidGateway', { number: i + 1 }));
         continue;
       }
 
       const gwOctets = route.gateway.split('.').map((o) => parseInt(o, 10));
       if (gwOctets.some((o) => o > 255)) {
-        routeErrors.push(`Route ${i + 1}: Invalid gateway address (octets must be 0-255)`);
+        routeErrors.push($t('tools/dhcp-option121-builder.errors.invalidGatewayOctets', { number: i + 1 }));
         continue;
       }
     }
@@ -192,19 +193,19 @@
       const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
 
       if (cfg.network.subnet && cfg.network.subnet.trim() && !ipv4Regex.test(cfg.network.subnet)) {
-        netErrors.push('Invalid subnet address');
+        netErrors.push($t('tools/dhcp-option121-builder.errors.invalidSubnet'));
       }
 
       if (cfg.network.netmask && cfg.network.netmask.trim() && !ipv4Regex.test(cfg.network.netmask)) {
-        netErrors.push('Invalid netmask');
+        netErrors.push($t('tools/dhcp-option121-builder.errors.invalidNetmask'));
       }
 
       if (cfg.network.rangeStart && cfg.network.rangeStart.trim() && !ipv4Regex.test(cfg.network.rangeStart)) {
-        netErrors.push('Invalid range start address');
+        netErrors.push($t('tools/dhcp-option121-builder.errors.invalidRangeStart'));
       }
 
       if (cfg.network.rangeEnd && cfg.network.rangeEnd.trim() && !ipv4Regex.test(cfg.network.rangeEnd)) {
-        netErrors.push('Invalid range end address');
+        netErrors.push($t('tools/dhcp-option121-builder.errors.invalidRangeEnd'));
       }
     }
 
@@ -215,7 +216,9 @@
       try {
         result = buildOption121(cfg);
       } catch (error) {
-        validationErrors = [error instanceof Error ? error.message : 'Encoding failed'];
+        validationErrors = [
+          error instanceof Error ? error.message : $t('tools/dhcp-option121-builder.errors.encodingFailed'),
+        ];
         result = null;
       }
     } else {
@@ -231,7 +234,7 @@
     }
 
     if (!/^[0-9a-fA-F\s:]+$/.test(decodeInput)) {
-      validationErrors = ['Invalid hex input: only hexadecimal characters allowed'];
+      validationErrors = [$t('tools/dhcp-option121-builder.errors.invalidHex')];
       decodeResult = null;
       return;
     }
@@ -240,7 +243,9 @@
       validationErrors = [];
       decodeResult = parseOption121(decodeInput);
     } catch (error) {
-      validationErrors = [error instanceof Error ? error.message : 'Decoding failed'];
+      validationErrors = [
+        error instanceof Error ? error.message : $t('tools/dhcp-option121-builder.errors.decodingFailed'),
+      ];
       decodeResult = null;
     }
   }
@@ -310,8 +315,8 @@
 </script>
 
 <ToolContentContainer
-  title="DHCP Option 121/249 - Classless Static Routes"
-  description="Encode and decode Classless Static Routes (RFC 3442 / MSFT 249) with bit-packed network prefixes. Generate configurations for ISC dhcpd and Kea DHCP."
+  title={$t('tools/dhcp-option121-builder.title')}
+  description={$t('tools/dhcp-option121-builder.subtitle')}
   navOptions={modeOptions}
   bind:selectedNav={mode}
 >
@@ -336,14 +341,16 @@
   {#if mode === 'encode'}
     <div class="card input-card">
       <div class="card-header">
-        <h3>Static Routes</h3>
+        <h3>{$t('tools/dhcp-option121-builder.encode.staticRoutesTitle')}</h3>
       </div>
       <div class="card-content">
         {#each config.routes as _, i (`route-${i}`)}
           <div class="route-group">
             <div class="route-header">
               <h4>
-                <Icon name="compass" size="sm" />Route {i + 1}
+                <Icon name="compass" size="sm" />{$t('tools/dhcp-option121-builder.encode.route.title', {
+                  number: i + 1,
+                })}
               </h4>
               {#if config.routes.length > 1}
                 <button type="button" class="btn-icon" onclick={() => removeRoute(i)}>
@@ -356,22 +363,27 @@
               <div class="input-group">
                 <label for="destination-{i}">
                   <Icon name="target" size="sm" />
-                  Destination (CIDR)
+                  {$t('tools/dhcp-option121-builder.encode.route.destination.label')}
                 </label>
                 <input
                   id="destination-{i}"
                   type="text"
                   bind:value={config.routes[i].destination}
-                  placeholder="10.0.0.0/8"
+                  placeholder={$t('tools/dhcp-option121-builder.encode.route.destination.placeholder')}
                 />
               </div>
 
               <div class="input-group">
                 <label for="gateway-{i}">
                   <Icon name="arrow-right" size="sm" />
-                  Gateway
+                  {$t('tools/dhcp-option121-builder.encode.route.gateway.label')}
                 </label>
-                <input id="gateway-{i}" type="text" bind:value={config.routes[i].gateway} placeholder="192.168.1.1" />
+                <input
+                  id="gateway-{i}"
+                  type="text"
+                  bind:value={config.routes[i].gateway}
+                  placeholder={$t('tools/dhcp-option121-builder.encode.route.gateway.placeholder')}
+                />
               </div>
             </div>
           </div>
@@ -379,14 +391,14 @@
 
         <button type="button" class="btn-add" onclick={addRoute}>
           <Icon name="plus" size="sm" />
-          Add Route
+          {$t('tools/dhcp-option121-builder.encode.addRoute')}
         </button>
       </div>
     </div>
 
     {#if validationErrors.length > 0}
       <div class="card errors-card">
-        <h3>Validation Errors</h3>
+        <h3>{$t('tools/dhcp-option121-builder.errors.title')}</h3>
         {#each validationErrors as error, i (i)}
           <div class="error-message">
             <Icon name="alert-triangle" size="sm" />
@@ -398,11 +410,11 @@
 
     {#if result && validationErrors.length === 0}
       <div class="card results">
-        <h3>Encoded Option 121/249</h3>
+        <h3>{$t('tools/dhcp-option121-builder.results.encodeTitle')}</h3>
 
         <div class="output-group">
           <div class="output-header">
-            <h4>Hex-Encoded (Compact)</h4>
+            <h4>{$t('tools/dhcp-option121-builder.results.hexEncoded.title')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -410,7 +422,9 @@
               onclick={() => clipboard.copy(result!.hexEncoded, 'hex')}
             >
               <Icon name={clipboard.isCopied('hex') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('hex') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('hex')
+                ? $t('tools/dhcp-option121-builder.buttons.copied')
+                : $t('tools/dhcp-option121-builder.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.hexEncoded}</pre>
@@ -418,7 +432,7 @@
 
         <div class="output-group">
           <div class="output-header">
-            <h4>Wire Format (Spaced)</h4>
+            <h4>{$t('tools/dhcp-option121-builder.results.wireFormat.title')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -426,15 +440,20 @@
               onclick={() => clipboard.copy(result!.wireFormat, 'wire')}
             >
               <Icon name={clipboard.isCopied('wire') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('wire') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('wire')
+                ? $t('tools/dhcp-option121-builder.buttons.copied')
+                : $t('tools/dhcp-option121-builder.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.wireFormat}</pre>
         </div>
 
         <div class="summary-card">
-          <div><strong>Total Length:</strong> {result.totalLength} bytes</div>
-          <div><strong>Routes:</strong> {result.routes.length}</div>
+          <div>
+            <strong>{$t('tools/dhcp-option121-builder.results.summary.totalLength')}</strong>
+            {$t('tools/dhcp-option121-builder.results.summary.bytes', { length: result.totalLength })}
+          </div>
+          <div><strong>{$t('tools/dhcp-option121-builder.results.summary.routes')}</strong> {result.routes.length}</div>
         </div>
       </div>
     {/if}
@@ -444,25 +463,35 @@
     {#if result}
       <div class="card input-card">
         <div class="card-header">
-          <h3>Network Settings (Optional)</h3>
-          <p class="help-text">Customize network values for configuration examples below</p>
+          <h3>{$t('tools/dhcp-option121-builder.encode.networkSettings.title')}</h3>
+          <p class="help-text">{$t('tools/dhcp-option121-builder.encode.networkSettings.help')}</p>
         </div>
         <div class="card-content">
           <div class="input-row">
             <div class="input-group">
               <label for="subnet">
                 <Icon name="network" size="sm" />
-                Subnet
+                {$t('tools/dhcp-option121-builder.encode.networkSettings.subnet.label')}
               </label>
-              <input id="subnet" type="text" bind:value={config.network!.subnet} placeholder="192.168.1.0" />
+              <input
+                id="subnet"
+                type="text"
+                bind:value={config.network!.subnet}
+                placeholder={$t('tools/dhcp-option121-builder.encode.networkSettings.subnet.placeholder')}
+              />
             </div>
 
             <div class="input-group">
               <label for="netmask">
                 <Icon name="network" size="sm" />
-                Netmask
+                {$t('tools/dhcp-option121-builder.encode.networkSettings.netmask.label')}
               </label>
-              <input id="netmask" type="text" bind:value={config.network!.netmask} placeholder="255.255.255.0" />
+              <input
+                id="netmask"
+                type="text"
+                bind:value={config.network!.netmask}
+                placeholder={$t('tools/dhcp-option121-builder.encode.networkSettings.netmask.placeholder')}
+              />
             </div>
           </div>
 
@@ -470,24 +499,34 @@
             <div class="input-group">
               <label for="range-start">
                 <Icon name="arrow-right" size="sm" />
-                Range Start
+                {$t('tools/dhcp-option121-builder.encode.networkSettings.rangeStart.label')}
               </label>
-              <input id="range-start" type="text" bind:value={config.network!.rangeStart} placeholder="192.168.1.100" />
+              <input
+                id="range-start"
+                type="text"
+                bind:value={config.network!.rangeStart}
+                placeholder={$t('tools/dhcp-option121-builder.encode.networkSettings.rangeStart.placeholder')}
+              />
             </div>
 
             <div class="input-group">
               <label for="range-end">
                 <Icon name="arrow-right" size="sm" />
-                Range End
+                {$t('tools/dhcp-option121-builder.encode.networkSettings.rangeEnd.label')}
               </label>
-              <input id="range-end" type="text" bind:value={config.network!.rangeEnd} placeholder="192.168.1.200" />
+              <input
+                id="range-end"
+                type="text"
+                bind:value={config.network!.rangeEnd}
+                placeholder={$t('tools/dhcp-option121-builder.encode.networkSettings.rangeEnd.placeholder')}
+              />
             </div>
           </div>
         </div>
 
         {#if networkValidationErrors.length > 0}
           <div class="network-errors">
-            <h4>Network Settings Errors</h4>
+            <h4>{$t('tools/dhcp-option121-builder.encode.networkSettings.errorsTitle')}</h4>
             {#each networkValidationErrors as error, i (i)}
               <div class="network-error-item">
                 <Icon name="alert-triangle" size="sm" />
@@ -501,12 +540,12 @@
 
     {#if result && networkValidationErrors.length === 0}
       <div class="card results">
-        <h3>Configuration Examples</h3>
+        <h3>{$t('tools/dhcp-option121-builder.results.configExamplesTitle')}</h3>
 
         {#if result.examples.iscDhcpd}
           <div class="output-group">
             <div class="output-header">
-              <h4>ISC dhcpd Configuration (Option 121)</h4>
+              <h4>{$t('tools/dhcp-option121-builder.results.formats.iscDhcpd')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -514,7 +553,9 @@
                 onclick={() => clipboard.copy(result!.examples.iscDhcpd!, 'isc')}
               >
                 <Icon name={clipboard.isCopied('isc') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('isc') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('isc')
+                  ? $t('tools/dhcp-option121-builder.buttons.copied')
+                  : $t('tools/dhcp-option121-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.examples.iscDhcpd}</pre>
@@ -524,7 +565,7 @@
         {#if result.examples.keaDhcp4}
           <div class="output-group">
             <div class="output-header">
-              <h4>Kea DHCPv4 Configuration</h4>
+              <h4>{$t('tools/dhcp-option121-builder.results.formats.keaDhcp4')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -532,7 +573,9 @@
                 onclick={() => clipboard.copy(result!.examples.keaDhcp4!, 'kea')}
               >
                 <Icon name={clipboard.isCopied('kea') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('kea') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('kea')
+                  ? $t('tools/dhcp-option121-builder.buttons.copied')
+                  : $t('tools/dhcp-option121-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.examples.keaDhcp4}</pre>
@@ -542,7 +585,7 @@
         {#if result.examples.msftOption249}
           <div class="output-group">
             <div class="output-header">
-              <h4>Microsoft Option 249 Configuration</h4>
+              <h4>{$t('tools/dhcp-option121-builder.results.formats.msftOption249')}</h4>
               <button
                 type="button"
                 class="copy-btn"
@@ -550,7 +593,9 @@
                 onclick={() => clipboard.copy(result!.examples.msftOption249!, 'msft')}
               >
                 <Icon name={clipboard.isCopied('msft') ? 'check' : 'copy'} size="xs" />
-                {clipboard.isCopied('msft') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('msft')
+                  ? $t('tools/dhcp-option121-builder.buttons.copied')
+                  : $t('tools/dhcp-option121-builder.buttons.copy')}
               </button>
             </div>
             <pre class="output-value code-block">{result.examples.msftOption249}</pre>
@@ -561,31 +606,31 @@
   {:else}
     <div class="card input-card">
       <div class="card-header">
-        <h3>Decode Option 121/249 Hex</h3>
+        <h3>{$t('tools/dhcp-option121-builder.decode.title')}</h3>
       </div>
       <div class="card-content">
         <div class="input-group">
           <label for="decode-input">
             <Icon name="code" size="sm" />
-            Hex-Encoded Option 121/249
+            {$t('tools/dhcp-option121-builder.decode.input.label')}
           </label>
           <textarea
             id="decode-input"
             bind:value={decodeInput}
-            placeholder="Enter hex string (e.g., 080ac0a80101acc01000c0a80101)"
+            placeholder={$t('tools/dhcp-option121-builder.decode.input.placeholder')}
             rows="4"
           ></textarea>
         </div>
         <button type="button" class="btn-primary" onclick={decode}>
           <Icon name="search" size="sm" />
-          Decode
+          {$t('tools/dhcp-option121-builder.decode.button')}
         </button>
       </div>
     </div>
 
     {#if validationErrors.length > 0}
       <div class="card errors-card">
-        <h3>Validation Errors</h3>
+        <h3>{$t('tools/dhcp-option121-builder.errors.title')}</h3>
         {#each validationErrors as error, i (i)}
           <div class="error-message">
             <Icon name="alert-triangle" size="sm" />
@@ -597,25 +642,31 @@
 
     {#if decodeResult && validationErrors.length === 0}
       <div class="card results">
-        <h3>Decoded Classless Static Routes</h3>
+        <h3>{$t('tools/dhcp-option121-builder.results.decodeTitle')}</h3>
 
         <div class="summary-card">
-          <div><strong>Total Length:</strong> {decodeResult.totalLength} bytes</div>
-          <div><strong>Routes Found:</strong> {decodeResult.routes.length}</div>
+          <div>
+            <strong>{$t('tools/dhcp-option121-builder.results.summary.totalLength')}</strong>
+            {$t('tools/dhcp-option121-builder.results.summary.bytes', { length: decodeResult.totalLength })}
+          </div>
+          <div>
+            <strong>{$t('tools/dhcp-option121-builder.results.routesFound')}</strong>
+            {decodeResult.routes.length}
+          </div>
         </div>
 
         <div class="routes-section">
-          <h4>Route List</h4>
+          <h4>{$t('tools/dhcp-option121-builder.results.routeListTitle')}</h4>
           {#each decodeResult.routes as route, i (i)}
             <div class="route-item">
               <div class="route-field">
                 <Icon name="target" size="sm" />
-                <span class="field-label">Destination:</span>
+                <span class="field-label">{$t('tools/dhcp-option121-builder.results.destination')}</span>
                 <span class="field-value">{route.destination}</span>
               </div>
               <div class="route-field">
                 <Icon name="arrow-right" size="sm" />
-                <span class="field-label">Gateway:</span>
+                <span class="field-label">{$t('tools/dhcp-option121-builder.results.gateway')}</span>
                 <span class="field-value">{route.gateway}</span>
               </div>
             </div>

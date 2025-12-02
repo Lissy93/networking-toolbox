@@ -1,5 +1,13 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
   import { generateULAAddresses, parseULA, type ULAResult } from '$lib/utils/ula';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools');
+  });
 
   let count = 1;
   let subnetIds = '';
@@ -41,47 +49,54 @@
 
 <div class="container">
   <div class="card">
-    <h2>ULA Generator</h2>
-    <p>Generate RFC 4193 Unique Local Addresses with cryptographically secure Global IDs.</p>
+    <h2>{$t('tools.ula_generator.title')}</h2>
+    <p>{$t('tools.ula_generator.description')}</p>
 
     <div class="input-section">
       <div class="input-group">
-        <label for="count">Number of ULAs to generate (1-100):</label>
-        <input id="count" type="number" min="1" max="100" bind:value={count} placeholder="1" />
+        <label for="count">{$t('tools.ula_generator.form.count.label')}</label>
+        <input
+          id="count"
+          type="number"
+          min="1"
+          max="100"
+          bind:value={count}
+          placeholder={$t('tools.ula_generator.form.count.placeholder')}
+        />
       </div>
 
       <div class="input-group">
-        <label for="subnet-ids">Subnet IDs (optional, comma/newline separated):</label>
+        <label for="subnet-ids">{$t('tools.ula_generator.form.subnetIds.label')}</label>
         <textarea
           id="subnet-ids"
           bind:value={subnetIds}
           rows="3"
-          placeholder="0001, 0002, 0003 or leave empty for random generation"
+          placeholder={$t('tools.ula_generator.form.subnetIds.placeholder')}
         ></textarea>
-        <small>If provided, must be 1-4 hex digits. Leave empty for random generation.</small>
+        <small>{$t('tools.ula_generator.form.subnetIds.helpText')}</small>
       </div>
 
       <button on:click={generateULAs} disabled={loading || count < 1 || count > 100} class="generate-btn">
-        {loading ? 'Generating...' : 'Generate ULA Addresses'}
+        {loading ? $t('tools.ula_generator.buttons.generating') : $t('tools.ula_generator.buttons.generate')}
       </button>
     </div>
 
     {#if result}
       <div class="results-section">
         <div class="summary">
-          <h3>Generation Summary</h3>
+          <h3>{$t('tools.ula_generator.results.summary.title')}</h3>
           <div class="summary-stats">
             <div class="stat">
-              <span class="label">Total Requested:</span>
+              <span class="label">{$t('tools.ula_generator.results.summary.stats.totalRequested')}</span>
               <span class="value">{result.summary.totalRequests}</span>
             </div>
             <div class="stat">
-              <span class="label">Successfully Generated:</span>
+              <span class="label">{$t('tools.ula_generator.results.summary.stats.successfullyGenerated')}</span>
               <span class="value success">{result.summary.successfulGenerations}</span>
             </div>
             {#if result.summary.failedGenerations > 0}
               <div class="stat">
-                <span class="label">Failed:</span>
+                <span class="label">{$t('tools.ula_generator.results.summary.stats.failed')}</span>
                 <span class="value error">{result.summary.failedGenerations}</span>
               </div>
             {/if}
@@ -90,7 +105,7 @@
 
         {#if result.errors.length > 0}
           <div class="errors">
-            <h4>Errors</h4>
+            <h4>{$t('tools.ula_generator.results.errors.title')}</h4>
             <ul>
               {#each result.errors as error, index (index)}
                 <li class="error">{error}</li>
@@ -101,16 +116,16 @@
 
         {#if result.generations.some((g) => g.isValid)}
           <div class="generations">
-            <h3>Generated ULA Addresses</h3>
+            <h3>{$t('tools.ula_generator.results.addresses.title')}</h3>
             {#each result.generations as generation, i (generation.globalID)}
               {#if generation.isValid}
                 <div class="generation-result">
                   <div class="generation-header">
-                    <h4>ULA #{i + 1}</h4>
+                    <h4>{$t('tools.ula_generator.results.addresses.ulaNumber')}{i + 1}</h4>
                     <button
                       class="copy-btn"
                       on:click={() => copyToClipboard(generation.network)}
-                      title="Copy network address"
+                      title={$t('tools.ula_generator.buttons.copyTooltip')}
                     >
                       📋
                     </button>
@@ -118,30 +133,30 @@
 
                   <div class="address-info">
                     <div class="address-row">
-                      <span class="label">Network:</span>
+                      <span class="label">{$t('tools.ula_generator.results.addresses.network')}</span>
                       <code class="network">{generation.network}</code>
                     </div>
                     <div class="address-row">
-                      <span class="label">Prefix:</span>
+                      <span class="label">{$t('tools.ula_generator.results.addresses.prefix')}</span>
                       <code>{generation.fullPrefix}::/64</code>
                     </div>
                   </div>
 
                   <div class="components">
-                    <h5>Address Components</h5>
+                    <h5>{$t('tools.ula_generator.results.components.title')}</h5>
                     <div class="component-grid">
                       <div class="component">
-                        <span class="comp-label">ULA Prefix:</span>
+                        <span class="comp-label">{$t('tools.ula_generator.results.components.ulaPrefix')}</span>
                         <code>{generation.prefix}</code>
                         <small>{generation.details.prefixBinary}</small>
                       </div>
                       <div class="component">
-                        <span class="comp-label">Global ID:</span>
+                        <span class="comp-label">{$t('tools.ula_generator.results.components.globalId')}</span>
                         <code>{generation.globalID}</code>
                         <small>{generation.details.globalIDBinary}</small>
                       </div>
                       <div class="component">
-                        <span class="comp-label">Subnet ID:</span>
+                        <span class="comp-label">{$t('tools.ula_generator.results.components.subnetId')}</span>
                         <code>{generation.subnetID}</code>
                         <small>{generation.details.subnetIDBinary}</small>
                       </div>
@@ -149,18 +164,18 @@
                   </div>
 
                   <div class="generation-details">
-                    <h5>Generation Details</h5>
+                    <h5>{$t('tools.ula_generator.results.details.title')}</h5>
                     <div class="detail-grid">
                       <div class="detail">
-                        <span class="detail-label">Algorithm:</span>
+                        <span class="detail-label">{$t('tools.ula_generator.results.details.algorithm')}</span>
                         <span>{generation.details.algorithm}</span>
                       </div>
                       <div class="detail">
-                        <span class="detail-label">Timestamp:</span>
+                        <span class="detail-label">{$t('tools.ula_generator.results.details.timestamp')}</span>
                         <span>{new Date(generation.details.timestamp).toISOString()}</span>
                       </div>
                       <div class="detail">
-                        <span class="detail-label">Entropy:</span>
+                        <span class="detail-label">{$t('tools.ula_generator.results.details.entropy')}</span>
                         <code>{generation.details.entropy}</code>
                       </div>
                     </div>
@@ -168,7 +183,10 @@
                 </div>
               {:else}
                 <div class="generation-result error-result">
-                  <h4>ULA #{i + 1} - Error</h4>
+                  <h4>
+                    {$t('tools.ula_generator.results.addresses.ulaNumber')}{i + 1}
+                    {$t('tools.ula_generator.results.addresses.error')}
+                  </h4>
                   <p class="error">{generation.error}</p>
                 </div>
               {/if}
@@ -180,40 +198,40 @@
   </div>
 
   <div class="card">
-    <h3>ULA Address Parser</h3>
-    <p>Parse and analyze existing ULA addresses to extract their components.</p>
+    <h3>{$t('tools.ula_generator.parser.title')}</h3>
+    <p>{$t('tools.ula_generator.parser.description')}</p>
 
     <div class="input-group">
-      <label for="parse-input">ULA Address:</label>
+      <label for="parse-input">{$t('tools.ula_generator.parser.form.address.label')}</label>
       <input
         id="parse-input"
         type="text"
         bind:value={parseInput}
         on:input={parseULAAddress}
-        placeholder="fd12:3456:789a:0001::/64"
+        placeholder={$t('tools.ula_generator.parser.form.address.placeholder')}
       />
     </div>
 
     {#if parseResult}
       {#if parseResult.isValid}
         <div class="parse-results">
-          <h4>Parsed Components</h4>
+          <h4>{$t('tools.ula_generator.parser.results.title')}</h4>
           <div class="component-grid">
             <div class="component">
-              <span class="comp-label">ULA Prefix:</span>
+              <span class="comp-label">{$t('tools.ula_generator.parser.results.components.ulaPrefix')}</span>
               <code>{parseResult.prefix}</code>
             </div>
             <div class="component">
-              <span class="comp-label">Global ID:</span>
+              <span class="comp-label">{$t('tools.ula_generator.parser.results.components.globalId')}</span>
               <code>{parseResult.globalID}</code>
             </div>
             <div class="component">
-              <span class="comp-label">Subnet ID:</span>
+              <span class="comp-label">{$t('tools.ula_generator.parser.results.components.subnetId')}</span>
               <code>{parseResult.subnetID}</code>
             </div>
             {#if parseResult.interfaceID}
               <div class="component">
-                <span class="comp-label">Interface ID:</span>
+                <span class="comp-label">{$t('tools.ula_generator.parser.results.components.interfaceId')}</span>
                 <code>{parseResult.interfaceID}</code>
               </div>
             {/if}

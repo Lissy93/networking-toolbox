@@ -6,6 +6,14 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import { useClipboard } from '$lib/composables';
   import { formatNumber } from '$lib/utils/formatters';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools');
+  });
 
   let parentCIDR = $state('192.168.1.0/24');
   let strategy = $state<'preserve-order' | 'fit-best'>('fit-best');
@@ -15,50 +23,57 @@
   let showVisualization = $state(true);
   let draggedIndex = $state<number | null>(null);
 
-  let requests = $state<SubnetRequest[]>([
-    { id: crypto.randomUUID(), name: 'Sales', size: 50, priority: 1 },
-    { id: crypto.randomUUID(), name: 'Engineering', size: 30, priority: 2 },
-    { id: crypto.randomUUID(), name: 'Marketing', size: 20, priority: 3 },
-    { id: crypto.randomUUID(), name: 'Servers', size: 10, priority: 4 },
-  ]);
+  let requests = $state<SubnetRequest[]>([]);
 
-  const examples = [
+  // Initialize default requests after translations load
+  onMount(() => {
+    if (requests.length === 0) {
+      requests = [
+        { id: crypto.randomUUID(), name: $t('tools.subnet_planner.defaultSubnets.sales'), size: 50, priority: 1 },
+        { id: crypto.randomUUID(), name: $t('tools.subnet_planner.defaultSubnets.engineering'), size: 30, priority: 2 },
+        { id: crypto.randomUUID(), name: $t('tools.subnet_planner.defaultSubnets.marketing'), size: 20, priority: 3 },
+        { id: crypto.randomUUID(), name: $t('tools.subnet_planner.defaultSubnets.servers'), size: 10, priority: 4 },
+      ];
+    }
+  });
+
+  const examples = $derived([
     {
-      label: 'Office Network',
+      label: $t('tools.subnet_planner.examples.officeNetwork.label'),
       parent: '192.168.0.0/24',
       requests: [
-        { name: 'Sales', size: 50 },
-        { name: 'Engineering', size: 30 },
-        { name: 'Servers', size: 10 },
+        { name: $t('tools.subnet_planner.examples.officeNetwork.subnets.sales'), size: 50 },
+        { name: $t('tools.subnet_planner.examples.officeNetwork.subnets.engineering'), size: 30 },
+        { name: $t('tools.subnet_planner.examples.officeNetwork.subnets.servers'), size: 10 },
       ],
     },
     {
-      label: 'Large Corporate',
+      label: $t('tools.subnet_planner.examples.largeCorporate.label'),
       parent: '10.0.0.0/16',
       requests: [
-        { name: 'HQ', size: 2000 },
-        { name: 'Branch Office', size: 500 },
-        { name: 'DMZ', size: 100 },
-        { name: 'Management', size: 20 },
+        { name: $t('tools.subnet_planner.examples.largeCorporate.subnets.hq'), size: 2000 },
+        { name: $t('tools.subnet_planner.examples.largeCorporate.subnets.branchOffice'), size: 500 },
+        { name: $t('tools.subnet_planner.examples.largeCorporate.subnets.dmz'), size: 100 },
+        { name: $t('tools.subnet_planner.examples.largeCorporate.subnets.management'), size: 20 },
       ],
     },
     {
-      label: 'Data Center',
+      label: $t('tools.subnet_planner.examples.dataCenter.label'),
       parent: '172.16.0.0/20',
       requests: [
-        { name: 'Web Servers', size: 200 },
-        { name: 'Database Cluster', size: 50 },
-        { name: 'Load Balancers', size: 10 },
-        { name: 'Monitoring', size: 5 },
+        { name: $t('tools.subnet_planner.examples.dataCenter.subnets.webServers'), size: 200 },
+        { name: $t('tools.subnet_planner.examples.dataCenter.subnets.databaseCluster'), size: 50 },
+        { name: $t('tools.subnet_planner.examples.dataCenter.subnets.loadBalancers'), size: 10 },
+        { name: $t('tools.subnet_planner.examples.dataCenter.subnets.monitoring'), size: 5 },
       ],
     },
-  ];
+  ]);
 
   /* Add new subnet request */
   function addRequest() {
     requests.push({
       id: crypto.randomUUID(),
-      name: `Subnet ${requests.length + 1}`,
+      name: $t('tools.subnet_planner.newSubnet.defaultName', { number: requests.length + 1 }),
       size: 10,
       priority: requests.length + 1,
     });
@@ -71,6 +86,12 @@
     // Renumber priorities
     requests.forEach((req, i) => (req.priority = i + 1));
     performPlanning();
+  }
+
+  /* Clear all subnet requests */
+  function clearRequests() {
+    requests = [];
+    result = null;
   }
 
   /* Set example */
@@ -103,7 +124,15 @@
         2,
       );
     } else {
-      const headers = ['Name', 'CIDR', 'Network', 'Broadcast', 'Usable Hosts', 'Requested', 'Efficiency %'];
+      const headers = [
+        $t('tools.subnet_planner.export.headers.name'),
+        $t('tools.subnet_planner.export.headers.cidr'),
+        $t('tools.subnet_planner.export.headers.network'),
+        $t('tools.subnet_planner.export.headers.broadcast'),
+        $t('tools.subnet_planner.export.headers.usableHosts'),
+        $t('tools.subnet_planner.export.headers.requested'),
+        $t('tools.subnet_planner.export.headers.efficiency'),
+      ];
       const rows = result.allocated.map((subnet) => [
         `"${subnet.name}"`,
         subnet.cidr,
@@ -157,12 +186,6 @@
     draggedIndex = null;
   }
 
-  /* Clear all requests */
-  function clearRequests() {
-    requests = [];
-    result = null;
-  }
-
   /* Perform subnet planning */
   function performPlanning() {
     if (!parentCIDR.trim() || requests.length === 0) {
@@ -195,11 +218,17 @@
     type: 'allocated' | 'leftover',
   ): string {
     if (type === 'allocated' && item.name) {
-      const size = item.start && item.end ? formatNumber(Number(item.end - item.start + 1n)) : 'Unknown';
-      return `${item.name}\n${item.cidr}\nSize: ${size} addresses`;
+      const size =
+        item.start && item.end
+          ? formatNumber(Number(item.end - item.start + 1n))
+          : $t('tools.subnet_planner.visualization.unknown');
+      return `${item.name}\n${item.cidr}\n${$t('tools.subnet_planner.visualization.sizeLabel')}: ${size} ${$t('tools.subnet_planner.visualization.addresses')}`;
     } else {
-      const size = item.start && item.end ? formatNumber(Number(item.end - item.start + 1n)) : 'Unknown';
-      return `Leftover Space\n${item.cidr}\nSize: ${size} addresses`;
+      const size =
+        item.start && item.end
+          ? formatNumber(Number(item.end - item.start + 1n))
+          : $t('tools.subnet_planner.visualization.unknown');
+      return `${$t('tools.subnet_planner.visualization.leftoverSpace')}\n${item.cidr}\n${$t('tools.subnet_planner.visualization.sizeLabel')}: ${size} ${$t('tools.subnet_planner.visualization.addresses')}`;
     }
   }
 
@@ -211,13 +240,10 @@
   });
 </script>
 
-<ToolContentContainer
-  title="Subnet Planner (VLSM)"
-  description="Design Variable Length Subnet Mask (VLSM) allocations with drag-and-drop reordering and space optimization."
->
+<ToolContentContainer title={$t('tools.subnet_planner.title')} description={$t('tools.subnet_planner.description')}>
   <!-- Strategy Selection -->
   <div class="strategy-section">
-    <h3>Allocation Strategy</h3>
+    <h3>{$t('tools.subnet_planner.strategy.title')}</h3>
     <div class="strategy-tabs">
       <button
         type="button"
@@ -227,9 +253,9 @@
           strategy = 'fit-best';
           performPlanning();
         }}
-        use:tooltip={{ text: 'Sort by size (largest first) for optimal space usage', position: 'top' }}
+        use:tooltip={{ text: $t('tools.subnet_planner.strategy.fitBest.tooltip'), position: 'top' }}
       >
-        Fit Best
+        {$t('tools.subnet_planner.strategy.fitBest.label')}
       </button>
       <button
         type="button"
@@ -239,15 +265,15 @@
           strategy = 'preserve-order';
           performPlanning();
         }}
-        use:tooltip={{ text: 'Allocate in the order specified (may waste space)', position: 'top' }}
+        use:tooltip={{ text: $t('tools.subnet_planner.strategy.preserveOrder.tooltip'), position: 'top' }}
       >
-        Preserve Order
+        {$t('tools.subnet_planner.strategy.preserveOrder.label')}
       </button>
       <div class="options">
         <label class="checkbox-label">
           <input type="checkbox" bind:checked={usableHosts} onchange={() => performPlanning()} />
-          <span class="checkbox-text" use:tooltip={'For IPv4, treat network and broadcast addresses as unusable'}>
-            IPv4 usable hosts (exclude network/broadcast)
+          <span class="checkbox-text" use:tooltip={$t('tools.subnet_planner.strategy.usableHosts.tooltip')}>
+            {$t('tools.subnet_planner.strategy.usableHosts.label')}
           </span>
         </label>
       </div>
@@ -257,15 +283,15 @@
   <!-- Parent Network -->
   <div class="parent-section">
     <div class="input-group">
-      <label for="parent-cidr" use:tooltip={'The parent CIDR to subdivide (e.g., 192.168.1.0/24)'}>
-        Parent Network
+      <label for="parent-cidr" use:tooltip={$t('tools.subnet_planner.parentNetwork.tooltip')}>
+        {$t('tools.subnet_planner.parentNetwork.label')}
       </label>
       <input
         id="parent-cidr"
         type="text"
         bind:value={parentCIDR}
         oninput={() => performPlanning()}
-        placeholder="192.168.1.0/24"
+        placeholder={$t('tools.subnet_planner.parentNetwork.placeholder')}
         class="input-field"
       />
     </div>
@@ -274,15 +300,15 @@
   <!-- Subnet Requests -->
   <div class="requests-section">
     <div class="requests-header">
-      <h3>Subnet Requirements</h3>
+      <h3>{$t('tools.subnet_planner.requirements.title')}</h3>
       <div class="requests-actions">
         <button type="button" class="btn btn-primary btn-sm" onclick={addRequest}>
           <Icon name="plus" size="sm" />
-          Add Subnet
+          {$t('tools.subnet_planner.requirements.addSubnet')}
         </button>
         <button type="button" class="btn btn-secondary btn-sm" onclick={clearRequests} disabled={requests.length === 0}>
           <Icon name="trash" size="sm" />
-          Clear All
+          {$t('tools.subnet_planner.requirements.clearAll')}
         </button>
       </div>
     </div>
@@ -303,7 +329,7 @@
             <Icon name="draggable" size="sm" />
           </div>
 
-          <div class="request-priority" use:tooltip={'Processing priority - drag to reorder'}>
+          <div class="request-priority" use:tooltip={$t('tools.subnet_planner.requirements.priorityTooltip')}>
             #{request.priority}
           </div>
 
@@ -312,7 +338,7 @@
               type="text"
               bind:value={request.name}
               oninput={() => performPlanning()}
-              placeholder="Subnet name"
+              placeholder={$t('tools.subnet_planner.requirements.namePlaceholder')}
               class="name-field"
             />
             <input
@@ -320,10 +346,10 @@
               bind:value={request.size}
               oninput={() => performPlanning()}
               min="1"
-              placeholder="Host count"
+              placeholder={$t('tools.subnet_planner.requirements.sizePlaceholder')}
               class="size-field"
             />
-            <span class="hosts-label">hosts</span>
+            <span class="hosts-label">{$t('tools.subnet_planner.requirements.hostsLabel')}</span>
           </div>
 
           <button type="button" class="btn btn-danger btn-xs" onclick={() => removeRequest(request.id)}>
@@ -334,7 +360,7 @@
 
       {#if requests.length === 0}
         <div class="empty-state">
-          <p>No subnet requirements defined. Add some subnets to get started.</p>
+          <p>{$t('tools.subnet_planner.requirements.emptyState')}</p>
         </div>
       {/if}
     </div>
@@ -342,7 +368,7 @@
 
   <!-- Examples -->
   <div class="examples-section">
-    <h4>Quick Examples</h4>
+    <h4>{$t('tools.subnet_planner.examples.title')}</h4>
     <div class="examples-grid">
       {#each examples as example (example.label)}
         <button type="button" class="example-btn" onclick={() => setExample(example)}>
@@ -358,7 +384,7 @@
       <!-- Errors -->
       {#if result.errors.length > 0}
         <div class="info-panel error">
-          <h3>Errors</h3>
+          <h3>{$t('tools.subnet_planner.results.errors.title')}</h3>
           <ul>
             {#each result.errors as error, index (index)}
               <li>{error}</li>
@@ -370,7 +396,7 @@
       <!-- Warnings -->
       {#if result.warnings.length > 0}
         <div class="info-panel warning">
-          <h3>Warnings</h3>
+          <h3>{$t('tools.subnet_planner.results.warnings.title')}</h3>
           <ul>
             {#each result.warnings as warning, index (index)}
               <li>{warning}</li>
@@ -383,7 +409,7 @@
         <!-- Statistics -->
         <div class="stats-section">
           <div class="summary-header">
-            <h3>Allocation Results</h3>
+            <h3>{$t('tools.subnet_planner.results.title')}</h3>
             <div class="export-buttons">
               <button
                 type="button"
@@ -392,7 +418,7 @@
                 onclick={() => exportResults('csv')}
               >
                 <Icon name={clipboard.isCopied('export-csv') ? 'check' : 'download'} size="sm" />
-                CSV
+                {$t('tools.subnet_planner.actions.exportCSV')}
               </button>
               <button
                 type="button"
@@ -401,37 +427,43 @@
                 onclick={() => exportResults('json')}
               >
                 <Icon name={clipboard.isCopied('export-json') ? 'check' : 'download'} size="sm" />
-                JSON
+                {$t('tools.subnet_planner.actions.exportJSON')}
               </button>
             </div>
           </div>
 
           <div class="stats-grid">
             <div class="stat-card parent">
-              <span class="stat-label" use:tooltip={'The original network being subdivided into smaller subnets'}
-                >Parent Network</span
+              <span class="stat-label" use:tooltip={$t('tools.subnet_planner.results.stats.parentNetwork.tooltip')}
+                >{$t('tools.subnet_planner.results.stats.parentNetwork.label')}</span
               >
               <span class="stat-value">{result.stats.parentCIDR}</span>
-              <span class="stat-detail">total space</span>
+              <span class="stat-detail">{$t('tools.subnet_planner.results.stats.parentNetwork.detail')}</span>
             </div>
             <div class="stat-card allocated">
-              <span class="stat-label" use:tooltip={'Total addresses assigned to subnets'}>Allocated</span>
+              <span class="stat-label" use:tooltip={$t('tools.subnet_planner.results.stats.allocated.tooltip')}
+                >{$t('tools.subnet_planner.results.stats.allocated.label')}</span
+              >
               <span class="stat-value">{result.stats.totalAllocated}</span>
-              <span class="stat-detail">{result.stats.successfulAllocations} subnets</span>
+              <span class="stat-detail"
+                >{$t('tools.subnet_planner.results.stats.allocated.detail', {
+                  count: result.stats.successfulAllocations,
+                })}</span
+              >
             </div>
             <div class="stat-card leftover">
-              <span class="stat-label" use:tooltip={'Unallocated address space that could be used for future subnets'}
-                >Leftover</span
+              <span class="stat-label" use:tooltip={$t('tools.subnet_planner.results.stats.leftover.tooltip')}
+                >{$t('tools.subnet_planner.results.stats.leftover.label')}</span
               >
               <span class="stat-value">{result.stats.totalLeftover}</span>
-              <span class="stat-detail">addresses</span>
+              <span class="stat-detail">{$t('tools.subnet_planner.results.stats.leftover.detail')}</span>
             </div>
             <div class="stat-card efficiency">
-              <span class="stat-label" use:tooltip={'Percentage of parent network space that has been allocated'}
-                >Efficiency</span
+              <span class="stat-label" use:tooltip={$t('tools.subnet_planner.results.stats.efficiency.tooltip')}
+                >{$t('tools.subnet_planner.results.stats.efficiency.label')}</span
               >
               <span class="stat-value">{result.stats.efficiency}%</span>
-              <span class="stat-detail">space utilized</span>
+              <span class="stat-detail">{$t('tools.subnet_planner.results.stats.efficiency.detail')}</span>
             </div>
           </div>
         </div>
@@ -440,14 +472,14 @@
         {#if showVisualization && result.visualization}
           <div class="visualization-section">
             <div class="viz-header">
-              <h4>Address Space Layout</h4>
+              <h4>{$t('tools.subnet_planner.results.visualization.title')}</h4>
               <button
                 type="button"
                 class="btn btn-secondary btn-xs"
                 onclick={() => (showVisualization = !showVisualization)}
               >
                 <Icon name="hide" size="xs" />
-                Hide
+                {$t('tools.subnet_planner.results.visualization.hide')}
               </button>
             </div>
 
@@ -474,11 +506,11 @@
             <div class="viz-legend">
               <div class="legend-item">
                 <div class="legend-color allocated-color"></div>
-                <span>Allocated Subnets</span>
+                <span>{$t('tools.subnet_planner.results.visualization.legend.allocated')}</span>
               </div>
               <div class="legend-item">
                 <div class="legend-color leftover-color"></div>
-                <span>Leftover Space</span>
+                <span>{$t('tools.subnet_planner.results.visualization.legend.leftover')}</span>
               </div>
             </div>
           </div>
@@ -486,19 +518,28 @@
 
         <!-- Allocation Table -->
         <div class="allocations-section">
-          <h4>Allocated Subnets ({result.allocated.length})</h4>
+          <h4>{$t('tools.subnet_planner.results.allocations.title', { count: result.allocated.length })}</h4>
           <div class="allocations-table">
             <div class="table-header">
-              <div class="col-name" use:tooltip={'User-defined name for the subnet'}>Name</div>
-              <div class="col-cidr" use:tooltip={'Network address in CIDR notation'}>CIDR</div>
-              <div class="col-range" use:tooltip={'Network/broadcast range and usable host addresses'}>
-                Address Range
+              <div class="col-name" use:tooltip={$t('tools.subnet_planner.results.allocations.table.name.tooltip')}>
+                {$t('tools.subnet_planner.results.allocations.table.name.label')}
               </div>
-              <div class="col-hosts" use:tooltip={'Number of usable and total host addresses'}>Hosts</div>
-              <div class="col-efficiency" use:tooltip={'How well the allocated subnet matches the requested size'}>
-                Efficiency
+              <div class="col-cidr" use:tooltip={$t('tools.subnet_planner.results.allocations.table.cidr.tooltip')}>
+                {$t('tools.subnet_planner.results.allocations.table.cidr.label')}
               </div>
-              <div class="col-actions">Actions</div>
+              <div class="col-range" use:tooltip={$t('tools.subnet_planner.results.allocations.table.range.tooltip')}>
+                {$t('tools.subnet_planner.results.allocations.table.range.label')}
+              </div>
+              <div class="col-hosts" use:tooltip={$t('tools.subnet_planner.results.allocations.table.hosts.tooltip')}>
+                {$t('tools.subnet_planner.results.allocations.table.hosts.label')}
+              </div>
+              <div
+                class="col-efficiency"
+                use:tooltip={$t('tools.subnet_planner.results.allocations.table.efficiency.tooltip')}
+              >
+                {$t('tools.subnet_planner.results.allocations.table.efficiency.label')}
+              </div>
+              <div class="col-actions">{$t('tools.subnet_planner.results.allocations.table.actions')}</div>
             </div>
 
             {#each result.allocated as subnet (subnet.cidr)}
@@ -515,20 +556,31 @@
                       {subnet.network} - {subnet.broadcast}
                     </div>
                     <div class="host-range">
-                      Hosts: {subnet.firstHost} - {subnet.lastHost}
+                      {$t('tools.subnet_planner.results.allocations.table.hostsRange', {
+                        first: subnet.firstHost,
+                        last: subnet.lastHost,
+                      })}
                     </div>
                   </div>
                 </div>
                 <div class="col-hosts">
                   <div class="hosts-info">
-                    <div class="usable-hosts">{subnet.usableHosts} usable</div>
-                    <div class="total-hosts">{subnet.totalHosts} total</div>
+                    <div class="usable-hosts">
+                      {$t('tools.subnet_planner.results.allocations.table.usableHosts', { count: subnet.usableHosts })}
+                    </div>
+                    <div class="total-hosts">
+                      {$t('tools.subnet_planner.results.allocations.table.totalHosts', { count: subnet.totalHosts })}
+                    </div>
                   </div>
                 </div>
                 <div class="col-efficiency">
                   <div class="efficiency-info">
                     <span class="efficiency-percent">{subnet.efficiency}%</span>
-                    <span class="requested-size">({subnet.requestedSize} req.)</span>
+                    <span class="requested-size"
+                      >({$t('tools.subnet_planner.results.allocations.table.requested', {
+                        count: subnet.requestedSize,
+                      })})</span
+                    >
                   </div>
                 </div>
                 <div class="col-actions">
@@ -549,12 +601,14 @@
         <!-- Leftover Space -->
         {#if result.leftover.length > 0}
           <div class="leftover-section">
-            <h4>Leftover Space ({result.leftover.length} blocks)</h4>
+            <h4>{$t('tools.subnet_planner.results.leftover.title', { count: result.leftover.length })}</h4>
             <div class="leftover-grid">
               {#each result.leftover as block, index (index)}
                 <div class="leftover-card">
                   <code class="leftover-cidr">{block.cidr}</code>
-                  <span class="leftover-size">{block.size} addresses</span>
+                  <span class="leftover-size"
+                    >{$t('tools.subnet_planner.results.leftover.size', { count: block.size })}</span
+                  >
                 </div>
               {/each}
             </div>
@@ -562,12 +616,12 @@
         {/if}
       {:else}
         <div class="info-panel info">
-          <h3>No Allocations</h3>
-          <p>Unable to allocate any subnets. Check that:</p>
+          <h3>{$t('tools.subnet_planner.results.noAllocations.title')}</h3>
+          <p>{$t('tools.subnet_planner.results.noAllocations.message')}</p>
           <ul>
-            <li>Parent CIDR is valid</li>
-            <li>Requested subnet sizes are reasonable</li>
-            <li>There's sufficient address space</li>
+            <li>{$t('tools.subnet_planner.results.noAllocations.checks.validCIDR')}</li>
+            <li>{$t('tools.subnet_planner.results.noAllocations.checks.reasonableSizes')}</li>
+            <li>{$t('tools.subnet_planner.results.noAllocations.checks.sufficientSpace')}</li>
           </ul>
         </div>
       {/if}

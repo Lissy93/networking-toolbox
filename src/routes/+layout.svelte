@@ -24,6 +24,7 @@
   import { ALL_PAGES } from '$lib/constants/nav';
   import { initializeOfflineSupport } from '$lib/stores/offline';
   import { bookmarks } from '$lib/stores/bookmarks';
+  import { initLanguage, loadNamespaces, locale } from '$lib/stores/language';
   import { ANALYTICS_ENABLED, ANALYTICS_DOMAIN, ANALYTICS_DSN } from '$lib/config/customizable-settings';
 
   import Header from '$lib/components/furniture/Header.svelte';
@@ -132,6 +133,13 @@
   }
 
   onMount(() => {
+    // Initialize language first
+    initLanguage($page.url.pathname);
+
+    // Load base translations asynchronously
+    const currentLocale = $locale;
+    loadNamespaces(currentLocale, ['common', 'nav']);
+
     theme.init();
     toolUsage.init();
     accessibility.init();

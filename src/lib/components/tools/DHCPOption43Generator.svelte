@@ -10,6 +10,7 @@
   import { useClipboard, useExamples } from '$lib/composables';
   import Icon from '$lib/components/global/Icon.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import { t } from '$lib/stores/language';
 
   let vendorType = $state<VendorType>('cisco-catalyst');
   let ipInput = $state('');
@@ -23,36 +24,36 @@
     {
       vendor: 'cisco-catalyst' as VendorType,
       ips: '192.168.1.10\n192.168.1.11',
-      description: 'Cisco Catalyst with dual controllers',
+      description: $t('tools/dhcp-option43-generator.examples.ciscoCatalyst'),
     },
     {
       vendor: 'cisco-meraki' as VendorType,
       ips: '192.168.10.5',
-      description: 'Single Meraki cloud controller',
+      description: $t('tools/dhcp-option43-generator.examples.ciscoMeraki'),
     },
     {
       vendor: 'ruckus-smartzone' as VendorType,
       ips: '10.0.0.100',
-      description: 'Ruckus SmartZone controller',
+      description: $t('tools/dhcp-option43-generator.examples.ruckusSmartzone'),
     },
     {
       vendor: 'aruba' as VendorType,
       ips: '172.16.1.50',
-      description: 'Aruba wireless controller',
+      description: $t('tools/dhcp-option43-generator.examples.aruba'),
     },
     {
       vendor: 'unifi' as VendorType,
       ips: '192.168.1.20',
-      description: 'UniFi Network Controller',
+      description: $t('tools/dhcp-option43-generator.examples.unifi'),
     },
     {
       vendor: 'ruckus-zonedirector' as VendorType,
       ips: '10.50.100.200',
-      description: 'Ruckus ZoneDirector (legacy)',
+      description: $t('tools/dhcp-option43-generator.examples.ruckusZonedirector'),
     },
   ];
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   function generate() {
     errors = [];
@@ -61,22 +62,24 @@
     const ips = parseIPList(ipInput);
 
     if (ips.length === 0) {
-      errors = ['Please enter at least one IP address'];
+      errors = [$t('tools/dhcp-option43-generator.errors.noIPs')];
       return;
     }
 
     // Validate each IP
     const invalidIPs = ips.filter((ip) => !isValidIPv4(ip));
     if (invalidIPs.length > 0) {
-      errors = [`Invalid IP address format: ${invalidIPs.join(', ')}`];
+      errors = [$t('tools/dhcp-option43-generator.errors.invalidIP', { ips: invalidIPs.join(', ') })];
       return;
     }
 
     // Check max IPs for vendor
     if (ips.length > vendorInfo.maxIPs) {
-      errors = [
-        `${vendorInfo.name} supports maximum ${vendorInfo.maxIPs} controller${vendorInfo.maxIPs > 1 ? 's' : ''}. You entered ${ips.length}.`,
-      ];
+      const errorKey =
+        vendorInfo.maxIPs > 1
+          ? 'tools/dhcp-option43-generator.errors.maxExceededPlural'
+          : 'tools/dhcp-option43-generator.errors.maxExceeded';
+      errors = [$t(errorKey, { vendor: vendorInfo.name, max: vendorInfo.maxIPs, count: ips.length })];
       return;
     }
 
@@ -102,20 +105,20 @@
   onSelect={loadExample}
   getLabel={(ex) => VENDOR_INFO[ex.vendor].name}
   getDescription={(ex) => ex.description}
-  getTooltip={(ex) => `Generate Option 43 for ${VENDOR_INFO[ex.vendor].name}`}
+  getTooltip={(ex) => $t('tools/dhcp-option43-generator.examples.tooltip', { vendor: VENDOR_INFO[ex.vendor].name })}
 />
 
 <!-- Input Form -->
 <div class="card input-card">
   <div class="card-header">
-    <h3>Generator Configuration</h3>
+    <h3>{$t('tools/dhcp-option43-generator.input.title')}</h3>
   </div>
   <div class="card-content">
     <section class="inputs">
       <div class="input-group">
         <label for="vendor">
           <Icon name="wifi" size="sm" />
-          Wireless Controller Vendor
+          {$t('tools/dhcp-option43-generator.input.vendor.label')}
         </label>
         <select
           id="vendor"
@@ -135,22 +138,26 @@
       <div class="input-group">
         <label for="ip-input">
           <Icon name="network" size="sm" />
-          Controller IP Address{vendorInfo.maxIPs > 1 ? 'es' : ''}
+          {vendorInfo.maxIPs > 1
+            ? $t('tools/dhcp-option43-generator.input.ipAddresses.labelPlural')
+            : $t('tools/dhcp-option43-generator.input.ipAddresses.label')}
           <span class="label-hint">
-            (max {vendorInfo.maxIPs})
+            {$t('tools/dhcp-option43-generator.input.ipAddresses.maxHint', { max: vendorInfo.maxIPs })}
           </span>
         </label>
         <textarea
           id="ip-input"
           bind:value={ipInput}
-          placeholder={`Enter IP address${vendorInfo.maxIPs > 1 ? 'es' : ''} (one per line or comma-separated)\ne.g., 192.168.1.10, 192.168.1.11`}
+          placeholder={vendorInfo.maxIPs > 1
+            ? $t('tools/dhcp-option43-generator.input.ipAddresses.placeholderPlural')
+            : $t('tools/dhcp-option43-generator.input.ipAddresses.placeholder')}
           rows="3"
           onchange={() => examples.clear()}
         ></textarea>
         <div class="input-actions">
           <button type="button" class="btn-primary" onclick={generate}>
             <Icon name="zap" size="sm" />
-            Generate
+            {$t('tools/dhcp-option43-generator.input.generateButton')}
           </button>
         </div>
       </div>
@@ -171,14 +178,14 @@
 
 {#if result}
   <div class="card results">
-    <h3>Generated Option 43 Values</h3>
+    <h3>{$t('tools/dhcp-option43-generator.results.title')}</h3>
 
     {#if result.iosCommand && result.workings}
       <div class="ios-command-section">
         <div class="ios-header">
           <h4>
             <Icon name="terminal" size="sm" />
-            {result.commandLabel || 'DHCP Server Command'}
+            {result.commandLabel || $t('tools/dhcp-option43-generator.results.commandSection.defaultLabel')}
           </h4>
           <button
             type="button"
@@ -187,13 +194,15 @@
             onclick={() => clipboard.copy(result!.iosCommand!, 'ios')}
           >
             <Icon name={clipboard.isCopied('ios') ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied('ios') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('ios')
+              ? $t('tools/dhcp-option43-generator.buttons.copied')
+              : $t('tools/dhcp-option43-generator.buttons.copy')}
           </button>
         </div>
         <pre class="ios-command">{result.iosCommand}</pre>
 
         <div class="workings">
-          <h5>How this value is calculated:</h5>
+          <h5>{$t('tools/dhcp-option43-generator.results.commandSection.calculationTitle')}</h5>
           <ul>
             {#each result.workings as working, i (i)}
               <li>{working}</li>
@@ -211,7 +220,7 @@
     <div class="output-formats">
       <div class="output-group">
         <div class="output-header">
-          <h4>Hexadecimal String</h4>
+          <h4>{$t('tools/dhcp-option43-generator.results.formats.hex.title')}</h4>
           <button
             type="button"
             class="copy-btn"
@@ -219,16 +228,18 @@
             onclick={() => clipboard.copy(result!.hex, 'hex')}
           >
             <Icon name={clipboard.isCopied('hex') ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied('hex') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('hex')
+              ? $t('tools/dhcp-option43-generator.buttons.copied')
+              : $t('tools/dhcp-option43-generator.buttons.copy')}
           </button>
         </div>
         <code class="output-value">{result.hex}</code>
-        <p class="format-hint">Raw hexadecimal - used in most DHCP server configurations</p>
+        <p class="format-hint">{$t('tools/dhcp-option43-generator.results.formats.hex.hint')}</p>
       </div>
 
       <div class="output-group">
         <div class="output-header">
-          <h4>Colon-Separated Hex</h4>
+          <h4>{$t('tools/dhcp-option43-generator.results.formats.colonHex.title')}</h4>
           <button
             type="button"
             class="copy-btn"
@@ -236,16 +247,18 @@
             onclick={() => clipboard.copy(result!.colonHex, 'colonHex')}
           >
             <Icon name={clipboard.isCopied('colonHex') ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied('colonHex') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('colonHex')
+              ? $t('tools/dhcp-option43-generator.buttons.copied')
+              : $t('tools/dhcp-option43-generator.buttons.copy')}
           </button>
         </div>
         <code class="output-value">{result.colonHex}</code>
-        <p class="format-hint">Used by Infoblox and some network appliances</p>
+        <p class="format-hint">{$t('tools/dhcp-option43-generator.results.formats.colonHex.hint')}</p>
       </div>
 
       <div class="output-group">
         <div class="output-header">
-          <h4>Windows DHCP Binary</h4>
+          <h4>{$t('tools/dhcp-option43-generator.results.formats.windowsBinary.title')}</h4>
           <button
             type="button"
             class="copy-btn"
@@ -253,16 +266,18 @@
             onclick={() => clipboard.copy(result!.windowsBinary, 'windows')}
           >
             <Icon name={clipboard.isCopied('windows') ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied('windows') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('windows')
+              ? $t('tools/dhcp-option43-generator.buttons.copied')
+              : $t('tools/dhcp-option43-generator.buttons.copy')}
           </button>
         </div>
         <code class="output-value">{result.windowsBinary}</code>
-        <p class="format-hint">Enter in Windows DHCP Server's Binary field for Option 43</p>
+        <p class="format-hint">{$t('tools/dhcp-option43-generator.results.formats.windowsBinary.hint')}</p>
       </div>
 
       <div class="output-group">
         <div class="output-header">
-          <h4>ISC DHCP Configuration</h4>
+          <h4>{$t('tools/dhcp-option43-generator.results.formats.iscDhcp.title')}</h4>
           <button
             type="button"
             class="copy-btn"
@@ -270,16 +285,18 @@
             onclick={() => clipboard.copy(result!.iscDhcp, 'isc')}
           >
             <Icon name={clipboard.isCopied('isc') ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied('isc') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('isc')
+              ? $t('tools/dhcp-option43-generator.buttons.copied')
+              : $t('tools/dhcp-option43-generator.buttons.copy')}
           </button>
         </div>
         <pre class="output-value code-block">{result.iscDhcp}</pre>
-        <p class="format-hint">Add to dhcpd.conf for ISC DHCP server</p>
+        <p class="format-hint">{$t('tools/dhcp-option43-generator.results.formats.iscDhcp.hint')}</p>
       </div>
 
       <div class="output-group">
         <div class="output-header">
-          <h4>Mikrotik Configuration</h4>
+          <h4>{$t('tools/dhcp-option43-generator.results.formats.mikrotik.title')}</h4>
           <button
             type="button"
             class="copy-btn"
@@ -287,30 +304,26 @@
             onclick={() => clipboard.copy(result!.mikrotik, 'mikrotik')}
           >
             <Icon name={clipboard.isCopied('mikrotik') ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied('mikrotik') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('mikrotik')
+              ? $t('tools/dhcp-option43-generator.buttons.copied')
+              : $t('tools/dhcp-option43-generator.buttons.copy')}
           </button>
         </div>
         <code class="output-value">{result.mikrotik}</code>
-        <p class="format-hint">RouterOS DHCP option configuration command</p>
+        <p class="format-hint">{$t('tools/dhcp-option43-generator.results.formats.mikrotik.hint')}</p>
       </div>
     </div>
   </div>
 
   <div class="card info">
-    <h3>Important Notes</h3>
+    <h3>{$t('tools/dhcp-option43-generator.notes.title')}</h3>
     <ul class="notes-list">
-      <li>
-        <strong>DHCP Option 43</strong> is vendor-specific and must match the AP manufacturer's expected format
-      </li>
-      <li>
-        Some vendors require <strong>Option 60</strong> (Vendor Class Identifier) to be set in addition to Option 43
-      </li>
-      <li>Ensure controller IPs are reachable from the AP management network</li>
-      <li>
-        For high availability, configure <strong>multiple controller IPs</strong> when supported
-      </li>
-      <li>Changes to DHCP options require AP to renew lease or reboot to take effect</li>
-      <li>Always test in a controlled environment before deploying to production networks</li>
+      <li>{$t('tools/dhcp-option43-generator.notes.list.vendorSpecific')}</li>
+      <li>{$t('tools/dhcp-option43-generator.notes.list.option60')}</li>
+      <li>{$t('tools/dhcp-option43-generator.notes.list.reachability')}</li>
+      <li>{$t('tools/dhcp-option43-generator.notes.list.highAvailability')}</li>
+      <li>{$t('tools/dhcp-option43-generator.notes.list.leaseRenewal')}</li>
+      <li>{$t('tools/dhcp-option43-generator.notes.list.testing')}</li>
     </ul>
   </div>
 {/if}
@@ -630,10 +643,6 @@
       li {
         line-height: 1.6;
         color: var(--text-primary);
-
-        strong {
-          color: var(--color-primary);
-        }
       }
     }
   }

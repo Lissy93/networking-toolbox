@@ -5,6 +5,7 @@
   import { bookmarks } from '$lib/stores/bookmarks';
   import { formatShortcut } from '$lib/utils/keyboard';
   import SegmentedControl from '$lib/components/global/SegmentedControl.svelte';
+  import { t } from '$lib/stores/language';
 
   interface Shortcut {
     keys: string;
@@ -14,16 +15,43 @@
 
   let isOpen = $state(false);
 
-  const shortcuts: Shortcut[] = [
-    { keys: '^K', description: 'Open search', category: 'Navigation' },
-    { keys: '^,', description: 'Open settings', category: 'Navigation' },
-    { keys: '^M', description: 'Toggle menu', category: 'Navigation' },
-    { keys: '^H', description: 'Go to homepage', category: 'Navigation' },
-    // { keys: '^B', description: 'Open bookmarks', category: 'Navigation' },
-    { keys: '^/', description: 'Show shortcuts', category: 'Navigation' },
-    { keys: '^1-9', description: 'Jump to bookmarked tool', category: 'Bookmarks' },
-    { keys: 'Esc', description: 'Close dialogs/clear', category: 'General' },
-  ];
+  const shortcuts = $derived([
+    {
+      keys: '^K',
+      description: $t('furniture.shortcuts.actions.open_search'),
+      category: $t('furniture.shortcuts.categories.navigation'),
+    },
+    {
+      keys: '^,',
+      description: $t('furniture.shortcuts.actions.open_settings'),
+      category: $t('furniture.shortcuts.categories.navigation'),
+    },
+    {
+      keys: '^M',
+      description: $t('furniture.shortcuts.actions.toggle_menu'),
+      category: $t('furniture.shortcuts.categories.navigation'),
+    },
+    {
+      keys: '^H',
+      description: $t('furniture.shortcuts.actions.go_home'),
+      category: $t('furniture.shortcuts.categories.navigation'),
+    },
+    {
+      keys: '^/',
+      description: $t('furniture.shortcuts.actions.show_shortcuts'),
+      category: $t('furniture.shortcuts.categories.navigation'),
+    },
+    {
+      keys: '^1-9',
+      description: $t('furniture.shortcuts.actions.jump_bookmark'),
+      category: $t('furniture.shortcuts.categories.bookmarks'),
+    },
+    {
+      keys: 'Esc',
+      description: $t('furniture.shortcuts.actions.close_dialogs'),
+      category: $t('furniture.shortcuts.categories.general'),
+    },
+  ]);
 
   function openDialog() {
     isOpen = true;
@@ -104,15 +132,19 @@
     return groups;
   });
 
-  const viewOptions = [
-    { label: 'Keyboard Shortcuts', value: 'keyboard-shortcuts', icon: 'keyboard' },
-    { label: 'About', value: 'about', icon: 'info' },
-  ];
+  const viewOptions = $derived([
+    { label: $t('furniture.shortcuts.view_options.shortcuts'), value: 'keyboard-shortcuts', icon: 'keyboard' },
+    { label: $t('furniture.shortcuts.view_options.about'), value: 'about', icon: 'info' },
+  ]);
 
   let activeView = $state('keyboard-shortcuts');
 
   // Compute dialog title based on active view
-  const dialogTitle = $derived(activeView === 'keyboard-shortcuts' ? 'Command Palette' : 'Networking Toolbox');
+  const dialogTitle = $derived(
+    activeView === 'keyboard-shortcuts'
+      ? $t('furniture.shortcuts.command_palette')
+      : $t('furniture.shortcuts.app_title'),
+  );
 
   // Close dialog when clicking links in About tab
   function handleLinkClick() {
@@ -137,7 +169,7 @@
             />
           </div>
         </div>
-        <button class="close-btn" onclick={close} aria-label="Close shortcuts">
+        <button class="close-btn" onclick={close} aria-label={$t('furniture.shortcuts.close')}>
           <Icon name="x" size="sm" />
         </button>
       </div>
@@ -157,9 +189,13 @@
               </ul>
 
               <!-- Show bookmarked tools if in Bookmarks category -->
-              {#if category === 'Bookmarks' && $bookmarks.length > 0}
+              {#if category === $t('furniture.shortcuts.categories.bookmarks') && $bookmarks.length > 0}
                 <details class="bookmarks-details">
-                  <summary>Your bookmarked tools ({Math.min($bookmarks.length, 9)})</summary>
+                  <summary
+                    >{$t('furniture.shortcuts.bookmarks.your_tools', {
+                      count: Math.min($bookmarks.length, 9),
+                    })}</summary
+                  >
                   <ul class="bookmarks-list">
                     {#each $bookmarks.slice(0, 10) as bookmark, index (bookmark.href)}
                       <li>
@@ -170,21 +206,21 @@
                     {#if $bookmarks.length <= 9}
                       <li>
                         <kbd>{formatShortcut('^0')}</kbd>
-                        <span>Homepage</span>
+                        <span>{$t('furniture.shortcuts.bookmarks.homepage')}</span>
                       </li>
                     {/if}
                     <li>
                       <kbd>{formatShortcut('^B')}</kbd>
-                      <span>View all Bookmarks</span>
+                      <span>{$t('furniture.shortcuts.bookmarks.view_all')}</span>
                     </li>
                   </ul>
                 </details>
               {/if}
 
-              {#if category === 'Bookmarks' && $bookmarks.length === 0}
+              {#if category === $t('furniture.shortcuts.categories.bookmarks') && $bookmarks.length === 0}
                 <p class="no-bookmarks-tip">
-                  <i>You don't have any bookmarks yet.</i>
-                  <span>Right-click on a tool to bookmark it for quick access and offline use.</span>
+                  <i>{$t('furniture.shortcuts.bookmarks.empty')}</i>
+                  <span>{$t('furniture.shortcuts.bookmarks.help')}</span>
                 </p>
               {/if}
             </div>
@@ -192,27 +228,25 @@
         </div>
       {:else if activeView === 'about'}
         <div class="about-content">
-          <p>
-            Networking Toolbox is an open-source collection of web-based networking tools designed to make
-            network-related tasks quicker and easier.
-          </p>
-          <p>
-            With 100+ tools, it's privacy-focused and self-hostable, fully customizable, and includes a free REST API
-            for automation.
-          </p>
+          <p>{$t('furniture.shortcuts.about.description_1')}</p>
+          <p>{$t('furniture.shortcuts.about.description_2')}</p>
           <ul>
-            <li><a href="https://github.com/lissy93/networking-toolbox" onclick={handleLinkClick}>GitHub</a></li>
-            <li><a href="/sitemap" onclick={handleLinkClick}>Page Listing</a></li>
-            <li><a href="/settings" onclick={handleLinkClick}>App Settings</a></li>
-            <li><a href="/about" onclick={handleLinkClick}>Documentation</a></li>
-            <li><a href="/about/support" onclick={handleLinkClick}>Support</a></li>
-            <li><a href="/about/legal" onclick={handleLinkClick}>Legal</a></li>
+            <li>
+              <a href="https://github.com/lissy93/networking-toolbox" onclick={handleLinkClick}
+                >{$t('furniture.shortcuts.about.github')}</a
+              >
+            </li>
+            <li><a href="/sitemap" onclick={handleLinkClick}>{$t('furniture.shortcuts.about.page_listing')}</a></li>
+            <li><a href="/settings" onclick={handleLinkClick}>{$t('furniture.shortcuts.about.app_settings')}</a></li>
+            <li><a href="/about" onclick={handleLinkClick}>{$t('furniture.shortcuts.about.documentation')}</a></li>
+            <li><a href="/about/support" onclick={handleLinkClick}>{$t('furniture.shortcuts.about.support')}</a></li>
+            <li><a href="/about/legal" onclick={handleLinkClick}>{$t('furniture.shortcuts.about.legal')}</a></li>
           </ul>
           <p class="sponsor">
             <Icon name="heart" size="md" />
             <span>
-              <b>Finding Networking Toolbox useful?</b>
-              Consider <a href="https://github.com/sponsors/Lissy93">sponsoring us on GitHub</a> to support ongoing development!
+              <b>{$t('furniture.shortcuts.about.sponsor_heading')}</b>
+              {$t('furniture.shortcuts.about.sponsor_text')}
             </span>
           </p>
 
@@ -221,9 +255,11 @@
               href="https://github.com/lissy93/networking-toolbox"
               target="_blank"
               rel="noopener"
-              onclick={handleLinkClick}>Networking Toolbox</a
+              onclick={handleLinkClick}>{$t('furniture.shortcuts.app_title')}</a
             >
-            v{import.meta.env.VITE_APP_VERSION}, licensed under
+            {$t('furniture.shortcuts.about.version', { version: import.meta.env.VITE_APP_VERSION })}, {$t(
+              'furniture.shortcuts.about.license',
+            )}
             <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener" onclick={handleLinkClick}
               >MIT</a
             >
@@ -494,10 +530,6 @@
       align-items: center;
       gap: var(--spacing-sm);
       margin: var(--spacing-md) auto;
-      a {
-        color: var(--color-pink);
-        text-decoration: underline;
-      }
       opacity: 0;
       animation: fadeIn 1s ease-out 10s forwards;
     }

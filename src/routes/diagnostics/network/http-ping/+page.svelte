@@ -1,10 +1,17 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
   import '../../../../styles/diagnostics-pages.scss';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics');
+  });
 
   let url = $state('https://google.com');
   let method = $state('HEAD');
@@ -15,20 +22,24 @@
   const clipboard = useClipboard();
 
   const examplesList = [
-    { url: 'https://google.com', method: 'HEAD', description: 'Google homepage' },
-    { url: 'https://github.com', method: 'HEAD', description: 'GitHub homepage' },
-    { url: 'https://api.github.com', method: 'GET', description: 'GitHub API' },
-    { url: 'https://httpbin.org/delay/1', method: 'GET', description: 'Simulated 1s delay' },
-    { url: 'https://www.cloudflare.com', method: 'HEAD', description: 'Cloudflare CDN' },
-    { url: 'https://stackoverflow.com', method: 'HEAD', description: 'Stack Overflow' },
+    { url: 'https://google.com', method: 'HEAD', description: $t('diagnostics.http-ping.examples.google') },
+    { url: 'https://github.com', method: 'HEAD', description: $t('diagnostics.http-ping.examples.github') },
+    { url: 'https://api.github.com', method: 'GET', description: $t('diagnostics.http-ping.examples.githubApi') },
+    { url: 'https://httpbin.org/delay/1', method: 'GET', description: $t('diagnostics.http-ping.examples.delay') },
+    { url: 'https://www.cloudflare.com', method: 'HEAD', description: $t('diagnostics.http-ping.examples.cloudflare') },
+    {
+      url: 'https://stackoverflow.com',
+      method: 'HEAD',
+      description: $t('diagnostics.http-ping.examples.stackoverflow'),
+    },
   ];
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   const httpMethods = [
-    { value: 'HEAD', label: 'HEAD', description: 'Headers only, fastest' },
-    { value: 'GET', label: 'GET', description: 'Full response, more realistic' },
-    { value: 'OPTIONS', label: 'OPTIONS', description: 'Preflight requests' },
+    { value: 'HEAD', label: 'HEAD', description: $t('diagnostics.http-ping.form.method.options.head') },
+    { value: 'GET', label: 'GET', description: $t('diagnostics.http-ping.form.method.options.get') },
+    { value: 'OPTIONS', label: 'OPTIONS', description: $t('diagnostics.http-ping.form.method.options.options') },
   ];
 
   // Reactive validation
@@ -101,10 +112,10 @@
   }
 
   function getLatencyDescription(latency: number): string {
-    if (latency < 100) return 'Excellent';
-    if (latency < 300) return 'Good';
-    if (latency < 1000) return 'Fair';
-    return 'Poor';
+    if (latency < 100) return $t('diagnostics.http-ping.results.latency.excellent');
+    if (latency < 300) return $t('diagnostics.http-ping.results.latency.good');
+    if (latency < 1000) return $t('diagnostics.http-ping.results.latency.fair');
+    return $t('diagnostics.http-ping.results.latency.poor');
   }
 
   async function copyResults() {
@@ -150,10 +161,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>HTTP Ping</h1>
+    <h1>{$t('diagnostics.http-ping.title')}</h1>
     <p>
-      Measure HTTP/HTTPS response latency by sending repeated requests and analyzing timing statistics. Alternative to
-      ICMP ping for web services and APIs.
+      {$t('diagnostics.http-ping.description')}
     </p>
   </header>
 
@@ -162,7 +172,7 @@
     examples={examplesList}
     selectedIndex={examples.selectedIndex}
     onSelect={loadExample}
-    title="HTTP Ping Examples"
+    title={$t('diagnostics.http-ping.examples.title')}
     getLabel={(ex) => ex.description}
     getDescription={(ex) => `${ex.url} (${ex.method})`}
     getTooltip={(ex) => `Ping ${ex.url} using ${ex.method} method`}
@@ -171,13 +181,13 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>HTTP Ping Configuration</h3>
+      <h3>{$t('diagnostics.http-ping.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-row">
         <div class="form-group">
-          <label for="url" use:tooltip={'Enter a complete HTTP or HTTPS URL'}>
-            Target URL
+          <label for="url" use:tooltip={$t('diagnostics.http-ping.form.url.tooltip')}>
+            {$t('diagnostics.http-ping.form.url.label')}
             <input
               id="url"
               type="url"
@@ -190,7 +200,7 @@
               }}
             />
             {#if url && !isUrlValid()}
-              <span class="error-text">Must be a valid HTTP or HTTPS URL</span>
+              <span class="error-text">{$t('diagnostics.http-ping.form.url.error')}</span>
             {/if}
           </label>
         </div>
@@ -199,7 +209,7 @@
       <!-- HTTP Method Selection -->
       <div class="form-row">
         <div class="form-group">
-          <h3>HTTP Method</h3>
+          <h3>{$t('diagnostics.http-ping.form.method.label')}</h3>
           <div class="method-options">
             {#each httpMethods as methodOption, index (index)}
               <button
@@ -218,8 +228,8 @@
 
       <div class="form-row two-columns">
         <div class="form-group">
-          <label for="count" use:tooltip={'Number of requests to send (1-20)'}>
-            Request Count
+          <label for="count" use:tooltip={$t('diagnostics.http-ping.form.count.tooltip')}>
+            {$t('diagnostics.http-ping.form.count.label')}
             <input
               id="count"
               type="number"
@@ -234,8 +244,8 @@
           </label>
         </div>
         <div class="form-group">
-          <label for="timeout" use:tooltip={'Timeout per request in milliseconds'}>
-            Timeout (ms)
+          <label for="timeout" use:tooltip={$t('diagnostics.http-ping.form.timeout.tooltip')}>
+            {$t('diagnostics.http-ping.form.timeout.label')}
             <input
               id="timeout"
               type="number"
@@ -256,10 +266,10 @@
         <button class="lookup-btn" onclick={httpPing} disabled={diagnosticState.loading || !isInputValid()}>
           {#if diagnosticState.loading}
             <Icon name="loader-2" size="sm" animate="spin" />
-            Pinging...
+            {$t('diagnostics.http-ping.form.button.pinging')}
           {:else}
             <Icon name="activity" size="sm" />
-            Start HTTP Ping
+            {$t('diagnostics.http-ping.form.button.start')}
           {/if}
         </button>
       </div>
@@ -270,10 +280,10 @@
   {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>HTTP Ping Results</h3>
+        <h3>{$t('diagnostics.http-ping.results.title')}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
           <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" />
-          {clipboard.isCopied() ? 'Copied!' : 'Copy Results'}
+          {clipboard.isCopied() ? $t('common.copied') : $t('diagnostics.http-ping.results.copy')}
         </button>
       </div>
       <div class="card-content">
@@ -283,7 +293,7 @@
             <Icon name="check-circle" size="sm" />
             <div>
               <span class="status-title">{diagnosticState.results.successful}/{diagnosticState.results.count}</span>
-              <p class="status-desc">Successful requests</p>
+              <p class="status-desc">{$t('diagnostics.http-ping.results.summary.successful')}</p>
             </div>
           </div>
           {#if diagnosticState.results.statistics?.avg}
@@ -302,7 +312,7 @@
               <Icon name="x-circle" size="sm" />
               <div>
                 <span class="status-title">{diagnosticState.results.failed}</span>
-                <p class="status-desc">Failed requests</p>
+                <p class="status-desc">{$t('diagnostics.http-ping.results.summary.failed')}</p>
               </div>
             </div>
           {/if}
@@ -311,30 +321,30 @@
         {#if diagnosticState.results.statistics && diagnosticState.results.successful > 0}
           <!-- Statistics -->
           <div class="stats-section">
-            <h4>Latency Statistics</h4>
+            <h4>{$t('diagnostics.http-ping.results.statistics.title')}</h4>
             <div class="stats-grid">
               <div class="stat-item">
-                <span class="stat-label">Minimum:</span>
+                <span class="stat-label">{$t('diagnostics.http-ping.results.statistics.minimum')}:</span>
                 <span class="stat-value">{diagnosticState.results.statistics.min}ms</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">Maximum:</span>
+                <span class="stat-label">{$t('diagnostics.http-ping.results.statistics.maximum')}:</span>
                 <span class="stat-value">{diagnosticState.results.statistics.max}ms</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">Average:</span>
+                <span class="stat-label">{$t('diagnostics.http-ping.results.statistics.average')}:</span>
                 <span class="stat-value">{diagnosticState.results.statistics.avg}ms</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">Median:</span>
+                <span class="stat-label">{$t('diagnostics.http-ping.results.statistics.median')}:</span>
                 <span class="stat-value">{diagnosticState.results.statistics.median}ms</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">95th Percentile:</span>
+                <span class="stat-label">{$t('diagnostics.http-ping.results.statistics.p95')}:</span>
                 <span class="stat-value">{diagnosticState.results.statistics.p95}ms</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">Range:</span>
+                <span class="stat-label">{$t('diagnostics.http-ping.results.statistics.range')}:</span>
                 <span class="stat-value"
                   >{diagnosticState.results.statistics.max - diagnosticState.results.statistics.min}ms</span
                 >
@@ -345,7 +355,7 @@
           <!-- Individual Results -->
           {#if diagnosticState.results.latencies?.length > 0}
             <div class="results-section">
-              <h4>Individual Request Results</h4>
+              <h4>{$t('diagnostics.http-ping.results.individual.title')}</h4>
               <div class="requests-list">
                 {#each diagnosticState.results.latencies as latency, i (i)}
                   <div class="request-item {getLatencyClass(latency)}">
@@ -362,7 +372,9 @@
         <!-- Errors -->
         {#if diagnosticState.results.errors?.length > 0}
           <div class="errors-section">
-            <h4>Request Errors ({diagnosticState.results.errors.length})</h4>
+            <h4>
+              {$t('diagnostics.http-ping.results.errors.title', { count: diagnosticState.results.errors.length })}
+            </h4>
             <div class="errors-list">
               {#each diagnosticState.results.errors as error, i (i)}
                 <div class="error-item">
@@ -376,18 +388,18 @@
 
         <!-- Connection Info -->
         <div class="info-section">
-          <h4>Request Information</h4>
+          <h4>{$t('diagnostics.http-ping.results.info.title')}</h4>
           <div class="detail-grid">
             <div class="detail-item">
-              <span class="detail-label">URL:</span>
+              <span class="detail-label">{$t('diagnostics.http-ping.results.info.url')}:</span>
               <span class="detail-value mono">{diagnosticState.results.url}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Method:</span>
+              <span class="detail-label">{$t('diagnostics.http-ping.results.info.method')}:</span>
               <span class="detail-value">{diagnosticState.results.method}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Success Rate:</span>
+              <span class="detail-label">{$t('diagnostics.http-ping.results.info.successRate')}:</span>
               <span class="detail-value"
                 >{((diagnosticState.results.successful / diagnosticState.results.count) * 100).toFixed(1)}%</span
               >
@@ -398,36 +410,51 @@
     </div>
   {/if}
 
-  <ErrorCard title="HTTP Ping Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('diagnostics.http-ping.error.title')} error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>Understanding HTTP Ping</h3>
+      <h3>{$t('diagnostics.http-ping.education.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>HTTP vs ICMP Ping</h4>
+          <h4>{$t('diagnostics.http-ping.education.httpVsIcmp.title')}</h4>
           <ul>
-            <li><strong>HTTP:</strong> Tests application layer connectivity</li>
-            <li><strong>ICMP:</strong> Tests network layer connectivity</li>
-            <li>HTTP ping better reflects real user experience</li>
-            <li>Works through firewalls that block ICMP</li>
+            <li>
+              <strong>{$t('diagnostics.http-ping.education.httpVsIcmp.http.title')}:</strong>
+              {$t('diagnostics.http-ping.education.httpVsIcmp.http.description')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics.http-ping.education.httpVsIcmp.icmp.title')}:</strong>
+              {$t('diagnostics.http-ping.education.httpVsIcmp.icmp.description')}
+            </li>
+            <li>{$t('diagnostics.http-ping.education.httpVsIcmp.userExperience')}</li>
+            <li>{$t('diagnostics.http-ping.education.httpVsIcmp.firewalls')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Request Methods</h4>
+          <h4>{$t('diagnostics.http-ping.education.methods.title')}</h4>
           <ul>
-            <li><strong>HEAD:</strong> Headers only, fastest and most efficient</li>
-            <li><strong>GET:</strong> Full response, more realistic timing</li>
-            <li><strong>OPTIONS:</strong> Check allowed methods and CORS</li>
+            <li>
+              <strong>{$t('diagnostics.http-ping.education.methods.head.title')}:</strong>
+              {$t('diagnostics.http-ping.education.methods.head.description')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics.http-ping.education.methods.get.title')}:</strong>
+              {$t('diagnostics.http-ping.education.methods.get.description')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics.http-ping.education.methods.options.title')}:</strong>
+              {$t('diagnostics.http-ping.education.methods.options.description')}
+            </li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Latency Guidelines</h4>
+          <h4>{$t('diagnostics.http-ping.education.latencyGuide.title')}</h4>
           <ul>
             <li><strong>&lt; 100ms:</strong> Excellent response time</li>
             <li><strong>100-300ms:</strong> Good for most applications</li>

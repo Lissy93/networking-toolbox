@@ -1,7 +1,15 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import { Copy, Download, Check, Mail } from 'lucide-svelte';
   import { tooltip } from '$lib/actions/tooltip.js';
   import { useClipboard } from '$lib/composables';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools');
+  });
 
   let domain = $state('');
   let mailboxDname = $state('admin.example.com.');
@@ -10,32 +18,32 @@
 
   const clipboard = useClipboard();
 
-  const roleExamples = [
+  const roleExamples = $derived([
     {
-      name: 'System Administrator',
+      name: $t('tools.rp_builder.examples.roles.systemAdmin.name'),
       mbox: 'admin.example.com.',
       txt: 'admin-info.example.com.',
-      description: 'Primary system administrator contact',
+      description: $t('tools.rp_builder.examples.roles.systemAdmin.description'),
     },
     {
-      name: 'Webmaster',
+      name: $t('tools.rp_builder.examples.roles.webmaster.name'),
       mbox: 'webmaster.example.com.',
       txt: 'webmaster-info.example.com.',
-      description: 'Website administrator contact',
+      description: $t('tools.rp_builder.examples.roles.webmaster.description'),
     },
     {
-      name: 'Security Contact',
+      name: $t('tools.rp_builder.examples.roles.security.name'),
       mbox: 'security.example.com.',
       txt: 'security-info.example.com.',
-      description: 'Security incident response contact',
+      description: $t('tools.rp_builder.examples.roles.security.description'),
     },
     {
-      name: 'DNS Administrator',
+      name: $t('tools.rp_builder.examples.roles.dnsAdmin.name'),
       mbox: 'dns-admin.example.com.',
       txt: 'dns-admin-info.example.com.',
-      description: 'DNS zone administrator',
+      description: $t('tools.rp_builder.examples.roles.dnsAdmin.description'),
     },
-  ];
+  ]);
 
   let rpRecord = $derived.by(() => {
     if (!domain.trim()) return '';
@@ -51,7 +59,8 @@
     if (!txtDname.trim() || txtDname === '.') return '';
 
     const txt = txtDname.trim().replace(/\.$/, '');
-    return `${txt}. IN TXT "Administrative contact for ${domain.trim().replace(/\.$/, '') || 'this domain'}. Please use the mailbox specified in the RP record for contact."`;
+    const domainName = domain.trim().replace(/\.$/, '') || 'this domain';
+    return `${txt}. IN TXT "Administrative contact for ${domainName}. Please use the mailbox specified in the RP record for contact."`;
   });
 
   let isValid = $derived.by(() => {
@@ -62,23 +71,23 @@
     const warns = [];
 
     if (mailboxDname && !mailboxDname.includes('.')) {
-      warns.push('Mailbox domain name should be a fully qualified domain name');
+      warns.push($t('tools.rp_builder.alerts.warnings.mailboxFqdn'));
     }
 
     if (txtDname && txtDname !== '.' && !txtDname.includes('.')) {
-      warns.push('TXT domain name should be a fully qualified domain name or "."');
+      warns.push($t('tools.rp_builder.alerts.warnings.txtFqdn'));
     }
 
     if (mailboxDname && mailboxDname.endsWith('.')) {
       // This is correct
     } else if (mailboxDname && mailboxDname !== '.') {
-      warns.push('Domain names in RP records should end with a dot (.) for absolute names');
+      warns.push($t('tools.rp_builder.alerts.warnings.mailboxDot'));
     }
 
     if (txtDname && txtDname.endsWith('.')) {
       // This is correct
     } else if (txtDname && txtDname !== '.') {
-      warns.push('TXT domain name should end with a dot (.) for absolute names');
+      warns.push($t('tools.rp_builder.alerts.warnings.txtDot'));
     }
 
     return warns;
@@ -88,15 +97,15 @@
     const infos = [];
 
     if (mailboxDname === '.') {
-      infos.push('Using "." for mailbox means no mailbox is specified');
+      infos.push($t('tools.rp_builder.alerts.info.noMailbox'));
     }
 
     if (txtDname === '.') {
-      infos.push('Using "." for TXT means no additional text information is provided');
+      infos.push($t('tools.rp_builder.alerts.info.noTxt'));
     }
 
     if (txtDname && txtDname !== '.') {
-      infos.push(`Remember to create the TXT record at ${txtDname} with contact information`);
+      infos.push($t('tools.rp_builder.alerts.info.txtRecord', { txtDname }));
     }
 
     return infos;
@@ -164,15 +173,15 @@
 <div class="rp-builder">
   <div class="card">
     <div class="card-header">
-      <h1>RP Record Builder</h1>
-      <p>Create RP (Responsible Person) records to specify administrative contacts for your domains</p>
+      <h1>{$t('tools.rp_builder.title')}</h1>
+      <p>{$t('tools.rp_builder.subtitle')}</p>
     </div>
 
     <div class="card-content">
       <!-- Role Examples -->
       <details bind:open={showExamples} class="examples-section">
         <summary>
-          <span>Common Role Examples</span>
+          <span>{$t('tools.rp_builder.examples.title')}</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <polyline points="6,9 12,15 18,9"></polyline>
           </svg>
@@ -191,90 +200,96 @@
         <!-- Input Form -->
         <div class="input-section">
           <div class="field-group">
-            <label for="domain" use:tooltip={'The domain name for which this RP record will be created'}>
-              Domain Name *
+            <label for="domain" use:tooltip={$t('tools.rp_builder.form.domain.tooltip')}>
+              {$t('tools.rp_builder.form.domain.label')} *
             </label>
-            <input id="domain" type="text" bind:value={domain} placeholder="example.com" />
-            <small>The domain name for this RP record</small>
+            <input
+              id="domain"
+              type="text"
+              bind:value={domain}
+              placeholder={$t('tools.rp_builder.form.domain.placeholder')}
+            />
+            <small>{$t('tools.rp_builder.form.domain.help')}</small>
           </div>
 
           <!-- Email to Domain Name Converter -->
           <div class="converter-section">
-            <h4>Email to Domain Name Converter</h4>
+            <h4>{$t('tools.rp_builder.form.converter.title')}</h4>
             <div class="converter-input">
-              <input type="email" bind:value={emailInput} placeholder="admin@example.com" />
-              <button onclick={convertEmailToDname} class="btn-success" disabled={!emailInput.trim()}> Convert </button>
+              <input
+                type="email"
+                bind:value={emailInput}
+                placeholder={$t('tools.rp_builder.form.converter.placeholder')}
+              />
+              <button onclick={convertEmailToDname} class="btn-success" disabled={!emailInput.trim()}>
+                {$t('tools.rp_builder.form.converter.button')}
+              </button>
             </div>
-            <small>Enter an email to automatically convert to domain name format</small>
+            <small>{$t('tools.rp_builder.form.converter.help')}</small>
           </div>
 
           <div class="field-group">
-            <label
-              for="mailbox"
-              use:tooltip={"Domain name encoding the email address. Use '.' for no contact specified."}
-            >
-              Mailbox Domain Name *
+            <label for="mailbox" use:tooltip={$t('tools.rp_builder.form.mailbox.tooltip')}>
+              {$t('tools.rp_builder.form.mailbox.label')} *
             </label>
             <input
               id="mailbox"
               type="text"
               bind:value={mailboxDname}
-              placeholder="admin.example.com."
+              placeholder={$t('tools.rp_builder.form.mailbox.placeholder')}
               class="mono-input"
             />
-            <small> Domain name encoding the email address (use "." for no contact) </small>
+            <small> {$t('tools.rp_builder.form.mailbox.help')} </small>
             {#if mailboxDname && mailboxDname !== '.'}
               <div class="email-preview">
                 <Mail size="12" />
-                Email: {dnameToEmail(mailboxDname) || 'Invalid format'}
+                {$t('tools.rp_builder.form.mailbox.emailPreview')}
+                {dnameToEmail(mailboxDname) || $t('tools.rp_builder.output.invalidFormat')}
               </div>
             {/if}
           </div>
 
           <div class="field-group">
-            <label
-              for="txt"
-              use:tooltip={"Domain name where TXT record with additional contact information can be found. Use '.' for no additional info."}
-            >
-              TXT Domain Name
+            <label for="txt" use:tooltip={$t('tools.rp_builder.form.txt.tooltip')}>
+              {$t('tools.rp_builder.form.txt.label')}
             </label>
             <input
               id="txt"
               type="text"
               bind:value={txtDname}
-              placeholder="admin-info.example.com."
+              placeholder={$t('tools.rp_builder.form.txt.placeholder')}
               class="mono-input"
             />
-            <small> Domain name where TXT record with contact info can be found (use "." for none) </small>
+            <small> {$t('tools.rp_builder.form.txt.help')} </small>
           </div>
         </div>
 
         <!-- Output -->
         <div class="output-section">
           <div class="output-group">
-            <h3>Generated RP Record</h3>
+            <h3>{$t('tools.rp_builder.output.rpRecord')}</h3>
             <div class="code-output">
               {#if isValid}
                 <pre>{rpRecord}</pre>
               {:else}
-                <p class="placeholder-text">Fill in the required fields to generate the RP record</p>
+                <p class="placeholder-text">{$t('tools.rp_builder.output.placeholder')}</p>
               {/if}
             </div>
           </div>
 
           {#if txtRecord}
             <div class="output-group">
-              <h3>Suggested TXT Record</h3>
+              <h3>{$t('tools.rp_builder.output.txtRecord')}</h3>
               <div class="code-output txt-output">
                 <pre>{txtRecord}</pre>
-                <small>This TXT record should be created at the specified domain</small>
+                <small>{$t('tools.rp_builder.output.txtHelp')}</small>
               </div>
             </div>
           {/if}
 
           {#if info.length > 0}
             <div class="alert alert-info">
-              <h4>Information</h4>
+              <h4>{$t('tools.rp_builder.alerts.info.title')}</h4>
               <ul>
                 {#each info as infoItem, index (index)}
                   <li>{infoItem}</li>
@@ -285,7 +300,7 @@
 
           {#if warnings.length > 0}
             <div class="alert alert-warning">
-              <h4>Configuration Warnings</h4>
+              <h4>{$t('tools.rp_builder.alerts.warnings.title')}</h4>
               <ul>
                 {#each warnings as warning, index (index)}
                   <li>{warning}</li>
@@ -304,10 +319,10 @@
               >
                 {#if clipboard.isCopied('copy')}
                   <Check size="16" />
-                  Copied!
+                  {$t('tools.rp_builder.buttons.copied')}
                 {:else}
                   <Copy size="16" />
-                  Copy Records
+                  {$t('tools.rp_builder.buttons.copy')}
                 {/if}
               </button>
               <button
@@ -318,10 +333,10 @@
               >
                 {#if clipboard.isCopied('download')}
                   <Check size="16" />
-                  Downloaded!
+                  {$t('tools.rp_builder.buttons.downloaded')}
                 {:else}
                   <Download size="16" />
-                  Download
+                  {$t('tools.rp_builder.buttons.download')}
                 {/if}
               </button>
             </div>
@@ -332,50 +347,48 @@
       <!-- Information Section -->
       <div class="info-section">
         <div class="card info-card">
-          <h4>About RP Records</h4>
+          <h4>{$t('tools.rp_builder.info.about.title')}</h4>
           <p>
-            RP (Responsible Person) records identify the responsible person for a domain or host. They specify both a
-            mailbox (encoded as a domain name) and optionally point to a TXT record with additional contact information.
-            This allows automated discovery of administrative contacts.
+            {$t('tools.rp_builder.info.about.description')}
           </p>
         </div>
 
         <div class="info-grid">
           <div class="card">
-            <h4>Email Encoding</h4>
+            <h4>{$t('tools.rp_builder.info.encoding.title')}</h4>
             <div class="encoding-examples">
-              <p>Email addresses are encoded as domain names:</p>
+              <p>{$t('tools.rp_builder.info.encoding.description')}</p>
               <div class="code-example">
-                <div><strong>Email:</strong> admin@example.com</div>
-                <div><strong>Encoded:</strong> admin.example.com.</div>
+                <div><strong>Email:</strong> {$t('tools.rp_builder.info.encoding.examples.simple.email')}</div>
+                <div><strong>Encoded:</strong> {$t('tools.rp_builder.info.encoding.examples.simple.encoded')}</div>
               </div>
               <div class="code-example">
-                <div><strong>Email:</strong> user.name@example.com</div>
-                <div><strong>Encoded:</strong> user\.name.example.com.</div>
+                <div><strong>Email:</strong> {$t('tools.rp_builder.info.encoding.examples.complex.email')}</div>
+                <div><strong>Encoded:</strong> {$t('tools.rp_builder.info.encoding.examples.complex.encoded')}</div>
               </div>
-              <small>Dots in the local part are escaped with backslashes</small>
+              <small>{$t('tools.rp_builder.info.encoding.note')}</small>
             </div>
           </div>
 
           <div class="card">
-            <h4>Common Use Cases</h4>
+            <h4>{$t('tools.rp_builder.info.useCases.title')}</h4>
             <ul class="use-cases">
-              <li>Zone administrator contact</li>
-              <li>Server administrator contact</li>
-              <li>Security incident response</li>
-              <li>Automated contact discovery</li>
-              <li>Compliance requirements</li>
+              <li>{$t('tools.rp_builder.info.useCases.items.zone')}</li>
+              <li>{$t('tools.rp_builder.info.useCases.items.server')}</li>
+              <li>{$t('tools.rp_builder.info.useCases.items.security')}</li>
+              <li>{$t('tools.rp_builder.info.useCases.items.automated')}</li>
+              <li>{$t('tools.rp_builder.info.useCases.items.compliance')}</li>
             </ul>
           </div>
         </div>
 
         <div class="card best-practices-card">
-          <h4>Best Practices</h4>
+          <h4>{$t('tools.rp_builder.info.bestPractices.title')}</h4>
           <ul class="best-practices">
-            <li>Always use fully qualified domain names ending with a dot</li>
-            <li>Create corresponding TXT records with detailed contact information</li>
-            <li>Keep contact information up to date and monitored</li>
-            <li>Consider creating role-based contacts rather than personal ones</li>
+            <li>{$t('tools.rp_builder.info.bestPractices.items.fqdn')}</li>
+            <li>{$t('tools.rp_builder.info.bestPractices.items.txtRecords')}</li>
+            <li>{$t('tools.rp_builder.info.bestPractices.items.upToDate')}</li>
+            <li>{$t('tools.rp_builder.info.bestPractices.items.rolesBased')}</li>
           </ul>
         </div>
       </div>

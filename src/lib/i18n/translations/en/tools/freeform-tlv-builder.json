@@ -1,0 +1,122 @@
+{
+  "title": "Freeform TLV Composer",
+  "subtitle": "Build custom DHCP options using Type-Length-Value encoding. Support for IPv4, IPv6, FQDN, strings, hex data, and numeric types with live hex preview.",
+
+  "optionConfig": {
+    "title": "Option Configuration",
+    "optionCode": {
+      "label": "Option Code",
+      "placeholder": "224",
+      "hint": "DHCP option number (0-255, recommend 224-254 for custom)"
+    },
+    "optionName": {
+      "label": "Option Name",
+      "placeholder": "e.g., Custom Server Option",
+      "hint": "Descriptive name for this option"
+    }
+  },
+
+  "dataItems": {
+    "title": "Data Items",
+    "hint": "Add multiple data items to build the option payload. Each item will be encoded sequentially.",
+    "item": "Item {number}",
+    "dataType": "Data Type",
+    "value": "Value",
+    "addButton": "Add Data Item",
+
+    "dataTypes": {
+      "ipv4": {
+        "label": "IPv4 Address",
+        "description": "4 bytes, e.g., 192.168.1.1",
+        "placeholder": "192.168.1.1"
+      },
+      "ipv6": {
+        "label": "IPv6 Address",
+        "description": "16 bytes, e.g., 2001:db8::1",
+        "placeholder": "2001:db8::1"
+      },
+      "fqdn": {
+        "label": "Domain Name (FQDN)",
+        "description": "DNS wire format with length prefixes",
+        "placeholder": "example.com"
+      },
+      "string": {
+        "label": "String (UTF-8)",
+        "description": "Text encoded as UTF-8 bytes",
+        "placeholder": "Enter text"
+      },
+      "hex": {
+        "label": "Raw Hex",
+        "description": "Direct hex bytes",
+        "placeholder": "deadbeef or DE AD BE EF"
+      },
+      "uint8": {
+        "label": "UInt8",
+        "description": "1 byte unsigned integer (0-255)",
+        "placeholder": "0-255"
+      },
+      "uint16": {
+        "label": "UInt16",
+        "description": "2 byte unsigned integer (0-65535)",
+        "placeholder": "0-65535"
+      },
+      "uint32": {
+        "label": "UInt32",
+        "description": "4 byte unsigned integer (0-4294967295)",
+        "placeholder": "0-4294967295"
+      },
+      "boolean": {
+        "label": "Boolean",
+        "description": "1 byte (0 or 1)",
+        "placeholder": "0, 1, true, or false"
+      }
+    }
+  },
+
+  "errors": {
+    "title": "Validation Errors"
+  },
+
+  "results": {
+    "title": "Encoded Option",
+    "summary": {
+      "optionCode": "Option Code:",
+      "optionName": "Option Name:",
+      "dataLength": "Data Length:",
+      "items": "Items:",
+      "bytes": "{length} bytes"
+    },
+    "hexEncoded": "Hex-Encoded (Compact)",
+    "wireFormat": "Wire Format (Spaced)",
+    "byteBreakdown": "Byte Breakdown",
+    "configExamples": "Configuration Examples",
+    "iscDhcpd": "ISC dhcpd Configuration",
+    "keaDhcp4": "Kea DHCPv4 Configuration"
+  },
+
+  "about": {
+    "title": "About TLV Encoding",
+    "intro": "Type-Length-Value (TLV) is a common encoding scheme used in DHCP options. This tool allows you to compose custom DHCP options by combining multiple data items of different types.",
+    "types": {
+      "ipv4Ipv6": "IPv4/IPv6:",
+      "ipv4Ipv6Desc": "Network addresses encoded as raw bytes",
+      "fqdn": "FQDN:",
+      "fqdnDesc": "Domain names in DNS wire format (length-prefixed labels)",
+      "string": "String:",
+      "stringDesc": "UTF-8 encoded text",
+      "uintTypes": "UInt8/16/32:",
+      "uintTypesDesc": "Unsigned integers of various sizes",
+      "boolean": "Boolean:",
+      "booleanDesc": "Single byte (0x00 or 0x01)",
+      "hex": "Hex:",
+      "hexDesc": "Raw hexadecimal bytes for custom data"
+    },
+    "outro": "The generated hex output represents the option data only. DHCP servers will automatically add the option code and length fields when sending the option to clients."
+  },
+
+  "common": {
+    "required": "*",
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

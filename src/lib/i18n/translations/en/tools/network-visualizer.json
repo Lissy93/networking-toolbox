@@ -1,0 +1,43 @@
+{
+  "title": "Network Visualization",
+  "sections": {
+    "networkVisualization": "Network Visualization",
+    "binaryBreakdown": "Subnet Mask Binary Breakdown",
+    "addressGrid": "Address Grid",
+    "networkEfficiency": "Network Efficiency"
+  },
+  "addressTypes": {
+    "networkAddress": "Network Address",
+    "broadcastAddress": "Broadcast Address",
+    "usableHost": "Usable Host",
+    "usableHosts": "Usable Hosts"
+  },
+  "ranges": {
+    "addressRange": "Address Range",
+    "totalAddresses": "{count} total addresses",
+    "usableHosts": "Usable Hosts ({count})"
+  },
+  "legend": {
+    "network": "Network",
+    "usableHosts": "Usable Hosts ({count})",
+    "broadcast": "Broadcast"
+  },
+  "binary": {
+    "networkBit": "Network bit (1)",
+    "hostBit": "Host bit (0)",
+    "bitPosition": "Position {position}",
+    "bitTooltip": "{type} - Position {position}",
+    "networkBits": "Network bits: {count}",
+    "hostBits": "Host bits: {count}",
+    "octetLabel": "(Octet {number})"
+  },
+  "efficiency": {
+    "addressUtilization": "Address Utilization",
+    "wastedAddresses": "Wasted Addresses",
+    "totalCapacity": "Total Capacity",
+    "networkOverhead": "Network Overhead"
+  },
+  "tooltips": {
+    "usableHostAddresses": "Usable Host Addresses"
+  }
+}

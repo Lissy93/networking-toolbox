@@ -8,7 +8,14 @@
   import ActionButton from '$lib/components/common/ActionButton.svelte';
   import ResultsCard from '$lib/components/common/ResultsCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import '../../../../styles/diagnostics-pages.scss';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics/http-headers');
+  });
 
   let url = $state('https://example.com');
   let method = $state('GET');
@@ -20,15 +27,15 @@
   const methods = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'];
 
   const examplesList = [
-    { url: 'https://httpbin.org/get', method: 'GET', description: 'Basic GET request headers' },
-    { url: 'https://api.github.com', method: 'HEAD', description: 'GitHub API headers (HEAD)' },
-    { url: 'https://www.cloudflare.com', method: 'GET', description: 'Cloudflare response headers' },
-    { url: 'https://httpbin.org/status/404', method: 'GET', description: '404 status response' },
-    { url: 'https://httpbin.org/redirect/3', method: 'GET', description: 'Redirect chain headers' },
-    { url: 'https://httpbin.org/gzip', method: 'GET', description: 'Compressed response headers' },
+    { url: 'https://httpbin.org/get', method: 'GET', description: 'get' },
+    { url: 'https://api.github.com', method: 'HEAD', description: 'github' },
+    { url: 'https://www.cloudflare.com', method: 'GET', description: 'cloudflare' },
+    { url: 'https://httpbin.org/status/404', method: 'GET', description: 'status_404' },
+    { url: 'https://httpbin.org/redirect/3', method: 'GET', description: 'redirect' },
+    { url: 'https://httpbin.org/gzip', method: 'GET', description: 'gzip' },
   ];
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   // Reactive validation
   const validation = useSimpleValidation(() => {
@@ -67,14 +74,14 @@
     // Validation
     const trimmedUrl = url.trim();
     if (!trimmedUrl) {
-      diagnosticState.setError('URL is required');
+      diagnosticState.setError($t('diagnostics/http-headers.form.url.required'));
       return;
     }
 
     try {
       new URL(trimmedUrl);
     } catch {
-      diagnosticState.setError('Invalid URL format');
+      diagnosticState.setError($t('diagnostics/http-headers.form.url.error'));
       return;
     }
 
@@ -141,10 +148,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>HTTP Headers Analyzer</h1>
+    <h1>{$t('diagnostics/http-headers.title')}</h1>
     <p>
-      Analyze HTTP response headers, status codes, and response metadata. Supports custom request methods and headers
-      for comprehensive HTTP testing.
+      {$t('diagnostics/http-headers.description')}
     </p>
   </header>
 
@@ -153,22 +159,22 @@
     examples={examplesList}
     selectedIndex={examples.selectedIndex}
     onSelect={loadExample}
-    title="Header Examples"
+    title={$t('diagnostics/http-headers.examples.title')}
     getLabel={(ex) => `${ex.method} ${ex.url}`}
-    getDescription={(ex) => ex.description}
+    getDescription={(ex) => $t(`diagnostics/http-headers.examples.${ex.description}`)}
     getTooltip={(ex) => `Analyze headers for ${ex.url}`}
   />
 
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>Request Configuration</h3>
+      <h3>{$t('diagnostics/http-headers.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-grid">
         <div class="form-group">
-          <label for="url" use:tooltip={'Enter the URL to analyze'}>
-            URL
+          <label for="url" use:tooltip={$t('diagnostics/http-headers.form.url.tooltip')}>
+            {$t('diagnostics/http-headers.form.url.label')}
             <input
               id="url"
               type="url"
@@ -181,14 +187,14 @@
               }}
             />
             {#if url && !validation.isValid}
-              <span class="error-text">Invalid URL format</span>
+              <span class="error-text">{$t('diagnostics/http-headers.form.url.error')}</span>
             {/if}
           </label>
         </div>
 
         <div class="form-group">
-          <label for="method" use:tooltip={'HTTP method to use'}>
-            Method
+          <label for="method" use:tooltip={$t('diagnostics/http-headers.form.method.tooltip')}>
+            {$t('diagnostics/http-headers.form.method.label')}
             <select
               id="method"
               bind:value={method}
@@ -206,8 +212,8 @@
       </div>
 
       <div class="form-group">
-        <label for="headers" use:tooltip={"Custom headers (one per line: 'Name: Value')"}>
-          Custom Headers (Optional)
+        <label for="headers" use:tooltip={$t('diagnostics/http-headers.form.custom_headers.tooltip')}>
+          {$t('diagnostics/http-headers.form.custom_headers.label')}
           <textarea
             id="headers"
             bind:value={customHeadersText}
@@ -226,10 +232,10 @@
           loading={diagnosticState.loading}
           disabled={!validation.isValid}
           icon="globe"
-          loadingText="Analyzing Headers..."
+          loadingText={$t('diagnostics/http-headers.form.analyzing')}
           onclick={checkHeaders}
         >
-          Analyze Headers
+          {$t('diagnostics/http-headers.form.analyze')}
         </ActionButton>
       </div>
     </div>
@@ -237,14 +243,18 @@
 
   <!-- Results -->
   {#if diagnosticState.results}
-    <ResultsCard title="HTTP Response Analysis" onCopy={copyResults} copied={clipboard.isCopied()}>
+    <ResultsCard
+      title={$t('diagnostics/http-headers.results.title')}
+      onCopy={copyResults}
+      copied={clipboard.isCopied()}
+    >
       <!-- Status Overview -->
       <div class="status-overview">
         <div class="status-item {getStatusClass(diagnosticState.results.status)}">
           <Icon name="activity" size="sm" />
           <div>
             <strong>{diagnosticState.results.status} {diagnosticState.results.statusText}</strong>
-            <div class="status-text">HTTP Status</div>
+            <div class="status-text">{$t('diagnostics/http-headers.results.status.label')}</div>
           </div>
         </div>
 
@@ -253,7 +263,7 @@
             <Icon name="file" size="sm" />
             <div>
               <strong>{formatBytes(diagnosticState.results.size)}</strong>
-              <div class="status-text">Response Size</div>
+              <div class="status-text">{$t('diagnostics/http-headers.results.status.response_size')}</div>
             </div>
           </div>
         {/if}
@@ -263,7 +273,7 @@
             <Icon name="clock" size="sm" />
             <div>
               <strong>{diagnosticState.results.timings.total.toFixed(0)}ms</strong>
-              <div class="status-text">Total Time</div>
+              <div class="status-text">{$t('diagnostics/http-headers.results.status.total_time')}</div>
             </div>
           </div>
         {/if}
@@ -271,7 +281,7 @@
 
       <!-- Response Headers -->
       <div class="record-section card">
-        <h4>Response Headers</h4>
+        <h4>{$t('diagnostics/http-headers.results.headers.title')}</h4>
         <div class="records-list">
           {#each Object.entries(diagnosticState.results.headers) as [name, value] (name)}
             <div class="record-item">
@@ -286,71 +296,98 @@
 
       {#if diagnosticState.results.timings}
         <div class="record-section card">
-          <h4>Performance Timing</h4>
+          <h4>{$t('diagnostics/http-headers.results.timing.title')}</h4>
           <div class="records-list">
             <div class="record-item">
               <div class="record-data">
-                <strong>DNS Resolution:</strong> ~{diagnosticState.results.timings.dns.toFixed(1)}ms
+                <strong>{$t('diagnostics/http-headers.results.timing.dns')}</strong>
+                ~{diagnosticState.results.timings.dns.toFixed(1)}ms
               </div>
             </div>
             <div class="record-item">
               <div class="record-data">
-                <strong>TCP Connect:</strong> ~{diagnosticState.results.timings.tcp.toFixed(1)}ms
+                <strong>{$t('diagnostics/http-headers.results.timing.tcp')}</strong>
+                ~{diagnosticState.results.timings.tcp.toFixed(1)}ms
               </div>
             </div>
             {#if diagnosticState.results.timings.tls > 0}
               <div class="record-item">
                 <div class="record-data">
-                  <strong>TLS Handshake:</strong> ~{diagnosticState.results.timings.tls.toFixed(1)}ms
+                  <strong>{$t('diagnostics/http-headers.results.timing.tls')}</strong>
+                  ~{diagnosticState.results.timings.tls.toFixed(1)}ms
                 </div>
               </div>
             {/if}
             <div class="record-item">
               <div class="record-data">
-                <strong>Time to First Byte:</strong> ~{diagnosticState.results.timings.ttfb.toFixed(1)}ms
+                <strong>{$t('diagnostics/http-headers.results.timing.ttfb')}</strong>
+                ~{diagnosticState.results.timings.ttfb.toFixed(1)}ms
               </div>
             </div>
           </div>
-          <p class="help-text">* Timing values are approximations when not isolated</p>
+          <p class="help-text">{$t('diagnostics/http-headers.results.timing.help')}</p>
         </div>
       {/if}
     </ResultsCard>
   {/if}
 
-  <ErrorCard title="Request Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('diagnostics/http-headers.error.title')} error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>About HTTP Headers</h3>
+      <h3>{$t('diagnostics/http-headers.info.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>Response Headers</h4>
+          <h4>{$t('diagnostics/http-headers.info.response.heading')}</h4>
           <p>
-            HTTP headers provide metadata about the response, including content type, caching instructions, security
-            policies, and server information.
+            {$t('diagnostics/http-headers.info.response.description')}
           </p>
         </div>
 
         <div class="info-section">
-          <h4>Status Codes</h4>
+          <h4>{$t('diagnostics/http-headers.info.status_codes.heading')}</h4>
           <ul>
-            <li><strong>2xx:</strong> Success responses</li>
-            <li><strong>3xx:</strong> Redirection responses</li>
-            <li><strong>4xx:</strong> Client error responses</li>
-            <li><strong>5xx:</strong> Server error responses</li>
+            <li>
+              <strong>{$t('diagnostics/http-headers.info.status_codes.2xx.name')}</strong>
+              {$t('diagnostics/http-headers.info.status_codes.2xx.description')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics/http-headers.info.status_codes.3xx.name')}</strong>
+              {$t('diagnostics/http-headers.info.status_codes.3xx.description')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics/http-headers.info.status_codes.4xx.name')}</strong>
+              {$t('diagnostics/http-headers.info.status_codes.4xx.description')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics/http-headers.info.status_codes.5xx.name')}</strong>
+              {$t('diagnostics/http-headers.info.status_codes.5xx.description')}
+            </li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Common Headers</h4>
+          <h4>{$t('diagnostics/http-headers.info.common.heading')}</h4>
           <ul>
-            <li><strong>Content-Type:</strong> MIME type of content</li>
-            <li><strong>Cache-Control:</strong> Caching directives</li>
-            <li><strong>Set-Cookie:</strong> Cookie instructions</li>
-            <li><strong>Location:</strong> Redirect target URL</li>
+            <li>
+              <strong>{$t('diagnostics/http-headers.info.common.content_type.name')}</strong>
+              {$t('diagnostics/http-headers.info.common.content_type.description')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics/http-headers.info.common.cache_control.name')}</strong>
+              {$t('diagnostics/http-headers.info.common.cache_control.description')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics/http-headers.info.common.set_cookie.name')}</strong>
+              {$t('diagnostics/http-headers.info.common.set_cookie.description')}
+            </li>
+            <li>
+              <strong>{$t('diagnostics/http-headers.info.common.location.name')}</strong>
+              {$t('diagnostics/http-headers.info.common.location.description')}
+            </li>
           </ul>
         </div>
       </div>

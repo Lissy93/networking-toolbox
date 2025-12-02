@@ -1,0 +1,59 @@
+{
+  "top": {
+    "subnetting": {
+      "label": "Subnetting",
+      "description": "Subnetz-Rechner für IPv4, IPv6, VLSM, Supernetting"
+    },
+    "cidr": {
+      "label": "CIDR",
+      "description": "CIDR-Notations-Tools, Konverter und Rechner"
+    },
+    "ip_tools": {
+      "label": "IP-Tools",
+      "description": "IP-Adressen-Konverter, Validatoren und Generatoren"
+    },
+    "dns_tools": {
+      "label": "DNS-Tools",
+      "description": "DNS-Datensatz-Generatoren, Validatoren und DNSSEC-Tools"
+    },
+    "dhcp": {
+      "label": "DHCP",
+      "description": "DHCP-Options-Generatoren für WLAN-Controller und Netzwerkkonfiguration"
+    },
+    "diagnostics": {
+      "label": "Diagnose",
+      "description": "Netzwerkdiagnose und Konnektivitätstests"
+    },
+    "reference": {
+      "label": "Referenz",
+      "description": "Netzwerk-Referenzhandbücher und Nachschlagetabellen"
+    }
+  },
+
+  "standalone": {
+    "bookmarks": {
+      "label": "Lesezeichen",
+      "description": "Netzwerkberechnungen und Tool-Ergebnisse speichern und organisieren"
+    },
+    "search": {
+      "label": "Suche",
+      "description": "Tools und Referenzinhalte schnell finden"
+    },
+    "settings": {
+      "label": "Einstellungen",
+      "description": "Designs, Layouts und Barrierefreiheitsoptionen anpassen"
+    }
+  },
+
+  "common_tools": {
+    "subnet_calculator": "Subnetz-Rechner",
+    "ipv6_subnet_calculator": "IPv6-Subnetz-Rechner",
+    "vlsm_calculator": "VLSM-Rechner",
+    "supernet_calculator": "Supernetz-Rechner",
+    "cidr_summarizer": "CIDR-Zusammenfasser",
+    "cidr_splitter": "CIDR-Teiler",
+    "ip_validator": "IP-Validator",
+    "dns_lookup": "DNS-Abfrage",
+    "tls_certificate": "TLS-Zertifikat-Analysator"
+  }
+}

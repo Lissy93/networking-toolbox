@@ -1,0 +1,91 @@
+{
+  "title": "Reverse DNS Lookup",
+  "subtitle": "Perform reverse DNS lookups (PTR records) to find hostnames associated with IP addresses. Automatically handles both IPv4 and IPv6 addresses with proper .in-addr.arpa and .ip6.arpa zone formatting.",
+  "resolvers": {
+    "cloudflare": "Cloudflare (1.1.1.1)",
+    "google": "Google (8.8.8.8)",
+    "quad9": "Quad9 (9.9.9.9)",
+    "opendns": "OpenDNS (208.67.222.222)"
+  },
+  "examples": {
+    "title": "Common IP Examples",
+    "items": {
+      "googleDNS": {
+        "ip": "8.8.8.8",
+        "description": "Google DNS server",
+        "tooltip": "Perform reverse lookup for 8.8.8.8 (Google DNS server)"
+      },
+      "cloudflareDNS": {
+        "ip": "1.1.1.1",
+        "description": "Cloudflare DNS server",
+        "tooltip": "Perform reverse lookup for 1.1.1.1 (Cloudflare DNS server)"
+      },
+      "googleIPv6": {
+        "ip": "2001:4860:4860::8888",
+        "description": "Google IPv6 DNS",
+        "tooltip": "Perform reverse lookup for 2001:4860:4860::8888 (Google IPv6 DNS)"
+      },
+      "cloudflareIPv6": {
+        "ip": "2606:4700:4700::1111",
+        "description": "Cloudflare IPv6 DNS",
+        "tooltip": "Perform reverse lookup for 2606:4700:4700::1111 (Cloudflare IPv6 DNS)"
+      }
+    }
+  },
+  "form": {
+    "title": "Reverse Lookup Configuration",
+    "ipLabel": "IP Address",
+    "ipPlaceholder": "8.8.8.8 or 2001:db8::1",
+    "ipTooltip": "Enter an IPv4 or IPv6 address to perform reverse lookup",
+    "dnsResolverLabel": "DNS Resolver",
+    "dnsResolverTooltip": "Choose a DNS resolver to use for the query",
+    "customResolverPlaceholder": "8.8.8.8 or custom IP",
+    "useCustomResolver": "Use custom resolver",
+    "invalidFormat": "Invalid IP address format",
+    "performingLookup": "Performing Reverse Lookup...",
+    "lookupButton": "Reverse Lookup IP"
+  },
+  "error": {
+    "title": "Reverse Lookup Failed",
+    "invalidIPFormat": "Invalid IP address format",
+    "lookupFailed": "Reverse lookup failed: {status}"
+  },
+  "results": {
+    "title": "Reverse DNS Results",
+    "copyButton": "Copy Results",
+    "copied": "Copied!",
+    "ipAddressLabel": "IP Address:",
+    "ipAddressTooltip": "The IP address that was queried",
+    "reverseZoneLabel": "Reverse Zone:",
+    "reverseZoneTooltip": "The reverse DNS zone that was queried (automatically generated)",
+    "ptrRecordsFound": "PTR Records Found:",
+    "ttlTooltip": "Time To Live - how long this record can be cached",
+    "noRecords": {
+      "title": "No PTR records found for",
+      "helpText": "This IP address may not have a reverse DNS entry configured."
+    }
+  },
+  "education": {
+    "title": "About Reverse DNS Lookups",
+    "howItWorks": {
+      "title": "How it Works",
+      "description": "Reverse DNS converts IP addresses to hostnames using PTR records. IPv4 addresses use .in-addr.arpa zones, while IPv6 addresses use .ip6.arpa zones with each nibble reversed."
+    },
+    "useCases": {
+      "title": "Common Use Cases",
+      "items": {
+        "emailVerification": "Email server verification",
+        "securityAnalysis": "Security analysis and logging",
+        "troubleshooting": "Network troubleshooting",
+        "ownership": "Identifying server ownership"
+      }
+    },
+    "zoneFormat": {
+      "title": "Zone Format Examples",
+      "ipv4Label": "IPv4:",
+      "ipv4Example": "8.8.8.8 → 8.8.8.8.in-addr.arpa",
+      "ipv6Label": "IPv6:",
+      "ipv6Example": "2001:db8::1 → 1.0.0.0...b.d.0.1.0.0.2.ip6.arpa"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from '$lib/components/global/Icon.svelte';
   import { tooltip } from '$lib/actions/tooltip';
+  import { t } from '$lib/stores/language';
 
   interface DKIMKey {
     privateKey: string;
@@ -152,26 +153,26 @@
     showButtonSuccess('download-txt');
   }
 
-  const examples = [
+  const examples = $derived([
     {
-      name: 'Standard Setup',
+      name: $t('tools/dkim-key-generator.examples.standard.name'),
       selector: 'default',
       domain: 'example.com',
       keySize: 2048,
     },
     {
-      name: 'Monthly Rotation',
+      name: $t('tools/dkim-key-generator.examples.monthly.name'),
       selector: '202412',
       domain: 'mycompany.com',
       keySize: 2048,
     },
     {
-      name: 'Service-Specific',
+      name: $t('tools/dkim-key-generator.examples.serviceSpecific.name'),
       selector: 'mailgun',
       domain: 'notifications.example.com',
       keySize: 1024,
     },
-  ];
+  ]);
 
   function loadExample(example: (typeof examples)[0]): void {
     selector = example.selector;
@@ -183,8 +184,8 @@
 
 <div class="card">
   <div class="card-header">
-    <h1>DKIM Key Generator</h1>
-    <p class="card-subtitle">Generate DKIM RSA keypairs with selectors and DNS TXT records for email authentication.</p>
+    <h1>{$t('tools/dkim-key-generator.title')}</h1>
+    <p class="card-subtitle">{$t('tools/dkim-key-generator.description')}</p>
   </div>
 
   <div class="grid-layout">
@@ -193,36 +194,42 @@
         <div class="section-header">
           <h3>
             <Icon name="settings" size="sm" />
-            Configuration
+            {$t('tools/dkim-key-generator.config.title')}
           </h3>
         </div>
 
         <div class="config-grid">
           <div class="input-group">
-            <label
-              for="selector"
-              use:tooltip={"Unique identifier for this DKIM key (e.g., 'default', '202412', 'mailgun')"}
-            >
-              Selector:
+            <label for="selector" use:tooltip={$t('tools/dkim-key-generator.config.selectorTooltip')}>
+              {$t('tools/dkim-key-generator.config.selectorLabel')}
             </label>
-            <input id="selector" type="text" bind:value={selector} placeholder="default" />
+            <input
+              id="selector"
+              type="text"
+              bind:value={selector}
+              placeholder={$t('tools/dkim-key-generator.config.selectorPlaceholder')}
+            />
           </div>
 
           <div class="input-group">
-            <label for="domain" use:tooltip={'Domain that will use this DKIM key for signing emails'}> Domain: </label>
-            <input id="domain" type="text" bind:value={domain} placeholder="example.com" />
+            <label for="domain" use:tooltip={$t('tools/dkim-key-generator.config.domainTooltip')}>
+              {$t('tools/dkim-key-generator.config.domainLabel')}
+            </label>
+            <input
+              id="domain"
+              type="text"
+              bind:value={domain}
+              placeholder={$t('tools/dkim-key-generator.config.domainPlaceholder')}
+            />
           </div>
 
           <div class="input-group">
-            <label
-              for="keySize"
-              use:tooltip={'RSA key size in bits. 2048-bit recommended for security, 1024-bit for compatibility'}
-            >
-              Key Size:
+            <label for="keySize" use:tooltip={$t('tools/dkim-key-generator.config.keySizeTooltip')}>
+              {$t('tools/dkim-key-generator.config.keySizeLabel')}
             </label>
             <select id="keySize" bind:value={keySize}>
-              <option value={1024}>1024-bit (Legacy)</option>
-              <option value={2048}>2048-bit (Recommended)</option>
+              <option value={1024}>{$t('tools/dkim-key-generator.config.keySizes.1024')}</option>
+              <option value={2048}>{$t('tools/dkim-key-generator.config.keySizes.2048')}</option>
             </select>
           </div>
         </div>
@@ -234,7 +241,9 @@
           disabled={isGenerating || !selector.trim() || !domain.trim()}
         >
           <Icon name={isGenerating ? 'loader' : 'key'} size="sm" />
-          {isGenerating ? 'Generating...' : 'Generate DKIM Keys'}
+          {isGenerating
+            ? $t('tools/dkim-key-generator.config.generating')
+            : $t('tools/dkim-key-generator.config.generateButton')}
         </button>
       </div>
 
@@ -243,32 +252,38 @@
           <div class="section-header">
             <h3>
               <Icon name="shield" size="sm" />
-              Generated Keys
+              {$t('tools/dkim-key-generator.keys.title')}
             </h3>
           </div>
 
           <div class="key-item">
             <div class="key-header">
-              <h4>Private Key</h4>
+              <h4>{$t('tools/dkim-key-generator.keys.privateKey.title')}</h4>
               <div class="key-actions">
                 <button
                   type="button"
                   class="toggle-btn"
                   onclick={() => (showPrivateKey = !showPrivateKey)}
-                  use:tooltip={showPrivateKey ? 'Hide private key' : 'Show private key'}
+                  use:tooltip={showPrivateKey
+                    ? $t('tools/dkim-key-generator.keys.privateKey.hideTooltip')
+                    : $t('tools/dkim-key-generator.keys.privateKey.showTooltip')}
                 >
                   <Icon name={showPrivateKey ? 'hide' : 'eye'} size="sm" />
-                  {showPrivateKey ? 'Hide' : 'Show'}
+                  {showPrivateKey
+                    ? $t('tools/dkim-key-generator.keys.privateKey.hideButton')
+                    : $t('tools/dkim-key-generator.keys.privateKey.showButton')}
                 </button>
                 <button
                   type="button"
                   class="download-btn"
                   class:success={buttonStates['download-private']}
                   onclick={downloadPrivateKey}
-                  use:tooltip={'Download private key as PEM file'}
+                  use:tooltip={$t('tools/dkim-key-generator.keys.privateKey.downloadTooltip')}
                 >
                   <Icon name={buttonStates['download-private'] ? 'check' : 'download'} size="sm" />
-                  {buttonStates['download-private'] ? 'Downloaded!' : 'Download'}
+                  {buttonStates['download-private']
+                    ? $t('tools/dkim-key-generator.keys.privateKey.downloaded')
+                    : $t('tools/dkim-key-generator.keys.privateKey.downloadButton')}
                 </button>
               </div>
             </div>
@@ -282,39 +297,43 @@
             {:else}
               <div class="key-hidden">
                 <Icon name="hide" size="sm" />
-                Private key hidden for security
+                {$t('tools/dkim-key-generator.keys.privateKey.hidden')}
               </div>
             {/if}
 
             <div class="security-warning">
               <Icon name="alert-triangle" size="sm" />
-              Keep this private key secure. Never share it publicly or store it in version control.
+              {$t('tools/dkim-key-generator.keys.privateKey.warning')}
             </div>
           </div>
 
           <div class="key-item">
             <div class="key-header">
-              <h4>Public Key</h4>
+              <h4>{$t('tools/dkim-key-generator.keys.publicKey.title')}</h4>
               <div class="key-actions">
                 <button
                   type="button"
                   class="copy-btn"
                   class:success={buttonStates['copy-public']}
                   onclick={() => copyToClipboard(generatedKey?.publicKey || '', 'copy-public')}
-                  use:tooltip={'Copy public key to clipboard'}
+                  use:tooltip={$t('tools/dkim-key-generator.keys.publicKey.copyTooltip')}
                 >
                   <Icon name={buttonStates['copy-public'] ? 'check' : 'copy'} size="sm" />
-                  {buttonStates['copy-public'] ? 'Copied!' : 'Copy'}
+                  {buttonStates['copy-public']
+                    ? $t('tools/dkim-key-generator.keys.publicKey.copied')
+                    : $t('tools/dkim-key-generator.keys.publicKey.copyButton')}
                 </button>
                 <button
                   type="button"
                   class="download-btn"
                   class:success={buttonStates['download-public']}
                   onclick={downloadPublicKey}
-                  use:tooltip={'Download public key as PEM file'}
+                  use:tooltip={$t('tools/dkim-key-generator.keys.publicKey.downloadTooltip')}
                 >
                   <Icon name={buttonStates['download-public'] ? 'check' : 'download'} size="sm" />
-                  {buttonStates['download-public'] ? 'Downloaded!' : 'Download'}
+                  {buttonStates['download-public']
+                    ? $t('tools/dkim-key-generator.keys.publicKey.downloaded')
+                    : $t('tools/dkim-key-generator.keys.publicKey.downloadButton')}
                 </button>
               </div>
             </div>
@@ -333,40 +352,44 @@
       <div class="results-section">
         <div class="dns-section">
           <div class="section-header">
-            <h3>DNS TXT Record</h3>
+            <h3>{$t('tools/dkim-key-generator.dns.title')}</h3>
             <div class="actions">
               <button
                 type="button"
                 class="copy-btn"
                 class:success={buttonStates['copy-txt']}
                 onclick={() => copyToClipboard(txtRecord, 'copy-txt')}
-                use:tooltip={'Copy DNS TXT record to clipboard'}
+                use:tooltip={$t('tools/dkim-key-generator.dns.copyTooltip')}
               >
                 <Icon name={buttonStates['copy-txt'] ? 'check' : 'copy'} size="sm" />
-                {buttonStates['copy-txt'] ? 'Copied!' : 'Copy'}
+                {buttonStates['copy-txt']
+                  ? $t('tools/dkim-key-generator.dns.copied')
+                  : $t('tools/dkim-key-generator.dns.copyButton')}
               </button>
               <button
                 type="button"
                 class="export-btn"
                 class:success={buttonStates['download-txt']}
                 onclick={downloadTXTRecord}
-                use:tooltip={'Download DNS record as text file'}
+                use:tooltip={$t('tools/dkim-key-generator.dns.exportTooltip')}
               >
                 <Icon name={buttonStates['download-txt'] ? 'check' : 'download'} size="sm" />
-                {buttonStates['download-txt'] ? 'Downloaded!' : 'Export'}
+                {buttonStates['download-txt']
+                  ? $t('tools/dkim-key-generator.dns.exported')
+                  : $t('tools/dkim-key-generator.dns.exportButton')}
               </button>
             </div>
           </div>
 
           <div class="record-output">
-            <h4>Zone File Format:</h4>
+            <h4>{$t('tools/dkim-key-generator.dns.zoneFileFormat')}</h4>
             <div class="code-block">
               <code>{txtRecord}</code>
             </div>
           </div>
 
           <div class="record-output">
-            <h4>DKIM Record Value:</h4>
+            <h4>{$t('tools/dkim-key-generator.dns.dkimRecordValue')}</h4>
             <div class="code-block">
               <code>{dkimRecord}</code>
             </div>
@@ -377,35 +400,35 @@
           <div class="section-header">
             <h3>
               <Icon name="info" size="sm" />
-              Implementation Notes
+              {$t('tools/dkim-key-generator.implementation.title')}
             </h3>
           </div>
 
           <div class="info-grid">
             <div class="info-item">
-              <strong>Selector:</strong>
+              <strong>{$t('tools/dkim-key-generator.implementation.selector')}</strong>
               {generatedKey.selector}
             </div>
             <div class="info-item">
-              <strong>Domain:</strong>
+              <strong>{$t('tools/dkim-key-generator.implementation.domain')}</strong>
               {domain}
             </div>
             <div class="info-item">
-              <strong>Key Size:</strong>
-              {generatedKey.keySize}-bit RSA
+              <strong>{$t('tools/dkim-key-generator.implementation.keySize')}</strong>
+              {$t('tools/dkim-key-generator.implementation.keySizeBits', { size: generatedKey.keySize })}
             </div>
             <div class="info-item">
-              <strong>Algorithm:</strong> RSA-SHA256 (rsa-sha256)
+              <strong>{$t('tools/dkim-key-generator.implementation.algorithm')}</strong>
+              {$t('tools/dkim-key-generator.implementation.algorithmValue')}
             </div>
           </div>
 
           <div class="implementation-steps">
-            <h4>Next Steps:</h4>
+            <h4>{$t('tools/dkim-key-generator.implementation.nextStepsTitle')}</h4>
             <ol>
-              <li>Add the DNS TXT record to your domain's DNS configuration</li>
-              <li>Configure your mail server with the private key</li>
-              <li>Set up DKIM signing for outgoing emails</li>
-              <li>Test DKIM signatures using online validation tools</li>
+              {#each $t('tools/dkim-key-generator.implementation.steps') as step, index (index)}
+                <li>{step}</li>
+              {/each}
             </ol>
           </div>
         </div>
@@ -417,7 +440,7 @@
     <details class="examples-toggle">
       <summary>
         <Icon name="lightbulb" size="sm" />
-        Example Configurations
+        {$t('tools/dkim-key-generator.examples.title')}
       </summary>
       <div class="examples-grid">
         {#each examples as example, exIdx (`${example.name}-${exIdx}`)}
@@ -426,9 +449,12 @@
               <strong>{example.name}</strong>
             </div>
             <div class="example-details">
-              <div>Selector: <code>{example.selector}</code></div>
-              <div>Domain: <code>{example.domain}</code></div>
-              <div>Key Size: <code>{example.keySize}-bit</code></div>
+              <div>{$t('tools/dkim-key-generator.examples.selectorLabel')} <code>{example.selector}</code></div>
+              <div>{$t('tools/dkim-key-generator.examples.domainLabel')} <code>{example.domain}</code></div>
+              <div>
+                {$t('tools/dkim-key-generator.examples.keySizeLabel')}
+                <code>{$t('tools/dkim-key-generator.examples.keySizeBits', { size: example.keySize })}</code>
+              </div>
             </div>
           </button>
         {/each}

@@ -7,6 +7,7 @@
   import ActionButton from '$lib/components/common/ActionButton.svelte';
   import ResultsCard from '$lib/components/common/ResultsCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
+  import { t } from '$lib/stores/language';
   import '../../../../styles/diagnostics-pages.scss';
 
   let url = $state('https://api.github.com');
@@ -18,22 +19,30 @@
 
   const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
 
-  const examplesList = [
-    { url: 'https://api.github.com', origin: 'https://example.com', description: 'GitHub API CORS policy' },
-    { url: 'https://httpbin.org/get', origin: 'https://test.com', description: 'HTTPBin CORS test' },
+  const examplesList = $derived([
+    {
+      url: 'https://api.github.com',
+      origin: 'https://example.com',
+      description: $t('diagnostics/http-cors-check.examples.github'),
+    },
+    {
+      url: 'https://httpbin.org/get',
+      origin: 'https://test.com',
+      description: $t('diagnostics/http-cors-check.examples.httpbin'),
+    },
     {
       url: 'https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&current=temperature_2m',
       origin: 'https://weather-app.com',
-      description: 'Open weather API',
+      description: $t('diagnostics/http-cors-check.examples.weather'),
     },
     {
       url: 'https://jsonplaceholder.typicode.com/posts/1',
       origin: 'https://example.org',
-      description: 'JSON Placeholder API',
+      description: $t('diagnostics/http-cors-check.examples.placeholder'),
     },
-  ];
+  ]);
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   // Reactive validation
   const isInputValid = $derived(() => {
@@ -59,12 +68,12 @@
     const trimmedOrigin = origin.trim();
 
     if (!trimmedUrl) {
-      diagnosticState.setError('URL is required');
+      diagnosticState.setError($t('diagnostics/http-cors-check.form.url.required'));
       return;
     }
 
     if (!trimmedOrigin) {
-      diagnosticState.setError('Origin is required');
+      diagnosticState.setError($t('diagnostics/http-cors-check.form.origin.required'));
       return;
     }
 
@@ -72,7 +81,7 @@
       new URL(trimmedUrl);
       new URL(trimmedOrigin);
     } catch {
-      diagnosticState.setError('Invalid URL or Origin format');
+      diagnosticState.setError($t('diagnostics/http-cors-check.form.origin.invalid'));
       return;
     }
 
@@ -162,9 +171,9 @@
   function getCORSStatusText(): string {
     if (!diagnosticState.results?.analysis) return 'Unknown';
 
-    if (!diagnosticState.results.analysis.corsEnabled) return 'No CORS Policy';
-    if (diagnosticState.results.analysis.allowsOrigin) return 'Access Allowed';
-    return 'Access Denied';
+    if (!diagnosticState.results.analysis.corsEnabled) return $t('diagnostics/http-cors-check.results.status.noCors');
+    if (diagnosticState.results.analysis.allowsOrigin) return $t('diagnostics/http-cors-check.results.status.allowed');
+    return $t('diagnostics/http-cors-check.results.status.denied');
   }
 
   function getCORSStatusClass(): string {
@@ -178,10 +187,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>CORS Policy Checker</h1>
+    <h1>{$t('diagnostics/http-cors-check.title')}</h1>
     <p>
-      Test Cross-Origin Resource Sharing (CORS) policies by sending preflight requests and analyzing the server's CORS
-      configuration. Check if your origin is allowed to access the target resource.
+      {$t('diagnostics/http-cors-check.description')}
     </p>
   </header>
 
@@ -190,27 +198,27 @@
     examples={examplesList}
     selectedIndex={examples.selectedIndex}
     onSelect={loadExample}
-    title="CORS Examples"
+    title={$t('diagnostics/http-cors-check.examples.title')}
     getLabel={(ex) => ex.url}
     getDescription={(ex) => ex.description}
-    getTooltip={(ex) => `Test CORS policy for ${ex.url}`}
+    getTooltip={(ex) => $t('diagnostics/http-cors-check.examples.tooltip', { url: ex.url })}
   />
 
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>CORS Test Configuration</h3>
+      <h3>{$t('diagnostics/http-cors-check.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-grid">
         <div class="form-group">
-          <label for="url" use:tooltip={'Target API/resource URL to test CORS against'}>
-            Target URL
+          <label for="url" use:tooltip={$t('diagnostics/http-cors-check.form.url.tooltip')}>
+            {$t('diagnostics/http-cors-check.form.url.label')}
             <input
               id="url"
               type="url"
               bind:value={url}
-              placeholder="https://api.example.com"
+              placeholder={$t('diagnostics/http-cors-check.form.url.placeholder')}
               class:invalid={url && !isInputValid()}
               onchange={() => {
                 examples.clear();
@@ -218,19 +226,19 @@
               }}
             />
             {#if url && !isInputValid()}
-              <span class="error-text">Invalid URL format</span>
+              <span class="error-text">{$t('diagnostics/http-cors-check.form.url.error')}</span>
             {/if}
           </label>
         </div>
 
         <div class="form-group">
-          <label for="origin" use:tooltip={"Your website's origin (where the request would come from)"}>
-            Origin
+          <label for="origin" use:tooltip={$t('diagnostics/http-cors-check.form.origin.tooltip')}>
+            {$t('diagnostics/http-cors-check.form.origin.label')}
             <input
               id="origin"
               type="url"
               bind:value={origin}
-              placeholder="https://yoursite.com"
+              placeholder={$t('diagnostics/http-cors-check.form.origin.placeholder')}
               class:invalid={origin && !isInputValid}
               onchange={() => {
                 examples.clear();
@@ -238,14 +246,14 @@
               }}
             />
             {#if origin && !isInputValid}
-              <span class="error-text">Invalid origin format</span>
+              <span class="error-text">{$t('diagnostics/http-cors-check.form.origin.error')}</span>
             {/if}
           </label>
         </div>
 
         <div class="form-group">
-          <label for="method" use:tooltip={'HTTP method to test in preflight request'}>
-            Method
+          <label for="method" use:tooltip={$t('diagnostics/http-cors-check.form.method.tooltip')}>
+            {$t('diagnostics/http-cors-check.form.method.label')}
             <select
               id="method"
               bind:value={method}
@@ -267,10 +275,10 @@
           loading={diagnosticState.loading}
           disabled={!isInputValid}
           icon="globe"
-          loadingText="Checking CORS..."
+          loadingText={$t('diagnostics/http-cors-check.form.checking')}
           onclick={checkCORS}
         >
-          Check CORS Policy
+          {$t('diagnostics/http-cors-check.form.checkButton')}
         </ActionButton>
       </div>
     </div>
@@ -278,7 +286,11 @@
 
   <!-- Results -->
   {#if diagnosticState.results}
-    <ResultsCard title="CORS Policy Analysis" onCopy={copyResults} copied={clipboard.isCopied()}>
+    <ResultsCard
+      title={$t('diagnostics/http-cors-check.results.title')}
+      onCopy={copyResults}
+      copied={clipboard.isCopied()}
+    >
       <div class="card-content">
         <!-- CORS Overview -->
         <div class="status-overview">
@@ -291,7 +303,7 @@
             />
             <div>
               <strong>{getCORSStatusText()}</strong>
-              <div class="status-text">CORS Status</div>
+              <div class="status-text">{$t('diagnostics/http-cors-check.results.corsStatus')}</div>
             </div>
           </div>
 
@@ -299,7 +311,7 @@
             <Icon name="shield" size="sm" />
             <div>
               <strong>{diagnosticState.results.preflight.status || 'Failed'}</strong>
-              <div class="status-text">Preflight Status</div>
+              <div class="status-text">{$t('diagnostics/http-cors-check.results.preflightStatus')}</div>
             </div>
           </div>
 
@@ -308,7 +320,7 @@
               <Icon name="clock" size="sm" />
               <div>
                 <strong>{diagnosticState.results.analysis.maxAge}s</strong>
-                <div class="status-text">Cache Max Age</div>
+                <div class="status-text">{$t('diagnostics/http-cors-check.results.cacheMaxAge')}</div>
               </div>
             </div>
           {/if}
@@ -316,16 +328,16 @@
 
         <!-- CORS Analysis Details -->
         <div class="record-section">
-          <h4>CORS Policy Details</h4>
+          <h4>{$t('diagnostics/http-cors-check.results.policyDetails')}</h4>
           <div class="cors-analysis">
             <div class="cors-item {getAccessClass(diagnosticState.results.analysis.corsEnabled)}">
               <Icon name={diagnosticState.results.analysis.corsEnabled ? 'check' : 'x'} size="sm" />
               <div>
-                <strong>CORS Enabled</strong>
+                <strong>{$t('diagnostics/http-cors-check.results.corsEnabled')}</strong>
                 <p>
                   {diagnosticState.results.analysis.corsEnabled
-                    ? 'Server has CORS headers configured'
-                    : 'No CORS headers found - requests will be blocked by browsers'}
+                    ? $t('diagnostics/http-cors-check.results.corsEnabledText')
+                    : $t('diagnostics/http-cors-check.results.corsDisabledText')}
                 </p>
               </div>
             </div>
@@ -333,12 +345,12 @@
             <div class="cors-item {getAccessClass(diagnosticState.results.analysis.allowsOrigin)}">
               <Icon name={getAccessIcon(diagnosticState.results.analysis.allowsOrigin)} size="sm" />
               <div>
-                <strong>Origin Access</strong>
+                <strong>{$t('diagnostics/http-cors-check.results.originAccess')}</strong>
                 <p>
                   {#if diagnosticState.results.analysis.allowsOrigin}
-                    Origin '{origin}' is allowed to access this resource
+                    {$t('diagnostics/http-cors-check.results.originAllowed', { origin })}
                   {:else}
-                    Origin '{origin}' is not allowed to access this resource
+                    {$t('diagnostics/http-cors-check.results.originDenied', { origin })}
                   {/if}
                 </p>
               </div>
@@ -347,11 +359,11 @@
             <div class="cors-item {getAccessClass(diagnosticState.results.analysis.allowsCredentials)}">
               <Icon name={diagnosticState.results.analysis.allowsCredentials ? 'check' : 'x'} size="sm" />
               <div>
-                <strong>Credentials Support</strong>
+                <strong>{$t('diagnostics/http-cors-check.results.credentialsSupport')}</strong>
                 <p>
                   {diagnosticState.results.analysis.allowsCredentials
-                    ? 'Cookies and credentials can be sent'
-                    : 'Cookies and credentials cannot be sent'}
+                    ? $t('diagnostics/http-cors-check.results.credentialsAllowed')
+                    : $t('diagnostics/http-cors-check.results.credentialsNotAllowed')}
                 </p>
               </div>
             </div>
@@ -361,7 +373,7 @@
         <!-- Allowed Methods -->
         {#if diagnosticState.results.analysis.allowedMethods?.length > 0}
           <div class="record-section">
-            <h4>Allowed Methods</h4>
+            <h4>{$t('diagnostics/http-cors-check.results.allowedMethods')}</h4>
             <div class="method-list">
               {#each diagnosticState.results.analysis.allowedMethods as allowedMethod, index (index)}
                 <span class="method-badge {method === allowedMethod ? 'active' : ''}">{allowedMethod}</span>
@@ -373,7 +385,7 @@
         <!-- Allowed Headers -->
         {#if diagnosticState.results.analysis.allowedHeaders?.length > 0}
           <div class="record-section">
-            <h4>Allowed Headers</h4>
+            <h4>{$t('diagnostics/http-cors-check.results.allowedHeaders')}</h4>
             <div class="header-list">
               {#each diagnosticState.results.analysis.allowedHeaders as header, index (index)}
                 <span class="header-badge">{header}</span>
@@ -385,7 +397,7 @@
         <!-- Raw CORS Headers -->
         {#if Object.keys(diagnosticState.results.preflight.headers || {}).length > 0}
           <div class="record-section">
-            <h4>CORS Headers</h4>
+            <h4>{$t('diagnostics/http-cors-check.results.corsHeaders')}</h4>
             <div class="records-list">
               {#each Object.entries(diagnosticState.results.preflight.headers) as [name, value] (name)}
                 <div class="record-item">
@@ -400,14 +412,14 @@
         {:else if diagnosticState.results.analysis.corsEnabled}
           <div class="no-records">
             <Icon name="info" size="md" />
-            <p>CORS enabled but no detailed headers available</p>
+            <p>{$t('diagnostics/http-cors-check.results.corsEnabledNoDetails')}</p>
           </div>
         {:else}
           <div class="no-records">
             <Icon name="x-circle" size="md" />
-            <p>No CORS headers found</p>
+            <p>{$t('diagnostics/http-cors-check.results.noCorsHeaders')}</p>
             <p class="help-text">
-              The server does not provide CORS headers - cross-origin requests will be blocked by browsers
+              {$t('diagnostics/http-cors-check.results.noCorsHeadersHelp')}
             </p>
           </div>
         {/if}
@@ -415,38 +427,48 @@
     </ResultsCard>
   {/if}
 
-  <ErrorCard title="CORS Check Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('diagnostics/http-cors-check.errors.title')} error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>About CORS</h3>
+      <h3>{$t('diagnostics/http-cors-check.about.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>What is CORS?</h4>
+          <h4>{$t('diagnostics/http-cors-check.about.whatIs.title')}</h4>
           <p>
-            Cross-Origin Resource Sharing (CORS) is a security mechanism that allows or restricts web pages from making
-            requests to a different domain, protocol, or port than the one serving the web page.
+            {$t('diagnostics/http-cors-check.about.whatIs.description')}
           </p>
         </div>
 
         <div class="info-section">
-          <h4>Preflight Requests</h4>
+          <h4>{$t('diagnostics/http-cors-check.about.preflight.title')}</h4>
           <p>
-            For certain requests, browsers send a preflight OPTIONS request to check if the actual request is allowed.
-            The server responds with CORS headers indicating permissions.
+            {$t('diagnostics/http-cors-check.about.preflight.description')}
           </p>
         </div>
 
         <div class="info-section">
-          <h4>Common CORS Headers</h4>
+          <h4>{$t('diagnostics/http-cors-check.about.headers.title')}</h4>
           <ul>
-            <li><strong>Access-Control-Allow-Origin:</strong> Allowed origins</li>
-            <li><strong>Access-Control-Allow-Methods:</strong> Allowed HTTP methods</li>
-            <li><strong>Access-Control-Allow-Headers:</strong> Allowed request headers</li>
-            <li><strong>Access-Control-Allow-Credentials:</strong> Cookie support</li>
+            <li>
+              <strong>Access-Control-Allow-Origin:</strong>
+              {$t('diagnostics/http-cors-check.about.headers.allowOrigin')}
+            </li>
+            <li>
+              <strong>Access-Control-Allow-Methods:</strong>
+              {$t('diagnostics/http-cors-check.about.headers.allowMethods')}
+            </li>
+            <li>
+              <strong>Access-Control-Allow-Headers:</strong>
+              {$t('diagnostics/http-cors-check.about.headers.allowHeaders')}
+            </li>
+            <li>
+              <strong>Access-Control-Allow-Credentials:</strong>
+              {$t('diagnostics/http-cors-check.about.headers.allowCredentials')}
+            </li>
           </ul>
         </div>
       </div>

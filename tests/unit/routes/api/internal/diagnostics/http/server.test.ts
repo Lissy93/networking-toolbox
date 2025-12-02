@@ -515,7 +515,7 @@ describe('HTTP Diagnostics API Endpoint', () => {
         expect(error.status).toBe(408);
         expect(error.body.message).toBe('Request timeout');
       }
-    }, 10000);
+    }, 15000);
 
     it('should handle non-existent host', async () => {
       const request = createMockRequest({

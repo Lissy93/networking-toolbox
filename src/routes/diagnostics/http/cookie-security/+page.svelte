@@ -20,7 +20,7 @@
     { url: 'https://domain-locker.com', description: 'No cookies found' },
   ];
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   const isInputValid = $derived(() => {
     const trimmedUrl = url.trim();

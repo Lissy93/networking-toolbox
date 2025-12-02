@@ -1,0 +1,127 @@
+{
+  "title": "VLSM Calculator",
+  "description": "Design efficient subnets with Variable Length Subnet Masking for optimal address space utilization.",
+  "networkConfig": {
+    "title": "Network Configuration",
+    "networkAddress": {
+      "label": "Network Address",
+      "placeholder": "192.168.1.0"
+    },
+    "cidrNotation": {
+      "label": "CIDR Notation"
+    }
+  },
+  "subnetRequirements": {
+    "title": "Subnet Requirements",
+    "addSubnet": "Add Subnet",
+    "subnetName": {
+      "placeholder": "Subnet name"
+    },
+    "hostsNeeded": "Hosts needed:",
+    "description": {
+      "placeholder": "Description (optional)"
+    }
+  },
+  "summary": {
+    "title": "VLSM Summary",
+    "totalSubnets": "Total Subnets",
+    "hostsRequested": "Hosts Requested",
+    "hostsProvided": "Hosts Provided",
+    "wastedHosts": "Wasted Hosts",
+    "efficiency": "Efficiency",
+    "remainingAddresses": "Remaining Addresses"
+  },
+  "table": {
+    "title": "Subnet Allocation Table",
+    "columns": {
+      "subnet": "Subnet",
+      "network": "Network",
+      "hosts": "Hosts",
+      "mask": "Mask",
+      "efficiency": "Efficiency",
+      "actions": "Actions"
+    },
+    "hostsNeeded": "{count} needed",
+    "hostsProvided": "{count} provided",
+    "hostsWasted": "{count} wasted"
+  },
+  "details": {
+    "networkAddress": {
+      "label": "Network Address",
+      "tooltip": "First IP address in the subnet - identifies the network"
+    },
+    "broadcastAddress": {
+      "label": "Broadcast Address",
+      "tooltip": "Last IP address in the subnet - sends to all hosts"
+    },
+    "firstUsableHost": {
+      "label": "First Usable Host",
+      "tooltip": "First IP address available for host assignment"
+    },
+    "lastUsableHost": {
+      "label": "Last Usable Host",
+      "tooltip": "Last IP address available for host assignment"
+    },
+    "subnetMask": {
+      "label": "Subnet Mask",
+      "tooltip": "Defines which portion of IP represents network vs host"
+    },
+    "wildcardMask": {
+      "label": "Wildcard Mask",
+      "tooltip": "Inverse of subnet mask - used in access control lists"
+    },
+    "binaryMask": {
+      "label": "Binary Mask",
+      "tooltip": "Binary representation of the subnet mask"
+    },
+    "hostBits": {
+      "label": "Host Bits",
+      "tooltip": "Number of bits available for host addressing",
+      "value": "{count} bits"
+    }
+  },
+  "details": {
+    "networkAddress": {
+      "label": "Network Address",
+      "tooltip": "First IP address in the subnet - identifies the network"
+    },
+    "broadcastAddress": {
+      "label": "Broadcast Address",
+      "tooltip": "Last IP address in the subnet - sends to all hosts"
+    },
+    "firstUsableHost": {
+      "label": "First Usable Host",
+      "tooltip": "First IP address available for host assignment"
+    },
+    "lastUsableHost": {
+      "label": "Last Usable Host",
+      "tooltip": "Last IP address available for host assignment"
+    },
+    "subnetMask": {
+      "label": "Subnet Mask",
+      "tooltip": "Defines which portion of IP represents network vs host"
+    },
+    "wildcardMask": {
+      "label": "Wildcard Mask",
+      "tooltip": "Inverse of subnet mask - used in access control lists"
+    },
+    "binaryMask": {
+      "label": "Binary Mask",
+      "tooltip": "Binary representation of the subnet mask"
+    },
+    "hostBits": {
+      "label": "Host Bits",
+      "tooltip": "Number of bits available for host addressing",
+      "value": "{count} bits"
+    }
+  },
+  "actions": {
+    "expandDetails": "Expand subnet details",
+    "collapseDetails": "Collapse subnet details",
+    "copyNetworkInfo": "Copy network info"
+  },
+  "error": {
+    "title": "Calculation Error"
+  },
+  "defaultSubnetName": "Subnet {number}"
+}

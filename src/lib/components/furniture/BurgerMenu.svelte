@@ -32,6 +32,7 @@
   import { site, author, license } from '$lib/constants/site';
   import { tooltip } from '$lib/actions/tooltip';
   import { browser } from '$app/environment';
+  import { t } from '$lib/stores/language';
 
   export let isOpen = false;
 
@@ -192,7 +193,7 @@
     class="action-button burger-button"
     class:active={isOpen}
     on:click={toggleMenu}
-    aria-label={isOpen ? 'Close menu' : 'Open menu'}
+    aria-label={isOpen ? $t('furniture.menu.close') : $t('furniture.menu.open')}
     aria-expanded={isOpen}
     aria-controls="mobile-menu"
     use:tooltip={`Menu (${shortcutKey}+M)`}
@@ -212,7 +213,7 @@
     class="menu-content"
     class:open={isOpen}
     id="mobile-menu"
-    aria-label="Mobile navigation"
+    aria-label={$t('furniture.navigation.mobile')}
     bind:this={menuContentElement}
   >
     <div class="menu-header">
@@ -220,7 +221,7 @@
         <Icon name="networking" size="lg" />
         <h2>{site.title}</h2>
       </a>
-      <button class="close-button" on:click={() => (isOpen = false)} aria-label="Close menu">
+      <button class="close-button" on:click={() => (isOpen = false)} aria-label={$t('furniture.menu.close')}>
         <Icon name="x" size="md" />
       </button>
     </div>

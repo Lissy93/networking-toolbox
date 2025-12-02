@@ -1,0 +1,80 @@
+{
+  "cidrSummarize": {
+    "about": {
+      "title": "About CIDR Summarization",
+      "description": "CIDR Summarization optimizes network routing by combining multiple IP addresses, ranges, and CIDR blocks into the minimal set of CIDR prefixes that covers the same address space."
+    },
+    "benefits": {
+      "routeTable": {
+        "title": "Route Table Optimization",
+        "description": "Reduce routing table size by aggregating multiple routes into fewer, larger prefixes"
+      },
+      "networkEfficiency": {
+        "title": "Network Efficiency",
+        "description": "Minimize routing protocol overhead and improve convergence times"
+      },
+      "dualProtocol": {
+        "title": "Dual Protocol Support",
+        "description": "Handle mixed IPv4 and IPv6 inputs with separate optimized outputs"
+      },
+      "flexibleInput": {
+        "title": "Flexible Input Formats",
+        "description": "Process single IPs, CIDR blocks, and explicit ranges in any combination"
+      }
+    },
+    "modes": {
+      "title": "Summarization Modes",
+      "exactMerge": {
+        "title": "Exact Merge",
+        "description": "Conservative approach: Merges overlapping ranges exactly without additional aggregation"
+      },
+      "minimalCover": {
+        "title": "Minimal Cover",
+        "description": "Aggressive optimization: Finds the smallest set of CIDR blocks that covers all inputs"
+      },
+      "example": {
+        "label": "Example:"
+      }
+    },
+    "useCases": {
+      "title": "Common Use Cases",
+      "bgp": {
+        "title": "BGP Route Aggregation",
+        "description": "Optimize BGP advertisements by summarizing customer routes into provider prefixes"
+      },
+      "firewall": {
+        "title": "Firewall Rule Optimization",
+        "description": "Reduce ACL complexity by consolidating IP ranges into fewer CIDR rules"
+      },
+      "planning": {
+        "title": "Network Planning",
+        "description": "Analyze address space utilization and optimize subnet allocations"
+      },
+      "migration": {
+        "title": "Migration Planning",
+        "description": "Consolidate legacy network ranges during infrastructure modernization"
+      }
+    },
+    "inputFormats": {
+      "title": "Supported Input Formats",
+      "singleIP": {
+        "title": "Single IP Addresses"
+      },
+      "cidrBlocks": {
+        "title": "CIDR Blocks"
+      },
+      "ipRanges": {
+        "title": "IP Ranges"
+      },
+      "mixedLists": {
+        "title": "Mixed Lists",
+        "example1": "One item per line",
+        "example2": "IPv4 and IPv6 together"
+      }
+    },
+    "optimizationTips": {
+      "title": "Optimization Tips",
+      "description": "For maximum efficiency, align your network allocations to power-of-2 boundaries. Contiguous address blocks summarize much more effectively than scattered allocations. Use the exact merge mode for conservative summarization or minimal cover for aggressive optimization."
+    }
+  }
+}

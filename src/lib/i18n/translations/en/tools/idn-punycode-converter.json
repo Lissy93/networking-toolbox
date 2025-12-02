@@ -1,0 +1,78 @@
+{
+  "title": "IDN Punycode Converter",
+  "description": "Convert between Unicode domain names and Punycode (ASCII-compatible encoding)",
+  "modes": {
+    "unicodeToPunycode": "Unicode → Punycode",
+    "punycodeToUnicode": "Punycode → Unicode"
+  },
+  "examples": {
+    "title": "Example Domains",
+    "german": "German city domain",
+    "japanese": "Japanese domain",
+    "russian": "Russian domain",
+    "arabic": "Arabic domain",
+    "korean": "Korean domain",
+    "greek": "Greek domain"
+  },
+  "conversion": {
+    "unicodeTitle": "Unicode → Punycode Conversion",
+    "punycodeTitle": "Punycode → Unicode Conversion",
+    "unicodeLabel": "Unicode Domain Name",
+    "punycodeLabel": "Punycode Domain Name",
+    "unicodeTooltip": "Enter the domain name you want to convert",
+    "unicodePlaceholder": "münchen.de",
+    "punycodePlaceholder": "xn--mnchen-3ya.de",
+    "unicodeHelp": "Enter Unicode domain names with international characters",
+    "punycodeHelp": "Enter domain names containing xn-- punycode labels",
+    "unicodeResult": "Unicode Result",
+    "punycodeResult": "Punycode Result",
+    "swapTooltip": "Swap input and output",
+    "reverse": "Reverse",
+    "placeholder": "Enter a domain name to see the conversion result",
+    "error": "Error: Invalid input"
+  },
+  "warnings": {
+    "title": "Notices",
+    "asciiOnly": "Input contains only ASCII characters - no conversion needed",
+    "noPunycode": "Input does not contain punycode domains (xn-- prefix)",
+    "tooLong": "Domain name exceeds maximum length of 253 characters"
+  },
+  "actions": {
+    "copyResult": "Copy Result",
+    "copied": "Copied!",
+    "download": "Download",
+    "downloaded": "Downloaded!"
+  },
+  "info": {
+    "aboutTitle": "About IDN and Punycode",
+    "aboutDescription": "Internationalized Domain Names (IDN) allow domain names to contain Unicode characters from various scripts and languages. Punycode is the ASCII-compatible encoding that represents Unicode domain labels, allowing non-ASCII domain names to work with existing DNS infrastructure.",
+    "howItWorksTitle": "How Punycode Works",
+    "howItWorksDescription": "Each Unicode label is encoded separately:",
+    "unicode": "Unicode:",
+    "encoded": "Encoded:",
+    "final": "Final:",
+    "xnPrefix": "The xn-- prefix identifies punycode labels",
+    "useCasesTitle": "Common Use Cases",
+    "useCases": {
+      "registration": "International domain registration",
+      "email": "Email address internationalization",
+      "dns": "DNS configuration",
+      "webDev": "Web application development",
+      "security": "Security analysis"
+    },
+    "featuresTitle": "Supported Features",
+    "features": {
+      "compliant": "RFC 3492 compliant Punycode encoding/decoding",
+      "bidirectional": "Bidirectional conversion (Unicode ↔ Punycode)",
+      "multipleLabels": "Multiple domain labels support",
+      "mixed": "Mixed ASCII/Unicode domain handling"
+    },
+    "securityTitle": "Security Considerations",
+    "security": {
+      "homograph": "Homograph attacks: visually similar characters from different scripts",
+      "validate": "Always validate and normalize IDN input in applications",
+      "mixedScript": "Consider implementing mixed-script detection",
+      "browserPolicy": "Be aware of browser IDN display policies"
+    }
+  }
+}

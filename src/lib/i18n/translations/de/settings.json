@@ -1,0 +1,94 @@
+{
+  "title": "Einstellungen",
+  "description": "Passen Sie Ihr Erlebnis mit Designs, Layouts und Barrierefreiheitsoptionen an.",
+
+  "disabled": {
+    "title": "Einstellungen deaktiviert",
+    "message": "Die Einstellungen für diese Instanz wurden von Ihrem Administrator deaktiviert."
+  },
+
+  "language": {
+    "title": "Sprache"
+  },
+
+  "theme": {
+    "title": "Design",
+    "show_more": "Mehr Designs anzeigen",
+    "show_less": "Weniger anzeigen"
+  },
+
+  "font_scale": {
+    "title": "Schriftgröße"
+  },
+
+  "homepage_layout": {
+    "title": "Startseiten-Layout"
+  },
+
+  "top_navigation": {
+    "title": "Obere Navigation"
+  },
+
+  "accessibility": {
+    "title": "Barrierefreiheit",
+    "show_all": "Alle Barrierefreiheitsoptionen anzeigen",
+    "show_less": "Weniger anzeigen"
+  },
+
+  "site_branding": {
+    "title": "Website-Branding",
+    "description": "Passen Sie den Website-Titel, die Beschreibung und das Symbol an.",
+    "site_title": "Website-Titel",
+    "site_description": "Beschreibung",
+    "site_icon_url": "Symbol-URL",
+    "apply": "Anwenden",
+    "reset": "Zurücksetzen"
+  },
+
+  "primary_color": {
+    "title": "Primärfarbe",
+    "description": "Wählen Sie eine Primärfarbe für die Benutzeroberfläche.",
+    "custom_color": "Benutzerdefinierte Farbe verwenden",
+    "color_picker": "Farbwähler",
+    "hex_code": "Hex-Code",
+    "reset": "Zurücksetzen"
+  },
+
+  "custom_css": {
+    "title": "Benutzerdefiniertes CSS",
+    "description": "Fügen Sie Ihr eigenes CSS hinzu, um das Aussehen global anzupassen.",
+    "placeholder": "/* Geben Sie hier Ihr benutzerdefiniertes CSS ein */",
+    "characters": "Zeichen",
+    "apply": "Anwenden",
+    "clear": "Löschen"
+  },
+
+  "more_info": {
+    "title": "Nicht gefunden, wonach Sie gesucht haben?",
+    "line1": "Gute Nachrichten! Der Code ist Open Source und einfach zu verwenden.",
+    "content": "Forken Sie einfach das Repository, folgen Sie unseren Entwicklungseinrichtungsanweisungen, nehmen Sie alle gewünschten Änderungen und Anpassungen vor und stellen Sie dann Ihre eigene Instanz bereit.",
+    "support": "Wir bieten auch Unternehmens-Supportdienste an, bei denen wir benutzerdefinierte Änderungen für Sie vornehmen können."
+  },
+
+  "delete_data": {
+    "title": "Daten löschen",
+    "caution": "Vorsicht: Dies setzt alle lokalen Daten zurück.",
+    "button": "Alle Daten löschen"
+  },
+
+  "sync": {
+    "title": "Einstellungen synchronisieren und Sichern/Wiederherstellen",
+    "line1": "Ihre Einstellungen werden im lokalen Speicher Ihres Browsers gespeichert und bleiben auch nach dem Beenden der App erhalten.",
+    "content": "Da wir keine Anmeldung/Registrierung für die Nutzung der App benötigen, gibt es derzeit keine Möglichkeit, Ihre Einstellungen automatisch über Geräte hinweg zu synchronisieren. Wenn Sie jedoch Networking Toolbox selbst hosten, können Sie Einstellungen in Ihrer Konfiguration anwenden, indem Sie die folgenden Umgebungsvariablen einbeziehen. Auf diese Weise werden Ihre Einstellungen auf alle Benutzer auf allen Geräten angewendet.",
+    "export_settings": "Einstellungen exportieren",
+    "export_styles": "Stile exportieren",
+    "env_vars_title": "Umgebungsvariablen",
+    "env_vars_description": "Aktuelle Umgebungsvariablenwerte. Kopieren Sie diese in Ihre Konfigurationsdatei für selbst gehostete Instanzen.",
+    "copy_clipboard": "In Zwischenablage kopieren",
+    "copied": "Kopiert!",
+    "custom_css_title": "Benutzerdefiniertes CSS",
+    "custom_css_description": "Wenden Sie Ihr benutzerdefiniertes CSS auf Ihre selbst gehostete Instanz an, indem Sie eine CSS-Datei mounten."
+  },
+
+  "more_settings": "Weitere Einstellungen"
+}

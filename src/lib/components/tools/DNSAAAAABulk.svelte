@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/stores/language';
 
   let hostnameInput = $state('');
   let ipInput = $state('');
@@ -11,23 +12,23 @@
   let zoneFileContent = $state('');
   let showExamples = $state(false);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Web Servers',
+      label: $t('tools/dns-aaaa-bulk.examples.webServers'),
       hostnames: 'www\napi\ncdn\nstatic',
       ips: '192.168.1.10\n192.168.1.11\n192.168.1.12\n192.168.1.13',
     },
     {
-      label: 'Mail Servers',
+      label: $t('tools/dns-aaaa-bulk.examples.mailServers'),
       hostnames: 'mail\nimap\nsmtp\npop3',
       ips: '10.0.1.20\n10.0.1.21\n10.0.1.22\n10.0.1.23',
     },
     {
-      label: 'IPv6 Services',
+      label: $t('tools/dns-aaaa-bulk.examples.ipv6Services'),
       hostnames: 'web6\napi6\nmail6',
       ips: '2001:db8::1\n2001:db8::2\n2001:db8::3',
     },
-  ];
+  ]);
 
   function isIPv4(ip: string): boolean {
     const parts = ip.split('.');
@@ -160,41 +161,41 @@ $ORIGIN ${zoneName}.
 
 <div class="card">
   <div class="card-header">
-    <h1>A/AAAA Bulk Generator</h1>
+    <h1>{$t('tools/dns-aaaa-bulk.title')}</h1>
     <p class="card-subtitle">
-      Bulk create A and AAAA record sets from hostname and IP lists with TTL controls and zone file generation.
+      {$t('tools/dns-aaaa-bulk.description')}
     </p>
   </div>
 
   <div class="grid-layout">
     <div class="input-section">
       <div class="input-group">
-        <label for="hostnames" use:tooltip={'Enter hostnames, one per line'}>
+        <label for="hostnames" use:tooltip={$t('tools/dns-aaaa-bulk.input.hostnames.tooltip')}>
           <Icon name="server" size="sm" />
-          Hostnames
+          {$t('tools/dns-aaaa-bulk.input.hostnames.label')}
         </label>
-        <textarea id="hostnames" bind:value={hostnameInput} placeholder="www&#10;api&#10;mail&#10;ftp" rows="8"
+        <textarea
+          id="hostnames"
+          bind:value={hostnameInput}
+          placeholder={$t('tools/dns-aaaa-bulk.input.hostnames.placeholder')}
+          rows="8"
         ></textarea>
       </div>
 
       <div class="input-group">
-        <label for="ips" use:tooltip={'Enter IP addresses (IPv4 or IPv6), one per line'}>
+        <label for="ips" use:tooltip={$t('tools/dns-aaaa-bulk.input.ips.tooltip')}>
           <Icon name="networking" size="sm" />
-          IP Addresses
+          {$t('tools/dns-aaaa-bulk.input.ips.label')}
         </label>
-        <textarea
-          id="ips"
-          bind:value={ipInput}
-          placeholder="192.168.1.10&#10;192.168.1.11&#10;2001:db8::1&#10;2001:db8::2"
-          rows="8"
+        <textarea id="ips" bind:value={ipInput} placeholder={$t('tools/dns-aaaa-bulk.input.ips.placeholder')} rows="8"
         ></textarea>
       </div>
 
       <div class="controls-row">
         <div class="input-group">
-          <label for="ttl" use:tooltip={'Time To Live in seconds'}>
+          <label for="ttl" use:tooltip={$t('tools/dns-aaaa-bulk.input.ttl.tooltip')}>
             <Icon name="clock" size="sm" />
-            TTL (seconds)
+            {$t('tools/dns-aaaa-bulk.input.ttl.label')}
           </label>
           <input type="number" id="ttl" bind:value={ttl} min="60" max="86400" />
         </div>
@@ -202,17 +203,22 @@ $ORIGIN ${zoneName}.
         <label class="checkbox-option">
           <input type="checkbox" bind:checked={generateZoneFile} />
           <span class="checkmark"></span>
-          Generate zone file
+          {$t('tools/dns-aaaa-bulk.input.generateZoneFile')}
         </label>
       </div>
 
       {#if generateZoneFile}
         <div class="input-group">
-          <label for="zoneName" use:tooltip={'Domain name for the zone file'}>
+          <label for="zoneName" use:tooltip={$t('tools/dns-aaaa-bulk.input.zoneName.tooltip')}>
             <Icon name="globe" size="sm" />
-            Zone Name
+            {$t('tools/dns-aaaa-bulk.input.zoneName.label')}
           </label>
-          <input type="text" id="zoneName" bind:value={zoneName} placeholder="example.com" />
+          <input
+            type="text"
+            id="zoneName"
+            bind:value={zoneName}
+            placeholder={$t('tools/dns-aaaa-bulk.input.zoneName.placeholder')}
+          />
         </div>
       {/if}
     </div>
@@ -221,13 +227,13 @@ $ORIGIN ${zoneName}.
       <details class="examples-toggle" bind:open={showExamples}>
         <summary>
           <Icon name="lightbulb" size="sm" />
-          Quick Examples
+          {$t('tools/dns-aaaa-bulk.examples.title')}
         </summary>
         <div class="examples-grid">
           {#each examples as example (example.label)}
             <button class="example-card" onclick={() => loadExample(example)}>
               <h4>{example.label}</h4>
-              <p>{example.hostnames.split('\n').length} hosts</p>
+              <p>{$t('tools/dns-aaaa-bulk.examples.hostsCount', { count: example.hostnames.split('\n').length })}</p>
             </button>
           {/each}
         </div>
@@ -238,18 +244,18 @@ $ORIGIN ${zoneName}.
   {#if results.length > 0}
     <div class="results-section">
       <div class="results-header">
-        <h2>Generated Records</h2>
+        <h2>{$t('tools/dns-aaaa-bulk.results.title')}</h2>
         <div class="export-buttons">
           <button
             onclick={() => copyToClipboard(results.map((r) => `${r.name} ${r.ttl} IN ${r.type} ${r.value}`).join('\n'))}
           >
             <Icon name="copy" size="sm" />
-            Copy Records
+            {$t('tools/dns-aaaa-bulk.results.copyRecordsButton')}
           </button>
           {#if generateZoneFile && zoneFileContent}
             <button onclick={downloadZoneFile}>
               <Icon name="download" size="sm" />
-              Download Zone
+              {$t('tools/dns-aaaa-bulk.results.downloadZoneButton')}
             </button>
           {/if}
         </div>
@@ -257,10 +263,10 @@ $ORIGIN ${zoneName}.
 
       <div class="records-table">
         <div class="table-header">
-          <div>Name</div>
-          <div>TTL</div>
-          <div>Type</div>
-          <div>Value</div>
+          <div>{$t('tools/dns-aaaa-bulk.results.tableHeaders.name')}</div>
+          <div>{$t('tools/dns-aaaa-bulk.results.tableHeaders.ttl')}</div>
+          <div>{$t('tools/dns-aaaa-bulk.results.tableHeaders.type')}</div>
+          <div>{$t('tools/dns-aaaa-bulk.results.tableHeaders.value')}</div>
         </div>
         {#each results as record, index (index)}
           <div class="table-row" class:invalid={record.type === 'INVALID'}>
@@ -284,10 +290,10 @@ $ORIGIN ${zoneName}.
       {#if generateZoneFile && zoneFileContent}
         <div class="zone-file-section">
           <div class="zone-file-header">
-            <h3>Zone File Preview</h3>
+            <h3>{$t('tools/dns-aaaa-bulk.zoneFile.title')}</h3>
             <button onclick={() => copyToClipboard(zoneFileContent)}>
               <Icon name="copy" size="sm" />
-              Copy Zone File
+              {$t('tools/dns-aaaa-bulk.zoneFile.copyButton')}
             </button>
           </div>
           <pre class="zone-file-content">{zoneFileContent}</pre>

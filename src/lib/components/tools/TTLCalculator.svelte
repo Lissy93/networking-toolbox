@@ -4,6 +4,13 @@
   import { humanizeTTL, calculateCacheExpiry, type TTLInfo } from '$lib/utils/dns-validation.js';
   import { useClipboard } from '$lib/composables';
   import { formatNumber } from '$lib/utils/formatters';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools/ttl-calculator');
+  });
 
   let ttlInput = $state('3600');
   let customDate = $state('');
@@ -37,23 +44,23 @@
   const examples = [
     {
       ttl: '300',
-      scenario: 'Load Balancer IP',
-      description: 'Short TTL for quick failover capability',
+      scenario: $t('examples.useCases.scenarios.loadBalancer'),
+      description: $t('examples.useCases.descriptions.loadBalancer'),
     },
     {
       ttl: '3600',
-      scenario: 'Web Server A Record',
-      description: 'Standard TTL for web services',
+      scenario: $t('examples.useCases.scenarios.webServer'),
+      description: $t('examples.useCases.descriptions.webServer'),
     },
     {
       ttl: '86400',
-      scenario: 'MX Record',
-      description: 'Stable mail server configuration',
+      scenario: $t('examples.useCases.scenarios.mxRecord'),
+      description: $t('examples.useCases.descriptions.mxRecord'),
     },
     {
       ttl: '604800',
-      scenario: 'NS Record',
-      description: 'Authoritative name servers rarely change',
+      scenario: $t('examples.useCases.scenarios.nsRecord'),
+      description: $t('examples.useCases.descriptions.nsRecord'),
     },
   ];
 
@@ -143,8 +150,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>TTL Calculator</h1>
-    <p>Humanize DNS TTL values and compute cache expiry times from now or specific dates</p>
+    <h1>{$t('title')}</h1>
+    <p>{$t('description')}</p>
   </header>
 
   <!-- Educational Overview -->
@@ -153,19 +160,22 @@
       <div class="overview-item">
         <Icon name="clock" size="sm" />
         <div>
-          <strong>TTL Humanization:</strong> Convert seconds to human-readable formats like "2 hours" or "1 day".
+          <strong>{$t('overview.humanization.title')}</strong>
+          {$t('overview.humanization.content')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="calendar" size="sm" />
         <div>
-          <strong>Cache Expiry:</strong> Calculate when DNS records will expire from resolver caches.
+          <strong>{$t('overview.cacheExpiry.title')}</strong>
+          {$t('overview.cacheExpiry.content')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="target" size="sm" />
         <div>
-          <strong>TTL Guidelines:</strong> Get recommendations based on record stability and use case.
+          <strong>{$t('overview.guidelines.title')}</strong>
+          {$t('overview.guidelines.content')}
         </div>
       </div>
     </div>
@@ -176,7 +186,7 @@
     <details class="common-details">
       <summary class="common-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Common TTL Values</h4>
+        <h4>{$t('examples.commonValues.title')}</h4>
       </summary>
       <div class="ttls-grid">
         {#each commonTTLs as ttl, index (ttl.seconds)}
@@ -198,7 +208,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>TTL by Use Case</h4>
+        <h4>{$t('examples.useCases.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, index (example.scenario)}
@@ -219,16 +229,16 @@
   <div class="card input-card">
     <!-- TTL Input -->
     <div class="input-group">
-      <label for="ttl-input" use:tooltip={'Enter TTL value in seconds'}>
+      <label for="ttl-input" use:tooltip={$t('input.tooltip')}>
         <Icon name="clock" size="sm" />
-        TTL (seconds)
+        {$t('input.label')}
       </label>
       <input
         id="ttl-input"
         type="number"
         bind:value={ttlInput}
         oninput={handleInputChange}
-        placeholder="3600"
+        placeholder={$t('input.placeholder')}
         class="ttl-input"
         min="0"
         max="2147483647"
@@ -239,7 +249,7 @@
     <div class="input-group">
       <label class="checkbox-label">
         <input type="checkbox" class="styled-checkbox" bind:checked={useCustomDate} onchange={handleInputChange} />
-        Calculate expiry from custom date/time
+        {$t('input.customDateLabel')}
       </label>
 
       {#if useCustomDate}
@@ -257,10 +267,10 @@
   {#if results}
     <div class="card results-card">
       <div class="results-header">
-        <h3>TTL Analysis</h3>
+        <h3>{$t('results.title')}</h3>
         <button class="copy-button {clipboard.isCopied() ? 'copied' : ''}" onclick={() => clipboard.copy(ttlInput)}>
           <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="sm" />
-          Copy TTL
+          {$t('results.copyTTL')}
         </button>
       </div>
 
@@ -273,20 +283,20 @@
           </div>
           <div class="ttl-seconds-display">
             <span class="seconds-value">{formatNumber(results.ttlInfo.seconds)}</span>
-            <span class="seconds-label">seconds</span>
+            <span class="seconds-label">{$t('results.secondsLabel')}</span>
           </div>
         </div>
       </div>
 
       <!-- Cache Expiry Times -->
       <div class="expiry-section">
-        <h4>Cache Expiry Times</h4>
+        <h4>{$t('results.cacheExpiry')}</h4>
 
         <div class="expiry-cards">
           <div class="expiry-card">
             <div class="expiry-label">
               <Icon name="clock" size="sm" />
-              From Now
+              {$t('results.fromNow')}
             </div>
             <div class="expiry-time">{formatDateTime(results.expiryFromNow)}</div>
             <div class="expiry-relative">{formatRelativeTime(results.expiryFromNow)}</div>
@@ -296,7 +306,7 @@
             <div class="expiry-card">
               <div class="expiry-label">
                 <Icon name="calendar" size="sm" />
-                From Custom Date
+                {$t('results.fromCustomDate')}
               </div>
               <div class="expiry-time">{formatDateTime(results.expiryFromCustom)}</div>
               <div class="expiry-relative">{formatRelativeTime(results.expiryFromCustom)}</div>
@@ -307,7 +317,7 @@
 
       <!-- Recommendations -->
       <div class="recommendations-section">
-        <h4>Summary</h4>
+        <h4>{$t('results.summary')}</h4>
         <ul class="recommendations-list">
           {#each results.ttlInfo.recommendations as recommendation, index (index)}
             <li class="recommendation-item">{recommendation}</li>
@@ -317,27 +327,27 @@
 
       <!-- TTL Guidelines -->
       <div class="guidelines-section">
-        <h4>TTL Guidelines by Category</h4>
+        <h4>{$t('results.guidelinesTitle')}</h4>
         <div class="guidelines-grid">
           <div class="guideline-item">
-            <div class="guideline-category very-short">Very Short (&lt; 5 min)</div>
-            <div class="guideline-text">High DNS load, instant propagation</div>
+            <div class="guideline-category very-short">{$t('guidelines.veryShort.label')}</div>
+            <div class="guideline-text">{$t('guidelines.veryShort.description')}</div>
           </div>
           <div class="guideline-item">
-            <div class="guideline-category short">Short (5 min - 1 hr)</div>
-            <div class="guideline-text">Frequent changes, good for testing</div>
+            <div class="guideline-category short">{$t('guidelines.short.label')}</div>
+            <div class="guideline-text">{$t('guidelines.short.description')}</div>
           </div>
           <div class="guideline-item">
-            <div class="guideline-category medium">Medium (1 hr - 1 day)</div>
-            <div class="guideline-text">Balanced performance and flexibility</div>
+            <div class="guideline-category medium">{$t('guidelines.medium.label')}</div>
+            <div class="guideline-text">{$t('guidelines.medium.description')}</div>
           </div>
           <div class="guideline-item">
-            <div class="guideline-category long">Long (1 day - 1 week)</div>
-            <div class="guideline-text">Stable records, reduced DNS queries</div>
+            <div class="guideline-category long">{$t('guidelines.long.label')}</div>
+            <div class="guideline-text">{$t('guidelines.long.description')}</div>
           </div>
           <div class="guideline-item">
-            <div class="guideline-category very-long">Very Long (> 1 week)</div>
-            <div class="guideline-text">Infrastructure, rarely changes</div>
+            <div class="guideline-category very-long">{$t('guidelines.veryLong.label')}</div>
+            <div class="guideline-text">{$t('guidelines.veryLong.description')}</div>
           </div>
         </div>
       </div>
@@ -348,34 +358,30 @@
   <div class="education-card">
     <div class="education-grid">
       <div class="education-item info-panel">
-        <h4>TTL Trade-offs</h4>
+        <h4>{$t('education.tradeoffs.title')}</h4>
         <p>
-          Lower TTLs allow faster propagation of DNS changes but increase DNS query load. Higher TTLs reduce DNS traffic
-          but slow down change propagation. Balance based on your needs.
+          {$t('education.tradeoffs.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Cache Behavior</h4>
+        <h4>{$t('education.cacheBehavior.title')}</h4>
         <p>
-          DNS resolvers cache records for the TTL duration. Once expired, they must query authoritative servers again.
-          Some resolvers may cache slightly longer or shorter than the exact TTL.
+          {$t('education.cacheBehavior.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Change Planning</h4>
+        <h4>{$t('education.changePlanning.title')}</h4>
         <p>
-          Before making DNS changes, consider lowering TTLs in advance. This reduces the time users see old records.
-          After changes stabilize, you can increase TTLs again.
+          {$t('education.changePlanning.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Monitoring Impact</h4>
+        <h4>{$t('education.monitoringImpact.title')}</h4>
         <p>
-          Monitor DNS query volumes when changing TTLs. Very short TTLs can significantly increase load on authoritative
-          servers and may impact DNS provider costs.
+          {$t('education.monitoringImpact.content')}
         </p>
       </div>
     </div>

@@ -7,6 +7,7 @@
   import { bookmarks } from '$lib/stores/bookmarks';
   import { frequentlyUsedTools, toolUsage } from '$lib/stores/toolUsage';
   import { onMount } from 'svelte';
+  import { t } from '$lib/stores/language';
 
   const currentPath = $derived($page.url?.pathname ?? '/');
 
@@ -118,7 +119,7 @@
           .slice(0, 8)
           .map((tool) => ({
             href: tool.href,
-            label: tool.label || 'Untitled Tool',
+            label: tool.label || $t('furniture.navigation.untitled_tool'),
             icon: tool.icon,
             description: tool.description,
           }));
@@ -142,7 +143,7 @@
   });
 </script>
 
-<nav id="navigation" class="top-nav" class:has-dropdowns={hasDropdowns} aria-label="Primary navigation">
+<nav id="navigation" class="top-nav" class:has-dropdowns={hasDropdowns} aria-label={$t('furniture.navigation.primary')}>
   {#each navigationItems as item (item.href)}
     <div
       class="nav-item"

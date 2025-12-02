@@ -12,8 +12,16 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables/useClipboard.svelte';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
 
   const clipboard = useClipboard();
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools.prefix-delegation');
+  });
 
   // State
   let iaid = $state<number>(1);
@@ -85,10 +93,7 @@
   });
 </script>
 
-<ToolContentContainer
-  title="DHCPv6 Prefix Delegation (IA_PD)"
-  description="Build DHCPv6 IA_PD options for delegating IPv6 prefixes to requesting routers. Configure Identity Association for Prefix Delegation (Option 25) with IA Prefix options (Option 26) per RFC 8415."
->
+<ToolContentContainer title={$t('tools/prefix-delegation.title')} description={$t('tools/prefix-delegation.subtitle')}>
   <ExamplesCard
     examples={PREFIX_DELEGATION_EXAMPLES}
     onSelect={(ex) => loadExample(ex)}
@@ -97,26 +102,42 @@
   />
 
   <div class="card input-card">
-    <h3>Prefix Delegation Configuration</h3>
+    <h3>{$t('tools/prefix-delegation.config.title')}</h3>
 
     <div class="form-row">
       <div class="form-group">
-        <label for="iaid">IAID (Identity Association ID)</label>
+        <label for="iaid">{$t('tools/prefix-delegation.config.iaid.label')}</label>
         <input id="iaid" type="number" bind:value={iaid} min="0" max="4294967295" class="input" />
-        <span class="hint">Unique identifier for this IA_PD (0-4294967295)</span>
+        <span class="hint">{$t('tools/prefix-delegation.config.iaid.hint')}</span>
       </div>
 
       <div class="form-group">
-        <label for="t1">T1 Renewal Time (seconds)</label>
-        <input id="t1" type="number" bind:value={t1} min="0" max="4294967295" placeholder="Optional" class="input" />
+        <label for="t1">{$t('tools/prefix-delegation.config.t1.label')}</label>
+        <input
+          id="t1"
+          type="number"
+          bind:value={t1}
+          min="0"
+          max="4294967295"
+          placeholder={$t('tools/prefix-delegation.config.t1.placeholder')}
+          class="input"
+        />
         {#if t1}
           <span class="hint">= {formatTime(t1)}</span>
         {/if}
       </div>
 
       <div class="form-group">
-        <label for="t2">T2 Rebinding Time (seconds)</label>
-        <input id="t2" type="number" bind:value={t2} min="0" max="4294967295" placeholder="Optional" class="input" />
+        <label for="t2">{$t('tools/prefix-delegation.config.t2.label')}</label>
+        <input
+          id="t2"
+          type="number"
+          bind:value={t2}
+          min="0"
+          max="4294967295"
+          placeholder={$t('tools/prefix-delegation.config.t2.placeholder')}
+          class="input"
+        />
         {#if t2}
           <span class="hint">= {formatTime(t2)}</span>
         {/if}
@@ -124,7 +145,7 @@
     </div>
 
     <div class="form-group">
-      <label for="prefix-0">Delegated Prefixes</label>
+      <label for="prefix-0">{$t('tools/prefix-delegation.config.prefixes.label')}</label>
       {#each prefixes as prefix, i (i)}
         <div class="prefix-row">
           <div class="prefix-inputs">
@@ -132,7 +153,7 @@
               id={i === 0 ? 'prefix-0' : undefined}
               type="text"
               bind:value={prefix.prefix}
-              placeholder="e.g., 2001:db8::/56"
+              placeholder={$t('tools/prefix-delegation.config.prefixes.prefixPlaceholder')}
               class="input"
               aria-label={i > 0 ? `Prefix ${i + 1}` : undefined}
             />
@@ -141,7 +162,7 @@
               bind:value={prefix.preferredLifetime}
               min="0"
               max="4294967295"
-              placeholder="Preferred (s)"
+              placeholder={$t('tools/prefix-delegation.config.prefixes.preferredPlaceholder')}
               class="input input-sm"
               aria-label="Preferred lifetime"
             />
@@ -150,22 +171,26 @@
               bind:value={prefix.validLifetime}
               min="0"
               max="4294967295"
-              placeholder="Valid (s)"
+              placeholder={$t('tools/prefix-delegation.config.prefixes.validPlaceholder')}
               class="input input-sm"
               aria-label="Valid lifetime"
             />
           </div>
           {#if prefixes.length > 1}
-            <button class="btn btn-danger btn-sm" onclick={() => removePrefix(i)}>Remove</button>
+            <button class="btn btn-danger btn-sm" onclick={() => removePrefix(i)}
+              >{$t('tools/prefix-delegation.config.prefixes.removeButton')}</button
+            >
           {/if}
         </div>
       {/each}
-      <button class="btn btn-secondary btn-sm" onclick={addPrefix}>Add Prefix</button>
+      <button class="btn btn-secondary btn-sm" onclick={addPrefix}
+        >{$t('tools/prefix-delegation.config.prefixes.addButton')}</button
+      >
     </div>
 
     {#if errors.length > 0}
       <div class="error-card">
-        <strong>Validation Errors:</strong>
+        <strong>{$t('tools/prefix-delegation.errors.title')}</strong>
         <ul>
           {#each errors as error, i (i)}
             <li>{error}</li>
@@ -177,26 +202,26 @@
 
   {#if result}
     <div class="card result-card">
-      <h3>Option 25 - IA_PD</h3>
+      <h3>{$t('tools/prefix-delegation.results.title')}</h3>
 
       <div class="result-grid">
         <div class="result-item">
-          <span class="label">IAID:</span>
+          <span class="label">{$t('tools/prefix-delegation.results.iaid')}</span>
           <code class="code-value">{result.iaid} (0x{result.iaidHex})</code>
         </div>
 
         <div class="result-item">
-          <span class="label">T1 Renewal:</span>
+          <span class="label">{$t('tools/prefix-delegation.results.t1Renewal')}</span>
           <span class="value">{result.t1Formatted} ({result.t1}s)</span>
         </div>
 
         <div class="result-item">
-          <span class="label">T2 Rebinding:</span>
+          <span class="label">{$t('tools/prefix-delegation.results.t2Rebinding')}</span>
           <span class="value">{result.t2Formatted} ({result.t2}s)</span>
         </div>
 
         <div class="result-item">
-          <span class="label">Full Hex:</span>
+          <span class="label">{$t('tools/prefix-delegation.results.fullHex')}</span>
           <code class="code-value">{result.fullHex}</code>
           <button
             class="btn-copy"
@@ -204,12 +229,14 @@
             onclick={() => clipboard.copy(result!.fullHex, 'full-hex')}
             aria-label="Copy hex"
           >
-            {clipboard.isCopied('full-hex') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('full-hex')
+              ? $t('tools/prefix-delegation.common.copied')
+              : $t('tools/prefix-delegation.common.copy')}
           </button>
         </div>
 
         <div class="result-item">
-          <span class="label">Wire Format:</span>
+          <span class="label">{$t('tools/prefix-delegation.results.wireFormat')}</span>
           <code class="code-value">{result.fullWireFormat}</code>
           <button
             class="btn-copy"
@@ -217,18 +244,20 @@
             onclick={() => clipboard.copy(result!.fullWireFormat, 'full-wire')}
             aria-label="Copy wire format"
           >
-            {clipboard.isCopied('full-wire') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('full-wire')
+              ? $t('tools/prefix-delegation.common.copied')
+              : $t('tools/prefix-delegation.common.copy')}
           </button>
         </div>
 
         <div class="result-item">
-          <span class="label">Total Length:</span>
+          <span class="label">{$t('tools/prefix-delegation.results.totalLength')}</span>
           <span class="value">{result.totalLength} bytes</span>
         </div>
       </div>
 
       <div class="prefixes-section">
-        <h4>Delegated Prefixes (Option 26)</h4>
+        <h4>{$t('tools/prefix-delegation.results.prefixesSection.title')}</h4>
         {#each result.prefixes as prefix, i (i)}
           <div class="prefix-card">
             <div class="prefix-header">
@@ -237,15 +266,19 @@
             </div>
             <div class="prefix-details">
               <div class="detail-item">
-                <span class="detail-label">Preferred Lifetime:</span>
+                <span class="detail-label"
+                  >{$t('tools/prefix-delegation.results.prefixesSection.preferredLifetime')}</span
+                >
                 <span>{prefix.preferredLifetimeFormatted} ({prefix.preferredLifetime}s)</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Valid Lifetime:</span>
+                <span class="detail-label">{$t('tools/prefix-delegation.results.prefixesSection.validLifetime')}</span>
                 <span>{prefix.validLifetimeFormatted} ({prefix.validLifetime}s)</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Wire Format:</span>
+                <span class="detail-label"
+                  >{$t('tools/prefix-delegation.results.prefixesSection.prefixWireFormat')}</span
+                >
                 <code class="code-small">{prefix.wireFormat}</code>
                 <button
                   class="btn-copy btn-copy-sm"
@@ -253,7 +286,9 @@
                   onclick={() => clipboard.copy(prefix.wireFormat.replace(/\s/g, ''), `prefix-wire-${i}`)}
                   aria-label="Copy prefix wire format"
                 >
-                  {clipboard.isCopied(`prefix-wire-${i}`) ? 'Copied' : 'Copy'}
+                  {clipboard.isCopied(`prefix-wire-${i}`)
+                    ? $t('tools/prefix-delegation.common.copied')
+                    : $t('tools/prefix-delegation.common.copy')}
                 </button>
               </div>
             </div>
@@ -262,17 +297,19 @@
       </div>
 
       <div class="config-section">
-        <h4>Configuration Example</h4>
+        <h4>{$t('tools/prefix-delegation.results.configSection.title')}</h4>
 
         <div class="output-group">
           <div class="output-header">
-            <h5>Kea DHCPv6</h5>
+            <h5>{$t('tools/prefix-delegation.results.configSection.keaDhcp6')}</h5>
             <button
               class="btn-copy"
               class:copied={clipboard.isCopied('kea-config')}
               onclick={() => clipboard.copy(result!.examples.keaDhcp6!, 'kea-config')}
             >
-              {clipboard.isCopied('kea-config') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('kea-config')
+                ? $t('tools/prefix-delegation.common.copied')
+                : $t('tools/prefix-delegation.common.copy')}
             </button>
           </div>
           <pre class="code-block"><code>{result.examples.keaDhcp6}</code></pre>

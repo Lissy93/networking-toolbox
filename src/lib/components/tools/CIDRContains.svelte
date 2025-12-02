@@ -5,6 +5,14 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
   import { formatNumber } from '$lib/utils/formatters';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools');
+  });
 
   let setA = $state(`192.168.0.0/16
 10.0.0.0/8`);
@@ -18,15 +26,15 @@
   let selectedExampleIndex = $state<number | null>(null);
   let userModified = $state(false);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Basic Containment',
+      label: $t('tools.cidr_contains.examples.basicContainment'),
       setA: '192.168.0.0/16',
       setB: `192.168.1.0/24
 192.168.2.0/24`,
     },
     {
-      label: 'Mixed Results',
+      label: $t('tools.cidr_contains.examples.mixedResults'),
       setA: `192.168.1.0/24
 10.0.0.0/16`,
       setB: `192.168.1.100/32
@@ -34,17 +42,17 @@
 172.16.0.0/24`,
     },
     {
-      label: 'Partial Overlap',
+      label: $t('tools.cidr_contains.examples.partialOverlap'),
       setA: '192.168.1.0/25',
       setB: '192.168.1.0/24',
     },
     {
-      label: 'IPv6 Containment',
+      label: $t('tools.cidr_contains.examples.ipv6Containment'),
       setA: '2001:db8::/32',
       setB: `2001:db8:1::/48
 2001:db8:2::/64`,
     },
-  ];
+  ]);
 
   /* Set example */
   function setExample(example: (typeof examples)[0], index: number) {
@@ -111,7 +119,7 @@
         checks: [],
         stats: { setA: { count: 0, addresses: '0' }, totalChecked: 0, inside: 0, equal: 0, partial: 0, outside: 0 },
         visualization: [],
-        errors: [error instanceof Error ? error.message : 'Unknown error'],
+        errors: [error instanceof Error ? error.message : $t('tools.cidr_contains.errors.unknownError')],
       };
     }
   }
@@ -120,13 +128,13 @@
   function getStatusInfo(status: ContainmentStatus) {
     switch (status) {
       case 'inside':
-        return { icon: 'check-circle', color: 'var(--color-success)', label: 'Inside' };
+        return { icon: 'check-circle', color: 'var(--color-success)', label: $t('tools.cidr_contains.status.inside') };
       case 'equal':
-        return { icon: 'equals', color: 'var(--color-info)', label: 'Equal' };
+        return { icon: 'equals', color: 'var(--color-info)', label: $t('tools.cidr_contains.status.equal') };
       case 'partial':
-        return { icon: 'alert-circle', color: 'var(--color-warning)', label: 'Partial' };
+        return { icon: 'alert-circle', color: 'var(--color-warning)', label: $t('tools.cidr_contains.status.partial') };
       case 'outside':
-        return { icon: 'x-circle', color: 'var(--color-error)', label: 'Outside' };
+        return { icon: 'x-circle', color: 'var(--color-error)', label: $t('tools.cidr_contains.status.outside') };
     }
   }
 
@@ -150,9 +158,14 @@
     type: 'candidate' | 'container' | 'gap',
   ): string {
     const size = range.end - range.start + 1n;
-    const label = type === 'candidate' ? 'Candidate' : type === 'container' ? 'Container' : 'Gap';
+    const labelPart = range.label ? ` (${range.label})` : '';
+    const cidrPart = range.cidr ? `\nCIDR: ${range.cidr}` : '';
 
-    return `${label}${range.label ? ` (${range.label})` : ''}\nSize: ${formatNumber(Number(size))}${range.cidr ? `\nCIDR: ${range.cidr}` : ''}`;
+    return $t(`tools.cidr_contains.visualization.${type}Tooltip`, {
+      label: labelPart,
+      size: formatNumber(Number(size)),
+      cidr: cidrPart,
+    });
   }
 
   // Reactive computation
@@ -165,13 +178,13 @@
 
 <!-- Options -->
 <div class="options-section">
-  <h3>Options</h3>
+  <h3>{$t('tools.cidr_contains.options.title')}</h3>
   <div class="options-grid">
     <label class="checkbox-label">
       <input type="checkbox" bind:checked={mergeContainers} />
       <span class="checkbox-text">
-        Merge/normalize containers first
-        <Tooltip text="Combine overlapping ranges in set A before checking containment">
+        {$t('tools.cidr_contains.options.mergeContainers')}
+        <Tooltip text={$t('tools.cidr_contains.options.mergeContainersTooltip')}>
           <Icon name="help" size="sm" />
         </Tooltip>
       </span>
@@ -179,8 +192,8 @@
     <label class="checkbox-label">
       <input type="checkbox" bind:checked={strictEquality} />
       <span class="checkbox-text">
-        Strict equality counts as contain
-        <Tooltip text="Treat exact matches as 'equal' instead of 'inside'">
+        {$t('tools.cidr_contains.options.strictEquality')}
+        <Tooltip text={$t('tools.cidr_contains.options.strictEqualityTooltip')}>
           <Icon name="help" size="sm" />
         </Tooltip>
       </span>
@@ -194,15 +207,15 @@
     <!-- Set A -->
     <div class="input-group">
       <h3>
-        Set A (Containers)
-        <Tooltip text="The containing set - these ranges may contain items from Set B">
+        {$t('tools.cidr_contains.input.setALabel')}
+        <Tooltip text={$t('tools.cidr_contains.input.setATooltip')}>
           <Icon name="help" size="sm" />
         </Tooltip>
       </h3>
       <div class="input-wrapper">
         <textarea
           bind:value={setA}
-          placeholder="192.168.0.0/16&#10;10.0.0.0/8"
+          placeholder={$t('tools.cidr_contains.input.setAPlaceholder')}
           class="input-textarea set-a"
           rows="6"
           oninput={handleInputChange}
@@ -213,15 +226,15 @@
     <!-- Set B -->
     <div class="input-group">
       <h3>
-        Set B (Candidates)
-        <Tooltip text="Items to check for containment within Set A">
+        {$t('tools/cidr-contains.input.setBLabel')}
+        <Tooltip text={$t('tools/cidr-contains.input.setBTooltip')}>
           <Icon name="help" size="sm" />
         </Tooltip>
       </h3>
       <div class="input-wrapper">
         <textarea
           bind:value={setB}
-          placeholder="192.168.1.0/24&#10;172.16.0.0/24"
+          placeholder={$t('tools/cidr-contains.input.setBPlaceholder')}
           class="input-textarea set-b"
           rows="6"
           oninput={handleInputChange}
@@ -233,7 +246,7 @@
   <div class="input-actions">
     <button type="button" class="btn btn-secondary btn-sm" onclick={clearInputs}>
       <Icon name="trash" size="sm" />
-      Clear All
+      {$t('tools/cidr-contains.input.clearAll')}
     </button>
   </div>
 
@@ -242,7 +255,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('tools/cidr-contains.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (example.label)}
@@ -267,7 +280,7 @@
   <div class="results-section">
     {#if result.errors.length > 0}
       <div class="info-panel error">
-        <h3>Parse Errors</h3>
+        <h3>{$t('tools/cidr-contains.results.errorsTitle')}</h3>
         <ul class="error-list">
           {#each result.errors as error (error)}
             <li>{error}</li>
@@ -280,7 +293,7 @@
       <!-- Summary Statistics -->
       <div class="stats-section">
         <div class="summary-header">
-          <h3>Containment Analysis</h3>
+          <h3>{$t('tools/cidr-contains.results.analysisTitle')}</h3>
           <div class="export-buttons">
             <button
               type="button"
@@ -289,7 +302,7 @@
               onclick={exportAsCSV}
             >
               <Icon name={clipboard.isCopied('csv-export') ? 'check' : 'csv-file'} size="sm" />
-              CSV
+              {$t('tools/cidr-contains.results.exportCSV')}
             </button>
             <button
               type="button"
@@ -298,55 +311,61 @@
               onclick={exportAsJSON}
             >
               <Icon name={clipboard.isCopied('json-export') ? 'check' : 'json-file'} size="sm" />
-              JSON
+              {$t('tools/cidr-contains.results.exportJSON')}
             </button>
           </div>
         </div>
 
         <div class="stats-grid">
           <div class="stat-card containers">
-            <span class="stat-label">Containers (A)</span>
-            <span class="stat-value">{result.stats.setA.count} items</span>
-            <span class="stat-detail">{result.stats.setA.addresses} addresses</span>
+            <span class="stat-label">{$t('tools/cidr-contains.stats.containersLabel')}</span>
+            <span class="stat-value"
+              >{$t('tools/cidr-contains.stats.itemsCount', { count: result.stats.setA.count })}</span
+            >
+            <span class="stat-detail"
+              >{$t('tools/cidr-contains.stats.addressesCount', { count: result.stats.setA.addresses })}</span
+            >
           </div>
           <div class="stat-card candidates">
-            <span class="stat-label">Candidates (B)</span>
-            <span class="stat-value">{result.stats.totalChecked} items</span>
-            <span class="stat-detail">checked for containment</span>
+            <span class="stat-label">{$t('tools/cidr-contains.stats.candidatesLabel')}</span>
+            <span class="stat-value"
+              >{$t('tools/cidr-contains.stats.itemsCount', { count: result.stats.totalChecked })}</span
+            >
+            <span class="stat-detail">{$t('tools/cidr-contains.stats.checkedForContainment')}</span>
           </div>
           <div class="stat-card inside">
-            <span class="stat-label">Inside</span>
+            <span class="stat-label">{$t('tools/cidr-contains.stats.insideLabel')}</span>
             <span class="stat-value">{result.stats.inside}</span>
-            <span class="stat-detail">fully contained</span>
+            <span class="stat-detail">{$t('tools/cidr-contains.stats.fullyContained')}</span>
           </div>
           <div class="stat-card equal">
-            <span class="stat-label">Equal</span>
+            <span class="stat-label">{$t('tools/cidr-contains.stats.equalLabel')}</span>
             <span class="stat-value">{result.stats.equal}</span>
-            <span class="stat-detail">exact matches</span>
+            <span class="stat-detail">{$t('tools/cidr-contains.stats.exactMatches')}</span>
           </div>
           <div class="stat-card partial">
-            <span class="stat-label">Partial</span>
+            <span class="stat-label">{$t('tools/cidr-contains.stats.partialLabel')}</span>
             <span class="stat-value">{result.stats.partial}</span>
-            <span class="stat-detail">partial overlap</span>
+            <span class="stat-detail">{$t('tools/cidr-contains.stats.partialOverlap')}</span>
           </div>
           <div class="stat-card outside">
-            <span class="stat-label">Outside</span>
+            <span class="stat-label">{$t('tools/cidr-contains.stats.outsideLabel')}</span>
             <span class="stat-value">{result.stats.outside}</span>
-            <span class="stat-detail">no overlap</span>
+            <span class="stat-detail">{$t('tools/cidr-contains.stats.noOverlap')}</span>
           </div>
         </div>
       </div>
 
       <!-- Containment Results Table -->
       <div class="table-section">
-        <h4>Containment Results</h4>
+        <h4>{$t('tools/cidr-contains.results.resultsTitle')}</h4>
         <div class="results-table">
           <div class="table-header">
-            <div class="col-input">Candidate</div>
-            <div class="col-status">Status</div>
-            <div class="col-coverage">Coverage</div>
-            <div class="col-containers">Containers</div>
-            <div class="col-gaps">Gaps</div>
+            <div class="col-input">{$t('tools/cidr-contains.table.candidateColumn')}</div>
+            <div class="col-status">{$t('tools/cidr-contains.table.statusColumn')}</div>
+            <div class="col-coverage">{$t('tools/cidr-contains.table.coverageColumn')}</div>
+            <div class="col-containers">{$t('tools/cidr-contains.table.containersColumn')}</div>
+            <div class="col-gaps">{$t('tools/cidr-contains.table.gapsColumn')}</div>
           </div>
 
           {#each result.checks as check, index (`${check.input}-${index}`)}
@@ -378,7 +397,7 @@
                     {/each}
                   </div>
                 {:else}
-                  <span class="no-containers">-</span>
+                  <span class="no-containers">{$t('tools/cidr-contains.table.noDash')}</span>
                 {/if}
               </div>
               <div class="col-gaps">
@@ -397,7 +416,7 @@
                     <Icon name={clipboard.isCopied(`gaps-${check.input}`) ? 'check' : 'copy'} size="xs" />
                   </button>
                 {:else}
-                  <span class="no-gaps">-</span>
+                  <span class="no-gaps">{$t('tools/cidr-contains.table.noDash')}</span>
                 {/if}
               </div>
             </div>
@@ -408,19 +427,19 @@
       <!-- Visualization -->
       {#if result.visualization.length > 0}
         <div class="visualization-section">
-          <h4>Containment Visualization</h4>
+          <h4>{$t('tools/cidr-contains.visualization.title')}</h4>
           <div class="viz-legend">
             <div class="legend-item">
               <div class="legend-color candidate-color"></div>
-              <span>Candidate Range</span>
+              <span>{$t('tools/cidr-contains.visualization.candidateRange')}</span>
             </div>
             <div class="legend-item">
               <div class="legend-color container-color"></div>
-              <span>Container Coverage</span>
+              <span>{$t('tools/cidr-contains.visualization.containerCoverage')}</span>
             </div>
             <div class="legend-item">
               <div class="legend-color gap-color"></div>
-              <span>Uncovered Gaps</span>
+              <span>{$t('tools/cidr-contains.visualization.uncoveredGaps')}</span>
             </div>
           </div>
 

@@ -1,0 +1,68 @@
+{
+  "title": "DHCP Lease Time Calculator",
+  "subtitle": "Calculate optimal DHCP lease times based on network size, client turnover, and utilization. Includes T1/T2 renewal times and configuration examples.",
+
+  "input": {
+    "title": "Network Configuration",
+    "helpText": "Enter your network characteristics to calculate optimal lease times",
+    "poolSize": {
+      "label": "IP Pool Size",
+      "placeholder": "100",
+      "hint": "Total available IP addresses in your DHCP pool"
+    },
+    "expectedClients": {
+      "label": "Expected Clients",
+      "placeholder": "50",
+      "hint": "Average number of concurrent clients"
+    },
+    "networkType": {
+      "label": "Network Type",
+      "custom": "Custom (use churn rate)"
+    },
+    "churnRate": {
+      "label": "Client Churn Rate",
+      "low": "Low - {time}",
+      "medium": "Medium - {time}",
+      "high": "High - {time}",
+      "custom": "Custom",
+      "hint": "How long devices typically stay connected"
+    },
+    "customChurn": {
+      "label": "Custom Churn Time (hours)",
+      "placeholder": "24",
+      "hint": "Average hours a device stays connected"
+    }
+  },
+
+  "errors": {
+    "title": "Validation Errors"
+  },
+
+  "results": {
+    "title": "Calculated Lease Times",
+    "summary": {
+      "poolUtilization": "Pool Utilization:",
+      "recommendedLease": "Recommended Lease:"
+    },
+    "exhaustionWarning": "Address Exhaustion:",
+    "leaseTimes": {
+      "defaultLease": "Default Lease Time",
+      "t1Renewal": "T1 (Renewal)",
+      "t2Rebinding": "T2 (Rebinding)",
+      "seconds": "{seconds} seconds"
+    },
+    "recommendations": {
+      "title": "Recommendations"
+    }
+  },
+
+  "config": {
+    "iscDhcpd": "ISC DHCPd Configuration",
+    "keaDhcp4": "Kea DHCPv4 Configuration"
+  },
+
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

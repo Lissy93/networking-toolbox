@@ -1,0 +1,86 @@
+{
+  "title": "IP Address Validator",
+  "description": "Validate IPv4 and IPv6 addresses with detailed error analysis and format checking",
+  "input": {
+    "label": "IP Address to Validate",
+    "placeholder": "Enter IPv4 or IPv6 address",
+    "help": "Enter any IP address format for comprehensive validation"
+  },
+  "examples": {
+    "title": "Test Cases",
+    "validIPv4": "Valid IPv4",
+    "validIPv6": "Valid IPv6",
+    "ipv4LeadingZeros": "IPv4 with leading zeros",
+    "ipv4OctetTooLarge": "IPv4 octet too large",
+    "ipv6MultipleDoubleColon": "IPv6 with multiple ::",
+    "ipv6TooManyGroups": "IPv6 too many groups"
+  },
+  "results": {
+    "valid": "Valid",
+    "invalid": "Invalid",
+    "details": {
+      "title": "Validation Details",
+      "type": "Address Type",
+      "normalizedForm": "Normalized Form",
+      "addressType": "Address Category",
+      "scope": "Scope",
+      "isPrivate": "Private Address",
+      "isReserved": "Reserved Address",
+      "compressedForm": "Compressed Form",
+      "embeddedIPv4": "Embedded IPv4",
+      "zoneId": "Zone Identifier",
+      "hasEmbeddedIPv4": "Contains IPv4"
+    },
+    "errors": {
+      "title": "Validation Errors"
+    },
+    "warnings": {
+      "title": "Warnings"
+    },
+    "info": {
+      "title": "Additional Information"
+    }
+  },
+  "errors": {
+    "ipv4": {
+      "mustContainDots": "IPv4 addresses must contain dots (.) to separate octets",
+      "exactlyFourOctets": "IPv4 addresses must have exactly 4 octets, found {count}",
+      "octetEmpty": "Octet {number} is empty",
+      "nonNumericCharacters": "Octet {number} contains non-numeric characters: {part}",
+      "leadingZeros": "Octet {number} has leading zeros: {part}",
+      "outOfRange": "Octet {number} is out of range (0-255): {value}",
+      "invalidFormat": "Invalid IPv4 format"
+    },
+    "ipv6": {
+      "invalidCharacter": "Invalid character in IPv6 address: {char}",
+      "multipleDoubleColon": "IPv6 addresses can only contain one '::' sequence",
+      "tooManyGroups": "IPv6 addresses can have at most 8 groups, found {count}",
+      "emptyGroup": "Empty group found in IPv6 address",
+      "groupTooLong": "IPv6 group too long (max 4 hex digits): {group}",
+      "invalidHexadecimal": "Invalid hexadecimal in group: {group}",
+      "embeddedIPv4Error": "Invalid embedded IPv4 address: {error}",
+      "invalidFormat": "Invalid IPv6 format"
+    },
+    "general": {
+      "unknownFormat": "Unknown IP address format",
+      "unknownError": "Unknown validation error occurred"
+    }
+  },
+  "warnings": {
+    "ipv4": {
+      "privateAddress": "This is a private IP address",
+      "reservedAddress": "This is a reserved IP address"
+    },
+    "ipv6": {
+      "linkLocal": "This is a link-local address",
+      "siteLocal": "This is a site-local address (deprecated)",
+      "embeddedIPv4": "Contains embedded IPv4 address"
+    }
+  },
+  "actions": {
+    "validate": "Validate",
+    "clear": "Clear",
+    "copy": "Copy",
+    "copied": "Copied!"
+  }
+}

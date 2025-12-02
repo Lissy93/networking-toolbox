@@ -1,0 +1,149 @@
+{
+  "title": "TCP Port Checker",
+  "subtitle": "Test TCP connectivity to one or more host:port combinations. Attempts direct TCP connections to check if ports are open and measures connection latency.",
+
+  "examples": {
+    "title": "Port Check Examples",
+    "items": {
+      "https": {
+        "targets": "google.com:443\ngithub.com:443\nstackoverflow.com:443",
+        "description": "Common HTTPS ports",
+        "tooltip": "Test ports: google.com:443, github.com:443, stackoverflow.com:443"
+      },
+      "smtp": {
+        "targets": "smtp.gmail.com:587\nsmtp.gmail.com:465\nsmtp.gmail.com:25",
+        "description": "Gmail SMTP ports",
+        "tooltip": "Test ports: smtp.gmail.com:587, smtp.gmail.com:465, smtp.gmail.com:25"
+      },
+      "dns": {
+        "targets": "dns.google:53\n1.1.1.1:53\n8.8.8.8:53",
+        "description": "DNS server ports",
+        "tooltip": "Test ports: dns.google:53, 1.1.1.1:53, 8.8.8.8:53"
+      },
+      "httpVsHttps": {
+        "targets": "reddit.com:80\nreddit.com:443\napi.reddit.com:443",
+        "description": "HTTP vs HTTPS ports",
+        "tooltip": "Test ports: reddit.com:80, reddit.com:443, api.reddit.com:443"
+      },
+      "localDev": {
+        "targets": "localhost:22\nlocalhost:80\nlocalhost:443\nlocalhost:3306\nlocalhost:5432",
+        "description": "Local development ports",
+        "tooltip": "Test ports: localhost:22, localhost:80, localhost:443, localhost:3306, localhost:5432"
+      },
+      "microsoft": {
+        "targets": "microsoft.com:443\noffice.com:443\noutlook.com:443",
+        "description": "Microsoft services",
+        "tooltip": "Test ports: microsoft.com:443, office.com:443, outlook.com:443"
+      }
+    }
+  },
+
+  "form": {
+    "title": "Port Check Configuration",
+    "targetsLabel": "Target Hosts & Ports",
+    "targetsTooltip": "Enter host:port combinations, one per line (max 50)",
+    "targetsPlaceholder": "google.com:443\ngithub.com:22\nexample.com:80",
+    "targetCount": "{count}/50 targets",
+    "invalidFormat": "Use format: hostname:port (one per line)",
+    "commonPortsTitle": "Common Ports",
+    "timeoutLabel": "Timeout (ms)",
+    "timeoutTooltip": "Connection timeout in milliseconds",
+    "checking": "Checking Ports...",
+    "checkButton": "Check Ports"
+  },
+
+  "commonPorts": {
+    "ssh": {
+      "port": "22",
+      "service": "SSH",
+      "description": "Secure Shell"
+    },
+    "http": {
+      "port": "80",
+      "service": "HTTP",
+      "description": "Web traffic"
+    },
+    "https": {
+      "port": "443",
+      "service": "HTTPS",
+      "description": "Secure web traffic"
+    },
+    "smtp": {
+      "port": "25",
+      "service": "SMTP",
+      "description": "Email sending"
+    },
+    "smtpSubmission": {
+      "port": "587",
+      "service": "SMTP",
+      "description": "Email submission"
+    },
+    "imaps": {
+      "port": "993",
+      "service": "IMAPS",
+      "description": "Secure IMAP"
+    },
+    "pop3s": {
+      "port": "995",
+      "service": "POP3S",
+      "description": "Secure POP3"
+    },
+    "dns": {
+      "port": "53",
+      "service": "DNS",
+      "description": "Domain resolution"
+    }
+  },
+
+  "results": {
+    "title": "Port Check Results",
+    "copyButton": "Copy Results",
+    "copied": "Copied!",
+    "summaryOpenPorts": "{count} Open",
+    "summaryClosedPorts": "{count} Closed",
+    "summaryAvgLatency": "{latency}ms",
+    "openPortsDescription": "Ports accepting connections",
+    "closedPortsDescription": "Ports not responding",
+    "avgLatencyDescription": "Average latency",
+    "portStatusTitle": "Port Status ({count} targets)",
+    "statusOpen": "Open ({latency}ms)",
+    "statusClosed": "Closed"
+  },
+
+  "error": {
+    "title": "Port Check Failed"
+  },
+
+  "info": {
+    "title": "Understanding TCP Port Connectivity",
+    "portStates": {
+      "title": "Port States",
+      "open": "Open:",
+      "openDesc": "Port accepts connections and responds",
+      "closed": "Closed:",
+      "closedDesc": "Port actively refuses connections",
+      "filtered": "Filtered:",
+      "filteredDesc": "Port blocked by firewall (appears as timeout)",
+      "timeout": "Timeout:",
+      "timeoutDesc": "No response within timeout period"
+    },
+    "commonPorts": {
+      "title": "Common Ports",
+      "ssh": "SSH (22):",
+      "sshDesc": "Secure remote access",
+      "http": "HTTP (80):",
+      "httpDesc": "Web traffic",
+      "https": "HTTPS (443):",
+      "httpsDesc": "Secure web traffic",
+      "smtp": "SMTP (25/587):",
+      "smtpDesc": "Email sending"
+    },
+    "troubleshooting": {
+      "title": "Troubleshooting Tips",
+      "tip1": "Timeouts often indicate firewall blocking",
+      "tip2": "Connection refused means service is not running",
+      "tip3": "Check both client and server firewalls",
+      "tip4": "Verify service is listening on expected port"
+    }
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "title": "IP Address Enumerator",
+  "description": "Generate all IP addresses in a CIDR block, range, or network with customizable display limits.",
+  "input": {
+    "label": "Network Input",
+    "placeholder": "192.168.1.0/28 or 10.0.0.1-10.0.0.50",
+    "help": "Enter CIDR block, IP range, or single address"
+  },
+  "options": {
+    "maxDisplay": "Maximum addresses to display",
+    "maxDisplayTooltip": "Limit display for performance (max 10,000)",
+    "includeNetwork": "Include network address",
+    "includeNetworkTooltip": "Include the first address (network identifier)",
+    "includeBroadcast": "Include broadcast address",
+    "includeBroadcastTooltip": "Include the last address (broadcast)",
+    "network": "Network",
+    "broadcast": "Broadcast"
+  },
+  "examples": {
+    "title": "Quick Examples",
+    "smallSubnet": {
+      "label": "Small Subnet /28",
+      "description": "16 addresses"
+    },
+    "standardSubnet": {
+      "label": "Standard /24",
+      "description": "256 addresses"
+    },
+    "ipRange": {
+      "label": "IP Range",
+      "description": "Custom range enumeration"
+    },
+    "singleAddress": {
+      "label": "Single Address",
+      "description": "Just one address"
+    },
+    "largeBlock": {
+      "label": "Large Block /16",
+      "description": "65,536 addresses (display limited)"
+    }
+  },
+  "actions": {
+    "enumerate": "Enumerate Addresses",
+    "enumerating": "Enumerating...",
+    "generating": "Generating addresses...",
+    "copyAll": "Copy All",
+    "exportTxt": "Export TXT",
+    "exportCsv": "Export CSV",
+    "exportJson": "Export JSON",
+    "copied": "Copied!"
+  },
+  "results": {
+    "title": "Enumerated Addresses",
+    "networkInfo": {
+      "title": "Network Information",
+      "type": "Type",
+      "network": "Network Address",
+      "broadcast": "Broadcast Address",
+      "firstUsable": "First Usable",
+      "lastUsable": "Last Usable",
+      "totalHosts": "Total Hosts"
+    },
+    "addresses": {
+      "title": "IP Addresses",
+      "showing": "Showing {displayed} of {total} addresses",
+      "truncated": "Display limited to first {limit} addresses",
+      "copyTooltip": "Copy address"
+    }
+  },
+  "errors": {
+    "title": "Error",
+    "invalidInput": "Invalid input format",
+    "tooManyAddresses": "Too many addresses to generate (max {max})",
+    "processingError": "Error processing input"
+  },
+  "warnings": {
+    "largeGeneration": "Generating {count} addresses may take some time",
+    "performanceWarning": "Large networks may impact browser performance"
+  },
+
+  "safety": {
+    "title": "Performance Notice",
+    "message": "Large networks will be truncated to prevent browser slowdown"
+  }
+}

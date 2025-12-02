@@ -1,0 +1,71 @@
+{
+  "title": "ULA Generator",
+  "description": "Generate RFC 4193 Unique Local Addresses with cryptographically secure Global IDs.",
+  "form": {
+    "count": {
+      "label": "Number of ULAs to generate (1-100):",
+      "placeholder": "1"
+    },
+    "subnetIds": {
+      "label": "Subnet IDs (optional, comma/newline separated):",
+      "placeholder": "0001, 0002, 0003 or leave empty for random generation",
+      "helpText": "If provided, must be 1-4 hex digits. Leave empty for random generation."
+    }
+  },
+  "buttons": {
+    "generate": "Generate ULA Addresses",
+    "generating": "Generating...",
+    "copyTooltip": "Copy network address"
+  },
+  "results": {
+    "summary": {
+      "title": "Generation Summary",
+      "stats": {
+        "totalRequested": "Total Requested:",
+        "successfullyGenerated": "Successfully Generated:",
+        "failed": "Failed:"
+      }
+    },
+    "errors": {
+      "title": "Errors"
+    },
+    "addresses": {
+      "title": "Generated ULA Addresses",
+      "ulaNumber": "ULA #",
+      "network": "Network:",
+      "prefix": "Prefix:",
+      "error": "- Error"
+    },
+    "components": {
+      "title": "Address Components",
+      "ulaPrefix": "ULA Prefix:",
+      "globalId": "Global ID:",
+      "subnetId": "Subnet ID:"
+    },
+    "details": {
+      "title": "Generation Details",
+      "algorithm": "Algorithm:",
+      "timestamp": "Timestamp:",
+      "entropy": "Entropy:"
+    }
+  },
+  "parser": {
+    "title": "ULA Address Parser",
+    "description": "Parse and analyze existing ULA addresses to extract their components.",
+    "form": {
+      "address": {
+        "label": "ULA Address:",
+        "placeholder": "fd12:3456:789a:0001::/64"
+      }
+    },
+    "results": {
+      "title": "Parsed Components",
+      "components": {
+        "ulaPrefix": "ULA Prefix:",
+        "globalId": "Global ID:",
+        "subnetId": "Subnet ID:",
+        "interfaceId": "Interface ID:"
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "title": "HTTP Ping",
+  "description": "Measure HTTP response time and availability for a URL",
+
+  "form": {
+    "title": "HTTP Ping Configuration",
+    "url": {
+      "label": "URL",
+      "placeholder": "https://example.com"
+    },
+    "count": {
+      "label": "Ping Count",
+      "placeholder": "5"
+    },
+    "ping": "Start HTTP Ping",
+    "pinging": "Pinging...",
+    "error": "Please enter a valid URL"
+  },
+
+  "results": {
+    "title": "HTTP Ping Results",
+    "status": "Status",
+    "response_time": "Response Time",
+    "avg_time": "Average Time",
+    "min_time": "Min Time",
+    "max_time": "Max Time",
+    "success_rate": "Success Rate",
+    "failed": "Failed"
+  }
+}

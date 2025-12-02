@@ -3,6 +3,14 @@
   import { tooltip } from '$lib/actions/tooltip.js';
   import { useClipboard } from '$lib/composables';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools');
+  });
 
   let inputText = $state('00:1A:2B:3C:4D:5E\n02:1A:2B:FF:FE:3C:4D:5F\n08:00:27:12:34:56\n0A:00:27:FF:FE:12:34:57');
   let globalPrefix = $state('2001:db8::/64');
@@ -26,7 +34,7 @@
       result = {
         conversions: [],
         summary: { totalInputs: 0, validInputs: 0, invalidInputs: 0, macToEUI64: 0, eui64ToMAC: 0 },
-        errors: [error instanceof Error ? error.message : 'Unknown error'],
+        errors: [error instanceof Error ? error.message : $t('tools.eui64.errors.unknownError')],
       };
     } finally {
       isLoading = false;
@@ -41,8 +49,18 @@
     let filename = '';
 
     if (format === 'csv') {
-      const headers =
-        'Input,Type,MAC Address,EUI-64,IPv6 Link-Local,IPv6 Global,Universal/Local,Unicast/Multicast,Valid,Error';
+      const headers = [
+        $t('tools.eui64.csvHeaders.input'),
+        $t('tools.eui64.csvHeaders.type'),
+        $t('tools.eui64.csvHeaders.macAddress'),
+        $t('tools.eui64.csvHeaders.eui64'),
+        $t('tools.eui64.csvHeaders.ipv6LinkLocal'),
+        $t('tools.eui64.csvHeaders.ipv6Global'),
+        $t('tools.eui64.csvHeaders.universalLocal'),
+        $t('tools.eui64.csvHeaders.unicastMulticast'),
+        $t('tools.eui64.csvHeaders.valid'),
+        $t('tools.eui64.csvHeaders.error'),
+      ].join(',');
       const rows = result.conversions.map(
         (conv) =>
           `"${conv.input}","${conv.inputType.toUpperCase()}","${conv.macAddress}","${conv.eui64Address}","${conv.ipv6LinkLocal}","${conv.ipv6Global}","${conv.details.universalLocal}","${conv.details.unicastMulticast}","${conv.isValid}","${conv.error || ''}"`,
@@ -74,29 +92,25 @@
 
 <div class="card">
   <header class="card-header">
-    <h2>EUI-64 Converter</h2>
-    <p>Convert between MAC addresses and IPv6 EUI-64 interface identifiers with automatic IPv6 address generation</p>
+    <h2>{$t('tools.eui64.title')}</h2>
+    <p>{$t('tools.eui64.description')}</p>
   </header>
 
   <div class="input-section">
     <div class="inputs-section">
-      <h3>Address Conversion</h3>
+      <h3>{$t('tools.eui64.input.title')}</h3>
       <div class="input-group">
-        <label
-          for="inputs"
-          use:tooltip={{ text: 'Enter MAC addresses (48-bit) or EUI-64 identifiers (64-bit)', position: 'top' }}
-        >
-          MAC Addresses or EUI-64 Identifiers
+        <label for="inputs" use:tooltip={{ text: $t('tools.eui64.input.addresses.tooltip'), position: 'top' }}>
+          {$t('tools.eui64.input.addresses.label')}
         </label>
         <textarea
           id="inputs"
           bind:value={inputText}
-          placeholder="00:1A:2B:3C:4D:5E&#10;02:1A:2B:FF:FE:3C:4D:5F&#10;08:00:27:12:34:56"
+          placeholder={$t('tools.eui64.input.addresses.placeholder')}
           rows="6"
         ></textarea>
         <div class="input-help">
-          Enter MAC addresses (48-bit) or EUI-64 identifiers (64-bit) one per line. Various formats supported:
-          xx:xx:xx:xx:xx:xx or xx-xx-xx-xx-xx-xx
+          {$t('tools.eui64.input.addresses.help')}
         </div>
       </div>
 
@@ -104,31 +118,35 @@
         <label
           for="prefix"
           use:tooltip={{
-            text: 'IPv6 network prefix for generating global addresses (e.g., 2001:db8::/64)',
+            text: $t('tools.eui64.input.globalPrefix.tooltip'),
             position: 'top',
           }}
         >
-          IPv6 Global Prefix (Optional)
+          {$t('tools.eui64.input.globalPrefix.label')}
         </label>
-        <input id="prefix" type="text" bind:value={globalPrefix} placeholder="2001:db8::/64" />
+        <input
+          id="prefix"
+          type="text"
+          bind:value={globalPrefix}
+          placeholder={$t('tools.eui64.input.globalPrefix.placeholder')}
+        />
         <div class="input-help">
-          IPv6 prefix for generating global unicast addresses. Leave empty to use example prefix.
+          {$t('tools.eui64.input.globalPrefix.help')}
         </div>
       </div>
     </div>
 
     <div class="info-section">
-      <h3>EUI-64 Information</h3>
+      <h3>{$t('tools.eui64.info.title')}</h3>
       <div class="info-content">
         <p>
-          <strong>EUI-64</strong> (Extended Unique Identifier 64-bit) is used to generate IPv6 interface identifiers from
-          MAC addresses:
+          {$t('tools.eui64.info.description')}
         </p>
         <ul>
-          <li>Split MAC address: OUI (24 bits) + Device ID (24 bits)</li>
-          <li>Insert FFFE between OUI and Device ID</li>
-          <li>Flip the Universal/Local bit (bit 1) in the first octet</li>
-          <li>Result: 64-bit interface identifier for IPv6</li>
+          <li>{$t('tools.eui64.info.steps.split')}</li>
+          <li>{$t('tools.eui64.info.steps.insert')}</li>
+          <li>{$t('tools.eui64.info.steps.flip')}</li>
+          <li>{$t('tools.eui64.info.steps.result')}</li>
         </ul>
       </div>
     </div>
@@ -137,7 +155,7 @@
   {#if isLoading}
     <div class="loading">
       <Icon name="loader" />
-      Converting addresses...
+      {$t('tools.eui64.processing')}
     </div>
   {/if}
 
@@ -145,7 +163,7 @@
     <div class="results">
       {#if result.errors.length > 0}
         <div class="errors">
-          <h3><Icon name="alert-triangle" /> Errors</h3>
+          <h3><Icon name="alert-triangle" /> {$t('tools.eui64.results.errors.title')}</h3>
           {#each result.errors as error (error)}
             <div class="error-item">{error}</div>
           {/each}
@@ -154,42 +172,42 @@
 
       {#if result.conversions.length > 0}
         <div class="summary">
-          <h3>Conversion Summary</h3>
+          <h3>{$t('tools.eui64.results.summary.title')}</h3>
           <div class="summary-stats">
             <div class="stat">
               <span class="stat-value">{result.summary.totalInputs}</span>
-              <span class="stat-label">Total Inputs</span>
+              <span class="stat-label">{$t('tools.eui64.results.summary.totalInputs')}</span>
             </div>
             <div class="stat valid">
               <span class="stat-value">{result.summary.validInputs}</span>
-              <span class="stat-label">Valid</span>
+              <span class="stat-label">{$t('tools.eui64.results.summary.valid')}</span>
             </div>
             <div class="stat invalid">
               <span class="stat-value">{result.summary.invalidInputs}</span>
-              <span class="stat-label">Invalid</span>
+              <span class="stat-label">{$t('tools.eui64.results.summary.invalid')}</span>
             </div>
             <div class="stat mac-to-eui">
               <span class="stat-value">{result.summary.macToEUI64}</span>
-              <span class="stat-label">MAC → EUI-64</span>
+              <span class="stat-label">{$t('tools.eui64.results.summary.macToEUI64')}</span>
             </div>
             <div class="stat eui-to-mac">
               <span class="stat-value">{result.summary.eui64ToMAC}</span>
-              <span class="stat-label">EUI-64 → MAC</span>
+              <span class="stat-label">{$t('tools.eui64.results.summary.eui64ToMAC')}</span>
             </div>
           </div>
         </div>
 
         <div class="conversions">
           <div class="conversions-header">
-            <h3>Address Conversions</h3>
+            <h3>{$t('tools.eui64.results.conversions.title')}</h3>
             <div class="export-buttons">
               <button onclick={() => exportResults('csv')}>
                 <Icon name="download" />
-                Export CSV
+                {$t('tools.eui64.actions.exportCSV')}
               </button>
               <button onclick={() => exportResults('json')}>
                 <Icon name="download" />
-                Export JSON
+                {$t('tools.eui64.actions.exportJSON')}
               </button>
             </div>
           </div>

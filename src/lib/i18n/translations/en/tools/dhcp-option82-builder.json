@@ -1,0 +1,122 @@
+{
+  "title": "DHCP Option 82 Builder",
+  "subtitle": "Construct and parse DHCP Relay Agent Information (Option 82) with Circuit-ID, Remote-ID, and VLAN formats. Includes examples for relay ACLs and policies.",
+
+  "modes": {
+    "build": "Build",
+    "parse": "Parse"
+  },
+
+  "formats": {
+    "ascii": "ASCII Text",
+    "hex": "Hexadecimal",
+    "vlanId": "VLAN ID",
+    "hostnamePort": "Hostname:Port"
+  },
+
+  "buildExamples": {
+    "vlan100": {
+      "label": "VLAN 100",
+      "description": "Circuit-ID as VLAN ID 100"
+    },
+    "switchPort": {
+      "label": "Switch Port",
+      "description": "Circuit-ID as hostname:port"
+    },
+    "customCircuit": {
+      "label": "Custom Circuit",
+      "description": "Circuit-ID as custom ASCII text"
+    },
+    "switchHostname": {
+      "label": "Switch Hostname",
+      "description": "Remote-ID as hostname"
+    },
+    "macAddress": {
+      "label": "MAC Address",
+      "description": "Remote-ID as MAC address"
+    },
+    "agentId": {
+      "label": "Agent ID",
+      "description": "Remote-ID as relay agent identifier"
+    }
+  },
+
+  "parseExamples": {
+    "vlanHostname": {
+      "label": "VLAN + Hostname",
+      "description": "Circuit-ID (VLAN 100) + Remote-ID (sw1.example)"
+    },
+    "switchPort": {
+      "label": "Switch Port",
+      "description": "Circuit-ID (Gi0/1) + Remote-ID (sw1.example)"
+    },
+    "macAddress": {
+      "label": "MAC Address",
+      "description": "Remote-ID as MAC address (00:11:22:33:44:55)"
+    }
+  },
+
+  "build": {
+    "configurationTitle": "Configuration",
+    "suboption": {
+      "title": "Suboption {number}",
+      "typeLabel": "Suboption Type",
+      "circuitId": "Circuit-ID (Suboption 1)",
+      "remoteId": "Remote-ID (Suboption 2)",
+      "encodingFormat": "Encoding Format",
+      "valueLabel": "Value",
+      "placeholders": {
+        "vlanId": "100",
+        "hex": "001122334455",
+        "default": "Enter value"
+      }
+    },
+    "addSuboption": "Add Suboption",
+    "results": {
+      "title": "Generated Option 82",
+      "hexEncoded": "Hex-Encoded Value",
+      "breakdown": "Breakdown",
+      "typeCode": "{type} (Code {code})",
+      "length": "Length: {length} bytes",
+      "valueLabel": "Value:",
+      "hexLabel": "Hex:",
+      "examples": {
+        "iscDhcpd": "ISC dhcpd Configuration Example",
+        "keaDhcp4": "Kea DHCPv4 Configuration Example",
+        "ciscoRelay": "Cisco Relay Agent Example"
+      }
+    }
+  },
+
+  "parse": {
+    "title": "Parse Option 82 Hex",
+    "hexEncoded": "Hex-Encoded Option 82",
+    "placeholder": "Enter hex string (e.g., 01064769302f31020b7377312e6578616d706c65)",
+    "button": "Parse",
+    "results": {
+      "title": "Parsed Option 82",
+      "totalLength": "Total Length:",
+      "suboptionsFound": "Suboptions Found:",
+      "suboptionsTitle": "Suboptions",
+      "typeCode": "{type} (Code {code})",
+      "length": "Length: {length} bytes",
+      "decodedValue": "Decoded Value:",
+      "hexValue": "Hex Value:",
+      "bytes": "{length} bytes",
+      "count": "{count}"
+    }
+  },
+
+  "errors": {
+    "title": "Validation Errors",
+    "valueRequired": "Suboption {number}: Value is required",
+    "vlanRange": "Suboption {number}: VLAN ID must be between 0 and 4095",
+    "invalidHex": "Suboption {number}: Invalid hex format",
+    "invalidHexInput": "Invalid hex input: only hexadecimal characters allowed"
+  },
+
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

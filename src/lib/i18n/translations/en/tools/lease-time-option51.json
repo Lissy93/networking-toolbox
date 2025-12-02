@@ -1,0 +1,100 @@
+{
+  "title": "DHCP Option 51 - IP Address Lease Time",
+  "subtitle": "Option 51 specifies the lease time in seconds for the IP address assignment. T1 (renewal at 50%) and T2 (rebinding at 87.5%) timers are automatically calculated.",
+
+  "nav": {
+    "build": "Build Option",
+    "decode": "Decode Option"
+  },
+
+  "examples": {
+    "decode": {
+      "oneHour": {
+        "label": "1 Hour",
+        "description": "3,600 seconds (0x00000e10)"
+      },
+      "twentyFourHours": {
+        "label": "24 Hours",
+        "description": "86,400 seconds (0x00015180)"
+      },
+      "sevenDays": {
+        "label": "7 Days",
+        "description": "604,800 seconds (0x00093a80)"
+      },
+      "infinite": {
+        "label": "Infinite",
+        "description": "Infinite lease (0xffffffff)"
+      }
+    }
+  },
+
+  "build": {
+    "title": "Lease Time Configuration",
+
+    "infinite": {
+      "label": "Infinite Lease (0xFFFFFFFF)",
+      "hint": "Permanent IP address assignment (may not be supported by all servers)"
+    },
+
+    "leaseSeconds": {
+      "label": "Lease Time (seconds)",
+      "hint": "= {time}"
+    },
+
+    "quickValues": {
+      "label": "Quick Values:",
+      "oneHour": "1h",
+      "fourHours": "4h",
+      "twentyFourHours": "24h",
+      "threeDays": "3d",
+      "sevenDays": "7d"
+    },
+
+    "errors": {
+      "warnings": "Warnings:",
+      "validationErrors": "Validation Errors:"
+    }
+  },
+
+  "decode": {
+    "title": "Decode Option 51",
+
+    "hexInput": {
+      "label": "Hex String",
+      "placeholder": "e.g., 00015180 or 00 01 51 80",
+      "hint": "Enter 8 hex characters (4 bytes, spaces optional)"
+    },
+
+    "error": {
+      "title": "Decode Error:"
+    }
+  },
+
+  "results": {
+    "buildTitle": "Option 51 - Lease Time",
+    "decodeTitle": "Decoded Option 51",
+
+    "leaseTime": "Lease Time:",
+    "hexEncoded": "Hex Encoded:",
+    "wireFormat": "Wire Format:",
+    "totalLength": "Total Length:",
+    "lengthBytes": "{length} bytes",
+    "seconds": "Seconds:",
+    "secondsValue": "{seconds}",
+    "infiniteLease": "Infinite Lease",
+    "t1Renewal": "T1 Renewal:",
+    "t1RenewalValue": "{time} (50% of lease)",
+    "t2Rebinding": "T2 Rebinding:",
+    "t2RebindingValue": "{time} (87.5% of lease)",
+
+    "configExamples": "Configuration Examples",
+    "iscDhcpd": "ISC DHCPd",
+    "keaDhcp4": "Kea DHCPv4",
+    "dnsmasq": "dnsmasq"
+  },
+
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied"
+  }
+}

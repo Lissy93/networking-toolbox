@@ -1,0 +1,25 @@
+{
+  "title": "ALPN Protocol Checker",
+  "description": "Check Application-Layer Protocol Negotiation (ALPN) support for a server",
+
+  "form": {
+    "title": "ALPN Check",
+    "hostname": {
+      "label": "Hostname",
+      "placeholder": "example.com"
+    },
+    "port": {
+      "label": "Port",
+      "placeholder": "443"
+    },
+    "check": "Check ALPN",
+    "checking": "Checking...",
+    "error": "Please enter a hostname"
+  },
+
+  "results": {
+    "title": "ALPN Results",
+    "supported_protocols": "Supported Protocols",
+    "no_alpn": "ALPN not supported"
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "title": "DHCP Options 6 & 15 - DNS Servers and Domain",
+  "subtitle": "Option 6 specifies DNS servers for name resolution, while Option 15 provides the domain name for client hostname resolution. These options work together for complete DNS configuration.",
+
+  "nav": {
+    "build": "Build Options",
+    "decode": "Decode Options"
+  },
+
+  "build": {
+    "title": "DNS Configuration",
+    "dnsServers": {
+      "legend": "DNS Servers (Option 6)",
+      "placeholder": "e.g., 8.8.8.8",
+      "addButton": "Add DNS Server",
+      "removeButton": "Remove"
+    },
+    "domainName": {
+      "label": "Domain Name (Option 15)",
+      "placeholder": "e.g., example.com",
+      "hint": "Domain name for client hostname resolution"
+    },
+    "validationErrors": "Validation Errors:"
+  },
+
+  "decode": {
+    "title": "Decode DNS Options",
+    "optionSelect": {
+      "legend": "Option to Decode",
+      "option6": "Option 6 - DNS Servers",
+      "option15": "Option 15 - Domain Name",
+      "option6Tooltip": "Decode Option 6 to extract DNS server addresses from hex",
+      "option15Tooltip": "Decode Option 15 to extract domain name from hex"
+    },
+    "hexInput": {
+      "label": "Hex String",
+      "placeholderOption6": "e.g., 08080808 or 08 08 08 08 08 08 04 04",
+      "placeholderOption15": "e.g., 6578616d706c6503636f6d",
+      "hint": "Enter hex bytes (spaces optional)"
+    },
+    "error": "Decode Error:"
+  },
+
+  "results": {
+    "title": "DHCP DNS Options",
+    "decodedTitle": "Decoded {option}",
+    "option6": {
+      "title": "Option 6 - DNS Servers",
+      "servers": "DNS Servers:",
+      "serverCount": "Server Count:",
+      "hexEncoded": "Hex Encoded:",
+      "wireFormat": "Wire Format:",
+      "totalLength": "Total Length:",
+      "bytes": "{length} bytes"
+    },
+    "option15": {
+      "title": "Option 15 - Domain Name",
+      "domain": "Domain:",
+      "domainName": "Domain Name:",
+      "hexEncoded": "Hex Encoded:",
+      "wireFormat": "Wire Format:",
+      "totalLength": "Total Length:",
+      "bytes": "{length} bytes"
+    },
+    "config": {
+      "title": "Configuration Examples",
+      "iscDhcpd": "ISC DHCPd",
+      "keaDhcp4": "Kea DHCPv4",
+      "dnsmasq": "dnsmasq"
+    },
+    "copyButton": "Copy",
+    "copiedButton": "Copied",
+    "copyHexLabel": "Copy hex",
+    "copyWireLabel": "Copy wire format"
+  }
+}

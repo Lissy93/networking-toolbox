@@ -3,21 +3,28 @@
   import { useDiagnosticState, useExamples } from '$lib/composables';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import '../../../../styles/diagnostics-pages.scss';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics');
+  });
 
   let hostname = $state('example.com');
   let port = $state('443');
   const diagnosticState = useDiagnosticState<any>();
-  const examplesList = [
-    { host: 'cloudflare.com', port: '443', description: 'Cloudflare - OCSP stapling enabled' },
-    { host: 'www.digicert.com', port: '443', description: 'DigiCert - OCSP stapling enabled' },
-    { host: 'github.com', port: '443', description: 'GitHub - OCSP stapling disabled' },
-  ];
-  const examples = useExamples(examplesList);
+  const examplesList = $derived([
+    { host: 'cloudflare.com', port: '443', description: $t('diagnostics.ocsp-stapling.examples.cloudflare') },
+    { host: 'www.digicert.com', port: '443', description: $t('diagnostics.ocsp-stapling.examples.digicert') },
+    { host: 'github.com', port: '443', description: $t('diagnostics.ocsp-stapling.examples.github') },
+  ]);
+  const examples = useExamples(() => examplesList);
 
   async function checkOCSP() {
     if (!hostname?.trim()) {
-      diagnosticState.setError('Please enter a hostname');
+      diagnosticState.setError($t('diagnostics.ocsp-stapling.form.hostname.error'));
       return;
     }
 
@@ -37,12 +44,12 @@
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to check OCSP stapling');
+        throw new Error(data.message || $t('diagnostics.ocsp-stapling.errors.failedToCheck'));
       }
 
       diagnosticState.setResults(data);
     } catch (err) {
-      diagnosticState.setError(err instanceof Error ? err.message : 'An error occurred');
+      diagnosticState.setError(err instanceof Error ? err.message : $t('common.errors.unknownError'));
     }
   }
 
@@ -61,8 +68,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>OCSP Stapling Check</h1>
-    <p>Report if server staples OCSP and basic status info</p>
+    <h1>{$t('diagnostics.ocsp-stapling.title')}</h1>
+    <p>{$t('diagnostics.ocsp-stapling.description')}</p>
   </header>
 
   <!-- Examples -->
@@ -78,17 +85,17 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>OCSP Stapling Configuration</h3>
+      <h3>{$t('diagnostics.ocsp-stapling.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-group">
-        <label for="hostname">Hostname and Port</label>
+        <label for="hostname">{$t('diagnostics.ocsp-stapling.form.hostname.label')}</label>
         <div class="input-flex-container">
           <input
             id="hostname"
             type="text"
             bind:value={hostname}
-            placeholder="example.com"
+            placeholder={$t('diagnostics.ocsp-stapling.form.hostname.placeholder')}
             disabled={diagnosticState.loading}
             onchange={() => examples.clear()}
             onkeydown={(e) => e.key === 'Enter' && checkOCSP()}
@@ -98,7 +105,7 @@
             id="port"
             type="text"
             bind:value={port}
-            placeholder="443"
+            placeholder={$t('diagnostics.ocsp-stapling.form.port.placeholder')}
             disabled={diagnosticState.loading}
             onchange={() => examples.clear()}
             onkeydown={(e) => e.key === 'Enter' && checkOCSP()}
@@ -107,10 +114,10 @@
           <button onclick={checkOCSP} disabled={diagnosticState.loading} class="primary">
             {#if diagnosticState.loading}
               <Icon name="loader" size="sm" animate="spin" />
-              Checking...
+              {$t('diagnostics.ocsp-stapling.form.checking')}
             {:else}
               <Icon name="search" size="sm" />
-              Check
+              {$t('diagnostics.ocsp-stapling.form.check')}
             {/if}
           </button>
         </div>
@@ -118,7 +125,7 @@
     </div>
   </div>
 
-  <ErrorCard title="OCSP Check Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('diagnostics.ocsp-stapling.errors.checkFailed')} error={diagnosticState.error} />
 
   {#if diagnosticState.loading}
     <div class="card">
@@ -126,8 +133,8 @@
         <div class="loading-state">
           <Icon name="loader" size="lg" animate="spin" />
           <div class="loading-text">
-            <h3>Checking OCSP Stapling</h3>
-            <p>Connecting to server and analyzing OCSP response stapling...</p>
+            <h3>{$t('diagnostics.ocsp-stapling.loading.title')}</h3>
+            <p>{$t('diagnostics.ocsp-stapling.loading.description')}</p>
           </div>
         </div>
       </div>
@@ -137,7 +144,7 @@
   {#if diagnosticState.results}
     <div class="card results-card">
       <div class="card-header">
-        <h3>OCSP Stapling Results</h3>
+        <h3>{$t('diagnostics.ocsp-stapling.results.title')}</h3>
       </div>
       <div class="card-content">
         <div class="results-section">

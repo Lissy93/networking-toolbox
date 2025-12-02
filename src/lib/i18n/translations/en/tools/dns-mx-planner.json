@@ -1,0 +1,83 @@
+{
+  "title": "MX Record Planner",
+  "subtitle": "Plan MX record priorities with fallback guidance, best practices, and sample configurations for popular email providers.",
+
+  "input": {
+    "domain": {
+      "label": "Domain",
+      "tooltip": "Domain name for the MX records"
+    },
+    "ttl": {
+      "label": "Default TTL (seconds)",
+      "tooltip": "Default Time To Live in seconds for all MX records"
+    },
+    "addRecordButton": "Add MX Record",
+    "priority": {
+      "label": "Priority",
+      "tooltip": "Lower numbers = higher priority"
+    },
+    "mailserver": "Mail Server (FQDN)",
+    "role": {
+      "label": "Role",
+      "primary": "Primary",
+      "backup": "Backup",
+      "custom": "Custom"
+    }
+  },
+
+  "section": {
+    "mxRecords": "MX Records",
+    "sortOriginal": "Original Order",
+    "sortPriority": "Sort by Priority"
+  },
+
+  "examples": {
+    "title": "Quick Examples",
+    "basicSetup": "Basic Setup",
+    "googleWorkspace": "Google Workspace",
+    "microsoft365": "Microsoft 365",
+    "multiProvider": "Multi-Provider Setup",
+    "recordsCount": "{count} MX records"
+  },
+
+  "guidelines": {
+    "title": "Priority Guidelines",
+    "highest": "Highest priority, primary mail servers",
+    "high": "High priority, secondary mail servers",
+    "medium": "Medium priority, backup servers",
+    "low": "Low priority, fallback servers"
+  },
+
+  "bestPractices": {
+    "title": "MX Best Practices",
+    "redundancy": "Always have at least two MX records for redundancy",
+    "priorities": "Use different priority values to control mail flow",
+    "configuration": "Ensure all mail servers are properly configured",
+    "testing": "Test mail delivery to all configured servers",
+    "geographic": "Consider geographic distribution for better performance"
+  },
+
+  "validation": {
+    "emptyMailserver": "Mail server cannot be empty",
+    "missingDot": "Mail server should end with a dot (FQDN)",
+    "priorityRange": "Priority must be between 0 and 65535",
+    "duplicatePriority": "Duplicate priority values detected"
+  },
+
+  "results": {
+    "title": "Generated MX Records",
+    "copyButton": "Copy Zone Records",
+    "tableHeaders": {
+      "domain": "Domain",
+      "ttl": "TTL",
+      "type": "Type",
+      "priority": "Priority",
+      "mailServer": "Mail Server",
+      "status": "Status"
+    },
+    "statusValid": "Valid",
+    "statusIssues": "Issues",
+    "configurationIssues": "Configuration Issues",
+    "priorityIssueFormat": "Priority {priority}: {issues}"
+  }
+}

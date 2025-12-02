@@ -1,0 +1,128 @@
+{
+  "title": "CORS Policy Checker",
+  "description": "Test and analyze Cross-Origin Resource Sharing (CORS) policies for APIs and web services",
+
+  "examples": {
+    "title": "CORS Examples",
+    "github": "GitHub API CORS policy",
+    "httpbin": "HTTPBin CORS test",
+    "weather": "Open weather API",
+    "placeholder": "JSON Placeholder API"
+  },
+
+  "form": {
+    "title": "CORS Test Configuration",
+    "url": {
+      "label": "Target URL",
+      "tooltip": "The API endpoint or resource you want to test",
+      "placeholder": "https://api.example.com",
+      "error": "Invalid URL format",
+      "required": "URL is required"
+    },
+    "origin": {
+      "label": "Origin",
+      "tooltip": "Your website's origin (where the request would come from)",
+      "placeholder": "https://yoursite.com",
+      "error": "Invalid origin format",
+      "required": "Origin is required",
+      "invalid": "Invalid URL or Origin format"
+    },
+    "method": {
+      "label": "HTTP Method",
+      "tooltip": "The HTTP method to test"
+    },
+    "checkButton": "Check CORS",
+    "check": "Check CORS",
+    "checking": "Checking CORS..."
+  },
+
+  "results": {
+    "title": "CORS Policy Analysis",
+    "corsStatus": "CORS Status",
+    "preflightStatus": "Preflight Status",
+    "cacheMaxAge": "Cache Max Age",
+    "failed": "Failed",
+
+    "status": {
+      "enabled": "CORS is enabled and allows this origin",
+      "blocked": "CORS blocked - origin not allowed",
+      "no_cors": "No CORS headers detected",
+      "error": "CORS check error"
+    },
+
+    "details": {
+      "title": "CORS Policy Details",
+      "corsEnabled": "CORS Enabled",
+      "originAccess": "Origin Access",
+      "credentialsSupport": "Credentials Support",
+      "yes": "Yes",
+      "no": "No",
+      "allowed": "Allowed",
+      "blocked": "Blocked"
+    },
+
+    "allowedMethods": {
+      "title": "Allowed Methods",
+      "none": "No methods specified"
+    },
+
+    "allowedHeaders": {
+      "title": "Allowed Headers",
+      "none": "No headers specified"
+    },
+
+    "corsHeaders": {
+      "title": "CORS Headers",
+      "none": "No CORS headers found",
+      "partial": "CORS enabled but no detailed headers available"
+    }
+  },
+
+  "errors": {
+    "title": "CORS Check Failed"
+  },
+
+  "error": {
+    "title": "CORS Check Failed",
+    "network": "Network error occurred",
+    "timeout": "Request timed out"
+  },
+
+  "about": {
+    "title": "About CORS",
+    "whatIs": {
+      "title": "What is CORS?",
+      "description": "Cross-Origin Resource Sharing (CORS) is a security feature implemented by web browsers that restricts web pages from making requests to a different domain than the one serving the page."
+    },
+    "preflight": {
+      "title": "Preflight Requests",
+      "description": "For certain cross-origin requests, browsers send a preflight OPTIONS request to check if the actual request is allowed."
+    },
+    "headers": {
+      "title": "CORS Headers",
+      "allowOrigin": "Access-Control-Allow-Origin: Specifies which origins can access the resource",
+      "allowMethods": "Access-Control-Allow-Methods: Lists allowed HTTP methods",
+      "allowHeaders": "Access-Control-Allow-Headers: Specifies allowed request headers",
+      "allowCredentials": "Access-Control-Allow-Credentials: Indicates if credentials can be included"
+    }
+  },
+
+  "info": {
+    "title": "Understanding CORS",
+    "what": {
+      "heading": "What is CORS?",
+      "description": "Cross-Origin Resource Sharing (CORS) is a security feature implemented by web browsers that restricts web pages from making requests to a different domain than the one serving the page. This prevents malicious websites from accessing sensitive data."
+    },
+    "how": {
+      "heading": "How CORS Works",
+      "description": "When your web application tries to access a resource from a different origin, the browser sends a preflight OPTIONS request to check if the server allows the cross-origin request. The server responds with CORS headers that specify which origins, methods, and headers are allowed."
+    },
+    "common": {
+      "heading": "Common CORS Issues",
+      "missing": "Missing CORS headers - server doesn't include Access-Control-Allow-Origin",
+      "wrong_origin": "Wrong origin - server allows different origins than yours",
+      "credentials": "Credentials issues - trying to send cookies without proper headers",
+      "methods": "Method not allowed - the HTTP method you're using isn't permitted"
+    }
+  }
+}

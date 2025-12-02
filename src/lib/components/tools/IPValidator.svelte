@@ -2,6 +2,14 @@
   import { tooltip as _tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import '../../../styles/diagnostics-pages.scss';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools.ip-validator');
+  });
 
   let inputValue = $state('');
   let selectedExampleIndex = $state<number | null>(null);
@@ -25,14 +33,18 @@
   } | null>(null);
 
   // Common test cases for quick validation
-  const testCases = [
-    { label: 'Valid IPv4', value: '192.168.1.1', valid: true },
-    { label: 'Valid IPv6', value: '2001:db8::1', valid: true },
-    { label: 'IPv4 with leading zeros', value: '192.168.001.001', valid: false },
-    { label: 'IPv4 octet too large', value: '192.168.1.256', valid: false },
-    { label: 'IPv6 with multiple ::', value: '2001::db8::1', valid: false },
-    { label: 'IPv6 too many groups', value: '2001:db8:85a3:0000:0000:8a2e:0370:7334:extra', valid: false },
-  ];
+  const testCases = $derived([
+    { label: $t('tools.ip-validator.examples.validIPv4'), value: '192.168.1.1', valid: true },
+    { label: $t('tools.ip-validator.examples.validIPv6'), value: '2001:db8::1', valid: true },
+    { label: $t('tools.ip-validator.examples.ipv4LeadingZeros'), value: '192.168.001.001', valid: false },
+    { label: $t('tools.ip-validator.examples.ipv4OctetTooLarge'), value: '192.168.1.256', valid: false },
+    { label: $t('tools.ip-validator.examples.ipv6MultipleDoubleColon'), value: '2001::db8::1', valid: false },
+    {
+      label: $t('tools.ip-validator.examples.ipv6TooManyGroups'),
+      value: '2001:db8:85a3:0000:0000:8a2e:0370:7334:extra',
+      valid: false,
+    },
+  ]);
 
   function validateIPv4(ip: string): {
     isValid: boolean;
@@ -46,7 +58,7 @@
 
     // Check basic format
     if (!ip.includes('.')) {
-      errors.push('IPv4 addresses must contain dots (.) to separate octets');
+      errors.push($t('tools.ip-validator.errors.ipv4.mustContainDots'));
       return { isValid: false, errors, warnings, details };
     }
 
@@ -54,7 +66,7 @@
 
     // Check number of octets
     if (parts.length !== 4) {
-      errors.push(`IPv4 addresses must have exactly 4 octets, found ${parts.length}`);
+      errors.push($t('tools.ip-validator.errors.ipv4.wrongOctetCount', { expected: 4, found: parts.length }));
       return { isValid: false, errors, warnings, details };
     }
 
@@ -66,31 +78,31 @@
 
       // Check if empty
       if (part === '') {
-        errors.push(`Octet ${octetNum} is empty`);
+        errors.push($t('tools.ip-validator.errors.ipv4.octetEmpty', { number: octetNum }));
         continue;
       }
 
       // Check for non-numeric characters
       if (!/^\d+$/.test(part)) {
-        errors.push(`Octet ${octetNum} contains non-numeric characters: "${part}"`);
+        errors.push($t('tools.ip-validator.errors.ipv4.nonNumericCharacters', { number: octetNum, part }));
         continue;
       }
 
       // Check for leading zeros (except for single zero)
       if (part.length > 1 && part[0] === '0') {
-        errors.push(`Octet ${octetNum} has leading zeros: "${part}" (should be "${parseInt(part)})")`);
+        errors.push($t('tools.ip-validator.errors.ipv4.leadingZeros', { number: octetNum, part }));
         continue;
       }
 
       // Parse and validate range
       const value = parseInt(part, 10);
       if (isNaN(value)) {
-        errors.push(`Octet ${octetNum} is not a valid number: "${part}"`);
+        errors.push($t('tools.ip-validator.errors.ipv4.nonNumericCharacters', { number: octetNum, part }));
         continue;
       }
 
       if (value < 0 || value > 255) {
-        errors.push(`Octet ${octetNum} out of range: ${value} (must be 0-255)`);
+        errors.push($t('tools.ip-validator.errors.ipv4.outOfRange', { number: octetNum, value }));
         continue;
       }
 
@@ -107,57 +119,57 @@
 
     // Determine address type and scope
     if (a === 127) {
-      details.addressType = 'Loopback';
-      details.scope = 'Host';
-      details.info.push('Used for local loopback communications');
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv4.loopback');
+      details.scope = $t('tools.ip-validator.scopes.host');
+      details.info.push($t('tools.ip-validator.info.loopbackCommunications'));
     } else if (a === 10) {
-      details.addressType = 'Private (Class A)';
-      details.scope = 'Private Network';
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv4.privateA');
+      details.scope = $t('tools.ip-validator.scopes.privateNetwork');
       details.isPrivate = true;
-      details.info.push('RFC 1918 private address space');
+      details.info.push($t('tools.ip-validator.info.rfc1918Private'));
     } else if (a === 172 && b >= 16 && b <= 31) {
-      details.addressType = 'Private (Class B)';
-      details.scope = 'Private Network';
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv4.privateB');
+      details.scope = $t('tools.ip-validator.scopes.privateNetwork');
       details.isPrivate = true;
-      details.info.push('RFC 1918 private address space');
+      details.info.push($t('tools.ip-validator.info.rfc1918Private'));
     } else if (a === 192 && b === 168) {
-      details.addressType = 'Private (Class C)';
-      details.scope = 'Private Network';
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv4.privateC');
+      details.scope = $t('tools.ip-validator.scopes.privateNetwork');
       details.isPrivate = true;
-      details.info.push('RFC 1918 private address space');
+      details.info.push($t('tools.ip-validator.info.rfc1918Private'));
     } else if (a === 169 && b === 254) {
-      details.addressType = 'Link-Local (APIPA)';
-      details.scope = 'Link-Local';
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv4.linkLocal');
+      details.scope = $t('tools.ip-validator.scopes.linkLocal');
       details.isReserved = true;
-      details.info.push('Automatic Private IP Addressing');
+      details.info.push($t('tools.ip-validator.info.apipa'));
     } else if (a >= 224 && a <= 239) {
-      details.addressType = 'Multicast (Class D)';
-      details.scope = 'Multicast';
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv4.multicast');
+      details.scope = $t('tools.ip-validator.scopes.multicast');
       details.isReserved = true;
-      details.info.push('Used for multicast communications');
+      details.info.push($t('tools.ip-validator.info.multicastCommunications'));
     } else if (a >= 240) {
-      details.addressType = 'Reserved (Class E)';
-      details.scope = 'Reserved';
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv4.reserved');
+      details.scope = $t('tools.ip-validator.scopes.reserved');
       details.isReserved = true;
-      details.info.push('Reserved for future use');
+      details.info.push($t('tools.ip-validator.info.reservedFuture'));
     } else if (a === 0) {
-      details.addressType = 'Network Address';
-      details.scope = 'Special Use';
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv4.networkAddress');
+      details.scope = $t('tools.ip-validator.scopes.specialUse');
       details.isReserved = true;
-      details.info.push('"This network" address');
+      details.info.push($t('tools.ip-validator.info.thisNetwork'));
     } else if (d === 0) {
-      details.addressType = 'Network Address';
-      details.scope = 'Network';
-      warnings.push('This appears to be a network address (host portion is 0)');
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv4.networkAddress');
+      details.scope = $t('tools.ip-validator.scopes.network');
+      warnings.push($t('tools.ip-validator.warnings.ipv4.networkAddress'));
     } else if (d === 255) {
-      details.addressType = 'Broadcast Address';
-      details.scope = 'Network';
-      warnings.push('This appears to be a broadcast address (host portion is all 1s)');
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv4.broadcastAddress');
+      details.scope = $t('tools.ip-validator.scopes.network');
+      warnings.push($t('tools.ip-validator.warnings.ipv4.broadcastAddress'));
     } else {
-      details.addressType = 'Public';
-      details.scope = 'Internet';
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv4.public');
+      details.scope = $t('tools.ip-validator.scopes.internet');
       details.isPrivate = false;
-      details.info.push('Publicly routable address');
+      details.info.push($t('tools.ip-validator.info.publiclyRoutable'));
     }
 
     return { isValid: true, errors: [], warnings, details };
@@ -179,19 +191,19 @@
     if (ip.includes('%')) {
       const parts = ip.split('%');
       if (parts.length > 2) {
-        errors.push('Multiple % symbols found - invalid zone ID format');
+        errors.push($t('tools.ip-validator.errors.ipv6.invalidCharacter', { char: '%' }));
         return { isValid: false, errors, warnings, details };
       }
       cleanIP = parts[0];
       zoneId = parts[1];
       details.zoneId = zoneId;
-      details.info.push(`Zone ID specified: %${zoneId}`);
+      details.info.push($t('tools.ip-validator.info.zoneIdSpecified', { zoneId }));
     }
 
     // Check for :: (compression)
     const doubleColonCount = (cleanIP.match(/::/g) || []).length;
     if (doubleColonCount > 1) {
-      errors.push('Multiple :: sequences found - only one :: allowed per address');
+      errors.push($t('tools.ip-validator.errors.ipv6.multipleDoubleColon'));
       return { isValid: false, errors, warnings, details };
     }
 
@@ -200,7 +212,7 @@
     if (cleanIP.includes('::')) {
       const parts = cleanIP.split('::');
       if (parts.length > 2) {
-        errors.push('Invalid :: usage - malformed compression');
+        errors.push($t('tools.ip-validator.errors.ipv6.invalidFormat'));
         return { isValid: false, errors, warnings, details };
       }
 
@@ -212,7 +224,7 @@
       const missingGroups = 8 - totalParts;
 
       if (missingGroups < 0) {
-        errors.push('Too many groups in compressed IPv6 address');
+        errors.push($t('tools.ip-validator.errors.ipv6.tooManyGroups', { count: totalParts }));
         return { isValid: false, errors, warnings, details };
       }
 
@@ -231,7 +243,7 @@
       const ipv4Result = validateIPv4(ipv4Part);
 
       if (!ipv4Result.isValid) {
-        errors.push(`Invalid embedded IPv4 address: ${ipv4Result.errors.join(', ')}`);
+        errors.push($t('tools.ip-validator.errors.ipv6.embeddedIPv4Error', { error: ipv4Result.errors.join(', ') }));
         return { isValid: false, errors, warnings, details };
       }
 
@@ -243,7 +255,7 @@
       expandedIP = expandedIP.replace(ipv4Pattern, `${group1}:${group2}`);
       details.hasEmbeddedIPv4 = true;
       details.embeddedIPv4 = ipv4Part;
-      details.info.push(`Contains embedded IPv4 address: ${ipv4Part}`);
+      details.info.push($t('tools.ip-validator.info.embeddedIPv4', { ipv4: ipv4Part }));
     }
 
     // Split into groups and validate
@@ -251,9 +263,9 @@
 
     if (groups.length !== 8) {
       if (!cleanIP.includes('::')) {
-        errors.push(`IPv6 addresses must have 8 groups, found ${groups.length} (use :: for compression)`);
+        errors.push($t('tools.ip-validator.errors.ipv6.tooManyGroups', { count: groups.length }));
       } else {
-        errors.push(`Invalid IPv6 compression - results in ${groups.length} groups instead of 8`);
+        errors.push($t('tools.ip-validator.errors.ipv6.tooManyGroups', { count: groups.length }));
       }
       return { isValid: false, errors, warnings, details };
     }
@@ -261,20 +273,20 @@
     // Validate each group
     for (let i = 0; i < groups.length; i++) {
       const group = groups[i];
-      const groupNum = i + 1;
+      const _groupNum = i + 1;
 
       if (group === '') {
-        errors.push(`Group ${groupNum} is empty`);
+        errors.push($t('tools.ip-validator.errors.ipv6.emptyGroup'));
         continue;
       }
 
       if (group.length > 4) {
-        errors.push(`Group ${groupNum} too long: "${group}" (max 4 hex digits)`);
+        errors.push($t('tools.ip-validator.errors.ipv6.groupTooLong', { group }));
         continue;
       }
 
       if (!/^[0-9a-fA-F]+$/.test(group)) {
-        errors.push(`Group ${groupNum} contains invalid characters: "${group}" (only 0-9, a-f, A-F allowed)`);
+        errors.push($t('tools.ip-validator.errors.ipv6.invalidHexadecimal', { group }));
         continue;
       }
     }
@@ -293,47 +305,47 @@
     const firstTwoGroups = normalizedGroups.slice(0, 2).join(':');
 
     if (fullForm === '0000:0000:0000:0000:0000:0000:0000:0001') {
-      details.addressType = 'Loopback';
-      details.scope = 'Host';
-      details.info.push('IPv6 loopback address (::1)');
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv6.loopback');
+      details.scope = $t('tools.ip-validator.scopes.host');
+      details.info.push($t('tools.ip-validator.info.ipv6Loopback'));
     } else if (fullForm === '0000:0000:0000:0000:0000:0000:0000:0000') {
-      details.addressType = 'Unspecified';
-      details.scope = 'Special Use';
-      details.info.push('IPv6 unspecified address (::)');
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv6.unspecified');
+      details.scope = $t('tools.ip-validator.scopes.specialUse');
+      details.info.push($t('tools.ip-validator.info.ipv6Unspecified'));
     } else if (firstGroup === 'fe80') {
-      details.addressType = 'Link-Local';
-      details.scope = 'Link-Local';
-      details.info.push('IPv6 link-local address');
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv6.linkLocal');
+      details.scope = $t('tools.ip-validator.scopes.linkLocal');
+      details.info.push($t('tools.ip-validator.info.ipv6LinkLocal'));
     } else if (firstGroup === 'fec0') {
-      details.addressType = 'Site-Local (Deprecated)';
-      details.scope = 'Site-Local';
-      details.info.push('Deprecated site-local address');
-      warnings.push('Site-local addresses are deprecated (RFC 3879)');
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv6.siteLocal');
+      details.scope = $t('tools.ip-validator.scopes.siteLocal');
+      details.info.push($t('tools.ip-validator.info.deprecatedSiteLocal'));
+      warnings.push($t('tools.ip-validator.warnings.ipv6.siteLocalDeprecated'));
     } else if (firstTwoGroups === 'fc00' || firstTwoGroups === 'fd00') {
-      details.addressType = 'Unique Local';
-      details.scope = 'Private Network';
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv6.uniqueLocal');
+      details.scope = $t('tools.ip-validator.scopes.privateNetwork');
       details.isPrivate = true;
-      details.info.push('RFC 4193 Unique Local Address');
+      details.info.push($t('tools.ip-validator.info.rfc4193UniqueLocal'));
     } else if (firstGroup.startsWith('ff')) {
-      details.addressType = 'Multicast';
-      details.scope = 'Multicast';
-      details.info.push('IPv6 multicast address');
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv6.multicast');
+      details.scope = $t('tools.ip-validator.scopes.multicast');
+      details.info.push($t('tools.ip-validator.info.ipv6Multicast'));
     } else if (firstTwoGroups === '2001' && normalizedGroups[1] === '0db8') {
-      details.addressType = 'Documentation';
-      details.scope = 'Documentation';
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv6.documentation');
+      details.scope = $t('tools.ip-validator.scopes.documentation');
       details.isReserved = true;
-      details.info.push('RFC 3849 documentation address');
-      warnings.push('This is a documentation address (not for production use)');
+      details.info.push($t('tools.ip-validator.info.rfc3849Documentation'));
+      warnings.push($t('tools.ip-validator.warnings.ipv6.documentationAddress'));
     } else if (firstGroup >= '2000' && firstGroup <= '3fff') {
-      details.addressType = 'Global Unicast';
-      details.scope = 'Internet';
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv6.globalUnicast');
+      details.scope = $t('tools.ip-validator.scopes.internet');
       details.isPrivate = false;
-      details.info.push('Globally routable IPv6 address');
+      details.info.push($t('tools.ip-validator.info.globallyRoutable'));
     } else {
-      details.addressType = 'Reserved';
-      details.scope = 'Reserved';
+      details.addressType = $t('tools.ip-validator.addressTypes.ipv6.reserved');
+      details.scope = $t('tools.ip-validator.scopes.reserved');
       details.isReserved = true;
-      details.info.push('Reserved address space');
+      details.info.push($t('tools.ip-validator.info.reservedAddressSpace'));
     }
 
     // Check for compressed form
@@ -341,7 +353,7 @@
       const compressedForm = compressIPv6(fullForm);
       details.compressedForm = compressedForm;
       if (cleanIP !== compressedForm) {
-        details.info.push(`Standard compressed form: ${compressedForm}`);
+        details.info.push($t('tools.ip-validator.info.standardCompressed', { form: compressedForm }));
       }
     }
 
@@ -446,7 +458,7 @@
       result = {
         isValid: false,
         type: null,
-        errors: ['Input does not appear to be an IP address (no dots or colons found)'],
+        errors: [$t('tools.ip-validator.errors.general.unknownFormat')],
         warnings: [],
         details: {},
       };
@@ -478,8 +490,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>IP Address Validator</h1>
-    <p>Validate IPv4 and IPv6 addresses with detailed error analysis and format checking</p>
+    <h1>{$t('tools.ip-validator.title')}</h1>
+    <p>{$t('tools.ip-validator.description')}</p>
   </header>
 
   <!-- Input Section -->
@@ -487,19 +499,19 @@
     <div class="input-group">
       <label for="ip-input">
         <Icon name="globe" size="sm" />
-        Enter IP Address
+        {$t('tools.ip-validator.form.enterLabel')}
       </label>
       <input
         id="ip-input"
         type="text"
         bind:value={inputValue}
         oninput={handleInput}
-        placeholder="e.g., 192.168.1.1 or 2001:db8::1"
+        placeholder={$t('tools.ip-validator.form.placeholder')}
         class="ip-input {result?.isValid === true ? 'valid' : result?.isValid === false ? 'invalid' : ''}"
         autocomplete="off"
         spellcheck="false"
       />
-      <div class="input-hint">Supports IPv4 (192.168.1.1), IPv6 (2001:db8::1), and various formats</div>
+      <div class="input-hint">{$t('tools.ip-validator.form.hint')}</div>
     </div>
   </section>
 
@@ -508,7 +520,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Test Cases</h4>
+        <h4>{$t('tools.ip-validator.testCases.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each testCases as testCase, index (`test-case-${index}`)}
@@ -536,7 +548,10 @@
           <div class="result-status">
             <Icon name={result.isValid ? 'check-circle' : 'x-circle'} size="lg" />
             <div class="status-text">
-              <h2>{result.isValid ? 'Valid' : 'Invalid'} IP Address</h2>
+              <h2>
+                {result.isValid ? $t('tools.ip-validator.results.valid') : $t('tools.ip-validator.results.invalid')}
+                {$t('tools.ip-validator.results.ipAddress')}
+              </h2>
               {#if result.type}
                 <span class="ip-type">{result.type.toUpperCase()} Format</span>
               {/if}
@@ -545,7 +560,7 @@
 
           {#if result.isValid && result.details.normalizedForm}
             <div class="normalized-form">
-              <span class="normalized-label">Normalized:</span>
+              <span class="normalized-label">{$t('tools.ip-validator.results.normalized')}</span>
               <code class="normalized-value">{result.details.normalizedForm}</code>
             </div>
           {/if}
@@ -556,7 +571,7 @@
           <div class="errors-section">
             <h4>
               <Icon name="alert-circle" size="sm" />
-              Issues Found ({result.errors.length})
+              {$t('tools.ip-validator.results.issuesFound', { count: result.errors.length })}
             </h4>
             <ul class="error-list">
               {#each result.errors as error (error)}
@@ -574,7 +589,7 @@
           <div class="warnings-section">
             <h4>
               <Icon name="alert-triangle" size="sm" />
-              Warnings ({result.warnings.length})
+              {$t('tools.ip-validator.results.warnings', { count: result.warnings.length })}
             </h4>
             <ul class="warning-list">
               {#each result.warnings as warning (warning)}
@@ -592,50 +607,52 @@
           <div class="details-section">
             <h4>
               <Icon name="info" size="sm" />
-              Address Details
+              {$t('tools.ip-validator.results.addressDetails')}
             </h4>
 
             <div class="details-grid">
               {#if result.details.addressType}
                 <div class="detail-item">
-                  <span class="detail-label">Type:</span>
+                  <span class="detail-label">{$t('tools.ip-validator.results.type')}</span>
                   <span class="detail-value">{result.details.addressType}</span>
                 </div>
               {/if}
 
               {#if result.details.scope}
                 <div class="detail-item">
-                  <span class="detail-label">Scope:</span>
+                  <span class="detail-label">{$t('tools.ip-validator.results.scope')}</span>
                   <span class="detail-value">{result.details.scope}</span>
                 </div>
               {/if}
 
               {#if result.details.isPrivate !== undefined}
                 <div class="detail-item">
-                  <span class="detail-label">Routing:</span>
+                  <span class="detail-label">{$t('tools.ip-validator.results.routing')}</span>
                   <span class="detail-value {result.details.isPrivate ? 'private' : 'public'}">
-                    {result.details.isPrivate ? 'Private' : 'Public'}
+                    {result.details.isPrivate
+                      ? $t('tools.ip-validator.results.private')
+                      : $t('tools.ip-validator.results.public')}
                   </span>
                 </div>
               {/if}
 
               {#if result.details.compressedForm}
                 <div class="detail-item">
-                  <span class="detail-label">Compressed:</span>
+                  <span class="detail-label">{$t('tools.ip-validator.results.compressed')}</span>
                   <code class="detail-value compressed">{result.details.compressedForm}</code>
                 </div>
               {/if}
 
               {#if result.details.embeddedIPv4}
                 <div class="detail-item">
-                  <span class="detail-label">Embedded IPv4:</span>
+                  <span class="detail-label">{$t('tools.ip-validator.results.embeddedIPv4')}</span>
                   <code class="detail-value embedded">{result.details.embeddedIPv4}</code>
                 </div>
               {/if}
 
               {#if result.details.zoneId}
                 <div class="detail-item">
-                  <span class="detail-label">Zone ID:</span>
+                  <span class="detail-label">{$t('tools.ip-validator.results.zoneId')}</span>
                   <code class="detail-value zone">%{result.details.zoneId}</code>
                 </div>
               {/if}
@@ -643,7 +660,7 @@
 
             {#if result.details.info && result.details.info.length > 0}
               <div class="info-section">
-                <h5>Additional Information</h5>
+                <h5>{$t('tools.ip-validator.results.additionalInfo')}</h5>
                 <ul class="info-list">
                   {#each result.details.info as info (info)}
                     <li class="info-item">
@@ -664,31 +681,23 @@
   <section class="about-content">
     <div class="about-grid">
       <div class="about-section">
-        <h3>How to Tell if an IP Address is Valid</h3>
+        <h3>{$t('tools.ip-validator.education.howToTell.title')}</h3>
         <p>
-          Valid IP addresses follow specific rules. For IPv4, you need exactly four numbers (0-255) separated by dots,
-          like 192.168.1.1. For IPv6, you need eight groups of hex digits separated by colons, though you can compress
-          consecutive zeros with :: (like 2001:db8::1). The validator checks these rules and tells you exactly what's
-          wrong when something doesn't match.
+          {$t('tools.ip-validator.education.howToTell.description')}
         </p>
       </div>
 
       <div class="about-section">
-        <h3>What Happens When Addresses Are Invalid</h3>
+        <h3>{$t('tools.ip-validator.education.whatHappens.title')}</h3>
         <p>
-          Invalid IP addresses cause real problems. Your router might reject them, network connections fail, or software
-          crashes. Common mistakes include typos like "192.168.1.256" (256 is too big), missing parts like "192.168.1",
-          or extra zeros like "192.168.01.01". This tool catches these errors before they break your network setup.
+          {$t('tools.ip-validator.education.whatHappens.description')}
         </p>
       </div>
 
       <div class="about-section">
-        <h3>Why Some Addresses Have Warnings</h3>
+        <h3>{$t('tools.ip-validator.education.whyWarnings.title')}</h3>
         <p>
-          Some valid addresses come with warnings because they have special meanings. For example, addresses ending in
-          .0 are usually network addresses, and ones ending in .255 are broadcast addresses. Private addresses like
-          192.168.x.x won't work on the internet. The tool explains what each address type means so you know if it's
-          right for your use case.
+          {$t('tools.ip-validator.education.whyWarnings.description')}
         </p>
       </div>
     </div>

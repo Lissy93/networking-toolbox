@@ -3,6 +3,13 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { estimateEDNSSize, type DNSRecord, type EDNSEstimate } from '$lib/utils/dns-validation.js';
   import { useClipboard } from '$lib/composables';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools');
+  });
 
   let queryName = $state('example.com');
   let queryType = $state('A');
@@ -16,24 +23,24 @@
 
   const recordTypes = ['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'SRV', 'NS', 'SOA', 'CAA', 'DNSKEY', 'RRSIG'];
 
-  const examples = [
+  const examples = $derived([
     {
-      name: 'Simple A Record',
+      name: $t('tools.edns_size_estimator.examples.simple.name'),
       records: [{ name: 'example.com', type: 'A', value: '192.0.2.1', ttl: 3600 }],
-      description: 'Basic single A record response',
+      description: $t('tools.edns_size_estimator.examples.simple.description'),
     },
     {
-      name: 'Multiple A Records',
+      name: $t('tools.edns_size_estimator.examples.multiple.name'),
       records: [
         { name: 'example.com', type: 'A', value: '192.0.2.1', ttl: 3600 },
         { name: 'example.com', type: 'A', value: '192.0.2.2', ttl: 3600 },
         { name: 'example.com', type: 'A', value: '192.0.2.3', ttl: 3600 },
         { name: 'example.com', type: 'A', value: '192.0.2.4', ttl: 3600 },
       ],
-      description: 'Load-balanced web servers',
+      description: $t('tools.edns_size_estimator.examples.multiple.description'),
     },
     {
-      name: 'Long TXT Records',
+      name: $t('tools.edns_size_estimator.examples.txt.name'),
       records: [
         {
           name: 'example.com',
@@ -48,28 +55,28 @@
           ttl: 3600,
         },
       ],
-      description: 'SPF and DMARC policies',
+      description: $t('tools.edns_size_estimator.examples.txt.description'),
     },
     {
-      name: 'MX Records',
+      name: $t('tools.edns_size_estimator.examples.mx.name'),
       records: [
         { name: 'example.com', type: 'MX', value: 'mail1.example.com.', priority: 10, ttl: 3600 },
         { name: 'example.com', type: 'MX', value: 'mail2.example.com.', priority: 20, ttl: 3600 },
         { name: 'example.com', type: 'MX', value: 'mail3.example.com.', priority: 30, ttl: 3600 },
       ],
-      description: 'Mail server configuration',
+      description: $t('tools.edns_size_estimator.examples.mx.description'),
     },
     {
-      name: 'Large Response',
+      name: $t('tools.edns_size_estimator.examples.large.name'),
       records: Array.from({ length: 20 }, (_, i) => ({
         name: `server${i + 1}.example.com`,
         type: 'A' as const,
         value: `192.0.2.${i + 1}`,
         ttl: 3600,
       })),
-      description: 'Many A records causing fragmentation risk',
+      description: $t('tools.edns_size_estimator.examples.large.description'),
     },
-  ];
+  ]);
 
   function loadExample(example: (typeof examples)[0], index: number) {
     records = [...example.records];
@@ -189,8 +196,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>EDNS Size Estimator</h1>
-    <p>Estimate DNS message size and UDP fragmentation risk with EDNS buffer recommendations</p>
+    <h1>{$t('tools.edns_size_estimator.title')}</h1>
+    <p>{$t('tools.edns_size_estimator.subtitle')}</p>
   </header>
 
   <!-- Educational Overview -->
@@ -199,19 +206,22 @@
       <div class="overview-item">
         <Icon name="ruler" size="sm" />
         <div>
-          <strong>Size Estimation:</strong> Calculate total DNS message size including headers and record data.
+          <strong>{$t('tools.edns_size_estimator.overview.sizeEstimation.title')}</strong>
+          {$t('tools.edns_size_estimator.overview.sizeEstimation.description')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="alert-triangle" size="sm" />
         <div>
-          <strong>Fragmentation Risk:</strong> Assess likelihood of UDP packet fragmentation and delivery issues.
+          <strong>{$t('tools.edns_size_estimator.overview.fragmentationRisk.title')}</strong>
+          {$t('tools.edns_size_estimator.overview.fragmentationRisk.description')}
         </div>
       </div>
       <div class="overview-item">
         <Icon name="settings" size="sm" />
         <div>
-          <strong>EDNS Recommendations:</strong> Get buffer size recommendations for optimal DNS performance.
+          <strong>{$t('tools.edns_size_estimator.overview.ednsRecommendations.title')}</strong>
+          {$t('tools.edns_size_estimator.overview.ednsRecommendations.description')}
         </div>
       </div>
     </div>
@@ -222,7 +232,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="sm" />
-        <h3>Response Examples</h3>
+        <h3>{$t('tools.edns_size_estimator.examples.title')}</h3>
       </summary>
       <div class="examples-grid">
         {#each examples as example, index (index)}
@@ -231,7 +241,9 @@
             onclick={() => loadExample(example, index)}
           >
             <div class="example-name">{example.name}</div>
-            <div class="example-count">{example.records.length} record{example.records.length !== 1 ? 's' : ''}</div>
+            <div class="example-count">
+              {$t('tools.edns_size_estimator.examples.recordCount', { count: example.records.length })}
+            </div>
             <div class="example-description">{example.description}</div>
           </button>
         {/each}
@@ -241,27 +253,21 @@
 
   <!-- Configuration -->
   <section class="config-section">
-    <h3>Query Configuration</h3>
+    <h3>{$t('tools.edns_size_estimator.config.title')}</h3>
     <div class="config-inner">
       <div class="query-toggle">
-        <label
-          class="checkbox-label"
-          use:tooltip={'Include the DNS query section in size calculations. Queries add ~20-50 bytes depending on name length.'}
-        >
+        <label class="checkbox-label" use:tooltip={$t('tools.edns_size_estimator.config.includeQuery.tooltip')}>
           <input type="checkbox" class="primary-checkbox" bind:checked={includeQuery} onchange={handleInputChange} />
-          <span class="checkbox-text">Include query section in estimate</span>
+          <span class="checkbox-text">{$t('tools.edns_size_estimator.config.includeQuery.label')}</span>
         </label>
       </div>
 
       {#if includeQuery}
         <div class="query-inputs">
           <div class="field-group">
-            <label
-              for="query-name"
-              use:tooltip={'The domain name being queried. Longer names result in larger message sizes.'}
-            >
+            <label for="query-name" use:tooltip={$t('tools.edns_size_estimator.config.queryName.tooltip')}>
               <Icon name="globe" size="xs" />
-              Query Name
+              {$t('tools.edns_size_estimator.config.queryName.label')}
             </label>
             <input
               id="query-name"
@@ -273,9 +279,9 @@
             />
           </div>
           <div class="field-group">
-            <label for="query-type" use:tooltip={'The type of DNS record being requested (A, AAAA, MX, etc.).'}>
+            <label for="query-type" use:tooltip={$t('tools.edns_size_estimator.config.queryType.tooltip')}>
               <Icon name="list" size="xs" />
-              Query Type
+              {$t('tools.edns_size_estimator.config.queryType.label')}
             </label>
             <select id="query-type" bind:value={queryType} onchange={handleInputChange} class="query-select">
               {#each recordTypes as type (type)}
@@ -291,10 +297,10 @@
   <!-- Records Editor -->
   <div class="card records-card">
     <div class="records-header">
-      <h3>Response Records</h3>
+      <h3>{$t('tools.edns_size_estimator.records.title')}</h3>
       <button class="add-record-btn" onclick={addRecord}>
         <Icon name="plus" size="sm" />
-        Add Record
+        {$t('tools.edns_size_estimator.records.addRecord')}
       </button>
     </div>
 
@@ -303,7 +309,7 @@
         <div class="record-item">
           <div class="record-fields">
             <div class="field-group">
-              <label for="name-{index}">Name</label>
+              <label for="name-{index}">{$t('tools.edns_size_estimator.records.fields.name')}</label>
               <input
                 id="name-{index}"
                 type="text"
@@ -313,7 +319,7 @@
               />
             </div>
             <div class="field-group">
-              <label for="type-{index}">Type</label>
+              <label for="type-{index}">{$t('tools.edns_size_estimator.records.fields.type')}</label>
               <select
                 id="type-{index}"
                 bind:value={record.type}
@@ -325,18 +331,18 @@
               </select>
             </div>
             <div class="field-group">
-              <label for="value-{index}">Value</label>
+              <label for="value-{index}">{$t('tools.edns_size_estimator.records.fields.value')}</label>
               <input
                 id="value-{index}"
                 type="text"
                 bind:value={record.value}
                 oninput={() => updateRecord(index, 'value', record.value)}
-                placeholder="Record value"
+                placeholder={$t('tools.edns_size_estimator.records.fields.valuePlaceholder')}
               />
             </div>
             {#if record.type === 'MX'}
               <div class="field-group">
-                <label for="priority-{index}">Priority</label>
+                <label for="priority-{index}">{$t('tools.edns_size_estimator.records.fields.priority')}</label>
                 <input
                   id="priority-{index}"
                   type="number"
@@ -348,7 +354,7 @@
               </div>
             {/if}
             <div class="field-group">
-              <label for="ttl-{index}">TTL</label>
+              <label for="ttl-{index}">{$t('tools.edns_size_estimator.records.fields.ttl')}</label>
               <input
                 id="ttl-{index}"
                 type="number"
@@ -358,7 +364,11 @@
               />
             </div>
           </div>
-          <button class="remove-record-btn" onclick={() => removeRecord(index)} use:tooltip={'Remove this record'}>
+          <button
+            class="remove-record-btn"
+            onclick={() => removeRecord(index)}
+            use:tooltip={$t('tools.edns_size_estimator.records.removeTooltip')}
+          >
             <Icon name="trash" size="sm" />
           </button>
         </div>
@@ -366,7 +376,7 @@
 
       {#if records.length === 0}
         <div class="empty-records">
-          <p>No records added. Click "Add Record" to start building your DNS response.</p>
+          <p>{$t('tools.edns_size_estimator.records.empty')}</p>
         </div>
       {/if}
     </div>
@@ -375,39 +385,44 @@
   <!-- Results -->
   {#if results}
     <section class="results-section">
-      <h3>Size Analysis</h3>
+      <h3>{$t('tools.edns_size_estimator.results.title')}</h3>
       <div class="results-inner">
         <!-- Size Breakdown -->
         <div class="analysis-card">
           <div class="card-header-with-actions">
             <h4>
               <Icon name="ruler" size="sm" />
-              Size Breakdown
+              {$t('tools.edns_size_estimator.results.sizeBreakdown.title')}
             </h4>
             <button
               class="copy-button {clipboard.isCopied() ? 'copied' : ''}"
               onclick={() =>
-                clipboard.copy(`DNS Message Size Estimate:
-Total Size: ${results?.totalSize || 0} bytes
-UDP Safe: ${results?.udpSafe ? 'Yes' : 'No'}
-Fragmentation Risk: ${results?.fragmentationRisk || 'unknown'}`)}
+                clipboard.copy(
+                  $t('tools.edns_size_estimator.results.copyText', {
+                    totalSize: results?.totalSize || 0,
+                    udpSafe: results?.udpSafe
+                      ? $t('tools.edns_size_estimator.results.yes')
+                      : $t('tools.edns_size_estimator.results.no'),
+                    fragmentationRisk: results?.fragmentationRisk || $t('tools.edns_size_estimator.results.unknown'),
+                  }),
+                )}
             >
               <Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="sm" />
-              Copy Summary
+              {$t('tools.edns_size_estimator.results.copySummary')}
             </button>
           </div>
 
           <div class="size-breakdown">
             <div class="size-item">
-              <div class="size-label">DNS Header</div>
+              <div class="size-label">{$t('tools.edns_size_estimator.results.sizeBreakdown.dnsHeader')}</div>
               <div class="size-value">{results.baseSize} bytes</div>
             </div>
             <div class="size-item">
-              <div class="size-label">Records Data</div>
+              <div class="size-label">{$t('tools.edns_size_estimator.results.sizeBreakdown.recordsData')}</div>
               <div class="size-value">{results.recordsSize} bytes</div>
             </div>
             <div class="size-item total">
-              <div class="size-label">Total Size</div>
+              <div class="size-label">{$t('tools.edns_size_estimator.results.sizeBreakdown.totalSize')}</div>
               <div class="size-value" style="color: {getSizeColor(results.totalSize)}">{results.totalSize} bytes</div>
             </div>
           </div>
@@ -417,7 +432,9 @@ Fragmentation Risk: ${results?.fragmentationRisk || 'unknown'}`)}
             <div class="safety-status {results.udpSafe ? 'safe' : 'unsafe'}">
               <Icon name={results.udpSafe ? 'check-circle' : 'alert-triangle'} size="sm" />
               <span>
-                {results.udpSafe ? 'UDP Safe' : 'Requires EDNS0'}
+                {results.udpSafe
+                  ? $t('tools.edns_size_estimator.results.udpSafe')
+                  : $t('tools.edns_size_estimator.results.requiresEdns')}
                 ({results.totalSize} / 512 bytes)
               </span>
             </div>
@@ -433,25 +450,28 @@ Fragmentation Risk: ${results?.fragmentationRisk || 'unknown'}`)}
         >
           <h4 style="color: {getRiskColor(results.fragmentationRisk)};">
             <Icon name="alert-triangle" size="sm" />
-            Fragmentation Analysis
+            {$t('tools.edns_size_estimator.results.fragmentation.title')}
           </h4>
           <div class="fragmentation-risk">
             <div class="risk-indicator" style="color: {getRiskColor(results.fragmentationRisk)}">
-              <span class="risk-level">{results.fragmentationRisk.toUpperCase()} RISK</span>
+              <span class="risk-level"
+                >{$t(`tools.edns_size_estimator.results.fragmentation.riskLevels.${results.fragmentationRisk}`)}
+                {$t('tools.edns_size_estimator.results.fragmentation.risk')}</span
+              >
             </div>
             <div class="risk-details">
               <div class="size-thresholds">
                 <div class="threshold-item {results.totalSize <= 512 ? 'passed' : 'failed'}">
                   <Icon name={results.totalSize <= 512 ? 'check' : 'x'} size="sm" />
-                  ≤ 512 bytes (Classic DNS)
+                  {$t('tools.edns_size_estimator.results.fragmentation.thresholds.classic')}
                 </div>
                 <div class="threshold-item {results.totalSize <= 1232 ? 'passed' : 'failed'}">
                   <Icon name={results.totalSize <= 1232 ? 'check' : 'x'} size="sm" />
-                  ≤ 1232 bytes (Safe for most networks)
+                  {$t('tools.edns_size_estimator.results.fragmentation.thresholds.safe')}
                 </div>
                 <div class="threshold-item {results.totalSize <= 4096 ? 'passed' : 'failed'}">
                   <Icon name={results.totalSize <= 4096 ? 'check' : 'x'} size="sm" />
-                  ≤ 4096 bytes (Common EDNS buffer)
+                  {$t('tools.edns_size_estimator.results.fragmentation.thresholds.edns')}
                 </div>
               </div>
             </div>
@@ -463,7 +483,7 @@ Fragmentation Risk: ${results?.fragmentationRisk || 'unknown'}`)}
           <div class="recommendations-card">
             <h4>
               <Icon name="lightbulb" size="sm" />
-              Recommendations
+              {$t('tools.edns_size_estimator.results.recommendations.title')}
             </h4>
             <ul class="recommendations-list">
               {#each results.recommendations as recommendation (recommendation)}
@@ -471,13 +491,13 @@ Fragmentation Risk: ${results?.fragmentationRisk || 'unknown'}`)}
               {/each}
 
               {#if results.totalSize > 4096}
-                <li class="recommendation-item">Consider using TCP for queries expecting large responses</li>
+                <li class="recommendation-item">{$t('tools.edns_size_estimator.results.recommendations.tcp')}</li>
               {/if}
               {#if results.totalSize > 1232}
-                <li class="recommendation-item">Some networks may fragment packets - monitor delivery success</li>
+                <li class="recommendation-item">{$t('tools.edns_size_estimator.results.recommendations.fragment')}</li>
               {/if}
               {#if !results.udpSafe}
-                <li class="recommendation-item">EDNS0 support required - advertise appropriate buffer size</li>
+                <li class="recommendation-item">{$t('tools.edns_size_estimator.results.recommendations.edns0')}</li>
               {/if}
             </ul>
           </div>
@@ -490,34 +510,30 @@ Fragmentation Risk: ${results?.fragmentationRisk || 'unknown'}`)}
   <div class="education-card">
     <div class="education-grid">
       <div class="education-item info-panel">
-        <h4>UDP Limitations</h4>
+        <h4>{$t('tools.edns_size_estimator.education.udpLimitations.title')}</h4>
         <p>
-          Classic DNS over UDP is limited to 512 bytes. Larger responses require EDNS0 extension to advertise bigger
-          buffer sizes. Without EDNS0, servers must truncate responses.
+          {$t('tools.edns_size_estimator.education.udpLimitations.description')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Fragmentation Issues</h4>
+        <h4>{$t('tools.edns_size_estimator.education.fragmentationIssues.title')}</h4>
         <p>
-          UDP packets larger than ~1232 bytes may be fragmented by network devices. Fragmented packets are more likely
-          to be dropped, causing DNS resolution failures.
+          {$t('tools.edns_size_estimator.education.fragmentationIssues.description')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>EDNS Buffer Sizes</h4>
+        <h4>{$t('tools.edns_size_estimator.education.ednsBufferSizes.title')}</h4>
         <p>
-          Common EDNS buffer sizes are 1232, 4096, and 8192 bytes. Larger buffers allow bigger responses but increase
-          fragmentation risk. Choose based on your network environment.
+          {$t('tools.edns_size_estimator.education.ednsBufferSizes.description')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Optimization Strategies</h4>
+        <h4>{$t('tools.edns_size_estimator.education.optimizationStrategies.title')}</h4>
         <p>
-          Minimize record sizes with shorter names and values. Use separate queries for large responses. Consider TCP
-          for consistently large responses like DNSSEC-signed zones.
+          {$t('tools.edns_size_estimator.education.optimizationStrategies.description')}
         </p>
       </div>
     </div>

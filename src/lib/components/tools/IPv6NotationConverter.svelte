@@ -3,6 +3,14 @@
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools');
+  });
 
   interface Props {
     mode: 'expand' | 'compress';
@@ -17,18 +25,38 @@
   let selectedExampleIndex = $state<number | null>(null);
 
   /* Common IPv6 example addresses for testing */
-  const exampleAddresses = [
-    { label: 'Documentation Prefix', compressed: '2001:db8::', expanded: '2001:0db8:0000:0000:0000:0000:0000:0000' },
-    { label: 'Loopback Address', compressed: '::1', expanded: '0000:0000:0000:0000:0000:0000:0000:0001' },
-    { label: 'Link-Local Address', compressed: 'fe80::1', expanded: 'fe80:0000:0000:0000:0000:0000:0000:0001' },
+  const exampleAddresses = $derived([
     {
-      label: 'Global Unicast',
+      label: $t('tools.ipv6_notation_converter.examples.documentationPrefix'),
+      compressed: '2001:db8::',
+      expanded: '2001:0db8:0000:0000:0000:0000:0000:0000',
+    },
+    {
+      label: $t('tools.ipv6_notation_converter.examples.loopbackAddress'),
+      compressed: '::1',
+      expanded: '0000:0000:0000:0000:0000:0000:0000:0001',
+    },
+    {
+      label: $t('tools.ipv6_notation_converter.examples.linkLocalAddress'),
+      compressed: 'fe80::1',
+      expanded: 'fe80:0000:0000:0000:0000:0000:0000:0001',
+    },
+    {
+      label: $t('tools.ipv6_notation_converter.examples.globalUnicast'),
       compressed: '2001:db8:85a3::8a2e:370:7334',
       expanded: '2001:0db8:85a3:0000:0000:8a2e:0370:7334',
     },
-    { label: 'IPv4-mapped IPv6', compressed: '::ffff:192.0.2.1', expanded: '0000:0000:0000:0000:0000:ffff:c000:0201' },
-    { label: 'Multicast Address', compressed: 'ff02::1', expanded: 'ff02:0000:0000:0000:0000:0000:0000:0001' },
-  ];
+    {
+      label: $t('tools.ipv6_notation_converter.examples.ipv4MappedIPv6'),
+      compressed: '::ffff:192.0.2.1',
+      expanded: '0000:0000:0000:0000:0000:ffff:c000:0201',
+    },
+    {
+      label: $t('tools.ipv6_notation_converter.examples.multicastAddress'),
+      compressed: 'ff02::1',
+      expanded: 'ff02:0000:0000:0000:0000:0000:0000:0001',
+    },
+  ]);
 
   /* Set example address */
   function setExample(address: string, index: number) {
@@ -54,13 +82,13 @@
     outputAddress = '';
 
     if (!inputAddress.trim()) {
-      conversionError = 'Please enter an IPv6 address';
+      conversionError = $t('tools.ipv6_notation_converter.errors.enterAddress');
       return;
     }
 
     const validation = validateIPv6Address(inputAddress);
     if (!validation.valid) {
-      conversionError = validation.error || 'Invalid IPv6 address format';
+      conversionError = validation.error || $t('tools.ipv6_notation_converter.errors.invalidFormat');
       return;
     }
 
@@ -71,7 +99,8 @@
         outputAddress = compressIPv6(inputAddress);
       }
     } catch (error) {
-      conversionError = error instanceof Error ? error.message : 'Conversion failed';
+      conversionError =
+        error instanceof Error ? error.message : $t('tools.ipv6_notation_converter.errors.conversionFailed');
     }
   }
 
@@ -92,16 +121,16 @@
 
 <!-- Input Section -->
 <div class="converter-section">
-  <h3>Input IPv6 Address</h3>
+  <h3>{$t('tools.ipv6_notation_converter.input.label')}</h3>
 
   <div class="input-group">
     <div class="form-group">
       <label for="ipv6-input">
-        IPv6 Address
+        {$t('tools.ipv6_notation_converter.input.label')}
         <Tooltip
           text={mode === 'expand'
-            ? 'Enter compressed IPv6 address to expand'
-            : 'Enter expanded IPv6 address to compress'}
+            ? $t('tools.ipv6_notation_converter.input.tooltipExpand')
+            : $t('tools.ipv6_notation_converter.input.tooltipCompress')}
         >
           <Icon name="help" size="sm" />
         </Tooltip>
@@ -131,7 +160,7 @@
   <details class="examples-details">
     <summary class="examples-summary">
       <Icon name="chevron-right" size="xs" />
-      <h3>Common Examples</h3>
+      <h3>{$t('tools.ipv6_notation_converter.examples.title')}</h3>
     </summary>
     <div class="examples-grid">
       {#each exampleAddresses as example, index (`example-${index}`)}
@@ -154,14 +183,16 @@
 <!-- Output Section -->
 {#if outputAddress && !conversionError}
   <div class="output-section">
-    <h3>Converted Address</h3>
+    <h3>{$t('tools.ipv6_notation_converter.output.label')}</h3>
 
     <div class="conversion-result">
       <div class="result-card success">
         <div class="result-header">
           <h4>
             <Icon name={mode === 'expand' ? 'maximize' : 'minimize'} size="sm" />
-            {mode === 'expand' ? 'Expanded Format' : 'Compressed Format'}
+            {mode === 'expand'
+              ? $t('tools.ipv6_notation_converter.output.expandedForm')
+              : $t('tools.ipv6_notation_converter.output.compressedForm')}
           </h4>
         </div>
 
@@ -183,11 +214,25 @@
           <!-- Comparison View -->
           <div class="comparison-view">
             <div class="comparison-item">
-              <span class="comparison-label">Input ({mode === 'expand' ? 'Compressed' : 'Expanded'}):</span>
+              <span class="comparison-label"
+                >{$t('tools.ipv6_notation_converter.comparison.input', {
+                  format:
+                    mode === 'expand'
+                      ? $t('tools.ipv6_notation_converter.modes.compress')
+                      : $t('tools.ipv6_notation_converter.modes.expand'),
+                })}:</span
+              >
               <code class="comparison-address input">{inputAddress}</code>
             </div>
             <div class="comparison-item">
-              <span class="comparison-label">Output ({mode === 'expand' ? 'Expanded' : 'Compressed'}):</span>
+              <span class="comparison-label"
+                >{$t('tools.ipv6_notation_converter.comparison.output', {
+                  format:
+                    mode === 'expand'
+                      ? $t('tools.ipv6_notation_converter.modes.expand')
+                      : $t('tools.ipv6_notation_converter.modes.compress'),
+                })}:</span
+              >
               <code class="comparison-address output">{outputAddress}</code>
             </div>
           </div>
@@ -195,17 +240,24 @@
           <!-- Character Count -->
           <div class="stats-grid">
             <div class="stat-item">
-              <span class="stat-label">Input Length</span>
-              <span class="stat-value">{inputAddress.length} characters</span>
+              <span class="stat-label">{$t('tools.ipv6_notation_converter.stats.inputLength')}</span>
+              <span class="stat-value"
+                >{$t('tools.ipv6_notation_converter.stats.characters', { count: inputAddress.length })}</span
+              >
             </div>
             <div class="stat-item">
-              <span class="stat-label">Output Length</span>
-              <span class="stat-value">{outputAddress.length} characters</span>
+              <span class="stat-label">{$t('tools.ipv6_notation_converter.stats.outputLength')}</span>
+              <span class="stat-value"
+                >{$t('tools.ipv6_notation_converter.stats.characters', { count: outputAddress.length })}</span
+              >
             </div>
             <div class="stat-item">
-              <span class="stat-label">Difference</span>
+              <span class="stat-label">{$t('tools.ipv6_notation_converter.stats.difference')}</span>
               <span class="stat-value {outputAddress.length > inputAddress.length ? 'expanded' : 'compressed'}">
-                {outputAddress.length > inputAddress.length ? '+' : ''}{outputAddress.length - inputAddress.length} characters
+                {outputAddress.length > inputAddress.length ? '+' : ''}{$t(
+                  'tools.ipv6_notation_converter.stats.charactersChange',
+                  { count: outputAddress.length - inputAddress.length },
+                )}
               </span>
             </div>
           </div>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import SupernetCalculator from '$lib/components/tools/SupernetCalculator.svelte';
+  import { t } from '$lib/i18n';
 
   import '$lib/../styles/pages.scss';
   import Icon from '$lib/components/global/Icon.svelte';
@@ -9,49 +10,48 @@
   <SupernetCalculator />
 
   <section class="explainer-section">
-    <h3>About Supernetting</h3>
+    <h3>{t('tools/supernet-calculator.page.aboutTitle')}</h3>
     <p>
-      <strong>Supernetting</strong> (also called route aggregation or CIDR block aggregation) is the process of combining
-      multiple smaller networks into a single larger network. This technique is essential for:
+      {t('tools/supernet-calculator.page.aboutDescription')}
     </p>
 
     <div class="benefits-grid">
       <div class="benefit-item">
-        <h4>Reduced Routing Tables</h4>
-        <p>Fewer routes mean faster lookups and reduced memory usage in routers</p>
+        <h4>{t('tools/supernet-calculator.page.benefits.reducedRoutingTables.title')}</h4>
+        <p>{t('tools/supernet-calculator.page.benefits.reducedRoutingTables.description')}</p>
       </div>
       <div class="benefit-item">
-        <h4>Improved Scalability</h4>
-        <p>Internet routing scales better with aggregated routes instead of individual subnets</p>
+        <h4>{t('tools/supernet-calculator.page.benefits.improvedScalability.title')}</h4>
+        <p>{t('tools/supernet-calculator.page.benefits.improvedScalability.description')}</p>
       </div>
       <div class="benefit-item">
-        <h4>Better Performance</h4>
-        <p>Reduced route advertisements and faster convergence in routing protocols</p>
+        <h4>{t('tools/supernet-calculator.page.benefits.betterPerformance.title')}</h4>
+        <p>{t('tools/supernet-calculator.page.benefits.betterPerformance.description')}</p>
       </div>
       <div class="benefit-item">
-        <h4>Easier Management</h4>
-        <p>Simplified network policies and access control lists</p>
+        <h4>{t('tools/supernet-calculator.page.benefits.easierManagement.title')}</h4>
+        <p>{t('tools/supernet-calculator.page.benefits.easierManagement.description')}</p>
       </div>
     </div>
 
     <div class="use-cases-section">
-      <h4>When to Use Supernetting</h4>
+      <h4>{t('tools/supernet-calculator.page.useCases.title')}</h4>
       <div class="use-cases-grid">
         <div class="use-case-item">
-          <h5>ISP Route Aggregation</h5>
-          <p>Combining customer routes for BGP advertisements</p>
+          <h5>{t('tools/supernet-calculator.page.useCases.ispRouteAggregation.title')}</h5>
+          <p>{t('tools/supernet-calculator.page.useCases.ispRouteAggregation.description')}</p>
         </div>
         <div class="use-case-item">
-          <h5>Enterprise Networks</h5>
-          <p>Summarizing branch office networks at headquarters</p>
+          <h5>{t('tools/supernet-calculator.page.useCases.enterpriseNetworks.title')}</h5>
+          <p>{t('tools/supernet-calculator.page.useCases.enterpriseNetworks.description')}</p>
         </div>
         <div class="use-case-item">
-          <h5>Data Centers</h5>
-          <p>Aggregating server farm subnets for external advertisement</p>
+          <h5>{t('tools/supernet-calculator.page.useCases.dataCenters.title')}</h5>
+          <p>{t('tools/supernet-calculator.page.useCases.dataCenters.description')}</p>
         </div>
         <div class="use-case-item">
-          <h5>Network Redesign</h5>
-          <p>Optimizing existing IP allocations for better summarization</p>
+          <h5>{t('tools/supernet-calculator.page.useCases.networkRedesign.title')}</h5>
+          <p>{t('tools/supernet-calculator.page.useCases.networkRedesign.description')}</p>
         </div>
       </div>
     </div>
@@ -59,11 +59,10 @@
     <div class="info-box">
       <h4>
         <Icon name="lightbulb" size="sm" />
-        Pro Tip
+        {t('tools/supernet-calculator.page.proTip.title')}
       </h4>
       <p>
-        For optimal supernetting, design your IP allocation strategy from the beginning. Contiguous, power-of-2 sized
-        networks aggregate much more efficiently than scattered allocations.
+        {t('tools/supernet-calculator.page.proTip.description')}
       </p>
     </div>
   </section>

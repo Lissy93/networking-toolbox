@@ -3,7 +3,7 @@
  * Handles example loading and selection tracking
  */
 
-export function useExamples<T extends { [key: string]: any }>(examples: T[]) {
+export function useExamples<T extends { [key: string]: any }>(getExamples: () => T[]) {
   let selectedIndex = $state<number | null>(null);
 
   function select(index: number) {
@@ -20,6 +20,7 @@ export function useExamples<T extends { [key: string]: any }>(examples: T[]) {
 
   function getSelected(): T | null {
     if (selectedIndex === null) return null;
+    const examples = getExamples();
     return examples[selectedIndex] ?? null;
   }
 

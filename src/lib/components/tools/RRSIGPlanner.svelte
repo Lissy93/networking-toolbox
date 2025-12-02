@@ -1,6 +1,13 @@
 <script lang="ts">
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools/rrsig-planner');
+  });
   import {
     suggestRRSIGWindows,
     formatRRSIGDates,
@@ -37,26 +44,30 @@
 
   function copyCurrentWindow() {
     if (!currentWindowFormatted) return;
-    const text = `RRSIG Timing Window:
-Inception: ${currentWindowFormatted.inceptionFormatted} (${currentWindowFormatted.inceptionTimestamp})
-Expiration: ${currentWindowFormatted.expirationFormatted} (${currentWindowFormatted.expirationTimestamp})
-Renewal Time: ${currentWindowFormatted.renewalFormatted}`;
+    const text = $t('copyTemplates.single', {
+      inception: currentWindowFormatted.inceptionFormatted,
+      inceptionTimestamp: currentWindowFormatted.inceptionTimestamp,
+      expiration: currentWindowFormatted.expirationFormatted,
+      expirationTimestamp: currentWindowFormatted.expirationTimestamp,
+      renewal: currentWindowFormatted.renewalFormatted,
+    });
     clipboard.copy(text, 'current');
   }
 
   function copyBothWindows() {
     if (!currentWindowFormatted || !nextWindowFormatted) return;
-    const text = `RRSIG Planning Schedule:
-
-Current Window:
-Inception: ${currentWindowFormatted.inceptionFormatted} (${currentWindowFormatted.inceptionTimestamp})
-Expiration: ${currentWindowFormatted.expirationFormatted} (${currentWindowFormatted.expirationTimestamp})
-Renewal Time: ${currentWindowFormatted.renewalFormatted}
-
-Next Window:
-Inception: ${nextWindowFormatted.inceptionFormatted} (${nextWindowFormatted.inceptionTimestamp})
-Expiration: ${nextWindowFormatted.expirationFormatted} (${nextWindowFormatted.expirationTimestamp})
-Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
+    const text = $t('copyTemplates.schedule', {
+      currentInception: currentWindowFormatted.inceptionFormatted,
+      currentInceptionTimestamp: currentWindowFormatted.inceptionTimestamp,
+      currentExpiration: currentWindowFormatted.expirationFormatted,
+      currentExpirationTimestamp: currentWindowFormatted.expirationTimestamp,
+      currentRenewal: currentWindowFormatted.renewalFormatted,
+      nextInception: nextWindowFormatted.inceptionFormatted,
+      nextInceptionTimestamp: nextWindowFormatted.inceptionTimestamp,
+      nextExpiration: nextWindowFormatted.expirationFormatted,
+      nextExpirationTimestamp: nextWindowFormatted.expirationTimestamp,
+      nextRenewal: nextWindowFormatted.renewalFormatted,
+    });
     clipboard.copy(text, 'both');
   }
 
@@ -76,10 +87,9 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
 
 <div class="card">
   <header class="card-header">
-    <h1>RRSIG Planner</h1>
+    <h1>{$t('title')}</h1>
     <p>
-      Suggest RRSIG validity windows (inception/expiration) based on TTLs and desired overlap, with renewal lead-time
-      guidance for automated DNSSEC signature management.
+      {$t('description')}
     </p>
   </header>
 
@@ -89,7 +99,7 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
       <div class="form-group">
         <label for="ttl">
           <Icon name="clock" size="sm" />
-          TTL (seconds)
+          {$t('form.ttl.label')}
         </label>
         <input
           id="ttl"
@@ -100,14 +110,14 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
           class="number-input {!isValidTTL ? 'invalid' : ''}"
         />
         {#if !isValidTTL}
-          <p class="field-error">TTL must be between 1 and 86400 seconds</p>
+          <p class="field-error">{$t('form.ttl.error')}</p>
         {/if}
       </div>
 
       <div class="form-group">
         <label for="overlap">
           <Icon name="overlap" size="sm" />
-          Desired Overlap (hours)
+          {$t('form.overlap.label')}
         </label>
         <input
           id="overlap"
@@ -118,14 +128,14 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
           class="number-input {!isValidOverlap ? 'invalid' : ''}"
         />
         {#if !isValidOverlap}
-          <p class="field-error">Overlap must be between 1 and 168 hours</p>
+          <p class="field-error">{$t('form.overlap.error')}</p>
         {/if}
       </div>
 
       <div class="form-group">
         <label for="lead-time">
           <Icon name="timer" size="sm" />
-          Renewal Lead Time (hours)
+          {$t('form.leadTime.label')}
         </label>
         <input
           id="lead-time"
@@ -136,14 +146,14 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
           class="number-input {!isValidLeadTime ? 'invalid' : ''}"
         />
         {#if !isValidLeadTime}
-          <p class="field-error">Lead time must be between 1 and 168 hours</p>
+          <p class="field-error">{$t('form.leadTime.error')}</p>
         {/if}
       </div>
 
       <div class="form-group">
         <label for="clock-skew">
           <Icon name="clock" size="sm" />
-          Clock Skew (hours)
+          {$t('form.clockSkew.label')}
         </label>
         <input
           id="clock-skew"
@@ -155,14 +165,14 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
           class="number-input {!isValidClockSkew ? 'invalid' : ''}"
         />
         {#if !isValidClockSkew}
-          <p class="field-error">Clock skew must be between 0 and 24 hours</p>
+          <p class="field-error">{$t('form.clockSkew.error')}</p>
         {/if}
       </div>
 
       <div class="form-group">
         <label for="validity-days">
           <Icon name="calendar" size="sm" />
-          Signature Validity (days)
+          {$t('form.validityDays.label')}
         </label>
         <input
           id="validity-days"
@@ -173,7 +183,7 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
           class="number-input {!isValidityDays ? 'invalid' : ''}"
         />
         {#if !isValidityDays}
-          <p class="field-error">Validity must be between 1 and 365 days</p>
+          <p class="field-error">{$t('form.validityDays.error')}</p>
         {/if}
       </div>
     </div>
@@ -185,7 +195,7 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
       <div class="warning-content">
         <Icon name="alert-triangle" size="sm" />
         <div>
-          <strong>Timing Warnings:</strong>
+          <strong>{$t('warnings.title')}</strong>
           <ul class="warning-list">
             {#each currentValidation.warnings as warning, index (index)}
               <li>{warning}</li>
@@ -202,10 +212,10 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
       <!-- Current Window -->
       <div class="card window-card">
         <div class="window-header">
-          <h3>Current Signature Window</h3>
+          <h3>{$t('windows.current.title')}</h3>
           <button class="copy-button {clipboard.isCopied('current') ? 'copied' : ''}" onclick={copyCurrentWindow}>
             <Icon name={clipboard.isCopied('current') ? 'check' : 'copy'} size="sm" />
-            Copy
+            {$t('windows.current.copy')}
           </button>
         </div>
 
@@ -214,7 +224,7 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
             <div class="timing-item inception">
               <div class="timing-header">
                 <Icon name="play" size="sm" />
-                <span class="timing-label">Inception (Start Time)</span>
+                <span class="timing-label">{$t('windows.timing.inception')}</span>
               </div>
               <div class="timing-value mono">{currentWindowFormatted.inceptionFormatted}</div>
               <div class="timing-readable">{currentWindowFormatted.inceptionTimestamp}</div>
@@ -223,7 +233,7 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
             <div class="timing-item expiration">
               <div class="timing-header">
                 <Icon name="stop" size="sm" />
-                <span class="timing-label">Expiration (End Time)</span>
+                <span class="timing-label">{$t('windows.timing.expiration')}</span>
               </div>
               <div class="timing-value mono">{currentWindowFormatted.expirationFormatted}</div>
               <div class="timing-readable">{currentWindowFormatted.expirationTimestamp}</div>
@@ -232,23 +242,23 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
             <div class="timing-item renewal">
               <div class="timing-header">
                 <Icon name="refresh" size="sm" />
-                <span class="timing-label">Renewal Time</span>
+                <span class="timing-label">{$t('windows.timing.renewal')}</span>
               </div>
               <div class="timing-value mono">{currentWindowFormatted.renewalFormatted}</div>
-              <div class="timing-note">Generate next signatures before this time</div>
+              <div class="timing-note">{$t('windows.timing.renewalNote')}</div>
             </div>
 
             <div class="metrics-grid">
               <div class="metric-item">
-                <span class="metric-label">Validity Period</span>
+                <span class="metric-label">{$t('windows.metrics.validityPeriod')}</span>
                 <span class="metric-value">{formatDuration(currentWindow.validity)}</span>
               </div>
               <div class="metric-item">
-                <span class="metric-label">Lead Time</span>
+                <span class="metric-label">{$t('windows.metrics.leadTime')}</span>
                 <span class="metric-value">{formatDuration(currentWindow.leadTime)}</span>
               </div>
               <div class="metric-item">
-                <span class="metric-label">Overlap Period</span>
+                <span class="metric-label">{$t('windows.metrics.overlapPeriod')}</span>
                 <span class="metric-value">{formatDuration(desiredOverlap)}</span>
               </div>
             </div>
@@ -259,7 +269,7 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
       <!-- Next Window -->
       <div class="card window-card">
         <div class="window-header">
-          <h3>Next Signature Window</h3>
+          <h3>{$t('windows.next.title')}</h3>
         </div>
 
         {#if nextWindowFormatted}
@@ -267,7 +277,7 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
             <div class="timing-item inception">
               <div class="timing-header">
                 <Icon name="play" size="sm" />
-                <span class="timing-label">Next Inception</span>
+                <span class="timing-label">{$t('windows.timing.nextInception')}</span>
               </div>
               <div class="timing-value mono">{nextWindowFormatted.inceptionFormatted}</div>
               <div class="timing-readable">{nextWindowFormatted.inceptionTimestamp}</div>
@@ -276,7 +286,7 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
             <div class="timing-item expiration">
               <div class="timing-header">
                 <Icon name="stop" size="sm" />
-                <span class="timing-label">Next Expiration</span>
+                <span class="timing-label">{$t('windows.timing.nextExpiration')}</span>
               </div>
               <div class="timing-value mono">{nextWindowFormatted.expirationFormatted}</div>
               <div class="timing-readable">{nextWindowFormatted.expirationTimestamp}</div>
@@ -285,7 +295,7 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
             <div class="timing-item renewal">
               <div class="timing-header">
                 <Icon name="refresh" size="sm" />
-                <span class="timing-label">Following Renewal</span>
+                <span class="timing-label">{$t('windows.timing.followingRenewal')}</span>
               </div>
               <div class="timing-value mono">{nextWindowFormatted.renewalFormatted}</div>
             </div>
@@ -293,7 +303,7 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
             <div class="copy-schedule-section">
               <button class="copy-button {clipboard.isCopied('both') ? 'copied' : ''}" onclick={copyBothWindows}>
                 <Icon name={clipboard.isCopied('both') ? 'check' : 'copy'} size="sm" />
-                Copy Full Schedule
+                {$t('windows.next.copySchedule')}
               </button>
             </div>
           </div>
@@ -305,25 +315,25 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
   <!-- Implementation Guidelines -->
   <div class="card guidelines-card">
     <div class="card-section-header">
-      <h3>Implementation Guidelines</h3>
+      <h3>{$t('guidelines.title')}</h3>
     </div>
     <div class="guidelines-content">
       <div class="guideline-section">
-        <h4>Automation Schedule:</h4>
+        <h4>{$t('guidelines.automation.title')}</h4>
         <ul class="guideline-list">
-          <li>Monitor renewal times continuously</li>
-          <li>Generate new signatures {formatDuration(renewalLeadTime)} before expiration</li>
-          <li>Maintain {formatDuration(desiredOverlap)} overlap period</li>
-          <li>Account for {clockSkew}h clock skew tolerance</li>
+          <li>{$t('guidelines.automation.monitor')}</li>
+          <li>{$t('guidelines.automation.generate', { leadTime: formatDuration(renewalLeadTime) })}</li>
+          <li>{$t('guidelines.automation.maintain', { overlap: formatDuration(desiredOverlap) })}</li>
+          <li>{$t('guidelines.automation.account', { clockSkew: clockSkew })}</li>
         </ul>
       </div>
       <div class="guideline-section">
-        <h4>Best Practices:</h4>
+        <h4>{$t('guidelines.bestPractices.title')}</h4>
         <ul class="guideline-list">
-          <li>Test signature generation before deployment</li>
-          <li>Monitor DNSSEC validation after updates</li>
-          <li>Keep backup signatures for rollback</li>
-          <li>Log all signature generation events</li>
+          <li>{$t('guidelines.bestPractices.test')}</li>
+          <li>{$t('guidelines.bestPractices.monitor')}</li>
+          <li>{$t('guidelines.bestPractices.backup')}</li>
+          <li>{$t('guidelines.bestPractices.log')}</li>
         </ul>
       </div>
     </div>
@@ -333,34 +343,30 @@ Renewal Time: ${nextWindowFormatted.renewalFormatted}`;
   <div class="education-card">
     <div class="education-grid">
       <div class="education-item info-panel">
-        <h4>RRSIG Timing</h4>
+        <h4>{$t('education.timing.title')}</h4>
         <p>
-          RRSIG records have inception and expiration timestamps that define when the signature is valid. Proper timing
-          ensures continuous DNSSEC validation during key transitions.
+          {$t('education.timing.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Overlap Strategy</h4>
+        <h4>{$t('education.overlap.title')}</h4>
         <p>
-          Overlapping signature validity periods prevent validation failures during rollover. New signatures should be
-          generated before old ones expire.
+          {$t('education.overlap.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Clock Skew Tolerance</h4>
+        <h4>{$t('education.clockSkew.title')}</h4>
         <p>
-          Account for time differences between authoritative servers and validators. Start signatures slightly in the
-          past to accommodate clock skew.
+          {$t('education.clockSkew.content')}
         </p>
       </div>
 
       <div class="education-item info-panel">
-        <h4>Automation Benefits</h4>
+        <h4>{$t('education.automation.title')}</h4>
         <p>
-          Automated RRSIG generation reduces manual errors and ensures consistent timing. Plan renewal schedules based
-          on TTL values and operational requirements.
+          {$t('education.automation.content')}
         </p>
       </div>
     </div>

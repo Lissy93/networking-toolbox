@@ -1,0 +1,54 @@
+{
+  "title": "Email MX Health Checker",
+  "description": "Check mail server (MX) health including DNS resolution and optional SMTP port connectivity testing. Verify your email infrastructure is properly configured and reachable.",
+
+  "examples": {
+    "title": "MX Health Examples",
+    "gmail": "Google Gmail MX infrastructure",
+    "outlook": "Microsoft Outlook mail servers",
+    "yahoo": "Yahoo Mail MX configuration",
+    "protonmail": "ProtonMail secure email setup",
+    "fastmail": "FastMail professional hosting",
+    "github": "GitHub enterprise email setup"
+  },
+
+  "form": {
+    "title": "MX Health Check",
+    "domain": {
+      "label": "Domain Name",
+      "placeholder": "example.com"
+    },
+    "check_ports": "Check SMTP port connectivity (25, 587, 465)",
+    "check": "Check MX Health",
+    "checking": "Checking MX Health..."
+  },
+
+  "results": {
+    "title": "MX Health Results",
+    "copy": "Copy Results",
+    "copied": "Copied!",
+
+    "summary": {
+      "healthy": "Mail Infrastructure Healthy",
+      "issues": "Mail Infrastructure Issues",
+      "resolved": "{healthy} of {total} MX records resolved successfully",
+      "reachable": "{reachable} reachable via SMTP"
+    },
+
+    "stats": {
+      "mx_records": "MX Records",
+      "healthy": "Healthy",
+      "reachable": "Reachable",
+      "redundancy": "Redundancy"
+    },
+
+    "ports": {
+      "25": "SMTP (Standard)",
+      "587": "Submission (TLS)",
+      "465": "SMTPS (SSL)",
+      "other": "Port {port}",
+      "open": "Open",
+      "closed": "Closed"
+    }
+  }
+}

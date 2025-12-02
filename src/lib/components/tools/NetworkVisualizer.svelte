@@ -2,6 +2,14 @@
   import type { SubnetInfo } from '$lib/types/ip.js';
   import Tooltip from '$lib/components/global/Tooltip.svelte';
   import { formatNumber } from '$lib/utils/formatters';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools.network-visualizer');
+  });
 
   interface Props {
     subnetInfo: SubnetInfo;
@@ -69,20 +77,24 @@
 
 <div class="network-visualizer {className}">
   <section class="visualizer-section">
-    <h3>Network Visualization</h3>
+    <h3>{$t('tools.network-visualizer.sections.networkVisualization')}</h3>
 
     <!-- Network Range Bar -->
     <div class="range-section">
       <div class="range-header">
-        <span class="range-label">Address Range</span>
+        <span class="range-label">{$t('tools.network-visualizer.ranges.addressRange')}</span>
         <span class="range-count">
-          {formatNumber(subnetInfo.hostCount)} total addresses
+          {$t('tools.network-visualizer.ranges.totalAddresses', { count: formatNumber(subnetInfo.hostCount) })}
         </span>
       </div>
 
       <div class="range-bar">
         <!-- Network Address -->
-        <div class="range-segment network" style="width: {100 / subnetInfo.hostCount}%" title="Network Address">
+        <div
+          class="range-segment network"
+          style="width: {100 / subnetInfo.hostCount}%"
+          title={$t('tools.network-visualizer.addressTypes.networkAddress')}
+        >
           {#if subnetInfo.hostCount <= 32}
             <span class="segment-label">N</span>
           {/if}
@@ -92,12 +104,16 @@
         <div
           class="range-segment usable"
           style="left: {100 / subnetInfo.hostCount}%; width: {usablePercentage * (1 - 2 / subnetInfo.hostCount)}%"
-          title="Usable Host Addresses"
+          title={$t('tools.network-visualizer.tooltips.usableHostAddresses')}
         ></div>
 
         <!-- Broadcast Address -->
         {#if subnetInfo.hostCount > 1}
-          <div class="range-segment broadcast" style="width: {100 / subnetInfo.hostCount}%" title="Broadcast Address">
+          <div
+            class="range-segment broadcast"
+            style="width: {100 / subnetInfo.hostCount}%"
+            title={$t('tools.network-visualizer.addressTypes.broadcastAddress')}
+          >
             {#if subnetInfo.hostCount <= 32}
               <span class="segment-label">B</span>
             {/if}
@@ -109,16 +125,18 @@
       <div class="range-legend">
         <div class="legend-item">
           <div class="legend-color network"></div>
-          <span>Network</span>
+          <span>{$t('tools.network-visualizer.legend.network')}</span>
         </div>
         <div class="legend-item">
           <div class="legend-color usable"></div>
-          <span>Usable Hosts ({formatNumber(subnetInfo.usableHosts)})</span>
+          <span
+            >{$t('tools.network-visualizer.legend.usableHosts', { count: formatNumber(subnetInfo.usableHosts) })}</span
+          >
         </div>
         {#if subnetInfo.hostCount > 1}
           <div class="legend-item">
             <div class="legend-color broadcast"></div>
-            <span>Broadcast</span>
+            <span>{$t('tools.network-visualizer.legend.broadcast')}</span>
           </div>
         {/if}
       </div>
@@ -127,7 +145,7 @@
 
   <!-- Binary Subnet Mask Visualization -->
   <section class="binary-section">
-    <h4>Subnet Mask Binary Breakdown</h4>
+    <h4>{$t('tools.network-visualizer.sections.binaryBreakdown')}</h4>
 
     <div class="binary-display">
       {#each subnetInfo.subnet.octets as octet, i (i)}
@@ -139,7 +157,13 @@
           <div class="bits-group">
             {#each octet.toString(2).padStart(8, '0').split('') as bit, bitIndex (bitIndex)}
               <Tooltip
-                text="{bit === '1' ? 'Network bit (1)' : 'Host bit (0)'} - Position {i * 8 + bitIndex + 1}"
+                text={$t('tools.network-visualizer.binary.bitTooltip', {
+                  type:
+                    bit === '1'
+                      ? $t('tools.network-visualizer.binary.networkBit')
+                      : $t('tools.network-visualizer.binary.hostBit'),
+                  position: i * 8 + bitIndex + 1,
+                })}
                 position="top"
               >
                 <span class="bit-box {bit === '1' ? 'network-bit' : 'host-bit'}">
@@ -149,7 +173,7 @@
             {/each}
           </div>
           <span class="octet-label">
-            (Octet {i + 1})
+            {$t('tools.network-visualizer.binary.octetLabel', { number: i + 1 })}
           </span>
         </div>
       {/each}
@@ -159,11 +183,11 @@
       <div class="bit-stats">
         <div class="bit-stat">
           <div class="legend-color network"></div>
-          <span>Network bits: {subnetInfo.cidr}</span>
+          <span>{$t('tools.network-visualizer.binary.networkBits', { count: subnetInfo.cidr })}</span>
         </div>
         <div class="bit-stat">
           <div class="legend-color host"></div>
-          <span>Host bits: {32 - subnetInfo.cidr}</span>
+          <span>{$t('tools.network-visualizer.binary.hostBits', { count: 32 - subnetInfo.cidr })}</span>
         </div>
       </div>
     </div>
@@ -172,7 +196,7 @@
   <!-- Address Grid (for smaller subnets) -->
   {#if subnetInfo.hostCount <= 64}
     <section class="grid-section">
-      <h4>Address Grid</h4>
+      <h4>{$t('tools.network-visualizer.sections.addressGrid')}</h4>
 
       <div class="address-grid-wrap">
         <div class="address-grid">
@@ -196,14 +220,14 @@
 
   <!-- Efficiency Metrics -->
   <section class="efficiency-section">
-    <h4>Network Efficiency</h4>
+    <h4>{$t('tools.network-visualizer.sections.networkEfficiency')}</h4>
 
     <div class="efficiency-grid">
       <div class="efficiency-metric">
         <div class="metric-value {getUtilizationColor(usablePercentage)}">
           {usablePercentage.toFixed(1)}%
         </div>
-        <div class="metric-label">Address Utilization</div>
+        <div class="metric-label">{$t('tools.network-visualizer.efficiency.addressUtilization')}</div>
       </div>
 
       <div class="efficiency-metric">

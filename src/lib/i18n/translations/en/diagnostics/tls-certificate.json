@@ -1,0 +1,125 @@
+{
+  "title": "TLS Certificate Analyzer",
+  "description": "Analyze TLS certificates, view certificate chains, check expiration dates, and examine Subject Alternative Names (SANs). Supports custom SNI servername for multi-domain certificates.",
+
+  "examples": [
+    {
+      "host": "google.com:443",
+      "description": "Google TLS certificate"
+    },
+    {
+      "host": "github.com:443",
+      "description": "GitHub certificate chain"
+    },
+    {
+      "host": "cloudflare.com:443",
+      "description": "Cloudflare certificate"
+    },
+    {
+      "host": "wikipedia.org:443",
+      "description": "Wikipedia certificate"
+    },
+    {
+      "host": "stackoverflow.com:443",
+      "description": "Stack Overflow certificate"
+    },
+    {
+      "host": "microsoft.com:443",
+      "description": "Microsoft certificate"
+    }
+  ],
+
+  "examplesSection": {
+    "title": "Certificate Examples",
+    "tooltip": "Analyze certificate for {host} ({description})"
+  },
+
+  "form": {
+    "title": "Certificate Analysis Configuration",
+    "hostPort": {
+      "label": "Host:Port",
+      "placeholder": "google.com:443",
+      "tooltip": "Enter hostname:port (e.g., google.com:443)",
+      "error": "Invalid host:port format"
+    },
+    "customSni": {
+      "label": "Use custom SNI servername",
+      "placeholder": "example.com",
+      "tooltip": "Custom servername for SNI (Server Name Indication)"
+    },
+    "analyze": "Analyze Certificate",
+    "analyzing": "Analyzing Certificate...",
+    "errors": {
+      "analysisFailedStatus": "Certificate analysis failed ({status})",
+      "unknownError": "Unknown error occurred"
+    }
+  },
+
+  "results": {
+    "title": "Certificate Analysis Results",
+    "copy": "Copy Certificate Info",
+    "copied": "Copied!",
+
+    "status": {
+      "expired": "Expired",
+      "expiresInDays": "Expires in {days} days",
+      "validForDays": "Valid for {days} days",
+      "notYetValid": "Not yet valid",
+      "currentlyValid": "Currently valid"
+    },
+
+    "certificate": {
+      "title": "Certificate Information",
+      "commonName": "Common Name:",
+      "organization": "Organization:",
+      "issuer": "Issuer:",
+      "serialNumber": "Serial Number:",
+      "validFrom": "Valid From:",
+      "validTo": "Valid To:",
+      "na": "N/A"
+    },
+
+    "san": {
+      "title": "Subject Alternative Names"
+    },
+
+    "fingerprints": {
+      "title": "Fingerprints",
+      "sha1": "SHA1:",
+      "sha256": "SHA256:"
+    },
+
+    "chain": {
+      "title": "Certificate Chain ({count} certificates)",
+      "level": "Level {level}",
+      "issuer": "Issuer: {issuer}",
+      "expires": "Expires: {date}"
+    },
+
+    "connection": {
+      "title": "Connection Details",
+      "tlsVersion": "TLS Version:",
+      "cipherSuite": "Cipher Suite:",
+      "alpnProtocol": "ALPN Protocol:"
+    }
+  },
+
+  "error": {
+    "title": "Certificate Analysis Failed"
+  },
+
+  "copyTemplate": {
+    "header": "TLS Certificate Analysis for {host}",
+    "generated": "Generated at: {timestamp}",
+    "subject": "Subject: {subject}",
+    "issuer": "Issuer: {issuer}",
+    "validFrom": "Valid From: {validFrom}",
+    "validTo": "Valid To: {validTo}",
+    "daysUntilExpiry": "Days Until Expiry: {days}",
+    "serialNumber": "Serial Number: {serialNumber}",
+    "fingerprintSha1": "Fingerprint (SHA1): {fingerprint}",
+    "fingerprintSha256": "Fingerprint (SHA256): {fingerprint256}",
+    "sanHeader": "Subject Alternative Names:",
+    "sanItem": "  {san}"
+  }
+}

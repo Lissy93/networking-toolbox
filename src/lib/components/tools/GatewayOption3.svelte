@@ -11,8 +11,16 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables/useClipboard.svelte';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
 
   const clipboard = useClipboard();
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools.gateway-option3');
+  });
 
   type Tab = 'build' | 'decode';
   let activeTab = $state<Tab>('build');
@@ -28,17 +36,33 @@
   let decodeResult = $state<GatewayResult | null>(null);
   let decodeError = $state<string>('');
 
-  const navOptions = [
-    { value: 'build', label: 'Build Option' },
-    { value: 'decode', label: 'Decode Option' },
-  ];
+  const navOptions = $derived([
+    { value: 'build', label: $t('tools/gateway-option3.nav.build') },
+    { value: 'decode', label: $t('tools/gateway-option3.nav.decode') },
+  ]);
 
-  const decodeExamples = [
-    { label: 'Single Gateway', hexValue: 'c0a80101', description: '192.168.1.1' },
-    { label: 'Dual Gateways', hexValue: 'c0a80101c0a80102', description: '192.168.1.1, 192.168.1.2' },
-    { label: 'Google DNS Primary', hexValue: '08080808', description: '8.8.8.8' },
-    { label: 'Common Home Router', hexValue: 'c0a8000a', description: '192.168.0.10' },
-  ];
+  const decodeExamples = $derived([
+    {
+      label: $t('tools/gateway-option3.examples.decode.singleGateway.label'),
+      hexValue: 'c0a80101',
+      description: $t('tools/gateway-option3.examples.decode.singleGateway.description'),
+    },
+    {
+      label: $t('tools/gateway-option3.examples.decode.dualGateways.label'),
+      hexValue: 'c0a80101c0a80102',
+      description: $t('tools/gateway-option3.examples.decode.dualGateways.description'),
+    },
+    {
+      label: $t('tools/gateway-option3.examples.decode.googleDNS.label'),
+      hexValue: '08080808',
+      description: $t('tools/gateway-option3.examples.decode.googleDNS.description'),
+    },
+    {
+      label: $t('tools/gateway-option3.examples.decode.commonRouter.label'),
+      hexValue: 'c0a8000a',
+      description: $t('tools/gateway-option3.examples.decode.commonRouter.description'),
+    },
+  ]);
 
   function loadExample(example: (typeof GATEWAY_EXAMPLES)[0]) {
     activeTab = 'build';
@@ -122,8 +146,8 @@
 </script>
 
 <ToolContentContainer
-  title="DHCP Option 3 - Router/Default Gateway"
-  description="Build and decode default gateway configuration. Multiple gateways can be specified for redundancy or load balancing, listed in order of preference."
+  title={$t('tools/gateway-option3.title')}
+  description={$t('tools/gateway-option3.subtitle')}
   {navOptions}
   bind:selectedNav={activeTab}
 >
@@ -136,37 +160,47 @@
     />
 
     <div class="card input-card">
-      <h3>Gateway Configuration</h3>
+      <h3>{$t('tools/gateway-option3.build.title')}</h3>
 
       <div class="form-group">
-        <label for="subnet">Subnet (Optional - for validation)</label>
-        <input id="subnet" type="text" bind:value={subnet} placeholder="e.g., 192.168.1.0/24" class="input" />
-        <span class="hint">If provided, gateways will be validated against this subnet</span>
+        <label for="subnet">{$t('tools/gateway-option3.build.subnet.label')}</label>
+        <input
+          id="subnet"
+          type="text"
+          bind:value={subnet}
+          placeholder={$t('tools/gateway-option3.build.subnet.placeholder')}
+          class="input"
+        />
+        <span class="hint">{$t('tools/gateway-option3.build.subnet.hint')}</span>
       </div>
 
       <div class="form-group">
-        <label for="gateway-0">Gateway Addresses (in order of preference)</label>
+        <label for="gateway-0">{$t('tools/gateway-option3.build.gateways.label')}</label>
         {#each gateways as _gateway, i (i)}
           <div class="gateway-row">
             <input
               id={i === 0 ? 'gateway-0' : undefined}
               type="text"
               bind:value={gateways[i]}
-              placeholder="e.g., 192.168.1.1"
+              placeholder={$t('tools/gateway-option3.build.gateways.placeholder')}
               class="input"
               aria-label={i > 0 ? `Gateway ${i + 1}` : undefined}
             />
             {#if gateways.length > 1}
-              <button class="btn btn-danger btn-sm" onclick={() => removeGateway(i)}>Remove</button>
+              <button class="btn btn-danger btn-sm" onclick={() => removeGateway(i)}
+                >{$t('tools/gateway-option3.build.gateways.removeButton')}</button
+              >
             {/if}
           </div>
         {/each}
-        <button class="btn btn-secondary btn-sm" onclick={addGateway}>Add Gateway</button>
+        <button class="btn btn-secondary btn-sm" onclick={addGateway}
+          >{$t('tools/gateway-option3.build.gateways.addButton')}</button
+        >
       </div>
 
       {#if buildErrors.length > 0}
         <div class="error-card">
-          <strong>Validation Errors:</strong>
+          <strong>{$t('tools/gateway-option3.build.errors.title')}</strong>
           <ul>
             {#each buildErrors as error, i (i)}
               <li>{error}</li>
@@ -178,11 +212,11 @@
 
     {#if buildResult}
       <div class="card result-card">
-        <h3>Option 3 - Router</h3>
+        <h3>{$t('tools/gateway-option3.results.buildTitle')}</h3>
 
         <div class="result-grid">
           <div class="result-item">
-            <span class="label">Gateways:</span>
+            <span class="label">{$t('tools/gateway-option3.results.gateways')}</span>
             <div class="gateway-list">
               {#each buildResult.gateways as gw, i (i)}
                 <span class="gateway-badge">
@@ -193,7 +227,7 @@
           </div>
 
           <div class="result-item">
-            <span class="label">Hex Encoded:</span>
+            <span class="label">{$t('tools/gateway-option3.results.hexEncoded')}</span>
             <code class="code-value">{buildResult.hexEncoded}</code>
             <button
               class="btn-copy"
@@ -201,12 +235,14 @@
               onclick={() => clipboard.copy(buildResult!.hexEncoded, 'hex')}
               aria-label="Copy hex"
             >
-              {clipboard.isCopied('hex') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('hex')
+                ? $t('tools/gateway-option3.buttons.copied')
+                : $t('tools/gateway-option3.buttons.copy')}
             </button>
           </div>
 
           <div class="result-item">
-            <span class="label">Wire Format:</span>
+            <span class="label">{$t('tools/gateway-option3.results.wireFormat')}</span>
             <code class="code-value">{buildResult.wireFormat}</code>
             <button
               class="btn-copy"
@@ -214,28 +250,34 @@
               onclick={() => clipboard.copy(buildResult!.wireFormat, 'wire')}
               aria-label="Copy wire format"
             >
-              {clipboard.isCopied('wire') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('wire')
+                ? $t('tools/gateway-option3.buttons.copied')
+                : $t('tools/gateway-option3.buttons.copy')}
             </button>
           </div>
 
           <div class="result-item">
-            <span class="label">Total Length:</span>
-            <span class="value">{buildResult.totalLength} bytes</span>
+            <span class="label">{$t('tools/gateway-option3.results.totalLength')}</span>
+            <span class="value"
+              >{$t('tools/gateway-option3.results.lengthBytes', { length: buildResult.totalLength })}</span
+            >
           </div>
         </div>
 
         <div class="config-section">
-          <h4>Configuration Examples</h4>
+          <h4>{$t('tools/gateway-option3.results.configExamples')}</h4>
 
           <div class="output-group">
             <div class="output-header">
-              <h5>ISC DHCPd</h5>
+              <h5>{$t('tools/gateway-option3.results.iscDhcpd')}</h5>
               <button
                 class="btn-copy"
                 class:copied={clipboard.isCopied('isc')}
                 onclick={() => clipboard.copy(buildResult!.configExamples.iscDhcpd, 'isc')}
               >
-                {clipboard.isCopied('isc') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('isc')
+                  ? $t('tools/gateway-option3.buttons.copied')
+                  : $t('tools/gateway-option3.buttons.copy')}
               </button>
             </div>
             <pre class="code-block"><code>{buildResult.configExamples.iscDhcpd}</code></pre>
@@ -243,13 +285,15 @@
 
           <div class="output-group">
             <div class="output-header">
-              <h5>Kea DHCPv4</h5>
+              <h5>{$t('tools/gateway-option3.results.keaDhcp4')}</h5>
               <button
                 class="btn-copy"
                 class:copied={clipboard.isCopied('kea')}
                 onclick={() => clipboard.copy(buildResult!.configExamples.keaDhcp4, 'kea')}
               >
-                {clipboard.isCopied('kea') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('kea')
+                  ? $t('tools/gateway-option3.buttons.copied')
+                  : $t('tools/gateway-option3.buttons.copy')}
               </button>
             </div>
             <pre class="code-block"><code>{buildResult.configExamples.keaDhcp4}</code></pre>
@@ -257,13 +301,15 @@
 
           <div class="output-group">
             <div class="output-header">
-              <h5>dnsmasq</h5>
+              <h5>{$t('tools/gateway-option3.results.dnsmasq')}</h5>
               <button
                 class="btn-copy"
                 class:copied={clipboard.isCopied('dnsmasq')}
                 onclick={() => clipboard.copy(buildResult!.configExamples.dnsmasq, 'dnsmasq')}
               >
-                {clipboard.isCopied('dnsmasq') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('dnsmasq')
+                  ? $t('tools/gateway-option3.buttons.copied')
+                  : $t('tools/gateway-option3.buttons.copy')}
               </button>
             </div>
             <pre class="code-block"><code>{buildResult.configExamples.dnsmasq}</code></pre>
@@ -280,23 +326,23 @@
     />
 
     <div class="card input-card">
-      <h3>Decode Option 3</h3>
+      <h3>{$t('tools/gateway-option3.decode.title')}</h3>
 
       <div class="form-group">
-        <label for="hex-input">Hex String</label>
+        <label for="hex-input">{$t('tools/gateway-option3.decode.hexInput.label')}</label>
         <textarea
           id="hex-input"
           bind:value={hexInput}
-          placeholder="e.g., c0a80101 or c0 a8 01 01"
+          placeholder={$t('tools/gateway-option3.decode.hexInput.placeholder')}
           rows="3"
           class="input"
         ></textarea>
-        <span class="hint">Enter hex bytes (spaces optional)</span>
+        <span class="hint">{$t('tools/gateway-option3.decode.hexInput.hint')}</span>
       </div>
 
       {#if decodeError}
         <div class="error-card">
-          <strong>Decode Error:</strong>
+          <strong>{$t('tools/gateway-option3.decode.error.title')}</strong>
           <p>{decodeError}</p>
         </div>
       {/if}
@@ -304,11 +350,11 @@
 
     {#if decodeResult}
       <div class="card result-card">
-        <h3>Decoded Option 3</h3>
+        <h3>{$t('tools/gateway-option3.results.decodeTitle')}</h3>
 
         <div class="result-grid">
           <div class="result-item">
-            <span class="label">Gateways:</span>
+            <span class="label">{$t('tools/gateway-option3.results.gateways')}</span>
             <div class="gateway-list">
               {#each decodeResult.gateways as gw, i (i)}
                 <span class="gateway-badge">
@@ -319,28 +365,32 @@
           </div>
 
           <div class="result-item">
-            <span class="label">Total Length:</span>
-            <span class="value">{decodeResult.totalLength} bytes</span>
+            <span class="label">{$t('tools/gateway-option3.results.totalLength')}</span>
+            <span class="value"
+              >{$t('tools/gateway-option3.results.lengthBytes', { length: decodeResult.totalLength })}</span
+            >
           </div>
 
           <div class="result-item">
-            <span class="label">Gateway Count:</span>
+            <span class="label">{$t('tools/gateway-option3.results.gatewayCount')}</span>
             <span class="value">{decodeResult.gateways.length}</span>
           </div>
         </div>
 
         <div class="config-section">
-          <h4>Configuration Examples</h4>
+          <h4>{$t('tools/gateway-option3.results.configExamples')}</h4>
 
           <div class="output-group">
             <div class="output-header">
-              <h5>ISC DHCPd</h5>
+              <h5>{$t('tools/gateway-option3.results.iscDhcpd')}</h5>
               <button
                 class="btn-copy"
                 class:copied={clipboard.isCopied('decode-isc')}
                 onclick={() => clipboard.copy(decodeResult!.configExamples.iscDhcpd, 'decode-isc')}
               >
-                {clipboard.isCopied('decode-isc') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('decode-isc')
+                  ? $t('tools/gateway-option3.buttons.copied')
+                  : $t('tools/gateway-option3.buttons.copy')}
               </button>
             </div>
             <pre class="code-block"><code>{decodeResult.configExamples.iscDhcpd}</code></pre>
@@ -348,13 +398,15 @@
 
           <div class="output-group">
             <div class="output-header">
-              <h5>Kea DHCPv4</h5>
+              <h5>{$t('tools/gateway-option3.results.keaDhcp4')}</h5>
               <button
                 class="btn-copy"
                 class:copied={clipboard.isCopied('decode-kea')}
                 onclick={() => clipboard.copy(decodeResult!.configExamples.keaDhcp4, 'decode-kea')}
               >
-                {clipboard.isCopied('decode-kea') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('decode-kea')
+                  ? $t('tools/gateway-option3.buttons.copied')
+                  : $t('tools/gateway-option3.buttons.copy')}
               </button>
             </div>
             <pre class="code-block"><code>{decodeResult.configExamples.keaDhcp4}</code></pre>
@@ -362,13 +414,15 @@
 
           <div class="output-group">
             <div class="output-header">
-              <h5>dnsmasq</h5>
+              <h5>{$t('tools/gateway-option3.results.dnsmasq')}</h5>
               <button
                 class="btn-copy"
                 class:copied={clipboard.isCopied('decode-dnsmasq')}
                 onclick={() => clipboard.copy(decodeResult!.configExamples.dnsmasq, 'decode-dnsmasq')}
               >
-                {clipboard.isCopied('decode-dnsmasq') ? 'Copied' : 'Copy'}
+                {clipboard.isCopied('decode-dnsmasq')
+                  ? $t('tools/gateway-option3.buttons.copied')
+                  : $t('tools/gateway-option3.buttons.copy')}
               </button>
             </div>
             <pre class="code-block"><code>{decodeResult.configExamples.dnsmasq}</code></pre>

@@ -1,7 +1,15 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import { Copy, Download, Check, Globe, Type } from 'lucide-svelte';
   import { tooltip } from '$lib/actions/tooltip.js';
   import { useClipboard } from '$lib/composables';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools/idn-punycode-converter');
+  });
 
   let inputText = $state('');
   let mode = $state('unicode-to-punycode');
@@ -9,14 +17,38 @@
 
   const clipboard = useClipboard();
 
-  const domainExamples = [
-    { unicode: 'münchen.de', punycode: 'xn--mnchen-3ya.de', description: 'German city domain' },
-    { unicode: '日本.jp', punycode: 'xn--wgbl6a.jp', description: 'Japanese domain' },
-    { unicode: 'россия.рф', punycode: 'xn--h1alffa9f.xn--p1ai', description: 'Russian domain' },
-    { unicode: 'العربية.net', punycode: 'xn--mgbah1a3hjkrd.net', description: 'Arabic domain' },
-    { unicode: '한국.kr', punycode: 'xn--3e0b707e.kr', description: 'Korean domain' },
-    { unicode: 'ελληνικά.gr', punycode: 'xn--hxajbheg2az3al.gr', description: 'Greek domain' },
-  ];
+  const domainExamples = $derived([
+    {
+      unicode: 'münchen.de',
+      punycode: 'xn--mnchen-3ya.de',
+      description: $t('tools.idn-punycode-converter.examples.german'),
+    },
+    {
+      unicode: '日本.jp',
+      punycode: 'xn--wgbl6a.jp',
+      description: $t('tools.idn-punycode-converter.examples.japanese'),
+    },
+    {
+      unicode: 'россия.рф',
+      punycode: 'xn--h1alffa9f.xn--p1ai',
+      description: $t('tools.idn-punycode-converter.examples.russian'),
+    },
+    {
+      unicode: 'العربية.net',
+      punycode: 'xn--mgbah1a3hjkrd.net',
+      description: $t('tools.idn-punycode-converter.examples.arabic'),
+    },
+    {
+      unicode: '한국.kr',
+      punycode: 'xn--3e0b707e.kr',
+      description: $t('tools.idn-punycode-converter.examples.korean'),
+    },
+    {
+      unicode: 'ελληνικά.gr',
+      punycode: 'xn--hxajbheg2az3al.gr',
+      description: $t('tools.idn-punycode-converter.examples.greek'),
+    },
+  ]);
 
   // Punycode implementation based on RFC 3492
   function punycodeDecode(input: string) {
@@ -204,12 +236,16 @@
         return convertDomain(inputText.trim(), false);
       }
     } catch {
-      return 'Error: Invalid input';
+      return $t('tools.idn-punycode-converter.conversion.error');
     }
   });
 
   let isValid = $derived.by(() => {
-    return inputText.trim() !== '' && result !== '' && !result.startsWith('Error:');
+    return (
+      inputText.trim() !== '' &&
+      result !== '' &&
+      !result.startsWith($t('tools.idn-punycode-converter.conversion.error').split(':')[0] + ':')
+    );
   });
 
   let warnings = $derived.by(() => {
@@ -217,16 +253,16 @@
 
     if (mode === 'unicode-to-punycode') {
       if (inputText && !/[\u0080-\uFFFF]/.test(inputText)) {
-        warns.push('Input contains only ASCII characters - no conversion needed');
+        warns.push($t('tools.idn-punycode-converter.warnings.asciiOnly'));
       }
     } else {
       if (inputText && !inputText.includes('xn--')) {
-        warns.push('Input does not contain punycode domains (xn-- prefix)');
+        warns.push($t('tools.idn-punycode-converter.warnings.noPunycode'));
       }
     }
 
     if (inputText.length > 253) {
-      warns.push('Domain name exceeds maximum length of 253 characters');
+      warns.push($t('tools.idn-punycode-converter.warnings.tooLong'));
     }
 
     return warns;
@@ -272,8 +308,8 @@
 <div class="idn-converter">
   <div class="card">
     <div class="card-header">
-      <h1>IDN Punycode Converter</h1>
-      <p>Convert between Unicode domain names and Punycode (ASCII-compatible encoding)</p>
+      <h1>{$t('tools.idn-punycode-converter.title')}</h1>
+      <p>{$t('tools.idn-punycode-converter.description')}</p>
     </div>
 
     <div class="card-content">
@@ -286,7 +322,7 @@
             onclick={() => (mode = 'unicode-to-punycode')}
           >
             <Globe size="16" />
-            Unicode → Punycode
+            {$t('tools.idn-punycode-converter.modes.unicodeToPunycode')}
           </button>
           <button
             class="toggle-btn"
@@ -294,7 +330,7 @@
             onclick={() => (mode = 'punycode-to-unicode')}
           >
             <Type size="16" />
-            Punycode → Unicode
+            {$t('tools.idn-punycode-converter.modes.punycodeToUnicode')}
           </button>
         </div>
       </div>
@@ -304,7 +340,7 @@
         <summary>
           <div class="summary-content">
             <Globe size="20" />
-            <span>Example Domains</span>
+            <span>{$t('examples.title')}</span>
           </div>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -326,7 +362,7 @@
       <div class="conversion-card">
         <div class="conversion-header">
           <h2>
-            {mode === 'unicode-to-punycode' ? 'Unicode → Punycode Conversion' : 'Punycode → Unicode Conversion'}
+            {mode === 'unicode-to-punycode' ? $t('conversion.unicodeTitle') : $t('conversion.punycodeTitle')}
           </h2>
         </div>
 
@@ -334,20 +370,20 @@
           <!-- Input -->
           <div class="input-card">
             <div class="input-section">
-              <label for="input" use:tooltip={'Enter the domain name you want to convert'}>
-                {mode === 'unicode-to-punycode' ? 'Unicode Domain Name' : 'Punycode Domain Name'}
+              <label for="input" use:tooltip={$t('conversion.unicodeTooltip')}>
+                {mode === 'unicode-to-punycode' ? $t('conversion.unicodeLabel') : $t('conversion.punycodeLabel')}
               </label>
               <textarea
                 id="input"
                 bind:value={inputText}
                 rows="4"
-                placeholder={mode === 'unicode-to-punycode' ? 'münchen.de' : 'xn--mnchen-3ya.de'}
+                placeholder={mode === 'unicode-to-punycode'
+                  ? $t('conversion.unicodePlaceholder')
+                  : $t('conversion.punycodePlaceholder')}
                 class:mono-font={mode === 'punycode-to-unicode'}
               ></textarea>
               <small>
-                {mode === 'unicode-to-punycode'
-                  ? 'Enter Unicode domain names with international characters'
-                  : 'Enter domain names containing xn-- punycode labels'}
+                {mode === 'unicode-to-punycode' ? $t('conversion.unicodeHelp') : $t('conversion.punycodeHelp')}
               </small>
             </div>
           </div>
@@ -357,10 +393,10 @@
             <div class="output-section">
               <div class="output-header">
                 <h3>
-                  {mode === 'unicode-to-punycode' ? 'Punycode Result' : 'Unicode Result'}
+                  {mode === 'unicode-to-punycode' ? $t('conversion.punycodeResult') : $t('conversion.unicodeResult')}
                 </h3>
                 {#if isValid}
-                  <button onclick={swapModeAndContent} class="swap-btn" use:tooltip={'Swap input and output'}>
+                  <button onclick={swapModeAndContent} class="swap-btn" use:tooltip={$t('conversion.swapTooltip')}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                       <path
                         stroke-linecap="round"
@@ -369,23 +405,23 @@
                         d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
                       ></path>
                     </svg>
-                    Reverse
+                    {$t('conversion.reverse')}
                   </button>
                 {/if}
               </div>
               <div class="output-display">
                 {#if isValid}
                   <pre class="result-text" class:mono-font={mode === 'unicode-to-punycode'}>{result}</pre>
-                {:else if result.startsWith('Error:')}
+                {:else if result.startsWith($t('tools.idn-punycode-converter.conversion.error').split(':')[0] + ':')}
                   <p class="error-text">{result}</p>
                 {:else}
-                  <p class="placeholder-text">Enter a domain name to see the conversion result</p>
+                  <p class="placeholder-text">{$t('conversion.placeholder')}</p>
                 {/if}
               </div>
 
               {#if warnings.length > 0}
                 <div class="alert alert-warning">
-                  <h4>Notices</h4>
+                  <h4>{$t('warnings.title')}</h4>
                   <ul>
                     {#each warnings as warning (warning)}
                       <li>{warning}</li>
@@ -404,10 +440,10 @@
                   >
                     {#if clipboard.isCopied('copy')}
                       <Check size="16" />
-                      Copied!
+                      {$t('actions.copied')}
                     {:else}
                       <Copy size="16" />
-                      Copy Result
+                      {$t('actions.copyResult')}
                     {/if}
                   </button>
                   <button
@@ -418,10 +454,10 @@
                   >
                     {#if clipboard.isCopied('download')}
                       <Check size="16" />
-                      Downloaded!
+                      {$t('actions.downloaded')}
                     {:else}
                       <Download size="16" />
-                      Download
+                      {$t('actions.download')}
                     {/if}
                   </button>
                 </div>
@@ -434,55 +470,53 @@
       <!-- Information Cards -->
       <div class="info-section">
         <div class="card info-card">
-          <h3>About IDN and Punycode</h3>
+          <h3>{$t('info.aboutTitle')}</h3>
           <p>
-            Internationalized Domain Names (IDN) allow domain names to contain Unicode characters from various scripts
-            and languages. Punycode is the ASCII-compatible encoding that represents Unicode domain labels, allowing
-            non-ASCII domain names to work with existing DNS infrastructure.
+            {$t('info.aboutDescription')}
           </p>
         </div>
 
         <div class="info-grid">
           <div class="card">
-            <h4>How Punycode Works</h4>
+            <h4>{$t('info.howItWorksTitle')}</h4>
             <div class="punycode-example">
-              <p>Each Unicode label is encoded separately:</p>
+              <p>{$t('info.howItWorksDescription')}</p>
               <div class="code-example">
-                <div><strong>Unicode:</strong> <span class="unicode-text">münchen</span></div>
-                <div><strong>Encoded:</strong> <span class="encoded-text">mnchen-3ya</span></div>
-                <div><strong>Final:</strong> <span class="final-text">xn--mnchen-3ya</span></div>
+                <div><strong>{$t('info.unicode')}</strong> <span class="unicode-text">münchen</span></div>
+                <div><strong>{$t('info.encoded')}</strong> <span class="encoded-text">mnchen-3ya</span></div>
+                <div><strong>{$t('info.final')}</strong> <span class="final-text">xn--mnchen-3ya</span></div>
               </div>
-              <small>The <code>xn--</code> prefix identifies punycode labels</small>
+              <small>{$t('info.xnPrefix')}</small>
             </div>
           </div>
 
           <div class="card">
-            <h4>Common Use Cases</h4>
+            <h4>{$t('info.useCasesTitle')}</h4>
             <ul class="use-cases">
-              <li>International domain registration</li>
-              <li>Email address internationalization</li>
-              <li>DNS configuration</li>
-              <li>Web application development</li>
-              <li>Security analysis</li>
+              <li>{$t('info.useCases.registration')}</li>
+              <li>{$t('info.useCases.email')}</li>
+              <li>{$t('info.useCases.dns')}</li>
+              <li>{$t('info.useCases.webDev')}</li>
+              <li>{$t('info.useCases.security')}</li>
             </ul>
           </div>
 
           <div class="card">
-            <h4>Supported Features</h4>
+            <h4>{$t('info.featuresTitle')}</h4>
             <ul class="features">
-              <li>RFC 3492 compliant Punycode encoding/decoding</li>
-              <li>Bidirectional conversion (Unicode ↔ Punycode)</li>
-              <li>Multiple domain labels support</li>
-              <li>Mixed ASCII/Unicode domain handling</li>
+              <li>{$t('info.features.compliant')}</li>
+              <li>{$t('info.features.bidirectional')}</li>
+              <li>{$t('info.features.multipleLabels')}</li>
+              <li>{$t('info.features.mixed')}</li>
             </ul>
           </div>
           <div class="card security-card">
-            <h4>Security Considerations</h4>
+            <h4>{$t('info.securityTitle')}</h4>
             <ul class="security-list">
-              <li><strong>Homograph attacks:</strong> visually similar characters from different scripts</li>
-              <li>Always validate and normalize IDN input in applications</li>
-              <li>Consider implementing mixed-script detection</li>
-              <li>Be aware of browser IDN display policies</li>
+              <li><strong>{$t('info.security.homograph')}</strong></li>
+              <li>{$t('info.security.validate')}</li>
+              <li>{$t('info.security.mixedScript')}</li>
+              <li>{$t('info.security.browserPolicy')}</li>
             </ul>
           </div>
         </div>
@@ -948,18 +982,6 @@
 
             .final-text {
               color: var(--color-success);
-            }
-          }
-
-          small {
-            color: var(--text-secondary);
-            font-size: var(--font-size-xs);
-
-            code {
-              background: var(--bg-tertiary);
-              padding: 2px var(--spacing-xs);
-              border-radius: var(--radius-xs);
-              font-size: var(--font-size-xs);
             }
           }
         }

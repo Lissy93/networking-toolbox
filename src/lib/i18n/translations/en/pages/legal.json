@@ -1,0 +1,142 @@
+{
+  "privacy": {
+    "title": "Privacy Policy",
+    "metaDescription": "Privacy policy for Networking Toolbox - how we handle your data",
+    "ogTitle": "Privacy Policy | {siteTitle}",
+    "ogDescription": "Learn about how Networking Toolbox handles your data and privacy",
+
+    "hero": {
+      "title": "Privacy Policy",
+      "lead": "Your privacy matters. Actually, that's one of the reasons that I built this (and my other apps). I believe you should have total transparency of how an app works (e.g. access to it's code), and full control over your data. So, weather you're self-hosting Networking Toolbox, or using the public instance, you can be sure that your data is handled with care."
+    },
+
+    "principles": {
+      "title": "Principles",
+      "items": [
+        "We only collect the minimum data needed for things to work",
+        "We never store anything which isn't 100% necessary",
+        "Any stored data stays local in your browser or is encrypted with your own key (we can't access it)",
+        "We don't use cookies or tracking of any kind",
+        "We never share your data with anyone else",
+        "We're transparent about what's collected, stored, used and why",
+        "Our code is fully open source, so you can verify our claims for yourself"
+      ]
+    },
+
+    "overview": {
+      "title": "Overview",
+      "description": "Networking Toolbox is designed with privacy in mind. All network calculations and most diagnostic tools run entirely in your browser, meaning your data never leaves your device."
+    },
+
+    "dataProcessing": {
+      "title": "Data Processing",
+      "clientSide": {
+        "title": "Client-Side Processing",
+        "description": "The majority of tools (CIDR calculators, IP converters, subnet planners, etc.) perform all calculations locally in your browser. No data from these tools is transmitted to any server."
+      },
+      "serverSide": {
+        "title": "Server-Side Diagnostic Tools",
+        "description": "Some diagnostic tools (DNS lookups, DNSBL checks, TLS tests, etc.) require server-side processing to query external services. For these tools:",
+        "items": [
+          "Only the specific domain or IP address you enter is sent to our server",
+          "Data is processed in real-time and not stored permanently",
+          "Requests may be temporarily logged for debugging purposes (logs are automatically purged)",
+          "No personally identifiable information is collected"
+        ]
+      }
+    },
+
+    "localStorage": {
+      "title": "Local Storage",
+      "description": "We use browser localStorage (not cookies) to save your preferences locally. This data never leaves your device and can be cleared at any time through your browser settings.",
+      "items": [
+        {
+          "title": "Theme settings:",
+          "description": "Your chosen color theme and accessibility preferences"
+        },
+        {
+          "title": "Layout preferences:",
+          "description": "Homepage and navigation layout choices"
+        },
+        {
+          "title": "Bookmarked tools:",
+          "description": "Your saved favorite tools for quick access"
+        }
+      ],
+      "note": "All localStorage usage is optional and strictly for your convenience. The application works without it."
+    },
+
+    "analytics": {
+      "title": "Analytics & Tracking",
+      "description": "Unless disabled, we log basic anonymous usage statistics using a self-hosted Plausible Analytics instance. This helps us understand which features are most useful and improve the application.",
+      "features": [
+        {
+          "title": "Privacy-focused:",
+          "description": "No cookies, no tracking across sites, no personal data collection"
+        },
+        {
+          "title": "Anonymous only:",
+          "description": "We only collect page views and referrer information - no IP addresses, user agents, or any personally identifiable information"
+        },
+        {
+          "title": "Self-hosted:",
+          "description": "Analytics data stays on our infrastructure and is never shared with third parties"
+        },
+        {
+          "title": "Opt-out:",
+          "description": "You can disable analytics by enabling \"Do Not Track\" in your browser settings"
+        }
+      ],
+      "note": "We do not use any third-party advertising services or tracking scripts that follow you across the web."
+    },
+
+    "thirdParty": {
+      "title": "Third-Party Services",
+      "description": "When using diagnostic tools, your queries may be sent to third-party services:",
+      "services": [
+        {
+          "title": "DNS queries:",
+          "description": "Public DNS resolvers (Google, Cloudflare, Quad9, etc.)"
+        },
+        {
+          "title": "DNSBL checks:",
+          "description": "Spam blacklist providers (Spamhaus, SORBS, etc.)"
+        },
+        {
+          "title": "WHOIS/RDAP:",
+          "description": "Regional Internet registries"
+        },
+        {
+          "title": "Certificate checks:",
+          "description": "Certificate Transparency logs"
+        }
+      ],
+      "note": "These services have their own privacy policies and are outside our control."
+    },
+
+    "selfHosting": {
+      "title": "Self-Hosting",
+      "description": "For maximum privacy, you can self-host Networking Toolbox. When self-hosted, you have complete control over all data processing and server logs. See the {deployingLink} for instructions.",
+      "deployingLinkText": "Self-Hosting section"
+    },
+
+    "openSource": {
+      "title": "Open Source",
+      "description": "Networking Toolbox is fully open source. You can review the code to verify our privacy practices:",
+      "githubLinkText": "Source code on GitHub"
+    },
+
+    "changes": {
+      "title": "Changes to This Policy",
+      "description": "This privacy policy may be updated occasionally. Significant changes will be noted in the {changelogLink}.",
+      "changelogLinkText": "changelog",
+      "lastUpdated": "Last updated: January 2025"
+    },
+
+    "contact": {
+      "title": "Questions?",
+      "description": "If you have questions about this privacy policy, please open an issue on {githubLink}.",
+      "githubLinkText": "GitHub"
+    }
+  }
+}

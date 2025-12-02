@@ -11,6 +11,7 @@
   } from '$lib/utils/dhcp-option60.js';
   import { useClipboard, useExamples } from '$lib/composables';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
+  import { t } from '$lib/stores/language';
 
   let selectedPreset = $state<VendorPreset>('cisco-phone');
   let customValue = $state('');
@@ -23,38 +24,38 @@
   const clipboard = useClipboard();
 
   const examplesList = [
-    { preset: 'cisco-phone' as VendorPreset, description: 'Cisco IP Phones with TFTP' },
-    { preset: 'cisco-ap' as VendorPreset, description: 'Cisco APs with Option 43' },
-    { preset: 'pxe-client' as VendorPreset, description: 'PXE network boot' },
-    { preset: 'aruba-ap' as VendorPreset, description: 'Aruba wireless APs' },
+    { preset: 'cisco-phone' as VendorPreset, description: $t('tools/dhcp-option60-builder.examples.ciscoPhone') },
+    { preset: 'cisco-ap' as VendorPreset, description: $t('tools/dhcp-option60-builder.examples.ciscoAp') },
+    { preset: 'pxe-client' as VendorPreset, description: $t('tools/dhcp-option60-builder.examples.pxeClient') },
+    { preset: 'aruba-ap' as VendorPreset, description: $t('tools/dhcp-option60-builder.examples.arubaAp') },
   ];
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
-  const importantNotes = [
-    '<strong>Option 60</strong> (Vendor Class Identifier) allows DHCP servers to provide different configurations based on client type',
-    'Class-based policies enable <strong>separate IP pools</strong> and options for different device types',
-    'Wireless APs typically require both <strong>Option 60 and Option 43</strong> for controller discovery',
-    'Test configurations in a lab environment before deploying to production networks',
-    'Adjust subnet addresses, pool ranges, and option values to match your network design',
-  ];
+  const importantNotes = $derived([
+    $t('tools/dhcp-option60-builder.notes.list.vendorClass'),
+    $t('tools/dhcp-option60-builder.notes.list.classPolicies'),
+    $t('tools/dhcp-option60-builder.notes.list.option43'),
+    $t('tools/dhcp-option60-builder.notes.list.testing'),
+    $t('tools/dhcp-option60-builder.notes.list.customize'),
+  ]);
 
   const poolFields = $derived([
     {
       id: 'poolStart',
       icon: 'arrow-right',
-      label: 'Pool Start',
-      help: 'First IP in matching pool',
-      placeholder: '192.168.10.100',
+      label: $t('tools/dhcp-option60-builder.input.poolStart.label'),
+      help: $t('tools/dhcp-option60-builder.input.poolStart.help'),
+      placeholder: $t('tools/dhcp-option60-builder.input.poolStart.placeholder'),
       bind: () => networkConfig.poolStart,
       set: (v: string) => (networkConfig.poolStart = v),
     },
     {
       id: 'poolEnd',
       icon: 'arrow-left',
-      label: 'Pool End',
-      help: 'Last IP in matching pool',
-      placeholder: '192.168.10.200',
+      label: $t('tools/dhcp-option60-builder.input.poolEnd.label'),
+      help: $t('tools/dhcp-option60-builder.input.poolEnd.help'),
+      placeholder: $t('tools/dhcp-option60-builder.input.poolEnd.placeholder'),
       bind: () => networkConfig.poolEnd,
       set: (v: string) => (networkConfig.poolEnd = v),
     },
@@ -64,18 +65,18 @@
     {
       id: 'nonMatchingPoolStart',
       icon: 'arrow-right',
-      label: 'Non-Matching Pool Start',
-      help: 'First IP for non-matching clients',
-      placeholder: '192.168.10.50',
+      label: $t('tools/dhcp-option60-builder.input.nonMatchingPoolStart.label'),
+      help: $t('tools/dhcp-option60-builder.input.nonMatchingPoolStart.help'),
+      placeholder: $t('tools/dhcp-option60-builder.input.nonMatchingPoolStart.placeholder'),
       bind: () => networkConfig.nonMatchingPoolStart,
       set: (v: string) => (networkConfig.nonMatchingPoolStart = v),
     },
     {
       id: 'nonMatchingPoolEnd',
       icon: 'arrow-left',
-      label: 'Non-Matching Pool End',
-      help: 'Last IP for non-matching clients',
-      placeholder: '192.168.10.99',
+      label: $t('tools/dhcp-option60-builder.input.nonMatchingPoolEnd.label'),
+      help: $t('tools/dhcp-option60-builder.input.nonMatchingPoolEnd.help'),
+      placeholder: $t('tools/dhcp-option60-builder.input.nonMatchingPoolEnd.placeholder'),
       bind: () => networkConfig.nonMatchingPoolEnd,
       set: (v: string) => (networkConfig.nonMatchingPoolEnd = v),
     },
@@ -131,43 +132,43 @@
 
     // Validate subnet
     if (!isValidCIDR(networkConfig.subnet)) {
-      validationErrors.push('Invalid subnet CIDR notation (e.g., 192.168.10.0/24)');
+      validationErrors.push($t('tools/dhcp-option60-builder.errors.invalidSubnet'));
     }
 
     // Validate pool IPs
     if (!isValidIPv4(networkConfig.poolStart)) {
-      validationErrors.push('Invalid pool start IP address');
+      validationErrors.push($t('tools/dhcp-option60-builder.errors.invalidPoolStart'));
     }
     if (!isValidIPv4(networkConfig.poolEnd)) {
-      validationErrors.push('Invalid pool end IP address');
+      validationErrors.push($t('tools/dhcp-option60-builder.errors.invalidPoolEnd'));
     }
 
     // Validate non-matching pool if provided
     if (networkConfig.nonMatchingPoolStart && !isValidIPv4(networkConfig.nonMatchingPoolStart)) {
-      validationErrors.push('Invalid non-matching pool start IP address');
+      validationErrors.push($t('tools/dhcp-option60-builder.errors.invalidNonMatchingPoolStart'));
     }
     if (networkConfig.nonMatchingPoolEnd && !isValidIPv4(networkConfig.nonMatchingPoolEnd)) {
-      validationErrors.push('Invalid non-matching pool end IP address');
+      validationErrors.push($t('tools/dhcp-option60-builder.errors.invalidNonMatchingPoolEnd'));
     }
 
     // Validate server IP if needed and provided
     if (needsServerIp && networkConfig.serverIp && !isValidIPv4(networkConfig.serverIp)) {
-      validationErrors.push('Invalid server IP address');
+      validationErrors.push($t('tools/dhcp-option60-builder.errors.invalidServerIp'));
     }
 
     // Validate boot filename if needed and provided
     if (needsBootFilename && networkConfig.bootFilename && !isValidFilename(networkConfig.bootFilename)) {
-      validationErrors.push('Invalid boot filename');
+      validationErrors.push($t('tools/dhcp-option60-builder.errors.invalidBootFilename'));
     }
 
     // Validate MikroTik server name
     if (networkConfig.mikrotikServerName && networkConfig.mikrotikServerName.trim().length === 0) {
-      validationErrors.push('MikroTik server name cannot be empty');
+      validationErrors.push($t('tools/dhcp-option60-builder.errors.invalidMikrotikServerName'));
     }
 
     // Validate lease time format (basic check)
     if (networkConfig.leaseTime && !/^\d+[smhd]$/.test(networkConfig.leaseTime.trim())) {
-      validationErrors.push('Invalid lease time format (e.g., 24h, 1h, 30m)');
+      validationErrors.push($t('tools/dhcp-option60-builder.errors.invalidLeaseTime'));
     }
 
     return validationErrors;
@@ -181,11 +182,11 @@
       // Validate custom input if custom preset
       if (selectedPreset === 'custom') {
         if (!customValue.trim()) {
-          errors = ['Custom vendor class identifier is required'];
+          errors = [$t('tools/dhcp-option60-builder.errors.customRequired')];
           return;
         }
         if (!isValidVendorClass(customValue)) {
-          errors = ['Invalid vendor class identifier. Must be 1-255 printable ASCII characters.'];
+          errors = [$t('tools/dhcp-option60-builder.errors.invalidVendorClass')];
           return;
         }
       }
@@ -199,7 +200,7 @@
 
       result = generateOption60(selectedPreset, customValue || undefined, networkConfig);
     } catch (err: unknown) {
-      errors = [err instanceof Error ? err.message : 'Failed to generate configuration'];
+      errors = [err instanceof Error ? err.message : $t('tools/dhcp-option60-builder.errors.failedToGenerate')];
     }
   }
 
@@ -219,20 +220,20 @@
   onSelect={loadExample}
   getLabel={(ex) => VENDOR_PRESETS[ex.preset].name}
   getDescription={(ex) => ex.description}
-  getTooltip={(ex) => `Generate config for ${VENDOR_PRESETS[ex.preset].name}`}
+  getTooltip={(ex) => $t('tools/dhcp-option60-builder.examples.tooltip', { vendor: VENDOR_PRESETS[ex.preset].name })}
 />
 
 <!-- Input Form -->
 <div class="card input-card">
   <div class="card-header">
-    <h3>Vendor Class Configuration</h3>
+    <h3>{$t('tools/dhcp-option60-builder.input.title')}</h3>
   </div>
   <div class="card-content">
     <section class="inputs">
       <div class="input-group">
         <label for="preset">
           <Icon name="tag" size="sm" />
-          Vendor Preset
+          {$t('tools/dhcp-option60-builder.input.preset.label')}
         </label>
         <select
           id="preset"
@@ -253,25 +254,36 @@
         <div class="input-group">
           <label for="custom">
             <Icon name="edit" size="sm" />
-            Custom Vendor Class
+            {$t('tools/dhcp-option60-builder.input.custom.label')}
           </label>
-          <input id="custom" type="text" bind:value={customValue} placeholder="MyCustomVendorClass" maxlength="255" />
-          <span class="help-text">1-255 printable ASCII characters</span>
+          <input
+            id="custom"
+            type="text"
+            bind:value={customValue}
+            placeholder={$t('tools/dhcp-option60-builder.input.custom.placeholder')}
+            maxlength="255"
+          />
+          <span class="help-text">{$t('tools/dhcp-option60-builder.input.custom.help')}</span>
         </div>
       {/if}
 
       <!-- Advanced Configuration Toggle -->
       <div class="advanced-section">
         <details open>
-          <summary><h3>Advanced Options</h3></summary>
+          <summary><h3>{$t('tools/dhcp-option60-builder.input.advancedOptions')}</h3></summary>
           <!-- Subnet Configuration -->
           <div class="input-group">
             <label for="subnet">
               <Icon name="network" size="sm" />
-              Subnet (CIDR)
+              {$t('tools/dhcp-option60-builder.input.subnet.label')}
             </label>
-            <input id="subnet" type="text" bind:value={networkConfig.subnet} placeholder="192.168.10.0/24" />
-            <span class="help-text">Network address in CIDR notation</span>
+            <input
+              id="subnet"
+              type="text"
+              bind:value={networkConfig.subnet}
+              placeholder={$t('tools/dhcp-option60-builder.input.subnet.placeholder')}
+            />
+            <span class="help-text">{$t('tools/dhcp-option60-builder.input.subnet.help')}</span>
           </div>
 
           <!-- Matching Pool Range -->
@@ -321,14 +333,12 @@
             <div class="input-group">
               <label for="serverIp">
                 <Icon name="server" size="sm" />
-                {selectedPreset === 'pxe-client'
-                  ? 'TFTP Server IP'
-                  : selectedPreset === 'docsis'
-                    ? 'Config File Server IP'
-                    : 'TFTP Server IP'}
+                {selectedPreset === 'docsis'
+                  ? $t('tools/dhcp-option60-builder.input.serverIp.label.config')
+                  : $t('tools/dhcp-option60-builder.input.serverIp.label.tftp')}
               </label>
               <input id="serverIp" type="text" bind:value={networkConfig.serverIp} placeholder="192.168.10.5" />
-              <span class="help-text">IP address of the provisioning server</span>
+              <span class="help-text">{$t('tools/dhcp-option60-builder.input.serverIp.help')}</span>
             </div>
           {/if}
 
@@ -337,19 +347,21 @@
             <div class="input-group">
               <label for="bootFilename">
                 <Icon name="file" size="sm" />
-                {selectedPreset === 'docsis' ? 'Config Filename' : 'Boot Filename'}
+                {selectedPreset === 'docsis'
+                  ? $t('tools/dhcp-option60-builder.input.bootFilename.label.config')
+                  : $t('tools/dhcp-option60-builder.input.bootFilename.label.default')}
               </label>
               <input
                 id="bootFilename"
                 type="text"
                 bind:value={networkConfig.bootFilename}
                 placeholder={selectedPreset === 'pxe-client'
-                  ? 'pxelinux.0'
+                  ? $t('tools/dhcp-option60-builder.input.bootFilename.placeholder.pxe')
                   : selectedPreset === 'docsis'
-                    ? 'modem.cfg'
-                    : 'SEPDefault.cnf.xml'}
+                    ? $t('tools/dhcp-option60-builder.input.bootFilename.placeholder.docsis')
+                    : $t('tools/dhcp-option60-builder.input.bootFilename.placeholder.cisco')}
               />
-              <span class="help-text">Name of the configuration or boot file</span>
+              <span class="help-text">{$t('tools/dhcp-option60-builder.input.bootFilename.help')}</span>
             </div>
           {/if}
 
@@ -357,25 +369,30 @@
           <div class="input-group">
             <label for="mikrotikServerName">
               <Icon name="server" size="sm" />
-              MikroTik DHCP Server Name
+              {$t('tools/dhcp-option60-builder.input.mikrotikServerName.label')}
             </label>
             <input
               id="mikrotikServerName"
               type="text"
               bind:value={networkConfig.mikrotikServerName}
-              placeholder="dhcp1"
+              placeholder={$t('tools/dhcp-option60-builder.input.mikrotikServerName.placeholder')}
             />
-            <span class="help-text">Name of DHCP server in MikroTik config</span>
+            <span class="help-text">{$t('tools/dhcp-option60-builder.input.mikrotikServerName.help')}</span>
           </div>
 
           <!-- Lease Time -->
           <div class="input-group">
             <label for="leaseTime">
               <Icon name="clock" size="sm" />
-              Lease Time (dnsmasq)
+              {$t('tools/dhcp-option60-builder.input.leaseTime.label')}
             </label>
-            <input id="leaseTime" type="text" bind:value={networkConfig.leaseTime} placeholder="24h" />
-            <span class="help-text">DHCP lease time (e.g., 24h, 1h, 30m)</span>
+            <input
+              id="leaseTime"
+              type="text"
+              bind:value={networkConfig.leaseTime}
+              placeholder={$t('tools/dhcp-option60-builder.input.leaseTime.placeholder')}
+            />
+            <span class="help-text">{$t('tools/dhcp-option60-builder.input.leaseTime.help')}</span>
           </div>
         </details>
       </div>
@@ -397,14 +414,14 @@
 
 {#if result}
   <div class="card results">
-    <h3>Generated Configurations</h3>
+    <h3>{$t('tools/dhcp-option60-builder.results.title')}</h3>
 
     <!-- Vendor Class Identifier -->
     <div class="vci-section">
       <div class="vci-header">
         <h4>
           <Icon name="tag" size="sm" />
-          Vendor Class Identifier (Option 60)
+          {$t('tools/dhcp-option60-builder.results.vendorClass.title')}
         </h4>
         <button
           type="button"
@@ -413,20 +430,22 @@
           onclick={() => clipboard.copy(result!.vendorClass, 'vci')}
         >
           <Icon name={clipboard.isCopied('vci') ? 'check' : 'copy'} size="xs" />
-          {clipboard.isCopied('vci') ? 'Copied' : 'Copy'}
+          {clipboard.isCopied('vci')
+            ? $t('tools/dhcp-option60-builder.buttons.copied')
+            : $t('tools/dhcp-option60-builder.buttons.copy')}
         </button>
       </div>
       <code class="vci-value">{result.vendorClass}</code>
 
       <div class="use-case">
         <Icon name="info" size="sm" />
-        <p><strong>Use Case:</strong> {result.useCase}</p>
+        <p><strong>{$t('tools/dhcp-option60-builder.results.vendorClass.useCase')}</strong> {result.useCase}</p>
       </div>
     </div>
 
     <!-- Server Configurations -->
     <div class="output-formats">
-      {#each [{ id: 'isc', title: 'ISC DHCP Server', content: result.iscDhcpConfig, hint: 'Add to /etc/dhcp/dhcpd.conf' }, { id: 'kea', title: 'Kea DHCP Server', content: result.keaConfig, hint: 'Add to Kea configuration JSON' }, { id: 'windows', title: 'Windows DHCP Server', content: result.windowsConfig, hint: 'Run PowerShell commands as Administrator' }, { id: 'dnsmasq', title: 'dnsmasq', content: result.dnsmasqConfig, hint: 'Add to /etc/dnsmasq.conf' }, { id: 'mikrotik', title: 'MikroTik RouterOS', content: result.mikrotikConfig, hint: 'RouterOS CLI commands' }] as config (config.id)}
+      {#each [{ id: 'isc', title: $t('tools/dhcp-option60-builder.results.formats.isc.title'), content: result.iscDhcpConfig, hint: $t('tools/dhcp-option60-builder.results.formats.isc.hint') }, { id: 'kea', title: $t('tools/dhcp-option60-builder.results.formats.kea.title'), content: result.keaConfig, hint: $t('tools/dhcp-option60-builder.results.formats.kea.hint') }, { id: 'windows', title: $t('tools/dhcp-option60-builder.results.formats.windows.title'), content: result.windowsConfig, hint: $t('tools/dhcp-option60-builder.results.formats.windows.hint') }, { id: 'dnsmasq', title: $t('tools/dhcp-option60-builder.results.formats.dnsmasq.title'), content: result.dnsmasqConfig, hint: $t('tools/dhcp-option60-builder.results.formats.dnsmasq.hint') }, { id: 'mikrotik', title: $t('tools/dhcp-option60-builder.results.formats.mikrotik.title'), content: result.mikrotikConfig, hint: $t('tools/dhcp-option60-builder.results.formats.mikrotik.hint') }] as config (config.id)}
         <div class="output-group">
           <div class="output-header">
             <h4>{config.title}</h4>
@@ -437,7 +456,9 @@
               onclick={() => clipboard.copy(config.content, config.id)}
             >
               <Icon name={clipboard.isCopied(config.id) ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied(config.id) ? 'Copied' : 'Copy'}
+              {clipboard.isCopied(config.id)
+                ? $t('tools/dhcp-option60-builder.buttons.copied')
+                : $t('tools/dhcp-option60-builder.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{config.content}</pre>
@@ -448,11 +469,10 @@
   </div>
 
   <div class="card info">
-    <h3>Important Notes</h3>
+    <h3>{$t('tools/dhcp-option60-builder.notes.title')}</h3>
     <ul class="notes-list">
       {#each importantNotes as note (note)}
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        <li>{@html note}</li>
+        <li>{note}</li>
       {/each}
     </ul>
   </div>

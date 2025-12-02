@@ -1,0 +1,83 @@
+{
+  "title": "IP Regex Generator",
+  "description": "Generate safe and reliable regular expressions for IPv4 and IPv6 address validation",
+
+  "modes": {
+    "simple": "Simple Mode",
+    "advanced": "Advanced Mode"
+  },
+
+  "types": {
+    "title": "IP Address Type",
+    "ipv4Only": "IPv4 Only",
+    "ipv6Only": "IPv6 Only",
+    "both": "Both IPv4 & IPv6"
+  },
+
+  "options": {
+    "title": "Advanced Options"
+  },
+
+  "results": {
+    "title": "Generated Pattern",
+    "patternLabel": "Regular Expression",
+    "edit": "Edit",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "testUrl": "Test on Regex101"
+  },
+
+  "editor": {
+    "title": "Edit Regular Expression",
+    "patternLabel": "Pattern:",
+    "patternPlaceholder": "Enter regex pattern...",
+    "flagsLabel": "Flags:",
+    "flagsPlaceholder": "g, i, m, etc.",
+    "apply": "Apply",
+    "cancel": "Cancel",
+    "previewLabel": "Preview:",
+    "validPattern": "Valid regex pattern",
+    "applyChanges": "Apply changes",
+    "cancelEditing": "Cancel editing",
+    "fixErrors": "Fix validation errors first"
+  },
+
+  "testCases": {
+    "title": "Test Cases",
+    "validTitle": "Valid Cases",
+    "invalidTitle": "Invalid Cases",
+    "addValid": "Add Valid",
+    "addInvalid": "Add Invalid",
+    "addValidPlaceholder": "Add new valid test case...",
+    "addInvalidPlaceholder": "Add new invalid test case...",
+    "editTestCases": "Edit Test Cases",
+    "applyTestChanges": "Apply Test Changes",
+    "cancelTestEditing": "Cancel Test Editing",
+    "matches": "matches",
+    "doesNotMatch": "does not match",
+    "all": "All",
+    "passed": "passed",
+    "of": "of"
+  },
+
+  "languageExamples": {
+    "title": "Language Examples",
+    "javascript": "JavaScript",
+    "python": "Python",
+    "java": "Java",
+    "csharp": "C#",
+    "php": "PHP",
+    "copy": "Copy"
+  },
+
+  "errors": {
+    "patternEmpty": "Pattern cannot be empty",
+    "invalidRegex": "Invalid regex"
+  },
+
+  "tooltips": {
+    "editPattern": "Edit the generated regex pattern",
+    "copyPattern": "Copy regex to clipboard",
+    "testRegex": "Test this regex on Regex101"
+  }
+}

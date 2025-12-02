@@ -1,0 +1,123 @@
+{
+  "title": "Reverse Zone Generator",
+  "description": "Generate complete reverse DNS zone files from CIDR blocks with customizable hostname templates",
+
+  "overview": {
+    "fullZoneFiles": {
+      "title": "Full Zone Files:",
+      "description": "Complete DNS zone files with SOA, NS, and PTR records ready for deployment."
+    },
+    "hostnameTemplates": {
+      "title": "Hostname Templates:",
+      "description": "Customize hostname patterns using placeholders like {ip} and {ip-dashes}."
+    },
+    "zoneConfiguration": {
+      "title": "Zone Configuration:",
+      "description": "Configure name servers, contact email, TTL values, and domain settings."
+    }
+  },
+
+  "examples": {
+    "title": "Quick Examples",
+    "items": [
+      {
+        "label": "IPv4 /24 Network",
+        "description": "Generate zone for full /24 subnet"
+      },
+      {
+        "label": "IPv4 /28 Block",
+        "description": "Small block with custom naming"
+      },
+      {
+        "label": "IPv6 /64 Network",
+        "description": "IPv6 reverse zone generation"
+      },
+      {
+        "label": "Corporate Network",
+        "description": "Corporate naming convention"
+      }
+    ]
+  },
+
+  "form": {
+    "cidrBlock": {
+      "label": "CIDR Block",
+      "placeholder": "192.168.1.0/24 or 2001:db8::/64",
+      "tooltip": "Enter a CIDR block to generate reverse zones for"
+    },
+    "hostnameTemplate": {
+      "label": "Hostname Template",
+      "placeholder": "host-[ip-dashes].example.com.",
+      "tooltip": "Use placeholders like {ip}, {ip-dashes} to customize hostnames"
+    },
+    "nameServers": {
+      "label": "Name Servers",
+      "placeholder": "ns1.example.com\nns2.example.com",
+      "tooltip": "One name server per line, automatically adds trailing dots"
+    },
+    "contactEmail": {
+      "label": "Contact Email",
+      "placeholder": "hostmaster.example.com.",
+      "tooltip": "DNS zone contact email address"
+    },
+    "defaultTTL": {
+      "label": "Default TTL (seconds)",
+      "placeholder": "86400",
+      "tooltip": "Default TTL for zone records in seconds"
+    },
+    "zoneConfiguration": "Zone Configuration"
+  },
+
+  "templateHelp": {
+    "title": "Available Placeholders:",
+    "placeholders": [
+      {
+        "placeholder": "{ip}",
+        "description": "Original IP address (192.168.1.100)"
+      },
+      {
+        "placeholder": "{ip-dashes}",
+        "description": "IP with dashes (192-168-1-100)"
+      },
+      {
+        "placeholder": "{domain}",
+        "description": "Base domain from settings"
+      }
+    ]
+  },
+
+  "results": {
+    "title": "Generated Zone Files",
+    "summary": {
+      "zoneFiles": "Zone Files",
+      "ptrRecords": "PTR Records"
+    },
+    "recordCount": "{count} records",
+    "copyZoneFile": "Copy Zone File",
+    "error": {
+      "title": "Generation Error",
+      "validFormats": "Valid formats:",
+      "ipv4CIDR": "IPv4 CIDR: 192.168.1.0/24, 10.0.0.0/16",
+      "ipv6CIDR": "IPv6 CIDR: 2001:db8::/64, fe80::/10"
+    }
+  },
+
+  "education": {
+    "zoneFileStructure": {
+      "title": "Zone File Structure",
+      "content": "Generated zone files include proper SOA records with serial numbers, refresh/retry/expire timers, and NS records for delegation. All PTR records are automatically generated based on your template."
+    },
+    "hostnameTemplates": {
+      "title": "Hostname Templates",
+      "content": "Use placeholders to create consistent naming patterns. {ip-dashes} is popular for creating hostnames like host-192-168-1-100.example.com from IP addresses."
+    },
+    "zoneDelegation": {
+      "title": "Zone Delegation",
+      "content": "The generated zones need to be properly delegated by your ISP or DNS provider. Ensure your name servers are configured to serve these zones and are reachable from the internet."
+    },
+    "bestPractices": {
+      "title": "Best Practices",
+      "content": "Keep TTL values reasonable (3600-86400 seconds). Use descriptive hostnames that help with network troubleshooting. Ensure forward DNS (A/AAAA) records exist for consistency."
+    }
+  }
+}

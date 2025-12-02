@@ -3,6 +3,13 @@
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
   import { generatePTRName, generateCIDRPTRs, type PTRRecord } from '$lib/utils/reverse-dns.js';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools/ptr-generator');
+  });
 
   let inputValue = $state('192.168.1.100');
   let inputType = $state<'single' | 'cidr'>('single');
@@ -23,34 +30,34 @@
 
   const examples = [
     {
-      label: 'Single IPv4',
+      label: $t('examples.singleIPv4.label'),
       input: '192.168.1.100',
       type: 'single' as const,
-      description: 'Generate PTR for single IPv4 address',
+      description: $t('examples.singleIPv4.description'),
     },
     {
-      label: 'Single IPv6',
+      label: $t('examples.singleIPv6.label'),
       input: '2001:db8::1',
       type: 'single' as const,
-      description: 'Generate PTR for single IPv6 address',
+      description: $t('examples.singleIPv6.description'),
     },
     {
-      label: 'IPv4 /28 Block',
+      label: $t('examples.ipv4SmallBlock.label'),
       input: '192.168.1.16/28',
       type: 'cidr' as const,
-      description: 'Generate PTRs for /28 subnet (16 addresses)',
+      description: $t('examples.ipv4SmallBlock.description'),
     },
     {
-      label: 'IPv4 /24 Network',
+      label: $t('examples.ipv4Subnet24.label'),
       input: '10.0.0.0/24',
       type: 'cidr' as const,
-      description: 'Generate PTRs for entire /24 network',
+      description: $t('examples.ipv4Subnet24.description'),
     },
     {
-      label: 'IPv6 /64 Network',
+      label: $t('examples.ipv6Network.label'),
       input: '2001:db8:1000::/64',
       type: 'cidr' as const,
-      description: 'Generate IPv6 PTR examples for /64',
+      description: $t('examples.ipv6Network.description'),
     },
   ];
 
@@ -78,7 +85,7 @@
         if (record) {
           entries.push(record);
         } else {
-          throw new Error('Invalid IP address format');
+          throw new Error($t('errors.invalidInput'));
         }
       } else {
         // CIDR notation
@@ -101,7 +108,7 @@
     } catch (error) {
       results = {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error: error instanceof Error ? error.message : $t('errors.processingError'),
         entries: [],
         summary: { totalEntries: 0, ipv4Entries: 0, ipv6Entries: 0, uniqueZones: 0 },
       };
@@ -126,8 +133,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>Reverse PTR Generator</h1>
-    <p>Convert IP addresses and CIDR blocks to PTR record names and zone file examples</p>
+    <h1>{$t('title')}</h1>
+    <p>{$t('description')}</p>
   </header>
 
   <!-- Educational Overview Card -->
@@ -136,8 +143,8 @@
       <div class="overview-item">
         <Icon name="rotate" size="sm" />
         <div>
-          <strong>Reverse DNS:</strong> PTR records map IP addresses back to hostnames using <code>in-addr.arpa</code>
-          (IPv4) and <code>ip6.arpa</code> (IPv6) zones.
+          <strong>{$t('overview.reverseDNS.title')}:</strong>
+          {$t('overview.reverseDNS.content')}
         </div>
       </div>
       <div class="overview-item">
@@ -149,7 +156,8 @@
       <div class="overview-item">
         <Icon name="file" size="sm" />
         <div>
-          <strong>Zone Lines:</strong> Ready-to-use DNS zone file entries with proper PTR record format.
+          <strong>{$t('overview.zoneFiles.title')}:</strong>
+          {$t('overview.zoneFiles.content')}
         </div>
       </div>
     </div>
@@ -160,7 +168,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="sm" />
-        <h3>Quick Examples</h3>
+        <h3>{$t('examples.title')}</h3>
       </summary>
       <div class="examples-grid">
         {#each examples as example (example.label)}
@@ -171,7 +179,7 @@
             <div class="example-header">
               <div class="example-label">{example.label}</div>
               <div class="example-type {example.type}">
-                {example.type === 'single' ? 'Single IP' : 'CIDR Block'}
+                {example.type === 'single' ? $t('examples.types.singleIP') : $t('examples.types.cidrBlock')}
               </div>
             </div>
             <code class="example-input">{example.input}</code>
@@ -186,20 +194,20 @@
   <div class="card input-card">
     <!-- Input Type Selection -->
     <div class="type-section">
-      <h3 class="type-label">Input Type</h3>
+      <h3 class="type-label">{$t('input.type.label')}</h3>
       <div class="type-options">
         <label class="type-option">
           <input type="radio" bind:group={inputType} value="single" onchange={handleTypeChange} />
           <div class="type-content">
             <Icon name="target" size="sm" />
-            <span>Single IP</span>
+            <span>{$t('input.type.singleIP')}</span>
           </div>
         </label>
         <label class="type-option">
           <input type="radio" bind:group={inputType} value="cidr" onchange={handleTypeChange} />
           <div class="type-content">
             <Icon name="network" size="sm" />
-            <span>CIDR Block</span>
+            <span>{$t('input.type.cidrBlock')}</span>
           </div>
         </label>
       </div>
@@ -214,7 +222,7 @@
           : 'Enter an IPv4 or IPv6 CIDR block (e.g., 192.168.1.0/24)'}
       >
         <Icon name={inputType === 'single' ? 'target' : 'network'} size="sm" />
-        {inputType === 'single' ? 'IP Address' : 'CIDR Block'}
+        {inputType === 'single' ? $t('input.address.labelSingle') : $t('input.type.cidrBlock')}
       </label>
       <input
         id="ip-input"
@@ -233,16 +241,16 @@
     <div class="card results-card">
       {#if results.success}
         <div class="results-header">
-          <h3>PTR Records Generated</h3>
+          <h3>{$t('results.title')}</h3>
           <div class="summary-stats">
             <div class="stat-item">
               <span class="stat-value">{results.summary.totalEntries}</span>
-              <span class="stat-label">Total PTRs</span>
+              <span class="stat-label">{$t('results.summary.totalPTRs')}</span>
             </div>
             {#if results.summary.ipv4Entries > 0}
               <div class="stat-item">
                 <span class="stat-value">{results.summary.ipv4Entries}</span>
-                <span class="stat-label">IPv4</span>
+                <span class="stat-label">{$t('results.summary.ipv4')}</span>
               </div>
             {/if}
             {#if results.summary.ipv6Entries > 0}
@@ -253,7 +261,7 @@
             {/if}
             <div class="stat-item">
               <span class="stat-value">{results.summary.uniqueZones}</span>
-              <span class="stat-label">Zones</span>
+              <span class="stat-label">{$t('results.summary.zones')}</span>
             </div>
           </div>
         </div>
@@ -262,14 +270,14 @@
         <div class="ptr-records">
           <h4>
             <Icon name="list" size="sm" />
-            PTR Records & Zone Lines
+            {$t('results.entries.title')}
           </h4>
           <div class="records-table">
             <div class="table-header">
-              <div class="col-ip">IP Address</div>
-              <div class="col-ptr">PTR Record Name</div>
+              <div class="col-ip">{$t('results.entries.ipAddress')}</div>
+              <div class="col-ptr">{$t('results.entries.ptrRecord')}</div>
               <div class="col-zone-line">Zone File Line</div>
-              <div class="col-type">Type</div>
+              <div class="col-type">{$t('results.entries.type')}</div>
             </div>
             {#each results.entries.slice(0, 100) as entry (`${entry.ip}-${entry.ptrName}`)}
               <div class="table-row">
@@ -390,14 +398,6 @@
     align-items: flex-start;
     gap: var(--spacing-sm);
     color: var(--text-secondary);
-
-    code {
-      background-color: var(--bg-tertiary);
-      color: var(--text-primary);
-      padding: 2px var(--spacing-xs);
-      border-radius: var(--radius-sm);
-      font-family: var(--font-mono);
-    }
 
     strong {
       color: var(--text-primary);

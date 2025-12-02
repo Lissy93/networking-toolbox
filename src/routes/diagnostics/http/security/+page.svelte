@@ -5,24 +5,31 @@
   import { useDiagnosticState, useClipboard, useExamples } from '$lib/composables';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import ErrorCard from '$lib/components/common/ErrorCard.svelte';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import '../../../../styles/diagnostics-pages.scss';
+
+  onMount(async () => {
+    await loadTranslations(get(locale), 'diagnostics/http-security');
+  });
 
   let url = $state('https://github.com');
 
   const diagnosticState = useDiagnosticState<any>();
   const clipboard = useClipboard();
 
-  const examplesList = [
-    { url: 'https://github.com', description: 'GitHub security headers' },
-    { url: 'https://www.cloudflare.com', description: 'Cloudflare security setup' },
+  const examplesList = $derived([
+    { url: 'https://github.com', description: $t('examples.github') },
+    { url: 'https://www.cloudflare.com', description: $t('examples.cloudflare') },
     {
       url: 'https://httpbin.org/response-headers?Strict-Transport-Security=max-age=31536000',
-      description: 'Example with HSTS',
+      description: $t('examples.hsts'),
     },
-    { url: 'https://example.com', description: 'Basic site (minimal headers)' },
-  ];
+    { url: 'https://example.com', description: $t('examples.basic') },
+  ]);
 
-  const examples = useExamples(examplesList);
+  const examples = useExamples(() => examplesList);
 
   // Reactive validation
   const isInputValid = $derived(() => {
@@ -40,14 +47,14 @@
     // Validation
     const trimmedUrl = url.trim();
     if (!trimmedUrl) {
-      diagnosticState.setError('URL is required');
+      diagnosticState.setError($t('form.url.required'));
       return;
     }
 
     try {
       new URL(trimmedUrl);
     } catch {
-      diagnosticState.setError('Invalid URL format');
+      diagnosticState.setError($t('form.url.error'));
       return;
     }
 
@@ -178,10 +185,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>HTTP Security Headers Analyzer</h1>
+    <h1>{$t('title')}</h1>
     <p>
-      Analyze and evaluate security headers to identify potential vulnerabilities and security improvements. Check for
-      HSTS, CSP, XSS protection, and other essential security headers.
+      {$t('description')}
     </p>
   </header>
 
@@ -190,7 +196,7 @@
     examples={examplesList}
     selectedIndex={examples.selectedIndex}
     onSelect={loadExample}
-    title="Security Examples"
+    title={$t('examples.title')}
     getLabel={(ex) => ex.url}
     getDescription={(ex) => ex.description}
     getTooltip={(ex) => `Analyze security headers for ${ex.url}`}
@@ -199,24 +205,24 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>Security Analysis</h3>
+      <h3>{$t('form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-group">
-        <label for="url" use:tooltip={'Enter the URL to analyze security headers for'}>
-          URL
+        <label for="url" use:tooltip={$t('form.url.tooltip')}>
+          {$t('form.url.label')}
           <input
             id="url"
             type="url"
             bind:value={url}
-            placeholder="https://example.com"
+            placeholder={$t('form.url.placeholder')}
             class:invalid={url && !isInputValid()}
             onchange={() => {
               if (isInputValid()) analyzeSecurity();
             }}
           />
           {#if url && !isInputValid()}
-            <span class="error-text">Invalid URL format</span>
+            <span class="error-text">{$t('form.url.error')}</span>
           {/if}
         </label>
       </div>
@@ -225,10 +231,10 @@
         <button class="lookup-btn" onclick={analyzeSecurity} disabled={diagnosticState.loading || !isInputValid}>
           {#if diagnosticState.loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Analyzing Security...
+            {$t('form.analyzing')}
           {:else}
             <Icon name="shield" size="sm" />
-            Analyze Security Headers
+            {$t('form.analyze')}
           {/if}
         </button>
       </div>
@@ -240,12 +246,12 @@
     {@const overallScore = getOverallScore()}
     <div class="card results-card">
       <div class="card-header">
-        <h3>Security Headers Analysis</h3>
+        <h3>{$t('results.title')}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={clipboard.isCopied()}>
           <span class={clipboard.isCopied() ? 'text-green-500' : ''}
             ><Icon name={clipboard.isCopied() ? 'check' : 'copy'} size="xs" /></span
           >
-          {clipboard.isCopied() ? 'Copied!' : 'Copy Analysis'}
+          {clipboard.isCopied() ? $t('results.copied') : $t('results.copy')}
         </button>
       </div>
       <div class="card-content">
@@ -254,8 +260,8 @@
           <div class="status-item {overallScore.class}">
             <Icon name="shield" size="sm" />
             <div>
-              <strong>Grade {overallScore.grade}</strong>
-              <div class="status-text">Security Score: {overallScore.score}%</div>
+              <strong>{$t('results.score.grade', { grade: overallScore.grade })}</strong>
+              <div class="status-text">{$t('results.score.label', { score: overallScore.score })}</div>
             </div>
           </div>
 
@@ -267,7 +273,7 @@
                   (a) => a.status === 'present',
                 ).length || 0}</strong
               >
-              <div class="status-text">Headers Present</div>
+              <div class="status-text">{$t('results.score.headers_present')}</div>
             </div>
           </div>
 
@@ -279,14 +285,14 @@
                   (a) => a.status === 'missing',
                 ).length || 0}</strong
               >
-              <div class="status-text">Headers Missing</div>
+              <div class="status-text">{$t('results.score.headers_missing')}</div>
             </div>
           </div>
         </div>
 
         <!-- Security Analysis -->
         <div class="record-section">
-          <h4>Security Header Analysis</h4>
+          <h4>{$t('results.analysis.title')}</h4>
           <div class="security-analysis">
             {#each diagnosticState.results.analysis as analysis, index (index)}
               <div class="analysis-item {getAnalysisClass(analysis.status)}">
@@ -314,7 +320,7 @@
         <!-- Present Headers -->
         {#if Object.keys(diagnosticState.results.headers || {}).length > 0}
           <div class="record-section">
-            <h4>Security Headers Found</h4>
+            <h4>{$t('results.headers.title')}</h4>
             <div class="records-list">
               {#each Object.entries(diagnosticState.results.headers) as [name, value], index (index)}
                 <div class="record-item">
@@ -329,48 +335,50 @@
         {:else}
           <div class="no-records">
             <Icon name="shield-x" size="md" />
-            <p>No security headers found</p>
-            <p class="help-text">This site may be vulnerable to various attacks</p>
+            <p>{$t('results.none.title')}</p>
+            <p class="help-text">{$t('results.none.message')}</p>
           </div>
         {/if}
       </div>
     </div>
   {/if}
 
-  <ErrorCard title="Security Analysis Failed" error={diagnosticState.error} />
+  <ErrorCard title={$t('error.title')} error={diagnosticState.error} />
 
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>About Security Headers</h3>
+      <h3>{$t('info.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>Critical Headers</h4>
+          <h4>{$t('info.critical.heading')}</h4>
           <ul>
-            <li><strong>Strict-Transport-Security:</strong> Forces HTTPS connections</li>
-            <li><strong>Content-Security-Policy:</strong> Prevents XSS and injection attacks</li>
-            <li><strong>X-Frame-Options:</strong> Prevents clickjacking attacks</li>
-            <li><strong>X-Content-Type-Options:</strong> Prevents MIME sniffing</li>
+            <li><strong>{$t('info.critical.hsts.name')}</strong> {$t('info.critical.hsts.description')}</li>
+            <li><strong>{$t('info.critical.csp.name')}</strong> {$t('info.critical.csp.description')}</li>
+            <li><strong>{$t('info.critical.xfo.name')}</strong> {$t('info.critical.xfo.description')}</li>
+            <li><strong>{$t('info.critical.xcto.name')}</strong> {$t('info.critical.xcto.description')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Additional Protection</h4>
+          <h4>{$t('info.additional.heading')}</h4>
           <ul>
-            <li><strong>Referrer-Policy:</strong> Controls referrer information</li>
-            <li><strong>Permissions-Policy:</strong> Controls browser features</li>
-            <li><strong>Cross-Origin-*:</strong> CORS and isolation policies</li>
-            <li><strong>X-XSS-Protection:</strong> Legacy XSS protection</li>
+            <li><strong>{$t('info.additional.referrer.name')}</strong> {$t('info.additional.referrer.description')}</li>
+            <li>
+              <strong>{$t('info.additional.permissions.name')}</strong>
+              {$t('info.additional.permissions.description')}
+            </li>
+            <li><strong>{$t('info.additional.cors.name')}</strong> {$t('info.additional.cors.description')}</li>
+            <li><strong>{$t('info.additional.xss.name')}</strong> {$t('info.additional.xss.description')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Implementation Tips</h4>
+          <h4>{$t('info.tips.heading')}</h4>
           <p>
-            Start with basic headers (HSTS, CSP, X-Frame-Options) and gradually add more. Test thoroughly as some
-            headers may break functionality if misconfigured.
+            {$t('info.tips.content')}
           </p>
         </div>
       </div>

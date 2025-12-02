@@ -1,0 +1,128 @@
+{
+  "title": "DNS Zone Statistics",
+  "description": "Analyze zone file structure, record distribution, and configuration health",
+
+  "overview": {
+    "recordAnalysis": {
+      "title": "Record Analysis:",
+      "content": "Count and categorize all DNS records by type and TTL."
+    },
+    "sizeMetrics": {
+      "title": "Size Metrics:",
+      "content": "Identify largest records and analyze name length distribution."
+    },
+    "healthChecks": {
+      "title": "Health Checks:",
+      "content": "Validate zone structure and identify potential issues."
+    }
+  },
+
+  "examples": {
+    "title": "Zone Analysis Examples",
+    "simple": {
+      "name": "Simple Zone",
+      "description": "Basic zone with common record types"
+    },
+    "complex": {
+      "name": "Complex Zone",
+      "description": "Comprehensive zone with diverse record types and TTLs"
+    },
+    "large": {
+      "name": "Large Organization",
+      "description": "Large organization with multiple services and locations"
+    }
+  },
+
+  "input": {
+    "label": "Zone File Content",
+    "tooltip": "Paste your DNS zone file for comprehensive statistical analysis"
+  },
+
+  "results": {
+    "title": "Zone Analysis Report",
+    "copy": "Copy Report",
+    "copied": "Copied!",
+    "stats": {
+      "totalRecords": "Total Records",
+      "recordTypes": "Record Types",
+      "uniqueTtls": "Unique TTLs",
+      "avgNameLength": "Avg Name Length"
+    },
+    "recordDistribution": {
+      "title": "Record Type Distribution",
+      "records": "record",
+      "recordsPlural": "records"
+    },
+    "ttlDistribution": {
+      "title": "TTL Distribution",
+      "labels": {
+        "veryShort": "Very Short",
+        "short": "Short",
+        "medium": "Medium",
+        "long": "Long"
+      }
+    },
+    "nameAnalysis": {
+      "title": "Name Length Analysis",
+      "shortestName": "Shortest Name",
+      "longestName": "Longest Name",
+      "averageLength": "Average Length",
+      "chars": "chars"
+    },
+    "largestRecord": {
+      "title": "Largest Record",
+      "bytes": "bytes"
+    },
+    "healthChecks": {
+      "title": "Zone Health Checks",
+      "soaPresent": "SOA Record Present",
+      "nsPresent": "NS Records Present",
+      "noDuplicates": "No Duplicate Records",
+      "duplicateRecords": "Duplicate Record",
+      "duplicateRecordsPlural": "Duplicate Records",
+      "noOrphanedGlue": "No Orphaned Glue Records",
+      "orphanedGlue": "Orphaned Glue Record",
+      "orphanedGluePlural": "Orphaned Glue Records"
+    }
+  },
+
+  "copyTemplate": {
+    "title": "DNS Zone Statistics Report",
+    "separator": "========================",
+    "totalRecords": "Total Records: {count}",
+    "recordsByType": "Records by Type:",
+    "ttlDistribution": "TTL Distribution:",
+    "ttlEntry": "{ttl}s: {count} record{plural}",
+    "nameStats": "Name Statistics:",
+    "shortestName": "Shortest name: {length} characters",
+    "longestName": "Longest name: {length} characters",
+    "averageLength": "Average length: {length} characters",
+    "largestRecord": "Largest Record: {size} bytes",
+    "zoneHealth": "Zone Health:",
+    "hasSoa": "Has SOA: {status}",
+    "hasNs": "Has NS records: {status}",
+    "duplicates": "Duplicate records: {count}",
+    "orphanedGlue": "Orphaned glue: {count}",
+    "yes": "Yes",
+    "no": "No"
+  },
+
+  "education": {
+    "statistics": {
+      "title": "Zone Statistics",
+      "content": "Zone statistics help understand DNS structure, identify optimization opportunities, and spot potential issues. Analyze record distribution, TTL patterns, and naming conventions for better zone management."
+    },
+    "ttlStrategy": {
+      "title": "TTL Strategy",
+      "content": "TTL distribution reveals caching patterns. Short TTLs enable quick changes but increase DNS load. Long TTLs reduce queries but slow propagation. Balance based on change frequency and traffic patterns."
+    },
+    "recordAnalysis": {
+      "title": "Record Analysis",
+      "content": "Record type distribution shows zone complexity. Heavy A/AAAA records suggest web services, many MX records indicate mail infrastructure, and diverse types show comprehensive DNS usage."
+    },
+    "healthMonitoring": {
+      "title": "Health Monitoring",
+      "content": "Regular zone analysis catches configuration drift, identifies duplicates, and ensures essential records exist. Use statistics to track zone growth and optimize DNS performance over time."
+    }
+  }
+}

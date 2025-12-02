@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
   import {
     generateSnippets,
     getDefaultSnippetConfig,
@@ -15,11 +16,11 @@
 
   const clipboard = useClipboard();
 
-  const targetOptions: Array<{ value: DhcpTarget; label: string }> = [
-    { value: 'isc-dhcpd', label: 'ISC dhcpd' },
-    { value: 'kea-dhcp4', label: 'Kea DHCPv4' },
-    { value: 'kea-dhcp6', label: 'Kea DHCPv6' },
-  ];
+  const targetOptions = $derived<Array<{ value: DhcpTarget; label: string }>>([
+    { value: 'isc-dhcpd', label: $t('tools/dhcp-snippets-generator.targets.iscDhcpd') },
+    { value: 'kea-dhcp4', label: $t('tools/dhcp-snippets-generator.targets.keaDhcp4') },
+    { value: 'kea-dhcp6', label: $t('tools/dhcp-snippets-generator.targets.keaDhcp6') },
+  ]);
 
   // Reactive generation
   $effect(() => {
@@ -42,7 +43,7 @@
     }
   }
 
-  function toggleTarget(target: DhcpTarget) {
+  function toggleTarge$t(target: DhcpTarget) {
     if (config.targets.includes(target)) {
       config.targets = config.targets.filter((t) => t !== target);
     } else {
@@ -53,14 +54,14 @@
 
 <div class="card input-card">
   <div class="card-header">
-    <h3>Configuration</h3>
+    <h3>{$t('tools/dhcp-snippets-generator.configuration.title')}</h3>
   </div>
   <div class="card-content">
     <!-- Target selection -->
     <div class="input-group">
       <label>
         <Icon name="server" size="sm" />
-        Target Servers
+        {$t('tools/dhcp-snippets-generator.configuration.targetServers')}
       </label>
       <div class="checkbox-group">
         {#each targetOptions as option (option.value)}
@@ -68,7 +69,7 @@
             <input
               type="checkbox"
               checked={config.targets.includes(option.value)}
-              onchange={() => toggleTarget(option.value)}
+              onchange={() => toggleTarge$t(option.value)}
             />
             {option.label}
           </label>
@@ -80,11 +81,11 @@
     <div class="input-group">
       <label for="mode">
         <Icon name="network" size="sm" />
-        IP Mode
+        {$t('tools/dhcp-snippets-generator.configuration.ipMode')}
       </label>
       <select id="mode" bind:value={config.mode}>
-        <option value="dhcp4">DHCPv4 (IPv4)</option>
-        <option value="dhcp6">DHCPv6 (IPv6)</option>
+        <option value="dhcp4">{$t('tools/dhcp-snippets-generator.configuration.modes.dhcp4')}</option>
+        <option value="dhcp6">{$t('tools/dhcp-snippets-generator.configuration.modes.dhcp6')}</option>
       </select>
     </div>
 
@@ -92,13 +93,15 @@
     <div class="input-group">
       <label for="subnet">
         <Icon name="network" size="sm" />
-        Subnet (CIDR)
+        {$t('tools/dhcp-snippets-generator.configuration.subnet.label')}
       </label>
       <input
         id="subnet"
         type="text"
         bind:value={config.subnet}
-        placeholder={config.mode === 'dhcp6' ? '2001:db8::/64' : '192.168.1.0/24'}
+        placeholder={config.mode === 'dhcp6'
+          ? $t('tools/dhcp-snippets-generator.configuration.subnet.placeholderV6')
+          : $t('tools/dhcp-snippets-generator.configuration.subnet.placeholderV4')}
       />
     </div>
 
@@ -106,13 +109,21 @@
     <div class="input-group">
       <label>
         <Icon name="layers" size="sm" />
-        Address Pools
+        {$t('tools/dhcp-snippets-generator.configuration.pools.label')}
       </label>
       {#each config.pools as pool, i (i)}
         <div class="pool-row">
-          <input type="text" bind:value={pool.start} placeholder="Start IP" />
+          <input
+            type="text"
+            bind:value={pool.start}
+            placeholder={$t('tools/dhcp-snippets-generator.configuration.pools.startPlaceholder')}
+          />
           <span>-</span>
-          <input type="text" bind:value={pool.end} placeholder="End IP" />
+          <input
+            type="text"
+            bind:value={pool.end}
+            placeholder={$t('tools/dhcp-snippets-generator.configuration.pools.endPlaceholder')}
+          />
           {#if config.pools.length > 1}
             <button type="button" class="btn-icon" onclick={() => removePool(i)}>
               <Icon name="x" size="sm" />
@@ -122,7 +133,7 @@
       {/each}
       <button type="button" class="btn-add" onclick={addPool}>
         <Icon name="plus" size="sm" />
-        Add Pool
+        {$t('tools/dhcp-snippets-generator.configuration.pools.addPool')}
       </button>
     </div>
 
@@ -130,13 +141,15 @@
     <div class="input-group">
       <label for="gateway">
         <Icon name="arrow-right" size="sm" />
-        Gateway (Router)
+        {$t('tools/dhcp-snippets-generator.configuration.gateway.label')}
       </label>
       <input
         id="gateway"
         type="text"
         bind:value={config.gateway}
-        placeholder={config.mode === 'dhcp6' ? 'fe80::1' : '192.168.1.1'}
+        placeholder={config.mode === 'dhcp6'
+          ? $t('tools/dhcp-snippets-generator.configuration.gateway.placeholderV6')
+          : $t('tools/dhcp-snippets-generator.configuration.gateway.placeholderV4')}
       />
     </div>
 
@@ -144,14 +157,14 @@
     <div class="input-group">
       <label for="dns">
         <Icon name="globe" size="sm" />
-        DNS Servers (comma-separated)
+        {$t('tools/dhcp-snippets-generator.configuration.dns.label')}
       </label>
       <input
         id="dns"
         type="text"
         value={config.dnsServers?.join(', ') || ''}
         oninput={(e) => (config.dnsServers = e.currentTarget.value.split(',').map((s) => s.trim()))}
-        placeholder="8.8.8.8, 8.8.4.4"
+        placeholder={$t('tools/dhcp-snippets-generator.configuration.dns.placeholder')}
       />
     </div>
 
@@ -159,9 +172,14 @@
     <div class="input-group">
       <label for="domain">
         <Icon name="globe" size="sm" />
-        Domain Name
+        {$t('tools/dhcp-snippets-generator.configuration.domain.label')}
       </label>
-      <input id="domain" type="text" bind:value={config.domainName} placeholder="example.com" />
+      <input
+        id="domain"
+        type="text"
+        bind:value={config.domainName}
+        placeholder={$t('tools/dhcp-snippets-generator.configuration.domain.placeholder')}
+      />
     </div>
 
     <!-- Lease times -->
@@ -169,16 +187,26 @@
       <div class="input-group">
         <label for="defaultLease">
           <Icon name="clock" size="sm" />
-          Default Lease (seconds)
+          {$t('tools/dhcp-snippets-generator.configuration.leases.defaultLabel')}
         </label>
-        <input id="defaultLease" type="number" bind:value={config.defaultLeaseTime} placeholder="86400" />
+        <input
+          id="defaultLease"
+          type="number"
+          bind:value={config.defaultLeaseTime}
+          placeholder={$t('tools/dhcp-snippets-generator.configuration.leases.defaultPlaceholder')}
+        />
       </div>
       <div class="input-group">
         <label for="maxLease">
           <Icon name="clock" size="sm" />
-          Max Lease (seconds)
+          {$t('tools/dhcp-snippets-generator.configuration.leases.maxLabel')}
         </label>
-        <input id="maxLease" type="number" bind:value={config.maxLeaseTime} placeholder="604800" />
+        <input
+          id="maxLease"
+          type="number"
+          bind:value={config.maxLeaseTime}
+          placeholder={$t('tools/dhcp-snippets-generator.configuration.leases.maxPlaceholder')}
+        />
       </div>
     </div>
 
@@ -186,11 +214,11 @@
     <div class="input-row">
       <label class="checkbox-label">
         <input type="checkbox" bind:checked={config.emitOptionNames} />
-        Use option names (ISC)
+        {$t('tools/dhcp-snippets-generator.configuration.options.useOptionNames')}
       </label>
       <label class="checkbox-label">
         <input type="checkbox" bind:checked={config.prettyJson} />
-        Pretty JSON (Kea)
+        {$t('tools/dhcp-snippets-generator.configuration.options.prettyJson')}
       </label>
     </div>
   </div>
@@ -199,7 +227,7 @@
 {#if result}
   {#if result.validations.length > 0}
     <div class="card errors-card">
-      <h3>Validation Errors</h3>
+      <h3>{$t('tools/dhcp-snippets-generator.errors.title')}</h3>
       {#each result.validations as error (error.field)}
         <div class="error-message">
           <Icon name="alert-triangle" size="sm" />
@@ -215,12 +243,12 @@
     </div>
 
     <div class="card results">
-      <h3>Generated Snippets</h3>
+      <h3>{$t('tools/dhcp-snippets-generator.results.title')}</h3>
 
       {#if result.iscDhcpdSnippet}
         <div class="output-group">
           <div class="output-header">
-            <h4>ISC dhcpd.conf</h4>
+            <h4>{$t('tools/dhcp-snippets-generator.results.iscDhcpd')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -228,7 +256,9 @@
               onclick={() => clipboard.copy(result!.iscDhcpdSnippet!, 'isc')}
             >
               <Icon name={clipboard.isCopied('isc') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('isc') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('isc')
+                ? $t('tools/dhcp-snippets-generator.buttons.copied')
+                : $t('tools/dhcp-snippets-generator.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.iscDhcpdSnippet}</pre>
@@ -238,7 +268,7 @@
       {#if result.keaDhcp4Snippet}
         <div class="output-group">
           <div class="output-header">
-            <h4>Kea DHCPv4 JSON</h4>
+            <h4>{$t('tools/dhcp-snippets-generator.results.keaDhcp4')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -246,7 +276,9 @@
               onclick={() => clipboard.copy(result!.keaDhcp4Snippet!, 'kea4')}
             >
               <Icon name={clipboard.isCopied('kea4') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('kea4') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('kea4')
+                ? $t('tools/dhcp-snippets-generator.buttons.copied')
+                : $t('tools/dhcp-snippets-generator.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.keaDhcp4Snippet}</pre>
@@ -256,7 +288,7 @@
       {#if result.keaDhcp6Snippet}
         <div class="output-group">
           <div class="output-header">
-            <h4>Kea DHCPv6 JSON</h4>
+            <h4>{$t('tools/dhcp-snippets-generator.results.keaDhcp6')}</h4>
             <button
               type="button"
               class="copy-btn"
@@ -264,7 +296,9 @@
               onclick={() => clipboard.copy(result!.keaDhcp6Snippet!, 'kea6')}
             >
               <Icon name={clipboard.isCopied('kea6') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('kea6') ? 'Copied' : 'Copy'}
+              {clipboard.isCopied('kea6')
+                ? $t('tools/dhcp-snippets-generator.buttons.copied')
+                : $t('tools/dhcp-snippets-generator.buttons.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{result.keaDhcp6Snippet}</pre>

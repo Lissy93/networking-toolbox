@@ -1,0 +1,86 @@
+{
+  "title": "IPv6 Zone ID Processor",
+  "description": "Process IPv6 addresses with zone identifiers for link-local and multicast address scoping.",
+  "input": {
+    "label": "IPv6 Addresses",
+    "placeholder": "fe80::1\nfe80::1%eth0\nfe80::1234:5678:90ab:cdef%wlan0\n::1\n2001:db8::1\nff02::1%eth0",
+    "help": "Enter IPv6 addresses with or without zone identifiers (%), one per line"
+  },
+  "actions": {
+    "process": "Process Addresses",
+    "processing": "Processing...",
+    "copyAll": "Copy All",
+    "exportCsv": "Export CSV",
+    "exportJson": "Export JSON",
+    "copied": "Copied!"
+  },
+  "errors": {
+    "title": "Errors",
+    "unknownError": "Unknown error"
+  },
+  "summary": {
+    "title": "Processing Summary",
+    "totalInputs": "Total Inputs",
+    "validInputs": "Valid",
+    "invalidInputs": "Invalid",
+    "addressesWithZones": "With Zone IDs",
+    "addressesRequiringZones": "Requiring Zone IDs"
+  },
+  "results": {
+    "title": "Zone ID Processing Results",
+    "count": "({count})",
+    "input": "Input",
+    "address": "Address",
+    "zoneId": "Zone ID",
+    "scope": "Scope",
+    "recommendation": "Recommendation",
+    "status": "Status",
+    "valid": "Valid",
+    "invalid": "Invalid",
+    "copyTooltip": "Copy processed address"
+  },
+  "scope": {
+    "linkLocal": "Link-Local",
+    "siteLocal": "Site-Local",
+    "multicast": "Multicast",
+    "global": "Global",
+    "loopback": "Loopback",
+    "unspecified": "Unspecified"
+  },
+  "recommendations": {
+    "zoneRequired": "Zone ID required for this scope",
+    "zoneOptional": "Zone ID optional",
+    "zoneNotNeeded": "Zone ID not needed",
+    "removeZone": "Consider removing zone ID",
+    "addZone": "Add zone ID for clarity"
+  },
+  "csvHeaders": {
+    "input": "Input",
+    "address": "Address",
+    "zoneId": "Zone ID",
+    "scope": "Scope",
+    "recommendation": "Recommendation",
+    "valid": "Valid",
+    "error": "Error"
+  },
+  "info": {
+    "title": "IPv6 Zone Identifiers",
+    "description": "Zone identifiers specify the network interface for link-local and multicast addresses",
+    "usage": "Format: address%zone (e.g., fe80::1%eth0)",
+    "whenRequired": {
+      "title": "When Zone IDs Are Required",
+      "linkLocal": {
+        "type": "Link-Local Addresses",
+        "description": "Required to specify which network interface"
+      },
+      "multicast": {
+        "type": "Multicast Addresses",
+        "description": "Required for link-local and site-local multicast"
+      }
+    },
+    "commonIdentifiers": {
+      "title": "Common Zone Identifiers",
+      "examples": "eth0, wlan0, lo0, 1, 2, 3"
+    }
+  }
+}

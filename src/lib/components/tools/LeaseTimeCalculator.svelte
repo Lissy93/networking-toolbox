@@ -14,6 +14,7 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
 
   let poolSize = $state<number | undefined>(100);
   let expectedClients = $state<number | undefined>(50);
@@ -105,8 +106,8 @@
 </script>
 
 <ToolContentContainer
-  title="DHCP Lease Time Calculator"
-  description="Calculate optimal DHCP lease times based on network size, client turnover, and utilization. Includes T1/T2 renewal times and configuration examples."
+  title={$t('tools/dhcp-lease-time-calculator.title')}
+  description={$t('tools/dhcp-lease-time-calculator.subtitle')}
 >
   <ExamplesCard
     {examples}
@@ -118,40 +119,52 @@
 
   <div class="card input-card">
     <div class="card-header">
-      <h3>Network Configuration</h3>
-      <p class="help-text">Enter your network characteristics to calculate optimal lease times</p>
+      <h3>{$t('tools/dhcp-lease-time-calculator.input.title')}</h3>
+      <p class="help-text">{$t('tools/dhcp-lease-time-calculator.input.helpText')}</p>
     </div>
     <div class="card-content">
       <div class="input-row">
         <div class="input-group">
           <label for="pool-size">
             <Icon name="layers" size="sm" />
-            IP Pool Size
+            {$t('tools/dhcp-lease-time-calculator.input.poolSize.label')}
           </label>
-          <input id="pool-size" type="number" bind:value={poolSize} placeholder="100" min="1" />
-          <small>Total available IP addresses in your DHCP pool</small>
+          <input
+            id="pool-size"
+            type="number"
+            bind:value={poolSize}
+            placeholder={$t('tools/dhcp-lease-time-calculator.input.poolSize.placeholder')}
+            min="1"
+          />
+          <small>{$t('tools/dhcp-lease-time-calculator.input.poolSize.hint')}</small>
         </div>
 
         <div class="input-group">
           <label for="expected-clients">
             <Icon name="users" size="sm" />
-            Expected Clients
+            {$t('tools/dhcp-lease-time-calculator.input.expectedClients.label')}
           </label>
-          <input id="expected-clients" type="number" bind:value={expectedClients} placeholder="50" min="0" />
-          <small>Average number of concurrent clients</small>
+          <input
+            id="expected-clients"
+            type="number"
+            bind:value={expectedClients}
+            placeholder={$t('tools/dhcp-lease-time-calculator.input.expectedClients.placeholder')}
+            min="0"
+          />
+          <small>{$t('tools/dhcp-lease-time-calculator.input.expectedClients.hint')}</small>
         </div>
       </div>
 
       <div class="input-group">
         <label for="network-type">
           <Icon name="network" size="sm" />
-          Network Type
+          {$t('tools/dhcp-lease-time-calculator.input.networkType.label')}
         </label>
         <select id="network-type" bind:value={networkType}>
           {#each Object.entries(NETWORK_TYPE_DEFAULTS) as [key, value] (key)}
             <option value={key}>{value.name}</option>
           {/each}
-          <option value="custom">Custom (use churn rate)</option>
+          <option value="custom">{$t('tools/dhcp-lease-time-calculator.input.networkType.custom')}</option>
         </select>
         {#if networkType !== 'custom'}
           <small>{NETWORK_TYPE_DEFAULTS[networkType].description}</small>
@@ -161,25 +174,43 @@
       <div class="input-group">
         <label for="churn-rate">
           <Icon name="refresh" size="sm" />
-          Client Churn Rate
+          {$t('tools/dhcp-lease-time-calculator.input.churnRate.label')}
         </label>
         <select id="churn-rate" bind:value={churnRate}>
-          <option value="low">Low - {formatTime(CHURN_RATE_HOURS.low * 3600)}</option>
-          <option value="medium">Medium - {formatTime(CHURN_RATE_HOURS.medium * 3600)}</option>
-          <option value="high">High - {formatTime(CHURN_RATE_HOURS.high * 3600)}</option>
-          <option value="custom">Custom</option>
+          <option value="low"
+            >{$t('tools/dhcp-lease-time-calculator.input.churnRate.low', {
+              time: formatTime(CHURN_RATE_HOURS.low * 3600),
+            })}</option
+          >
+          <option value="medium"
+            >{$t('tools/dhcp-lease-time-calculator.input.churnRate.medium', {
+              time: formatTime(CHURN_RATE_HOURS.medium * 3600),
+            })}</option
+          >
+          <option value="high"
+            >{$t('tools/dhcp-lease-time-calculator.input.churnRate.high', {
+              time: formatTime(CHURN_RATE_HOURS.high * 3600),
+            })}</option
+          >
+          <option value="custom">{$t('tools/dhcp-lease-time-calculator.input.churnRate.custom')}</option>
         </select>
-        <small>How long devices typically stay connected</small>
+        <small>{$t('tools/dhcp-lease-time-calculator.input.churnRate.hint')}</small>
       </div>
 
       {#if churnRate === 'custom'}
         <div class="input-group">
           <label for="custom-churn">
             <Icon name="clock" size="sm" />
-            Custom Churn Time (hours)
+            {$t('tools/dhcp-lease-time-calculator.input.customChurn.label')}
           </label>
-          <input id="custom-churn" type="number" bind:value={customChurnHours} placeholder="24" min="1" />
-          <small>Average hours a device stays connected</small>
+          <input
+            id="custom-churn"
+            type="number"
+            bind:value={customChurnHours}
+            placeholder={$t('tools/dhcp-lease-time-calculator.input.customChurn.placeholder')}
+            min="1"
+          />
+          <small>{$t('tools/dhcp-lease-time-calculator.input.customChurn.hint')}</small>
         </div>
       {/if}
     </div>
@@ -187,7 +218,7 @@
 
   {#if validationErrors.length > 0}
     <div class="card errors-card">
-      <h3>Validation Errors</h3>
+      <h3>{$t('tools/dhcp-lease-time-calculator.errors.title')}</h3>
       {#each validationErrors as error, i (i)}
         <div class="error-message">
           <Icon name="alert-triangle" size="sm" />
@@ -199,22 +230,31 @@
 
   {#if result && validationErrors.length === 0}
     <div class="card results">
-      <h3>Calculated Lease Times</h3>
+      <h3>{$t('tools/dhcp-lease-time-calculator.results.title')}</h3>
 
       <div class="summary-card">
-        <div><strong>Pool Utilization:</strong> {result.utilizationPercent}%</div>
-        <div><strong>Recommended Lease:</strong> {result.recommendedLeaseFormatted}</div>
+        <div>
+          <strong>{$t('tools/dhcp-lease-time-calculator.results.summary.poolUtilization')}</strong>
+          {result.utilizationPercent}%
+        </div>
+        <div>
+          <strong>{$t('tools/dhcp-lease-time-calculator.results.summary.recommendedLease')}</strong>
+          {result.recommendedLeaseFormatted}
+        </div>
       </div>
 
       {#if result.exhaustionTime}
         <div class="warning-card">
           <Icon name="alert-triangle" size="sm" />
-          <span><strong>Address Exhaustion:</strong> {result.exhaustionTime}</span>
+          <span
+            ><strong>{$t('tools/dhcp-lease-time-calculator.results.exhaustionWarning')}</strong>
+            {result.exhaustionTime}</span
+          >
         </div>
       {/if}
 
       <div class="lease-times">
-        {#each [{ label: 'Default Lease Time', value: result.recommendedLeaseFormatted, seconds: result.recommendedLeaseSeconds, key: 'lease' }, { label: 'T1 (Renewal)', value: result.t1RenewalFormatted, seconds: result.t1RenewalSeconds, key: 't1' }, { label: 'T2 (Rebinding)', value: result.t2RebindingFormatted, seconds: result.t2RebindingSeconds, key: 't2' }] as time (time.key)}
+        {#each [{ label: $t('tools/dhcp-lease-time-calculator.results.leaseTimes.defaultLease'), value: result.recommendedLeaseFormatted, seconds: result.recommendedLeaseSeconds, key: 'lease' }, { label: $t('tools/dhcp-lease-time-calculator.results.leaseTimes.t1Renewal'), value: result.t1RenewalFormatted, seconds: result.t1RenewalSeconds, key: 't1' }, { label: $t('tools/dhcp-lease-time-calculator.results.leaseTimes.t2Rebinding'), value: result.t2RebindingFormatted, seconds: result.t2RebindingSeconds, key: 't2' }] as time (time.key)}
           <div class="time-item">
             <div class="time-header">
               <span class="time-label">{time.label}</span>
@@ -227,14 +267,16 @@
               </button>
             </div>
             <div class="time-value">{time.value}</div>
-            <div class="time-seconds">{time.seconds} seconds</div>
+            <div class="time-seconds">
+              {$t('tools/dhcp-lease-time-calculator.results.leaseTimes.seconds', { seconds: time.seconds })}
+            </div>
           </div>
         {/each}
       </div>
 
       {#if result.recommendations.length > 0}
         <div class="recommendations">
-          <h4>Recommendations</h4>
+          <h4>{$t('tools/dhcp-lease-time-calculator.results.recommendations.title')}</h4>
           {#each result.recommendations as recommendation, i (i)}
             <div class="recommendation-item">
               {recommendation}
@@ -244,7 +286,7 @@
       {/if}
     </div>
 
-    {#each [{ title: 'ISC DHCPd Configuration', content: result.configExamples.iscDhcpd, key: 'isc' }, { title: 'Kea DHCPv4 Configuration', content: result.configExamples.keaDhcp4, key: 'kea' }] as config (config.key)}
+    {#each [{ title: $t('tools/dhcp-lease-time-calculator.config.iscDhcpd'), content: result.configExamples.iscDhcpd, key: 'isc' }, { title: $t('tools/dhcp-lease-time-calculator.config.keaDhcp4'), content: result.configExamples.keaDhcp4, key: 'kea' }] as config (config.key)}
       <div class="card results">
         <div class="card-header-with-action">
           <h3>{config.title}</h3>
@@ -255,7 +297,9 @@
             onclick={() => clipboard.copy(config.content, config.key)}
           >
             <Icon name={clipboard.isCopied(config.key) ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied(config.key) ? 'Copied' : 'Copy'}
+            {clipboard.isCopied(config.key)
+              ? $t('tools/dhcp-lease-time-calculator.buttons.copied')
+              : $t('tools/dhcp-lease-time-calculator.buttons.copy')}
           </button>
         </div>
         <pre class="output-value code-block">{config.content}</pre>

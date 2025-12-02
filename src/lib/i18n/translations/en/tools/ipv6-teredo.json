@@ -1,0 +1,113 @@
+{
+  "title": "IPv6 Teredo Parser",
+  "description": "Parse Teredo IPv6 addresses to extract server IPv4, flags, mapped port, and client IPv4",
+
+  "overview": {
+    "tunneling": {
+      "title": "Teredo Tunneling:",
+      "description": "Allows IPv6 connectivity for hosts behind IPv4 NATs by encapsulating IPv6 packets in IPv4 UDP."
+    },
+    "format": {
+      "title": "Address Format:",
+      "description": "where components are encoded and obfuscated."
+    },
+    "obfuscation": {
+      "title": "Obfuscation:",
+      "description": "Client IP and port are XOR'ed to prevent some NATs from interfering with the tunnel."
+    }
+  },
+
+  "examples": {
+    "title": "Quick Examples",
+    "microsoftTeredo": "Microsoft Teredo",
+    "microsoftTeredoDesc": "Microsoft Teredo server example",
+    "compressedForm": "Compressed Form",
+    "compressedFormDesc": "Same address in compressed format",
+    "behindNATCone": "Behind NAT (Cone)",
+    "behindNATConeDesc": "Client behind cone NAT",
+    "directConnection": "Direct Connection",
+    "directConnectionDesc": "Direct connection without NAT"
+  },
+
+  "input": {
+    "label": "Teredo IPv6 Address",
+    "placeholder": "Enter IPv6 Teredo address...",
+    "help": "Enter a Teredo IPv6 address (starts with 2001::/32)"
+  },
+
+  "results": {
+    "validAddress": "Valid Teredo Address",
+    "invalidAddress": "Invalid Address"
+  },
+
+  "breakdown": {
+    "title": "Address Structure",
+    "prefix": {
+      "label": "Prefix",
+      "description": "Teredo identifier"
+    },
+    "server": {
+      "label": "Server",
+      "description": "IPv4:"
+    },
+    "flags": {
+      "label": "Flags"
+    },
+    "port": {
+      "label": "Port",
+      "description": "Actual:"
+    },
+    "client": {
+      "label": "Client",
+      "description": "IPv4:"
+    }
+  },
+
+  "components": {
+    "title": "Extracted Components",
+    "teredoServer": {
+      "title": "Teredo Server",
+      "description": "The Teredo relay server handling this tunnel"
+    },
+    "clientIPv4": {
+      "title": "Client IPv4",
+      "description": "The client's public IPv4 address (may be NAT address)"
+    },
+    "clientPort": {
+      "title": "Client Port",
+      "description": "The UDP port used by the client (may be NAT-mapped)"
+    },
+    "natType": {
+      "title": "NAT Detection",
+      "description": "Indicates the type of NAT the client is behind"
+    }
+  },
+
+  "natTypes": {
+    "cone": "Cone NAT",
+    "symmetric": "Symmetric NAT",
+    "direct": "Direct connection (no NAT)"
+  },
+
+  "explanation": {
+    "title": "Parsing Steps",
+    "step1": "1. Teredo prefix: {prefix} (identifies this as a Teredo tunnel)",
+    "step2": "2. Server IPv4: {hex} → {ipv4}",
+    "step3": "3. Flags: {hex} → {flags}",
+    "step4": "4. Client port: {hex} XOR FFFF → {port}",
+    "step5": "5. Client IPv4: {hex} XOR FFFFFFFF → {ipv4}"
+  },
+
+  "errors": {
+    "invalidFormat": "Invalid IPv6 address format",
+    "notTeredo": "Not a valid Teredo address (must start with 2001::/32)",
+    "invalidComponents": "Invalid address components detected"
+  },
+
+  "actions": {
+    "parse": "Parse",
+    "clear": "Clear",
+    "copy": "Copy",
+    "copied": "Copied!"
+  }
+}

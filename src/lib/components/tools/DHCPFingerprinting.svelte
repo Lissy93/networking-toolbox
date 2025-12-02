@@ -17,6 +17,7 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables/useClipboard.svelte';
+  import { t } from '$lib/stores/language';
 
   const clipboard = useClipboard(1800);
 
@@ -31,55 +32,55 @@
   let reverseQuery = $state<string>('');
   let reverseResults = $state<typeof FINGERPRINT_DATABASE>([]);
 
-  const examples = [
+  const examples = $derived([
     {
-      label: 'Windows 10/11',
-      description: 'Modern Windows desktop',
+      label: $t('tools/dhcp-fingerprinting.examples.windows.label'),
+      description: $t('tools/dhcp-fingerprinting.examples.windows.description'),
       params: '1,3,6,15,31,33,43,44,46,47,119,121,249,252',
       vendor: '',
     },
     {
-      label: 'macOS/iOS',
-      description: 'Apple device',
+      label: $t('tools/dhcp-fingerprinting.examples.macOS.label'),
+      description: $t('tools/dhcp-fingerprinting.examples.macOS.description'),
       params: '1,3,6,15,119,252',
       vendor: '',
     },
     {
-      label: 'Android',
-      description: 'Android smartphone',
+      label: $t('tools/dhcp-fingerprinting.examples.android.label'),
+      description: $t('tools/dhcp-fingerprinting.examples.android.description'),
       params: '1,3,6,15,26,28,51,58,59,43',
       vendor: 'dhcpcd',
     },
     {
-      label: 'Linux (dhclient)',
-      description: 'Linux with ISC dhclient',
+      label: $t('tools/dhcp-fingerprinting.examples.linux.label'),
+      description: $t('tools/dhcp-fingerprinting.examples.linux.description'),
       params: '1,3,6,15,26,28,42',
       vendor: '',
     },
     {
-      label: 'Cisco IP Phone',
-      description: 'Cisco VoIP device',
+      label: $t('tools/dhcp-fingerprinting.examples.ciscoPhone.label'),
+      description: $t('tools/dhcp-fingerprinting.examples.ciscoPhone.description'),
       params: '1,3,6,12,15,28,42,66,67,120,150',
       vendor: 'Cisco',
     },
     {
-      label: 'Raspberry Pi',
-      description: 'Raspberry Pi OS (Debian)',
+      label: $t('tools/dhcp-fingerprinting.examples.raspberryPi.label'),
+      description: $t('tools/dhcp-fingerprinting.examples.raspberryPi.description'),
       params: '1,3,6,12,15,28,40,41,42',
       vendor: '',
     },
     {
-      label: 'Samsung Smart TV',
-      description: 'Smart TV device',
+      label: $t('tools/dhcp-fingerprinting.examples.samsungTV.label'),
+      description: $t('tools/dhcp-fingerprinting.examples.samsungTV.description'),
       params: '1,3,6,12,15,28,40,41,42,119',
       vendor: 'SAMSUNG',
     },
-  ];
+  ]);
 
-  const navOptions = [
-    { value: 'lookup', label: 'Fingerprint Lookup', icon: 'fingerprint' },
-    { value: 'reverse', label: 'Device Search', icon: 'monitor' },
-  ];
+  const navOptions = $derived([
+    { value: 'lookup' as const, label: $t('tools/dhcp-fingerprinting.tabs.lookup'), icon: 'fingerprint' },
+    { value: 'reverse' as const, label: $t('tools/dhcp-fingerprinting.tabs.reverse'), icon: 'monitor' },
+  ]);
 
   function loadExample(ex: (typeof examples)[0]) {
     activeTab = 'lookup';
@@ -179,8 +180,8 @@
 </script>
 
 <ToolContentContainer
-  title="DHCP Fingerprinting Database"
-  description="Identify devices based on their DHCP fingerprints using Parameter Request List (Option 55) and Vendor Class Identifier (Option 60). Database contains {FINGERPRINT_DATABASE.length} known fingerprints from common devices, operating systems, and IoT equipment."
+  title={$t('tools/dhcp-fingerprinting.title')}
+  description={$t('tools/dhcp-fingerprinting.subtitle', { count: FINGERPRINT_DATABASE.length })}
   {navOptions}
   bind:selectedNav={activeTab}
 >
@@ -193,35 +194,35 @@
     />
 
     <div class="card input-card">
-      <h3>Device Fingerprint Lookup</h3>
+      <h3>{$t('tools/dhcp-fingerprinting.lookup.title')}</h3>
 
       <div class="form-group">
-        <label for="param-list">Parameter Request List (Option 55)</label>
+        <label for="param-list">{$t('tools/dhcp-fingerprinting.lookup.parameterList.label')}</label>
         <input
           id="param-list"
           type="text"
           bind:value={parameterInput}
-          placeholder="e.g., 1,3,6,15 or 0103060f or 1 3 6 15"
+          placeholder={$t('tools/dhcp-fingerprinting.lookup.parameterList.placeholder')}
           class="input"
         />
-        <span class="hint">Enter as comma-separated, hex, or space-separated numbers</span>
+        <span class="hint">{$t('tools/dhcp-fingerprinting.lookup.parameterList.hint')}</span>
       </div>
 
       <div class="form-group">
-        <label for="vendor-class">Vendor Class Identifier (Option 60) - Optional</label>
+        <label for="vendor-class">{$t('tools/dhcp-fingerprinting.lookup.vendorClass.label')}</label>
         <input
           id="vendor-class"
           type="text"
           bind:value={vendorClass}
-          placeholder="e.g., MSFT, dhcpcd, Cisco"
+          placeholder={$t('tools/dhcp-fingerprinting.lookup.vendorClass.placeholder')}
           class="input"
         />
-        <span class="hint">Helps improve match accuracy</span>
+        <span class="hint">{$t('tools/dhcp-fingerprinting.lookup.vendorClass.hint')}</span>
       </div>
 
       {#if error}
         <div class="error-card">
-          <strong>Error:</strong>
+          <strong>{$t('tools/dhcp-fingerprinting.lookup.error')}</strong>
           <p>{error}</p>
         </div>
       {/if}
@@ -229,31 +230,35 @@
 
     {#if parsedParams.length > 0}
       <div class="card result-card">
-        <h3>Requested DHCP Options</h3>
+        <h3>{$t('tools/dhcp-fingerprinting.lookup.requestedOptions.title')}</h3>
 
         <div class="result-item">
-          <span class="label">Parameter List:</span>
+          <span class="label">{$t('tools/dhcp-fingerprinting.lookup.requestedOptions.parameterList')}</span>
           <code class="code-value">{formatParameterListDisplay(parsedParams)}</code>
           <button
             class="btn-copy"
             class:copied={clipboard.isCopied('param-list')}
             onclick={() => clipboard.copy(formatParameterListDisplay(parsedParams), 'param-list')}
-            aria-label="Copy"
+            aria-label={$t('tools/dhcp-fingerprinting.buttons.copyAria')}
           >
-            {clipboard.isCopied('param-list') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('param-list')
+              ? $t('tools/dhcp-fingerprinting.buttons.copied')
+              : $t('tools/dhcp-fingerprinting.buttons.copy')}
           </button>
         </div>
 
         <div class="result-item">
-          <span class="label">Hex Encoded:</span>
+          <span class="label">{$t('tools/dhcp-fingerprinting.lookup.requestedOptions.hexEncoded')}</span>
           <code class="code-value">{formatParameterListToHex(parsedParams)}</code>
           <button
             class="btn-copy"
             class:copied={clipboard.isCopied('param-hex')}
             onclick={() => clipboard.copy(formatParameterListToHex(parsedParams), 'param-hex')}
-            aria-label="Copy hex"
+            aria-label={$t('tools/dhcp-fingerprinting.buttons.copyHexAria')}
           >
-            {clipboard.isCopied('param-hex') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('param-hex')
+              ? $t('tools/dhcp-fingerprinting.buttons.copied')
+              : $t('tools/dhcp-fingerprinting.buttons.copy')}
           </button>
         </div>
 
@@ -261,14 +266,16 @@
           {#each parsedParams as param, i (i)}
             <div class="option-badge">
               <span class="option-num">{param}</span>
-              <span class="option-name">{DHCP_OPTION_NAMES[param] || 'Unknown'}</span>
+              <span class="option-name"
+                >{DHCP_OPTION_NAMES[param] || $t('tools/dhcp-fingerprinting.lookup.requestedOptions.unknown')}</span
+              >
             </div>
           {/each}
         </div>
 
         {#if analysis && analysis.warnings.length > 0}
           <div class="card warning-card">
-            <h3>Security Warnings</h3>
+            <h3>{$t('tools/dhcp-fingerprinting.lookup.securityWarnings.title')}</h3>
             {#each analysis.warnings as warning, i (i)}
               <div class="warning-item">⚠️ {warning}</div>
             {/each}
@@ -277,24 +284,34 @@
 
         {#if analysis && (analysis.unusual.length > 0 || (analysis.missing.length > 0 && matches.length > 0))}
           <div class="card analysis-card">
-            <h3>Option Analysis</h3>
+            <h3>{$t('tools/dhcp-fingerprinting.lookup.optionAnalysis.title')}</h3>
 
             {#if analysis.unusual.length > 0}
               <div class="info-section">
-                <h4>Unusual Options Detected</h4>
-                <p>These options may indicate vendor-specific configurations:</p>
+                <h4>{$t('tools/dhcp-fingerprinting.lookup.optionAnalysis.unusualTitle')}</h4>
+                <p>{$t('tools/dhcp-fingerprinting.lookup.optionAnalysis.unusualDescription')}</p>
                 <code class="code-value"
-                  >{analysis.unusual.map((o) => `${o} (${DHCP_OPTION_NAMES[o] || 'Unknown'})`).join(', ')}</code
+                  >{analysis.unusual
+                    .map(
+                      (o) =>
+                        `${o} (${DHCP_OPTION_NAMES[o] || $t('tools/dhcp-fingerprinting.lookup.requestedOptions.unknown')})`,
+                    )
+                    .join(', ')}</code
                 >
               </div>
             {/if}
 
             {#if analysis.missing.length > 0 && matches.length > 0}
               <div class="info-section">
-                <h4>Missing Options (vs. Best Match)</h4>
-                <p>Options present in the best match but not in your fingerprint:</p>
+                <h4>{$t('tools/dhcp-fingerprinting.lookup.optionAnalysis.missingTitle')}</h4>
+                <p>{$t('tools/dhcp-fingerprinting.lookup.optionAnalysis.missingDescription')}</p>
                 <code class="code-value"
-                  >{analysis.missing.map((o) => `${o} (${DHCP_OPTION_NAMES[o] || 'Unknown'})`).join(', ')}</code
+                  >{analysis.missing
+                    .map(
+                      (o) =>
+                        `${o} (${DHCP_OPTION_NAMES[o] || $t('tools/dhcp-fingerprinting.lookup.requestedOptions.unknown')})`,
+                    )
+                    .join(', ')}</code
                 >
               </div>
             {/if}
@@ -306,10 +323,14 @@
     {#if matches.length > 0}
       <div class="card matches-card">
         <div class="matches-header">
-          <h3>Matching Devices ({matches.length})</h3>
+          <h3>{$t('tools/dhcp-fingerprinting.lookup.matches.title', { count: matches.length })}</h3>
           <div class="export-buttons">
-            <button class="btn btn-secondary btn-sm" onclick={handleExportJSON}>Export JSON</button>
-            <button class="btn btn-secondary btn-sm" onclick={handleExportCSV}>Export CSV</button>
+            <button class="btn btn-secondary btn-sm" onclick={handleExportJSON}
+              >{$t('tools/dhcp-fingerprinting.lookup.matches.exportJSON')}</button
+            >
+            <button class="btn btn-secondary btn-sm" onclick={handleExportCSV}
+              >{$t('tools/dhcp-fingerprinting.lookup.matches.exportCSV')}</button
+            >
           </div>
         </div>
 
@@ -327,32 +348,36 @@
                   <h4>{match.fingerprint.device}</h4>
                   <span class="confidence">
                     {confidenceBadges[match.fingerprint.confidence] || ''}
-                    {match.fingerprint.confidence} confidence
+                    {$t('tools/dhcp-fingerprinting.lookup.matches.confidence', { level: match.fingerprint.confidence })}
                   </span>
                 </div>
                 <div class="match-score">
-                  <span class="score-value">{match.matchScore.toFixed(0)}%</span>
-                  <span class="score-label">Match</span>
+                  <span class="score-value"
+                    >{$t('tools/dhcp-fingerprinting.lookup.matches.matchScore', {
+                      score: match.matchScore.toFixed(0),
+                    })}</span
+                  >
+                  <span class="score-label">{$t('tools/dhcp-fingerprinting.lookup.matches.matchLabel')}</span>
                 </div>
               </div>
 
               <div class="match-details">
                 <div class="detail-row">
-                  <span class="detail-label">OS:</span>
+                  <span class="detail-label">{$t('tools/dhcp-fingerprinting.lookup.matches.osLabel')}</span>
                   <span>{match.fingerprint.os}</span>
                 </div>
                 <div class="detail-row">
-                  <span class="detail-label">Matched On:</span>
+                  <span class="detail-label">{$t('tools/dhcp-fingerprinting.lookup.matches.matchedOnLabel')}</span>
                   <span>{match.matchedOn.join(', ')}</span>
                 </div>
                 {#if match.fingerprint.description}
                   <div class="detail-row">
-                    <span class="detail-label">Description:</span>
+                    <span class="detail-label">{$t('tools/dhcp-fingerprinting.lookup.matches.descriptionLabel')}</span>
                     <span>{match.fingerprint.description}</span>
                   </div>
                 {/if}
                 <div class="detail-row">
-                  <span class="detail-label">Known Parameters:</span>
+                  <span class="detail-label">{$t('tools/dhcp-fingerprinting.lookup.matches.knownParamsLabel')}</span>
                   <code class="code-small">{formatParameterListDisplay(match.fingerprint.parameterRequestList)}</code>
                 </div>
               </div>
@@ -362,36 +387,41 @@
       </div>
     {:else if parsedParams.length > 0 && !error}
       <div class="card no-match-card">
-        <h3>No Matches Found</h3>
-        <p>The provided fingerprint doesn't match any known devices in the database. This could be:</p>
+        <h3>{$t('tools/dhcp-fingerprinting.lookup.noMatches.title')}</h3>
+        <p>{$t('tools/dhcp-fingerprinting.lookup.noMatches.description')}</p>
         <ul>
-          <li>A custom DHCP client configuration</li>
-          <li>An uncommon device or operating system</li>
-          <li>A device with a modified DHCP request list</li>
+          <li>{$t('tools/dhcp-fingerprinting.lookup.noMatches.reasons.custom')}</li>
+          <li>{$t('tools/dhcp-fingerprinting.lookup.noMatches.reasons.uncommon')}</li>
+          <li>{$t('tools/dhcp-fingerprinting.lookup.noMatches.reasons.modified')}</li>
         </ul>
-        <p class="hint">Try adding the Vendor Class Identifier if available.</p>
+        <p class="hint">{$t('tools/dhcp-fingerprinting.lookup.noMatches.hint')}</p>
       </div>
     {/if}
   {:else}
     <div class="card input-card">
-      <h3>Search by Device or OS</h3>
+      <h3>{$t('tools/dhcp-fingerprinting.reverse.title')}</h3>
 
       <div class="form-group">
-        <label for="reverse-query">Search for Device/OS/Vendor</label>
+        <label for="reverse-query">{$t('tools/dhcp-fingerprinting.reverse.search.label')}</label>
         <input
           id="reverse-query"
           type="text"
           bind:value={reverseQuery}
-          placeholder="e.g., iPhone, Windows, Cisco, Printer..."
+          placeholder={$t('tools/dhcp-fingerprinting.reverse.search.placeholder')}
           class="input"
         />
-        <span class="hint">Search the database by device name, OS, or vendor</span>
+        <span class="hint">{$t('tools/dhcp-fingerprinting.reverse.search.hint')}</span>
       </div>
     </div>
 
     {#if reverseResults.length > 0}
       <div class="card result-card">
-        <h3>Found {reverseResults.length} Device{reverseResults.length > 1 ? 's' : ''}</h3>
+        <h3>
+          {$t('tools/dhcp-fingerprinting.reverse.results.title', {
+            count: reverseResults.length,
+            plural: reverseResults.length > 1 ? 's' : '',
+          })}
+        </h3>
 
         {#each reverseResults as device, i (i)}
           <div class="reverse-item">
@@ -405,37 +435,39 @@
               <h4>{device.device}</h4>
               <span class="confidence">
                 {confidenceBadges[device.confidence] || ''}
-                {device.confidence} confidence
+                {$t('tools/dhcp-fingerprinting.reverse.results.confidence', { level: device.confidence })}
               </span>
             </div>
 
             <div class="reverse-details">
               <div class="detail-row">
-                <span class="detail-label">OS:</span>
+                <span class="detail-label">{$t('tools/dhcp-fingerprinting.reverse.results.osLabel')}</span>
                 <span>{device.os}</span>
               </div>
               {#if device.description}
                 <div class="detail-row">
-                  <span class="detail-label">Description:</span>
+                  <span class="detail-label">{$t('tools/dhcp-fingerprinting.reverse.results.descriptionLabel')}</span>
                   <span>{device.description}</span>
                 </div>
               {/if}
               <div class="detail-row">
-                <span class="detail-label">Parameter Request List:</span>
+                <span class="detail-label">{$t('tools/dhcp-fingerprinting.reverse.results.parameterListLabel')}</span>
                 <code class="code-small">{formatParameterListDisplay(device.parameterRequestList)}</code>
                 <button
                   class="btn-copy"
                   class:copied={clipboard.isCopied(`reverse-${i}`)}
                   onclick={() =>
                     clipboard.copy(formatParameterListDisplay(device.parameterRequestList), `reverse-${i}`)}
-                  aria-label="Copy parameter list"
+                  aria-label={$t('tools/dhcp-fingerprinting.buttons.copyParamListAria')}
                 >
-                  {clipboard.isCopied(`reverse-${i}`) ? 'Copied' : 'Copy'}
+                  {clipboard.isCopied(`reverse-${i}`)
+                    ? $t('tools/dhcp-fingerprinting.buttons.copied')
+                    : $t('tools/dhcp-fingerprinting.buttons.copy')}
                 </button>
               </div>
               {#if device.vendorClassPattern}
                 <div class="detail-row">
-                  <span class="detail-label">Vendor Class Pattern:</span>
+                  <span class="detail-label">{$t('tools/dhcp-fingerprinting.reverse.results.vendorPatternLabel')}</span>
                   <code class="code-small">{device.vendorClassPattern}</code>
                 </div>
               {/if}
@@ -445,8 +477,8 @@
       </div>
     {:else if reverseQuery.trim()}
       <div class="card no-match-card">
-        <h3>No Devices Found</h3>
-        <p>No devices matched "{reverseQuery}". Try a different search term.</p>
+        <h3>{$t('tools/dhcp-fingerprinting.reverse.noResults.title')}</h3>
+        <p>{$t('tools/dhcp-fingerprinting.reverse.noResults.description', { query: reverseQuery })}</p>
       </div>
     {/if}
   {/if}

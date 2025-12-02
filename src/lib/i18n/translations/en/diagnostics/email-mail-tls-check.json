@@ -1,0 +1,67 @@
+{
+  "title": "SMTP TLS Checker",
+  "description": "Check if a mail server supports TLS encryption (STARTTLS and Direct TLS)",
+
+  "examples": {
+    "title": "Quick Examples",
+    "gmail_starttls": "Google Mail STARTTLS",
+    "outlook_starttls": "Microsoft Outlook STARTTLS",
+    "gmail_direct": "Gmail Direct TLS"
+  },
+
+  "form": {
+    "title": "Check Mail Server TLS",
+    "domain_placeholder": "mail.example.com",
+    "port_placeholder": "Port",
+    "check": "Check TLS",
+    "checking": "Checking...",
+    "error": "Please enter a domain name"
+  },
+
+  "loading": {
+    "title": "Checking TLS Support",
+    "description": "Testing connection to {domain}:{port}..."
+  },
+
+  "results": {
+    "title": "TLS Check Results for {domain}:{port}",
+
+    "status": {
+      "starttls_supported": {
+        "title": "STARTTLS Supported",
+        "description": "Server supports upgrading to TLS"
+      },
+      "direct_tls_supported": {
+        "title": "Direct TLS Supported",
+        "description": "Server supports implicit TLS"
+      },
+      "not_supported": {
+        "title": "TLS Not Supported",
+        "description": "Server does not support TLS encryption"
+      }
+    },
+
+    "connection": {
+      "title": "Connection Details",
+      "tls_version": "TLS Version",
+      "cipher_suite": "Cipher Suite"
+    },
+
+    "certificate": {
+      "title": "Certificate Information",
+      "common_name": "Common Name",
+      "issuer": "Issuer",
+      "valid_from": "Valid From",
+      "valid_to": "Valid To",
+      "expires_in": "Expires in {days} days",
+      "serial_number": "Serial Number",
+      "fingerprint": "Fingerprint",
+      "alt_names": "Alternative Names ({count})"
+    }
+  },
+
+  "info": {
+    "title": "About SMTP TLS",
+    "quick_tips": "Quick Tips"
+  }
+}

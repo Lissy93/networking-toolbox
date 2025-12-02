@@ -1,0 +1,24 @@
+{
+  "title": "DNSSEC AD Flag Checker",
+  "description": "Check if DNS resolvers set the Authenticated Data (AD) flag for DNSSEC validation",
+
+  "form": {
+    "title": "DNSSEC AD Flag Check",
+    "domain": {
+      "label": "Domain",
+      "placeholder": "example.com"
+    },
+    "check": "Check AD Flag",
+    "checking": "Checking...",
+    "error": "Please enter a domain"
+  },
+
+  "results": {
+    "title": "AD Flag Results",
+    "ad_flag_set": "AD Flag Set",
+    "ad_flag_not_set": "AD Flag Not Set",
+    "dnssec_validated": "DNSSEC Validated",
+    "resolver": "Resolver",
+    "authenticated": "Authenticated"
+  }
+}

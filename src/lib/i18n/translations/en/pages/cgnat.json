@@ -1,0 +1,86 @@
+{
+  "cgnat": {
+    "addressRange": {
+      "title": "CGNAT Address Range",
+      "sharedSpace": "Shared Address Space",
+      "labels": {
+        "range": "Range",
+        "fullRange": "Full Range",
+        "totalAddresses": "Total Addresses",
+        "rfc": "RFC"
+      },
+      "breakdown": {
+        "title": "Address Breakdown",
+        "headers": {
+          "network": "Network Block",
+          "addresses": "Available Addresses",
+          "use": "Typical Use"
+        }
+      }
+    },
+    "natSystem": {
+      "title": "Two-Layer NAT System",
+      "headers": {
+        "layer": "Layer",
+        "location": "Location",
+        "insideAddress": "Inside Address",
+        "outsideAddress": "Outside Address",
+        "purpose": "Purpose"
+      }
+    },
+    "trafficFlow": {
+      "title": "Traffic Flow"
+    },
+    "identification": {
+      "labels": {
+        "description": "Description",
+        "cgnatIndicator": "CGNAT Indicator",
+        "normalIndicator": "Normal Indicator"
+      }
+    },
+    "impacts": {
+      "title": "Impact on Services",
+      "negative": {
+        "title": "Negative Impacts",
+        "labels": {
+          "description": "Description",
+          "affectedServices": "Affected Services",
+          "workaround": "Workaround"
+        }
+      },
+      "positive": {
+        "title": "Positive Aspects"
+      }
+    },
+    "workarounds": {
+      "title": "Workarounds and Solutions",
+      "labels": {
+        "description": "Description",
+        "effectiveness": "Effectiveness",
+        "cost": "Cost"
+      }
+    },
+    "troubleshooting": {
+      "title": "Troubleshooting Common Issues",
+      "labels": {
+        "cause": "Cause",
+        "diagnosis": "Diagnosis",
+        "solution": "Solution"
+      }
+    },
+    "quickCheck": {
+      "title": "Quick CGNAT Check",
+      "stepsTitle": "Steps to Check",
+      "nextStepsTitle": "What to Do Next"
+    },
+    "bestPractices": {
+      "title": "Best Practices"
+    },
+    "ispPerspective": {
+      "title": "ISP Perspective",
+      "whyTitle": "Why ISPs Use CGNAT",
+      "tradeoffTitle": "Understanding the Trade-off",
+      "tradeoffDescription": "CGNAT is a necessary compromise. It allows ISPs to provide affordable internet service during IPv4 exhaustion, but at the cost of some functionality. The long-term solution is IPv6 adoption."
+    }
+  }
+}

@@ -12,6 +12,7 @@
   import ToolContentContainer from '$lib/components/global/ToolContentContainer.svelte';
   import ExamplesCard from '$lib/components/common/ExamplesCard.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t } from '$lib/stores/language';
 
   let method = $state<'interface-index' | 'interface-name' | 'mac-address' | 'custom'>('interface-index');
   let interfaceIndex = $state<number | undefined>(undefined);
@@ -114,10 +115,7 @@
   });
 </script>
 
-<ToolContentContainer
-  title="IAID Calculator"
-  description="Calculate Identity Association Identifier (IAID) for DHCPv6 interfaces. Generate IAIDs from interface index, name, MAC address, or custom values with OS-specific conventions."
->
+<ToolContentContainer title={$t('tools/iaid-calculator.title')} description={$t('tools/iaid-calculator.subtitle')}>
   <ExamplesCard
     {examples}
     onSelect={loadExample}
@@ -128,20 +126,20 @@
 
   <div class="card input-card">
     <div class="card-header">
-      <h3>IAID Configuration</h3>
-      <p class="help-text">Select method to generate Identity Association Identifier</p>
+      <h3>{$t('tools/iaid-calculator.config.title')}</h3>
+      <p class="help-text">{$t('tools/iaid-calculator.config.hint')}</p>
     </div>
     <div class="card-content">
       <div class="input-group">
         <label for="method">
           <Icon name="settings" size="sm" />
-          Generation Method
+          {$t('tools/iaid-calculator.config.method.label')}
         </label>
         <select id="method" bind:value={method}>
-          <option value="interface-index">Interface Index</option>
-          <option value="interface-name">Interface Name (hash)</option>
-          <option value="mac-address">MAC Address (hash)</option>
-          <option value="custom">Custom Value</option>
+          <option value="interface-index">{$t('tools/iaid-calculator.config.method.options.interfaceIndex')}</option>
+          <option value="interface-name">{$t('tools/iaid-calculator.config.method.options.interfaceName')}</option>
+          <option value="mac-address">{$t('tools/iaid-calculator.config.method.options.macAddress')}</option>
+          <option value="custom">{$t('tools/iaid-calculator.config.method.options.custom')}</option>
         </select>
       </div>
 
@@ -149,17 +147,17 @@
         <div class="input-group">
           <label for="interface-index">
             <Icon name="hash" size="sm" />
-            Interface Index
+            {$t('tools/iaid-calculator.config.interfaceIndex.label')}
           </label>
           <input
             id="interface-index"
             type="number"
             bind:value={interfaceIndex}
-            placeholder="e.g., 2 for eth0, 3 for wlan0"
+            placeholder={$t('tools/iaid-calculator.config.interfaceIndex.placeholder')}
             min="0"
             max="4294967295"
           />
-          <small>Network interface index (0-4294967295)</small>
+          <small>{$t('tools/iaid-calculator.config.interfaceIndex.hint')}</small>
         </div>
       {/if}
 
@@ -167,10 +165,15 @@
         <div class="input-group">
           <label for="interface-name">
             <Icon name="network" size="sm" />
-            Interface Name
+            {$t('tools/iaid-calculator.config.interfaceName.label')}
           </label>
-          <input id="interface-name" type="text" bind:value={interfaceName} placeholder="e.g., eth0, wlan0, enp3s0" />
-          <small>Network interface name (will be hashed to generate IAID)</small>
+          <input
+            id="interface-name"
+            type="text"
+            bind:value={interfaceName}
+            placeholder={$t('tools/iaid-calculator.config.interfaceName.placeholder')}
+          />
+          <small>{$t('tools/iaid-calculator.config.interfaceName.hint')}</small>
         </div>
       {/if}
 
@@ -178,10 +181,15 @@
         <div class="input-group">
           <label for="mac-address">
             <Icon name="cpu" size="sm" />
-            MAC Address
+            {$t('tools/iaid-calculator.config.macAddress.label')}
           </label>
-          <input id="mac-address" type="text" bind:value={macAddress} placeholder="00:0c:29:4f:a3:d2" />
-          <small>Hardware address (last 4 bytes used for IAID)</small>
+          <input
+            id="mac-address"
+            type="text"
+            bind:value={macAddress}
+            placeholder={$t('tools/iaid-calculator.config.macAddress.placeholder')}
+          />
+          <small>{$t('tools/iaid-calculator.config.macAddress.hint')}</small>
         </div>
       {/if}
 
@@ -189,17 +197,17 @@
         <div class="input-group">
           <label for="custom-value">
             <Icon name="edit" size="sm" />
-            Custom IAID Value
+            {$t('tools/iaid-calculator.config.customValue.label')}
           </label>
           <input
             id="custom-value"
             type="number"
             bind:value={customValue}
-            placeholder="Enter value between 0 and 4294967295"
+            placeholder={$t('tools/iaid-calculator.config.customValue.placeholder')}
             min="0"
             max="4294967295"
           />
-          <small>32-bit unsigned integer (0-4294967295)</small>
+          <small>{$t('tools/iaid-calculator.config.customValue.hint')}</small>
         </div>
       {/if}
     </div>
@@ -207,7 +215,7 @@
 
   {#if validationErrors.length > 0}
     <div class="card errors-card">
-      <h3>Validation Errors</h3>
+      <h3>{$t('tools/iaid-calculator.errors.title')}</h3>
       {#each validationErrors as error, i (i)}
         <div class="error-message">
           <Icon name="alert-triangle" size="sm" />
@@ -219,11 +227,11 @@
 
   {#if result && validationErrors.length === 0}
     <div class="card results">
-      <h3>Calculated IAID</h3>
+      <h3>{$t('tools/iaid-calculator.results.title')}</h3>
 
       <div class="summary-card">
-        <div><strong>Method:</strong> {result.method}</div>
-        <div><strong>IAID:</strong> {result.iaid}</div>
+        <div><strong>{$t('tools/iaid-calculator.results.summary.method')}</strong> {result.method}</div>
+        <div><strong>{$t('tools/iaid-calculator.results.summary.iaid')}</strong> {result.iaid}</div>
       </div>
 
       {#if result.collisionWarning}
@@ -235,7 +243,7 @@
 
       <div class="output-group">
         <div class="output-header">
-          <h4>Hexadecimal</h4>
+          <h4>{$t('tools/iaid-calculator.results.hex')}</h4>
           <button
             type="button"
             class="copy-btn"
@@ -243,7 +251,9 @@
             onclick={() => clipboard.copy(result!.hex, 'hex')}
           >
             <Icon name={clipboard.isCopied('hex') ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied('hex') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('hex')
+              ? $t('tools/iaid-calculator.common.copied')
+              : $t('tools/iaid-calculator.common.copy')}
           </button>
         </div>
         <pre class="output-value code-block">{result.hex}</pre>
@@ -251,7 +261,7 @@
 
       <div class="output-group">
         <div class="output-header">
-          <h4>Decimal</h4>
+          <h4>{$t('tools/iaid-calculator.results.decimal')}</h4>
           <button
             type="button"
             class="copy-btn"
@@ -259,7 +269,9 @@
             onclick={() => clipboard.copy(result!.decimal, 'decimal')}
           >
             <Icon name={clipboard.isCopied('decimal') ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied('decimal') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('decimal')
+              ? $t('tools/iaid-calculator.common.copied')
+              : $t('tools/iaid-calculator.common.copy')}
           </button>
         </div>
         <pre class="output-value code-block">{result.decimal}</pre>
@@ -267,7 +279,7 @@
 
       <div class="output-group">
         <div class="output-header">
-          <h4>Binary</h4>
+          <h4>{$t('tools/iaid-calculator.results.binary')}</h4>
           <button
             type="button"
             class="copy-btn"
@@ -275,7 +287,9 @@
             onclick={() => clipboard.copy(result!.binary, 'binary')}
           >
             <Icon name={clipboard.isCopied('binary') ? 'check' : 'copy'} size="xs" />
-            {clipboard.isCopied('binary') ? 'Copied' : 'Copy'}
+            {clipboard.isCopied('binary')
+              ? $t('tools/iaid-calculator.common.copied')
+              : $t('tools/iaid-calculator.common.copy')}
           </button>
         </div>
         <pre class="output-value code-block">{result.binary}</pre>
@@ -283,8 +297,8 @@
     </div>
 
     <div class="card results">
-      <h3>OS-Specific Conventions</h3>
-      <p class="help-text">How different operating systems typically generate IAIDs</p>
+      <h3>{$t('tools/iaid-calculator.results.osConventions.title')}</h3>
+      <p class="help-text">{$t('tools/iaid-calculator.results.osConventions.hint')}</p>
 
       <div class="os-conventions">
         {#each [{ icon: 'linux', name: 'Linux', text: result.osConventions.linux }, { icon: 'windows', name: 'Windows', text: result.osConventions.windows }, { icon: 'mac', name: 'macOS', text: result.osConventions.macos }, { icon: 'bsd', name: 'FreeBSD', text: result.osConventions.freebsd }] as os (os.name)}
@@ -301,7 +315,7 @@
       </div>
     </div>
 
-    {#each [{ title: 'Kea DHCPv6 Configuration', content: result?.configExamples?.keaDhcp6, key: 'kea' }, { title: 'ISC DHCPd Configuration', content: result?.configExamples?.iscDhcpd, key: 'isc' }] as config (config.key)}
+    {#each [{ title: $t('tools/iaid-calculator.results.configExamples.keaDhcp6'), content: result?.configExamples?.keaDhcp6, key: 'kea' }, { title: $t('tools/iaid-calculator.results.configExamples.iscDhcpd'), content: result?.configExamples?.iscDhcpd, key: 'isc' }] as config (config.key)}
       {#if config.content}
         <div class="card results">
           <div class="card-header-with-action">
@@ -313,7 +327,9 @@
               onclick={() => clipboard.copy(config.content!, config.key)}
             >
               <Icon name={clipboard.isCopied(config.key) ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied(config.key) ? 'Copied' : 'Copy'}
+              {clipboard.isCopied(config.key)
+                ? $t('tools/iaid-calculator.common.copied')
+                : $t('tools/iaid-calculator.common.copy')}
             </button>
           </div>
           <pre class="output-value code-block">{config.content}</pre>
@@ -323,8 +339,8 @@
   {/if}
 
   <div class="card naming-guide-wrap">
-    <h3>Network Interface Naming Guide</h3>
-    <p class="help-text">Common interface naming conventions across different operating systems</p>
+    <h3>{$t('tools/iaid-calculator.namingGuide.title')}</h3>
+    <p class="help-text">{$t('tools/iaid-calculator.namingGuide.hint')}</p>
 
     <div class="naming-guide">
       {#each [{ icon: 'linux', data: INTERFACE_NAMING_GUIDE.linux }, { icon: 'windows', data: INTERFACE_NAMING_GUIDE.windows }, { icon: 'mac', data: INTERFACE_NAMING_GUIDE.macos }, { icon: 'bsd', data: INTERFACE_NAMING_GUIDE.freebsd }] as osGuide (osGuide.data.title)}

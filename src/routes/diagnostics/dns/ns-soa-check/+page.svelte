@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tooltip } from '$lib/actions/tooltip.js';
   import Icon from '$lib/components/global/Icon.svelte';
+  import { t } from '$lib/stores/language';
   import '../../../../styles/diagnostics-pages.scss';
 
   let domain = $state('google.com');
@@ -10,14 +11,38 @@
   let copiedState = $state(false);
   let selectedExampleIndex = $state<number | null>(null);
 
-  const examples = [
-    { domain: 'google.com', description: 'Google DNS infrastructure check' },
-    { domain: 'github.com', description: 'GitHub nameserver configuration' },
-    { domain: 'cloudflare.com', description: 'Cloudflare NS/SOA setup' },
-    { domain: 'stackoverflow.com', description: 'Stack Overflow DNS consistency' },
-    { domain: 'microsoft.com', description: 'Microsoft nameserver analysis' },
-    { domain: 'aws.amazon.com', description: 'AWS subdomain NS/SOA check' },
-  ];
+  const examples = $derived([
+    {
+      domain: $t('diagnostics/dns-ns-soa-check.examples.items.google.domain'),
+      description: $t('diagnostics/dns-ns-soa-check.examples.items.google.description'),
+      tooltip: $t('diagnostics/dns-ns-soa-check.examples.items.google.tooltip'),
+    },
+    {
+      domain: $t('diagnostics/dns-ns-soa-check.examples.items.github.domain'),
+      description: $t('diagnostics/dns-ns-soa-check.examples.items.github.description'),
+      tooltip: $t('diagnostics/dns-ns-soa-check.examples.items.github.tooltip'),
+    },
+    {
+      domain: $t('diagnostics/dns-ns-soa-check.examples.items.cloudflare.domain'),
+      description: $t('diagnostics/dns-ns-soa-check.examples.items.cloudflare.description'),
+      tooltip: $t('diagnostics/dns-ns-soa-check.examples.items.cloudflare.tooltip'),
+    },
+    {
+      domain: $t('diagnostics/dns-ns-soa-check.examples.items.stackoverflow.domain'),
+      description: $t('diagnostics/dns-ns-soa-check.examples.items.stackoverflow.description'),
+      tooltip: $t('diagnostics/dns-ns-soa-check.examples.items.stackoverflow.tooltip'),
+    },
+    {
+      domain: $t('diagnostics/dns-ns-soa-check.examples.items.microsoft.domain'),
+      description: $t('diagnostics/dns-ns-soa-check.examples.items.microsoft.description'),
+      tooltip: $t('diagnostics/dns-ns-soa-check.examples.items.microsoft.tooltip'),
+    },
+    {
+      domain: $t('diagnostics/dns-ns-soa-check.examples.items.aws.domain'),
+      description: $t('diagnostics/dns-ns-soa-check.examples.items.aws.description'),
+      tooltip: $t('diagnostics/dns-ns-soa-check.examples.items.aws.tooltip'),
+    },
+  ]);
 
   async function checkNSSOA() {
     loading = true;
@@ -157,10 +182,9 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>NS/SOA Consistency Checker</h1>
+    <h1>{$t('diagnostics/dns-ns-soa-check.title')}</h1>
     <p>
-      Verify DNS nameserver and SOA (Start of Authority) record consistency. Check that all listed nameservers resolve
-      correctly and analyze SOA parameters for proper DNS configuration.
+      {$t('diagnostics/dns-ns-soa-check.subtitle')}
     </p>
   </header>
 
@@ -169,7 +193,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>NS/SOA Examples</h4>
+        <h4>{$t('diagnostics/dns-ns-soa-check.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (i)}
@@ -177,7 +201,7 @@
             class="example-card"
             class:selected={selectedExampleIndex === i}
             onclick={() => loadExample(example, i)}
-            use:tooltip={`Check NS/SOA consistency for ${example.domain}`}
+            use:tooltip={example.tooltip}
           >
             <h5>{example.domain}</h5>
             <p>{example.description}</p>
@@ -190,17 +214,17 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>NS/SOA Check</h3>
+      <h3>{$t('diagnostics/dns-ns-soa-check.form.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-group">
-        <label for="domain" use:tooltip={'Enter the domain to check nameserver and SOA consistency for'}>
-          Domain Name
+        <label for="domain" use:tooltip={$t('diagnostics/dns-ns-soa-check.form.domainTooltip')}>
+          {$t('diagnostics/dns-ns-soa-check.form.domainLabel')}
           <input
             id="domain"
             type="text"
             bind:value={domain}
-            placeholder="example.com"
+            placeholder={$t('diagnostics/dns-ns-soa-check.form.domainPlaceholder')}
             onchange={() => {
               clearExampleSelection();
               if (domain) checkNSSOA();
@@ -213,10 +237,10 @@
         <button class="check-btn lookup-btn" onclick={checkNSSOA} disabled={loading || !domain.trim()}>
           {#if loading}
             <Icon name="loader" size="sm" animate="spin" />
-            Checking NS/SOA...
+            {$t('diagnostics/dns-ns-soa-check.form.checking')}
           {:else}
             <Icon name="server" size="sm" />
-            Check NS/SOA Records
+            {$t('diagnostics/dns-ns-soa-check.form.checkButton')}
           {/if}
         </button>
       </div>
@@ -227,12 +251,14 @@
   {#if results && !results.error}
     <div class="card results-card">
       <div class="card-header row">
-        <h3>NS/SOA Analysis Results</h3>
+        <h3>{$t('diagnostics/dns-ns-soa-check.results.title')}</h3>
         <button class="copy-btn" onclick={copyResults} disabled={copiedState}>
           <span class={copiedState ? 'text-green-500' : ''}
             ><Icon name={copiedState ? 'check' : 'copy'} size="xs" /></span
           >
-          {copiedState ? 'Copied!' : 'Copy Results'}
+          {copiedState
+            ? $t('diagnostics/dns-ns-soa-check.results.copied')
+            : $t('diagnostics/dns-ns-soa-check.results.copyButton')}
         </button>
       </div>
       <div class="card-content">
@@ -252,11 +278,11 @@
               <div>
                 <h4>
                   {#if status.status === 'good'}
-                    DNS Configuration Healthy
+                    {$t('diagnostics/dns-ns-soa-check.results.status.healthy')}
                   {:else if status.status === 'partial'}
-                    DNS Issues Detected
+                    {$t('diagnostics/dns-ns-soa-check.results.status.issues')}
                   {:else}
-                    DNS Configuration Problems
+                    {$t('diagnostics/dns-ns-soa-check.results.status.problems')}
                   {/if}
                 </h4>
                 <p>{status.message}</p>
@@ -268,7 +294,9 @@
         <!-- Nameservers -->
         {#if results.nameservers?.length > 0}
           <div class="nameservers-section">
-            <h4>Nameservers ({results.nameservers.length})</h4>
+            <h4>
+              {$t('diagnostics/dns-ns-soa-check.results.nameservers.title', { count: results.nameservers.length })}
+            </h4>
             <div class="nameserver-grid">
               {#each results.nameserverChecks as check, _index (_index)}
                 <div class="nameserver-item {check.resolved ? 'success' : 'error'}">
@@ -286,7 +314,7 @@
                   {:else if !check.resolved}
                     <div class="nameserver-error">
                       <Icon name="alert-triangle" size="xs" />
-                      <span>Failed to resolve</span>
+                      <span>{$t('diagnostics/dns-ns-soa-check.results.nameservers.failedToResolve')}</span>
                     </div>
                   {/if}
                 </div>
@@ -299,11 +327,11 @@
         {#if results.soa}
           {@const parsed = parseSOA(results.soa)}
           <div class="soa-section">
-            <h4>SOA (Start of Authority) Record</h4>
+            <h4>{$t('diagnostics/dns-ns-soa-check.results.soa.title')}</h4>
 
             <!-- Raw SOA -->
             <div class="soa-raw">
-              <h5>Raw SOA Record</h5>
+              <h5>{$t('diagnostics/dns-ns-soa-check.results.soa.rawTitle')}</h5>
               <div class="soa-display">
                 <code>{results.soa}</code>
               </div>
@@ -312,28 +340,38 @@
             <!-- Parsed SOA -->
             {#if parsed}
               <div class="soa-parsed">
-                <h5>Parsed SOA Parameters</h5>
+                <h5>{$t('diagnostics/dns-ns-soa-check.results.soa.parsedTitle')}</h5>
                 <div class="soa-grid">
                   <div class="soa-item">
-                    <div class="soa-label" use:tooltip={'The primary nameserver for this zone'}>Primary NS</div>
+                    <div
+                      class="soa-label"
+                      use:tooltip={$t('diagnostics/dns-ns-soa-check.results.soa.primaryNSTooltip')}
+                    >
+                      {$t('diagnostics/dns-ns-soa-check.results.soa.primaryNS')}
+                    </div>
                     <div class="soa-value">{parsed.primaryNS}</div>
                   </div>
 
                   <div class="soa-item">
-                    <div class="soa-label" use:tooltip={'Email address of the zone administrator (@ replaced with .)'}>
-                      Administrator
+                    <div
+                      class="soa-label"
+                      use:tooltip={$t('diagnostics/dns-ns-soa-check.results.soa.administratorTooltip')}
+                    >
+                      {$t('diagnostics/dns-ns-soa-check.results.soa.administrator')}
                     </div>
                     <div class="soa-value">{parsed.admin}</div>
                   </div>
 
                   <div class="soa-item">
-                    <div class="soa-label" use:tooltip={'Zone serial number - used to track zone changes'}>Serial</div>
+                    <div class="soa-label" use:tooltip={$t('diagnostics/dns-ns-soa-check.results.soa.serialTooltip')}>
+                      {$t('diagnostics/dns-ns-soa-check.results.soa.serial')}
+                    </div>
                     <div class="soa-value mono">{parsed.serial}</div>
                   </div>
 
                   <div class="soa-item">
-                    <div class="soa-label" use:tooltip={'How often secondary servers should check for updates'}>
-                      Refresh
+                    <div class="soa-label" use:tooltip={$t('diagnostics/dns-ns-soa-check.results.soa.refreshTooltip')}>
+                      {$t('diagnostics/dns-ns-soa-check.results.soa.refresh')}
                     </div>
                     <div class="soa-value">
                       <span class="mono">{parsed.refresh}s</span>
@@ -342,8 +380,8 @@
                   </div>
 
                   <div class="soa-item">
-                    <div class="soa-label" use:tooltip={'How long to wait before retrying a failed zone transfer'}>
-                      Retry
+                    <div class="soa-label" use:tooltip={$t('diagnostics/dns-ns-soa-check.results.soa.retryTooltip')}>
+                      {$t('diagnostics/dns-ns-soa-check.results.soa.retry')}
                     </div>
                     <div class="soa-value">
                       <span class="mono">{parsed.retry}s</span>
@@ -352,11 +390,8 @@
                   </div>
 
                   <div class="soa-item">
-                    <div
-                      class="soa-label"
-                      use:tooltip={"When secondary servers should stop answering queries if they can't contact the primary"}
-                    >
-                      Expire
+                    <div class="soa-label" use:tooltip={$t('diagnostics/dns-ns-soa-check.results.soa.expireTooltip')}>
+                      {$t('diagnostics/dns-ns-soa-check.results.soa.expire')}
                     </div>
                     <div class="soa-value">
                       <span class="mono">{parsed.expire}s</span>
@@ -365,8 +400,11 @@
                   </div>
 
                   <div class="soa-item">
-                    <div class="soa-label" use:tooltip={'Default TTL for negative responses (NXDOMAIN)'}>
-                      Minimum TTL
+                    <div
+                      class="soa-label"
+                      use:tooltip={$t('diagnostics/dns-ns-soa-check.results.soa.minimumTTLTooltip')}
+                    >
+                      {$t('diagnostics/dns-ns-soa-check.results.soa.minimumTTL')}
                     </div>
                     <div class="soa-value">
                       <span class="mono">{parsed.minimum}s</span>
@@ -377,18 +415,18 @@
 
                 <!-- Configuration Analysis -->
                 <div class="recommendations-section">
-                  <h5>Configuration Analysis</h5>
+                  <h5>{$t('diagnostics/dns-ns-soa-check.results.analysis.title')}</h5>
                   <div class="recommendation-list">
                     <!-- Serial number check -->
                     {#if parsed.serial.toString().length === 10 && parsed.serial.toString().startsWith('202')}
                       <div class="recommendation-item success">
                         <Icon name="check-circle" size="sm" />
-                        <span>Serial number appears to use YYYYMMDDNN format (recommended)</span>
+                        <span>{$t('diagnostics/dns-ns-soa-check.results.analysis.serialYYYYMMDDNN')}</span>
                       </div>
                     {:else}
                       <div class="recommendation-item warning">
                         <Icon name="alert-circle" size="sm" />
-                        <span>Consider using YYYYMMDDNN format for serial numbers for easier tracking</span>
+                        <span>{$t('diagnostics/dns-ns-soa-check.results.analysis.serialSuggestion')}</span>
                       </div>
                     {/if}
 
@@ -396,19 +434,29 @@
                     {#if parsed.refresh >= 3600 && parsed.refresh <= 86400}
                       <div class="recommendation-item success">
                         <Icon name="check-circle" size="sm" />
-                        <span>Refresh interval ({formatTime(parsed.refresh)}) is within recommended range</span>
+                        <span
+                          >{$t('diagnostics/dns-ns-soa-check.results.analysis.refreshGood', {
+                            time: formatTime(parsed.refresh),
+                          })}</span
+                        >
                       </div>
                     {:else if parsed.refresh < 3600}
                       <div class="recommendation-item warning">
                         <Icon name="alert-circle" size="sm" />
                         <span
-                          >Refresh interval ({formatTime(parsed.refresh)}) is quite frequent - consider increasing</span
+                          >{$t('diagnostics/dns-ns-soa-check.results.analysis.refreshTooFrequent', {
+                            time: formatTime(parsed.refresh),
+                          })}</span
                         >
                       </div>
                     {:else}
                       <div class="recommendation-item warning">
                         <Icon name="alert-circle" size="sm" />
-                        <span>Refresh interval ({formatTime(parsed.refresh)}) is quite long - consider reducing</span>
+                        <span
+                          >{$t('diagnostics/dns-ns-soa-check.results.analysis.refreshTooLong', {
+                            time: formatTime(parsed.refresh),
+                          })}</span
+                        >
                       </div>
                     {/if}
 
@@ -416,17 +464,21 @@
                     {#if parsed.retry >= 600 && parsed.retry < parsed.refresh}
                       <div class="recommendation-item success">
                         <Icon name="check-circle" size="sm" />
-                        <span>Retry interval is properly configured</span>
+                        <span>{$t('diagnostics/dns-ns-soa-check.results.analysis.retryGood')}</span>
                       </div>
                     {:else if parsed.retry >= parsed.refresh}
                       <div class="recommendation-item error">
                         <Icon name="x-circle" size="sm" />
-                        <span>Retry interval should be less than refresh interval</span>
+                        <span>{$t('diagnostics/dns-ns-soa-check.results.analysis.retryTooLong')}</span>
                       </div>
                     {:else}
                       <div class="recommendation-item warning">
                         <Icon name="alert-circle" size="sm" />
-                        <span>Retry interval ({formatTime(parsed.retry)}) might be too short</span>
+                        <span
+                          >{$t('diagnostics/dns-ns-soa-check.results.analysis.retryTooShort', {
+                            time: formatTime(parsed.retry),
+                          })}</span
+                        >
                       </div>
                     {/if}
 
@@ -434,12 +486,20 @@
                     {#if parsed.expire >= 604800}
                       <div class="recommendation-item success">
                         <Icon name="check-circle" size="sm" />
-                        <span>Expire time ({formatTime(parsed.expire)}) provides good resilience</span>
+                        <span
+                          >{$t('diagnostics/dns-ns-soa-check.results.analysis.expireGood', {
+                            time: formatTime(parsed.expire),
+                          })}</span
+                        >
                       </div>
                     {:else}
                       <div class="recommendation-item warning">
                         <Icon name="alert-circle" size="sm" />
-                        <span>Expire time ({formatTime(parsed.expire)}) is quite short - consider at least 1 week</span>
+                        <span
+                          >{$t('diagnostics/dns-ns-soa-check.results.analysis.expireShort', {
+                            time: formatTime(parsed.expire),
+                          })}</span
+                        >
                       </div>
                     {/if}
                   </div>
@@ -458,7 +518,7 @@
         <div class="error-content">
           <Icon name="alert-triangle" size="md" />
           <div>
-            <strong>NS/SOA Check Failed</strong>
+            <strong>{$t('diagnostics/dns-ns-soa-check.error.title')}</strong>
             <p>{error || results.error}</p>
           </div>
         </div>
@@ -469,58 +529,98 @@
   <!-- Educational Content -->
   <div class="card info-card">
     <div class="card-header">
-      <h3>Understanding NS and SOA Records</h3>
+      <h3>{$t('diagnostics/dns-ns-soa-check.education.title')}</h3>
     </div>
     <div class="card-content">
       <div class="info-grid">
         <div class="info-section">
-          <h4>NS (Name Server) Records</h4>
-          <p>NS records specify which name servers are authoritative for a domain. All listed nameservers should:</p>
+          <h4>{$t('diagnostics/dns-ns-soa-check.education.nsRecords.title')}</h4>
+          <p>{$t('diagnostics/dns-ns-soa-check.education.nsRecords.description')}</p>
           <ul>
-            <li>Resolve to valid IP addresses</li>
-            <li>Be reachable and responsive</li>
-            <li>Serve consistent zone data</li>
-            <li>Be geographically distributed for redundancy</li>
+            <li>{$t('diagnostics/dns-ns-soa-check.education.nsRecords.resolveToValidIP')}</li>
+            <li>{$t('diagnostics/dns-ns-soa-check.education.nsRecords.beReachable')}</li>
+            <li>{$t('diagnostics/dns-ns-soa-check.education.nsRecords.serveConsistent')}</li>
+            <li>{$t('diagnostics/dns-ns-soa-check.education.nsRecords.beDistributed')}</li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>SOA (Start of Authority)</h4>
-          <p>The SOA record contains administrative information about the zone:</p>
+          <h4>{$t('diagnostics/dns-ns-soa-check.education.soaRecord.title')}</h4>
+          <p>{$t('diagnostics/dns-ns-soa-check.education.soaRecord.description')}</p>
           <ul>
-            <li><strong>Serial:</strong> Version number for zone changes</li>
-            <li><strong>Refresh:</strong> How often secondaries check for updates</li>
-            <li><strong>Retry:</strong> Wait time before retrying failed transfers</li>
-            <li><strong>Expire:</strong> When to stop serving stale data</li>
-            <li><strong>Minimum:</strong> Default negative response TTL</li>
+            <li>
+              <strong>Serial:</strong>
+              {$t('diagnostics/dns-ns-soa-check.education.soaRecord.serial').replace('Serial: ', '')}
+            </li>
+            <li>
+              <strong>Refresh:</strong>
+              {$t('diagnostics/dns-ns-soa-check.education.soaRecord.refresh').replace('Refresh: ', '')}
+            </li>
+            <li>
+              <strong>Retry:</strong>
+              {$t('diagnostics/dns-ns-soa-check.education.soaRecord.retry').replace('Retry: ', '')}
+            </li>
+            <li>
+              <strong>Expire:</strong>
+              {$t('diagnostics/dns-ns-soa-check.education.soaRecord.expire').replace('Expire: ', '')}
+            </li>
+            <li>
+              <strong>Minimum:</strong>
+              {$t('diagnostics/dns-ns-soa-check.education.soaRecord.minimum').replace('Minimum: ', '')}
+            </li>
           </ul>
         </div>
 
         <div class="info-section">
-          <h4>Recommended Values</h4>
+          <h4>{$t('diagnostics/dns-ns-soa-check.education.recommended.title')}</h4>
           <div class="recommendations-table">
             <div class="rec-item">
-              <strong>Refresh:</strong> 1-24 hours (3600-86400s)
+              <strong>Refresh:</strong>
+              {$t('diagnostics/dns-ns-soa-check.education.recommended.refresh').replace('Refresh: ', '')}
             </div>
             <div class="rec-item">
-              <strong>Retry:</strong> 10-60 minutes (600-3600s)
+              <strong>Retry:</strong>
+              {$t('diagnostics/dns-ns-soa-check.education.recommended.retry').replace('Retry: ', '')}
             </div>
             <div class="rec-item">
-              <strong>Expire:</strong> 1-4 weeks (604800-2419200s)
+              <strong>Expire:</strong>
+              {$t('diagnostics/dns-ns-soa-check.education.recommended.expire').replace('Expire: ', '')}
             </div>
             <div class="rec-item">
-              <strong>Minimum:</strong> 5 minutes to 1 hour (300-3600s)
+              <strong>Minimum:</strong>
+              {$t('diagnostics/dns-ns-soa-check.education.recommended.minimum').replace('Minimum: ', '')}
             </div>
           </div>
         </div>
 
         <div class="info-section">
-          <h4>Common Issues</h4>
+          <h4>{$t('diagnostics/dns-ns-soa-check.education.commonIssues.title')}</h4>
           <ul>
-            <li><strong>Unreachable nameservers:</strong> Can cause resolution failures</li>
-            <li><strong>Inconsistent data:</strong> Different responses from different NS</li>
-            <li><strong>Wrong SOA values:</strong> Too aggressive or too conservative timing</li>
-            <li><strong>Serial number issues:</strong> Outdated or incorrect format</li>
+            <li>
+              <strong>Unreachable nameservers:</strong>
+              {$t('diagnostics/dns-ns-soa-check.education.commonIssues.unreachable').replace(
+                'Unreachable nameservers: ',
+                '',
+              )}
+            </li>
+            <li>
+              <strong>Inconsistent data:</strong>
+              {$t('diagnostics/dns-ns-soa-check.education.commonIssues.inconsistent').replace(
+                'Inconsistent data: ',
+                '',
+              )}
+            </li>
+            <li>
+              <strong>Wrong SOA values:</strong>
+              {$t('diagnostics/dns-ns-soa-check.education.commonIssues.wrongValues').replace('Wrong SOA values: ', '')}
+            </li>
+            <li>
+              <strong>Serial number issues:</strong>
+              {$t('diagnostics/dns-ns-soa-check.education.commonIssues.serialIssues').replace(
+                'Serial number issues: ',
+                '',
+              )}
+            </li>
           </ul>
         </div>
       </div>

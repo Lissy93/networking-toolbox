@@ -3,7 +3,15 @@
   import { calculateNthIPs, type NthIPResult } from '$lib/utils/nth-ip.js';
   import Icon from '$lib/components/global/Icon.svelte';
   import { useClipboard } from '$lib/composables';
+  import { t, loadTranslations, locale } from '$lib/stores/language';
+  import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import '../../../styles/diagnostics-pages.scss';
+
+  // Load translations for this tool
+  onMount(async () => {
+    await loadTranslations(get(locale), 'tools');
+  });
 
   let inputText = $state('192.168.1.0/24 @ 10\n10.0.0.0-10.0.0.255 [50]\n172.16.0.0/16 100\n2001:db8::/64#1000');
   let globalOffset = $state(0);
@@ -13,40 +21,40 @@
   let userModified = $state(false);
   const clipboard = useClipboard();
 
-  const examples = [
+  const examples = $derived([
     {
       input: '192.168.1.0/24 @ 10',
-      description: 'Get 10th IP from a /24 subnet',
+      description: $t('tools.nth_ip.examples.tenthFromSubnet.description'),
     },
     {
       input: '10.0.0.0-10.0.0.255 [128]\n172.16.0.0/16 1000',
-      description: 'Multiple range types with different indices',
+      description: $t('tools.nth_ip.examples.multipleRanges.description'),
     },
     {
       input: '2001:db8::/64#100\nfe80::/10 @ 50',
-      description: 'IPv6 networks with various formats',
+      description: $t('tools.nth_ip.examples.ipv6Networks.description'),
     },
     {
       input: '192.168.0.0/16 + 100\n10.0.0.0/8 [5000]',
-      description: 'Large networks with high indices',
+      description: $t('tools.nth_ip.examples.largeNetworks.description'),
     },
     {
       input: '203.0.113.0/24 @ 1\n203.0.113.0/24 @ -1',
-      description: 'First and last IP using positive/negative indexing',
+      description: $t('tools.nth_ip.examples.firstLastIP.description'),
     },
     {
       input: '192.168.1.1-192.168.1.100 [25]\n192.168.1.101-192.168.1.200 [75]',
-      description: 'Sequential IP ranges with specific indices',
+      description: $t('tools.nth_ip.examples.sequentialRanges.description'),
     },
     {
       input: '2001:db8:85a3::/48#65536\nfc00::/7 @ 1000000',
-      description: 'Large IPv6 address spaces',
+      description: $t('tools.nth_ip.examples.largeIPv6.description'),
     },
     {
       input: '127.0.0.0/8 @ 256\n::1/128 @ 0\n169.254.0.0/16 [32768]',
-      description: 'Special-use addresses: loopback and link-local',
+      description: $t('tools.nth_ip.examples.specialUse.description'),
     },
-  ];
+  ]);
 
   function calculateIPs() {
     if (!inputText.trim()) {
@@ -62,7 +70,7 @@
         result = {
           calculations: [],
           summary: { totalCalculations: 0, validCalculations: 0, invalidCalculations: 0, outOfBoundsCalculations: 0 },
-          errors: ['No valid input lines found'],
+          errors: [$t('tools.nth_ip.errors.noValidInputs')],
         };
         return;
       }
@@ -72,7 +80,7 @@
       result = {
         calculations: [],
         summary: { totalCalculations: 0, validCalculations: 0, invalidCalculations: 0, outOfBoundsCalculations: 0 },
-        errors: [error instanceof Error ? error.message : 'Unknown error occurred while calculating nth IPs'],
+        errors: [error instanceof Error ? error.message : $t('tools.nth_ip.errors.unknownError')],
       };
     } finally {
       isLoading = false;
@@ -87,7 +95,18 @@
     let filename = '';
 
     if (format === 'csv') {
-      const headers = 'Input,Network,Index,Offset,Result IP,Version,Total Addresses,In Bounds,Valid,Error';
+      const headers = [
+        $t('tools.nth_ip.export.headers.input'),
+        $t('tools.nth_ip.export.headers.network'),
+        $t('tools.nth_ip.export.headers.index'),
+        $t('tools.nth_ip.export.headers.offset'),
+        $t('tools.nth_ip.export.headers.resultIP'),
+        $t('tools.nth_ip.export.headers.version'),
+        $t('tools.nth_ip.export.headers.totalAddresses'),
+        $t('tools.nth_ip.export.headers.inBounds'),
+        $t('tools.nth_ip.export.headers.valid'),
+        $t('tools.nth_ip.export.headers.error'),
+      ].join(',');
       const rows = result.calculations.map(
         (calc) =>
           `"${calc.input}","${calc.network}","${calc.index}","${calc.offset}","${calc.resultIP}","IPv${calc.version}","${calc.totalAddresses}","${calc.isInBounds}","${calc.isValid}","${calc.error || ''}"`,
@@ -133,8 +152,8 @@
 
 <div class="card">
   <header class="card-header">
-    <h1>Nth IP Calculator</h1>
-    <p>Resolve the IP address at a specific index within networks and ranges with optional global offset.</p>
+    <h1>{$t('tools.nth_ip.title')}</h1>
+    <p>{$t('tools.nth_ip.description')}</p>
   </header>
 
   <!-- Examples -->
@@ -142,7 +161,7 @@
     <details class="examples-details">
       <summary class="examples-summary">
         <Icon name="chevron-right" size="xs" />
-        <h4>Quick Examples</h4>
+        <h4>{$t('tools.nth_ip.examples.title')}</h4>
       </summary>
       <div class="examples-grid">
         {#each examples as example, i (`${example.input}-${i}`)}
@@ -150,7 +169,7 @@
             class="example-card"
             class:selected={selectedExampleIndex === i && !userModified}
             onclick={() => loadExample(example, i)}
-            use:tooltip={`Calculate: ${example.input.split('\n')[0]}`}
+            use:tooltip={$t('tools.nth_ip.examples.calculate', { input: example.input.split('\n')[0] })}
           >
             <h5>{example.input.split('\n')[0]}</h5>
             <p>{example.description}</p>
@@ -163,43 +182,40 @@
   <!-- Input Form -->
   <div class="card input-card">
     <div class="card-header">
-      <h3>Network Configuration</h3>
+      <h3>{$t('tools.nth_ip.input.title')}</h3>
     </div>
     <div class="card-content">
       <div class="form-row">
         <div class="form-group textarea-group">
-          <label
-            for="inputs"
-            use:tooltip={'Enter network and index specifications, one per line. Supports formats: network @ index, network [index], network index, or network#index'}
-          >
-            Network and Index Specifications
+          <label for="inputs" use:tooltip={$t('tools.nth_ip.input.tooltip')}>
+            {$t('tools.nth_ip.input.label')}
           </label>
           <textarea
             id="inputs"
             bind:value={inputText}
             oninput={handleInputChange}
-            placeholder="192.168.1.0/24 @ 10&#10;10.0.0.0-10.0.0.255 [50]&#10;172.16.0.0/16 100&#10;2001:db8::/64#1000"
+            placeholder={$t('tools.nth_ip.input.placeholder')}
             rows="6"
           ></textarea>
           <div class="input-help">
-            Formats: network @ index, network [index], network index, or network#index. Optional offset: + number
+            {$t('tools.nth_ip.input.help')}
           </div>
         </div>
 
         <div class="options-section">
           <div class="option-group">
-            <label for="offset" use:tooltip={'Add this value to all index calculations (0-based indexing)'}>
-              Global Offset
+            <label for="offset" use:tooltip={$t('tools.nth_ip.input.globalOffset.tooltip')}>
+              {$t('tools.nth_ip.input.globalOffset.label')}
             </label>
             <input
               id="offset"
               type="number"
               bind:value={globalOffset}
               oninput={handleInputChange}
-              placeholder="0"
+              placeholder={$t('tools.nth_ip.input.globalOffset.placeholder')}
               min="0"
             />
-            <div class="option-help">Add this value to all index calculations (0-based indexing)</div>
+            <div class="option-help">{$t('tools.nth_ip.input.globalOffset.help')}</div>
           </div>
         </div>
       </div>
@@ -211,7 +227,7 @@
       <div class="card-content">
         <div class="loading">
           <Icon name="loader" size="sm" animate="spin" />
-          Calculating IPs...
+          {$t('tools.nth_ip.calculating')}
         </div>
       </div>
     </div>
@@ -225,7 +241,7 @@
             <div class="error-content">
               <Icon name="alert-triangle" size="md" />
               <div>
-                <strong>Calculation Errors</strong>
+                <strong>{$t('tools.nth_ip.results.errors.title')}</strong>
                 {#each result.errors as error, index (index)}
                   <p>{error}</p>
                 {/each}
@@ -238,7 +254,7 @@
       {#if result.calculations.length > 0}
         <div class="card summary-card">
           <div class="card-header row">
-            <h3>Calculation Summary</h3>
+            <h3>{$t('tools.nth_ip.results.summary.title')}</h3>
             <button
               class="copy-btn"
               class:copied={clipboard.isCopied('summary')}
@@ -246,33 +262,38 @@
                 result &&
                 result.summary &&
                 clipboard.copy(
-                  `Total: ${result.summary.totalCalculations}\nValid: ${result.summary.validCalculations}\nInvalid: ${result.summary.invalidCalculations}\nOut of Bounds: ${result.summary.outOfBoundsCalculations}`,
+                  $t('tools.nth_ip.results.summary.copyText', {
+                    total: result.summary.totalCalculations,
+                    valid: result.summary.validCalculations,
+                    invalid: result.summary.invalidCalculations,
+                    outOfBounds: result.summary.outOfBoundsCalculations,
+                  }),
                   'summary',
                 )}
-              use:tooltip={'Copy summary to clipboard'}
+              use:tooltip={$t('tools.nth_ip.actions.copySummary')}
             >
               <Icon name={clipboard.isCopied('summary') ? 'check' : 'copy'} size="xs" />
-              {clipboard.isCopied('summary') ? 'Copied!' : 'Copy'}
+              {clipboard.isCopied('summary') ? $t('tools.nth_ip.actions.copied') : $t('tools.nth_ip.actions.copy')}
             </button>
           </div>
           <div class="card-content">
             <div class="summary-stats">
               <div class="info-card">
-                <div class="info-label">Total</div>
+                <div class="info-label">{$t('tools.nth_ip.results.summary.total')}</div>
                 <div class="metric-value">{result.summary.totalCalculations}</div>
               </div>
               <div class="info-card">
-                <div class="info-label">Valid</div>
+                <div class="info-label">{$t('tools.nth_ip.results.summary.valid')}</div>
                 <div class="metric-value success">{result.summary.validCalculations}</div>
               </div>
               <div class="info-card">
-                <div class="info-label">Invalid</div>
+                <div class="info-label">{$t('tools.nth_ip.results.summary.invalid')}</div>
                 <div class="metric-value" class:error={result.summary.invalidCalculations > 0}>
                   {result.summary.invalidCalculations}
                 </div>
               </div>
               <div class="info-card">
-                <div class="info-label">Out of Bounds</div>
+                <div class="info-label">{$t('tools.nth_ip.results.summary.outOfBounds')}</div>
                 <div class="metric-value" class:warning={result.summary.outOfBoundsCalculations > 0}>
                   {result.summary.outOfBoundsCalculations}
                 </div>
@@ -283,15 +304,15 @@
 
         <div class="card calculations-card">
           <div class="card-header row">
-            <h3>IP Calculations</h3>
+            <h3>{$t('tools.nth_ip.results.calculations.title')}</h3>
             <div class="export-buttons">
-              <button onclick={() => exportResults('csv')} use:tooltip={'Export results as CSV file'}>
+              <button onclick={() => exportResults('csv')} use:tooltip={$t('tools.nth_ip.actions.exportCSV')}>
                 <Icon name="csv-file" size="xs" />
-                Export CSV
+                {$t('tools.nth_ip.actions.exportCSVLabel')}
               </button>
-              <button onclick={() => exportResults('json')} use:tooltip={'Export results as JSON file'}>
+              <button onclick={() => exportResults('json')} use:tooltip={$t('tools.nth_ip.actions.exportJSON')}>
                 <Icon name="json-file" size="xs" />
-                Export JSON
+                {$t('tools.nth_ip.actions.exportJSONLabel')}
               </button>
             </div>
           </div>
@@ -312,32 +333,38 @@
                           class="copy-btn"
                           class:copied={clipboard.isCopied(`input-${index}`)}
                           onclick={() => clipboard.copy(calculation.input, `input-${index}`)}
-                          use:tooltip={'Copy input specification'}
+                          use:tooltip={$t('tools.nth_ip.actions.copyInput')}
                         >
                           <Icon name={clipboard.isCopied(`input-${index}`) ? 'check' : 'copy'} size="xs" />
                         </button>
                       </div>
                       <div class="input-meta">
-                        <span class="network-type" use:tooltip={`Network type: ${calculation.inputType}`}
-                          >{calculation.inputType.toUpperCase()}</span
+                        <span
+                          class="network-type"
+                          use:tooltip={$t('tools.nth_ip.results.calculations.networkTypeTooltip', {
+                            type: calculation.inputType,
+                          })}>{calculation.inputType.toUpperCase()}</span
                         >
-                        <span class="ip-version" use:tooltip={`IP version ${calculation.version}`}
-                          >IPv{calculation.version}</span
+                        <span
+                          class="ip-version"
+                          use:tooltip={$t('tools.nth_ip.results.calculations.ipVersionTooltip', {
+                            version: calculation.version,
+                          })}>IPv{calculation.version}</span
                         >
                       </div>
                     </div>
 
                     <div class="status">
                       {#if calculation.isValid && calculation.isInBounds}
-                        <span use:tooltip={'Valid calculation within bounds'}>
+                        <span use:tooltip={$t('tools.nth_ip.results.calculations.status.validInBounds')}>
                           <Icon name="check-circle" size="md" />
                         </span>
                       {:else if calculation.isValid && !calculation.isInBounds}
-                        <span use:tooltip={'Valid calculation but index out of bounds'}>
+                        <span use:tooltip={$t('tools.nth_ip.results.calculations.status.validOutOfBounds')}>
                           <Icon name="alert-circle" size="md" />
                         </span>
                       {:else}
-                        <span use:tooltip={'Invalid calculation'}>
+                        <span use:tooltip={$t('tools.nth_ip.results.calculations.status.invalid')}>
                           <Icon name="x-circle" size="md" />
                         </span>
                       {/if}
@@ -348,8 +375,10 @@
                     <div class="calculation-details">
                       <div class="result-section">
                         <div class="result-ip">
-                          <span class="result-label" use:tooltip={'The calculated IP address at the specified index'}
-                            >Result IP:</span
+                          <span
+                            class="result-label"
+                            use:tooltip={$t('tools.nth_ip.results.calculations.resultIPTooltip')}
+                            >{$t('tools.nth_ip.results.calculations.resultIP')}:</span
                           >
                           <div class="value-copy">
                             <span class="result-value">{calculation.resultIP}</span>
@@ -357,7 +386,7 @@
                               class="copy-btn"
                               class:copied={clipboard.isCopied(`result-${index}`)}
                               onclick={() => clipboard.copy(calculation.resultIP, `result-${index}`)}
-                              use:tooltip={'Copy result IP address'}
+                              use:tooltip={$t('tools.nth_ip.actions.copyResultIP')}
                             >
                               <Icon name={clipboard.isCopied(`result-${index}`) ? 'check' : 'copy'} size="xs" />
                             </button>
@@ -367,25 +396,30 @@
                         {#if !calculation.isInBounds}
                           <div class="bounds-warning">
                             <Icon name="alert-triangle" size="sm" />
-                            <span>Index out of bounds</span>
+                            <span>{$t('tools.nth_ip.results.calculations.indexOutOfBounds')}</span>
                           </div>
                         {/if}
                       </div>
 
                       <div class="calculation-info">
                         <div class="details-header">
-                          <h4>Calculation Details</h4>
+                          <h4>{$t('tools.nth_ip.results.calculations.details.title')}</h4>
                         </div>
                         <div class="info-grid">
                           <div class="info-card">
-                            <div class="info-label" use:tooltip={'Network or range being processed'}>Network</div>
+                            <div
+                              class="info-label"
+                              use:tooltip={$t('tools.nth_ip.results.calculations.details.networkTooltip')}
+                            >
+                              {$t('tools.nth_ip.results.calculations.details.network')}
+                            </div>
                             <div class="value-copy">
                               <span class="ip-value">{calculation.network}</span>
                               <button
                                 class="copy-btn"
                                 class:copied={clipboard.isCopied(`network-${index}`)}
                                 onclick={() => clipboard.copy(calculation.network, `network-${index}`)}
-                                use:tooltip={'Copy network address'}
+                                use:tooltip={$t('tools.nth_ip.actions.copyNetwork')}
                               >
                                 <Icon name={clipboard.isCopied(`network-${index}`) ? 'check' : 'copy'} size="xs" />
                               </button>
@@ -393,20 +427,31 @@
                           </div>
 
                           <div class="info-card">
-                            <div class="info-label" use:tooltip={'Total number of addresses in this network'}>
-                              Total Addresses
+                            <div
+                              class="info-label"
+                              use:tooltip={$t('tools.nth_ip.results.calculations.details.totalAddressesTooltip')}
+                            >
+                              {$t('tools.nth_ip.results.calculations.details.totalAddresses')}
                             </div>
                             <div class="metric-value">{calculation.totalAddresses}</div>
                           </div>
 
                           <div class="info-card">
-                            <div class="info-label" use:tooltip={'The index position requested'}>Index</div>
+                            <div
+                              class="info-label"
+                              use:tooltip={$t('tools.nth_ip.results.calculations.details.indexTooltip')}
+                            >
+                              {$t('tools.nth_ip.results.calculations.details.index')}
+                            </div>
                             <div class="metric-value info">{calculation.index}</div>
                           </div>
 
                           <div class="info-card">
-                            <div class="info-label" use:tooltip={'Global offset applied to the calculation'}>
-                              Offset
+                            <div
+                              class="info-label"
+                              use:tooltip={$t('tools.nth_ip.results.calculations.details.offsetTooltip')}
+                            >
+                              {$t('tools.nth_ip.results.calculations.details.offset')}
                             </div>
                             <div class="metric-value">{calculation.offset}</div>
                           </div>
@@ -416,12 +461,17 @@
                       {#if calculation.details}
                         <div>
                           <div class="details-header">
-                            <h4>Network Details</h4>
+                            <h4>{$t('tools.nth_ip.results.calculations.networkDetails.title')}</h4>
                           </div>
                           <div class="network-details">
                             <div class="details-grid">
                               <div class="info-card">
-                                <div class="info-label" use:tooltip={'First IP address in the network'}>Start</div>
+                                <div
+                                  class="info-label"
+                                  use:tooltip={$t('tools.nth_ip.results.calculations.networkDetails.startTooltip')}
+                                >
+                                  {$t('tools.nth_ip.results.calculations.networkDetails.start')}
+                                </div>
                                 <div class="value-copy">
                                   <span class="ip-value">{calculation.details.networkStart}</span>
                                   <button
@@ -430,7 +480,7 @@
                                     onclick={() =>
                                       calculation.details &&
                                       clipboard.copy(calculation.details.networkStart, `start-${index}`)}
-                                    use:tooltip={'Copy network start address'}
+                                    use:tooltip={$t('tools.nth_ip.actions.copyNetworkStart')}
                                   >
                                     <Icon name={clipboard.isCopied(`start-${index}`) ? 'check' : 'copy'} size="xs" />
                                   </button>
@@ -438,7 +488,12 @@
                               </div>
 
                               <div class="info-card">
-                                <div class="info-label" use:tooltip={'Last IP address in the network'}>End</div>
+                                <div
+                                  class="info-label"
+                                  use:tooltip={$t('tools.nth_ip.results.calculations.networkDetails.endTooltip')}
+                                >
+                                  {$t('tools.nth_ip.results.calculations.networkDetails.end')}
+                                </div>
                                 <div class="value-copy">
                                   <span class="ip-value">{calculation.details.networkEnd}</span>
                                   <button
@@ -447,7 +502,7 @@
                                     onclick={() =>
                                       calculation.details &&
                                       clipboard.copy(calculation.details.networkEnd, `end-${index}`)}
-                                    use:tooltip={'Copy network end address'}
+                                    use:tooltip={$t('tools.nth_ip.actions.copyNetworkEnd')}
                                   >
                                     <Icon name={clipboard.isCopied(`end-${index}`) ? 'check' : 'copy'} size="xs" />
                                   </button>

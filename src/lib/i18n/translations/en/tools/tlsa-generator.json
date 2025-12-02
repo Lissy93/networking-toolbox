@@ -1,0 +1,175 @@
+{
+  "title": "TLSA Generator",
+  "subtitle": "Create TLSA (DNS-based Authentication of Named Entities) records for certificate pinning and DANE implementation.",
+  "service": {
+    "title": "Service Configuration",
+    "domain": {
+      "label": "Domain:",
+      "placeholder": "example.com",
+      "tooltip": "Domain name for the TLSA record"
+    },
+    "port": {
+      "label": "Port:",
+      "placeholder": "443",
+      "tooltip": "Port number for the service (e.g., 443 for HTTPS, 25 for SMTP)"
+    },
+    "protocol": {
+      "label": "Protocol:",
+      "tooltip": "Protocol type (tcp or udp)",
+      "options": {
+        "tcp": "TCP",
+        "udp": "UDP"
+      }
+    }
+  },
+  "parameters": {
+    "title": "TLSA Parameters",
+    "usage": {
+      "label": "Certificate Usage:",
+      "tooltip": "Certificate usage - how the certificate should be used for authentication",
+      "options": {
+        "0": "0 - CA Constraint",
+        "1": "1 - Service Certificate Constraint",
+        "2": "2 - Trust Anchor Assertion",
+        "3": "3 - Domain-Issued Certificate"
+      },
+      "descriptions": {
+        "0": "CA Constraint - Certificate must be issued by the CA represented in the TLSA record",
+        "1": "Service Certificate Constraint - Certificate must match the one in the TLSA record",
+        "2": "Trust Anchor Assertion - Certificate must chain to the CA in the TLSA record",
+        "3": "Domain-Issued Certificate - Certificate must match the one specified (most common)"
+      }
+    },
+    "selector": {
+      "label": "Selector:",
+      "tooltip": "Which part of the certificate to use",
+      "options": {
+        "0": "0 - Full Certificate",
+        "1": "1 - Subject Public Key Info"
+      },
+      "descriptions": {
+        "0": "Full Certificate - Use the entire certificate",
+        "1": "Subject Public Key Info - Use only the public key portion (recommended)"
+      }
+    },
+    "matchingType": {
+      "label": "Matching Type:",
+      "tooltip": "How to process the certificate data",
+      "options": {
+        "0": "0 - Exact Match",
+        "1": "1 - SHA-256 Hash",
+        "2": "2 - SHA-512 Hash"
+      },
+      "descriptions": {
+        "0": "Exact Match - Use the certificate/key data as-is (not recommended)",
+        "1": "SHA-256 Hash - Use SHA-256 hash of the certificate/key (recommended)",
+        "2": "SHA-512 Hash - Use SHA-512 hash of the certificate/key"
+      }
+    }
+  },
+  "certificate": {
+    "title": "Certificate Data",
+    "inputType": {
+      "certificate": "Certificate/Public Key (PEM)",
+      "hash": "Hash Value"
+    },
+    "certificateInput": {
+      "label": "Certificate/Public Key:",
+      "placeholder": "-----BEGIN CERTIFICATE-----\nMIIFXzCCA0egAwIBAgIJAKZ5QeHxw...\n-----END CERTIFICATE-----",
+      "tooltip": "Paste the PEM-encoded certificate or public key"
+    },
+    "hashInput": {
+      "label": "Hash Value:",
+      "tooltip": "Enter the {type} hash value",
+      "placeholders": {
+        "sha256": "abcd1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab",
+        "sha512": "abcd1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+        "exact": "Certificate or key data"
+      }
+    },
+    "generateHash": {
+      "button": "Generate Hash",
+      "tooltip": "Generate hash from certificate (demo mode)"
+    }
+  },
+  "output": {
+    "title": "Generated TLSA Record",
+    "copy": {
+      "button": "Copy",
+      "copied": "Copied!",
+      "tooltip": "Copy TLSA record to clipboard"
+    },
+    "export": {
+      "button": "Export",
+      "downloaded": "Downloaded!",
+      "tooltip": "Download as zone file"
+    }
+  },
+  "examples": {
+    "title": "Example Configurations",
+    "items": {
+      "https": {
+        "name": "HTTPS Certificate Pin",
+        "description": "Pin a specific certificate for HTTPS"
+      },
+      "smtp": {
+        "name": "SMTP TLS Certificate",
+        "description": "DANE for email server TLS"
+      },
+      "ca": {
+        "name": "CA Trust Anchor",
+        "description": "Trust anchor for certificate authority"
+      }
+    },
+    "tooltip": "Load example configuration",
+    "selected": "Selected"
+  },
+  "validation": {
+    "errors": {
+      "domainRequired": "Domain is required",
+      "portRange": "Port must be between 1 and 65535",
+      "certificateRequired": "Certificate data is required",
+      "hashRequired": "Hash value is required",
+      "hashFormat": "Hash must contain only hexadecimal characters"
+    },
+    "warnings": {
+      "domainTld": "Domain should include TLD (e.g., .com, .org)",
+      "certificateFormat": "Certificate should be in PEM format",
+      "sha256Length": "SHA-256 hash should be exactly 64 hexadecimal characters",
+      "sha512Length": "SHA-512 hash should be exactly 128 hexadecimal characters",
+      "caManagement": "Usage types 0 and 2 require careful CA certificate management",
+      "fullCertificate": "Full certificate selector (0) is less flexible than SPKI selector (1)",
+      "exactMatch": "Exact match (0) is not recommended - use SHA-256 (1) or SHA-512 (2)"
+    },
+    "title": {
+      "errors": "Validation Errors",
+      "warnings": "Warnings"
+    }
+  },
+  "security": {
+    "title": "Security Best Practices",
+    "tips": {
+      "usageType": "Use usage type 3 (Domain-Issued Certificate) for most scenarios",
+      "selector": "Prefer selector 1 (SPKI) over selector 0 (full certificate) for flexibility",
+      "matching": "Use SHA-256 (1) or SHA-512 (2) matching types, avoid exact match (0)",
+      "multiple": "Pin multiple certificates to avoid service disruption during certificate rotation",
+      "testing": "Test TLSA records with DANE validation tools before deployment"
+    }
+  },
+  "info": {
+    "about": {
+      "title": "About TLSA Records",
+      "description": "TLSA records provide DNS-based certificate constraints for TLS connections. They enable DANE (DNS-based Authentication of Named Entities), allowing domain owners to specify which certificates should be trusted for their services, independent of traditional Certificate Authorities."
+    },
+    "usage": {
+      "title": "Common Use Cases",
+      "items": {
+        "pinning": "Certificate pinning for enhanced security",
+        "dane": "DANE implementation for email servers",
+        "ca": "Custom CA trust anchors",
+        "mitm": "Protection against man-in-the-middle attacks",
+        "compliance": "Meeting security compliance requirements"
+      }
+    }
+  }
+}
