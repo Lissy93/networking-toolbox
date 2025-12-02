@@ -547,11 +547,16 @@ export const POST: RequestHandler = async ({ request }) => {
         };
 
         try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), timeout);
+
           const preflightResponse = await fetch(url, {
             method: 'OPTIONS',
             headers: preflightHeaders,
-            signal: AbortSignal.timeout(timeout),
+            signal: controller.signal,
           });
+
+          clearTimeout(timeoutId);
 
           const corsHeaders: Record<string, string> = {};
           preflightResponse.headers.forEach((value, key) => {

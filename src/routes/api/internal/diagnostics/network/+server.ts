@@ -139,13 +139,17 @@ async function httpPing(
     try {
       const startTime = Date.now();
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
       const response = await fetch(url, {
         method: method.toUpperCase(),
-        signal: AbortSignal.timeout(timeout),
+        signal: controller.signal,
         // Don't follow redirects for more consistent timing
         redirect: 'manual',
       });
 
+      clearTimeout(timeoutId);
       const latency = Date.now() - startTime;
       latencies.push(latency);
 
