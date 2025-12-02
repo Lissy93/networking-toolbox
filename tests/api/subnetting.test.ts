@@ -72,7 +72,7 @@ describe('Subnetting API Endpoints', () => {
       expect(ipObjectToString(result.broadcast)).toBe('192.168.1.1');
       expect(ipObjectToString(result.subnet)).toBe('255.255.255.255');
       expect(result.hostCount).toBe(1);
-      expect(result.usableHosts).toBe(0);
+      expect(result.usableHosts).toBe(1); // RFC 3021: /32 is a single usable host
     });
 
     it('should handle invalid CIDR format', async () => {

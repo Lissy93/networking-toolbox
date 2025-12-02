@@ -22,36 +22,44 @@
    * Generates visual representation of network range
    */
   function generateNetworkBlocks() {
-    const totalHosts = subnetInfo.hostCount;
-    const _usableHosts = subnetInfo.usableHosts;
-
-    // For visualization, we'll show up to 256 blocks max
+    const { hostCount, cidr } = subnetInfo;
     const maxBlocks = 256;
-    const blocksToShow = Math.min(totalHosts, maxBlocks);
-    const blockSize = totalHosts > maxBlocks ? Math.ceil(totalHosts / maxBlocks) : 1;
+    const blocksToShow = Math.min(hostCount, maxBlocks);
+    const blockSize = hostCount > maxBlocks ? Math.ceil(hostCount / maxBlocks) : 1;
 
-    const blocks = [];
+    return Array.from({ length: blocksToShow }, (_, i) => {
+      const isFirst = i === 0;
+      const isLast = i === blocksToShow - 1;
 
-    for (let i = 0; i < blocksToShow; i++) {
-      const isNetwork = i === 0;
-      const isBroadcast = i === blocksToShow - 1 && totalHosts > 2;
-      const _isUsable = !isNetwork && !isBroadcast;
+      // RFC 3021: /31 and /32 have all IPs usable
+      if (cidr === 31) {
+        return {
+          id: i,
+          type: 'usable' as const,
+          represents: blockSize,
+          tooltip: isFirst ? 'Usable Host 1 (P2P)' : 'Usable Host 2 (P2P)',
+        };
+      }
 
-      blocks.push({
-        id: i,
-        type: isNetwork ? 'network' : isBroadcast ? 'broadcast' : 'usable',
-        represents: blockSize,
-        tooltip: isNetwork
-          ? $t('tools.network-visualizer.addressTypes.networkAddress')
-          : isBroadcast
-            ? $t('tools.network-visualizer.addressTypes.broadcastAddress')
-            : blockSize > 1
-              ? $t('tools.network-visualizer.addressTypes.usableHosts')
-              : $t('tools.network-visualizer.addressTypes.usableHost'),
-      });
-    }
+      if (cidr === 32) {
+        return {
+          id: i,
+          type: 'usable' as const,
+          represents: blockSize,
+          tooltip: 'Single Host',
+        };
+      }
 
-    return blocks;
+      // Normal subnets have network/broadcast reserved
+      const type = isFirst ? 'network' : isLast && hostCount > 2 ? 'broadcast' : 'usable';
+      const tooltip = isFirst
+        ? 'Network Address'
+        : isLast && hostCount > 2
+          ? 'Broadcast Address'
+          : `Usable Host${blockSize > 1 ? 's' : ''}`;
+
+      return { id: i, type, represents: blockSize, tooltip };
+    });
   }
 
   let networkBlocks = $derived(generateNetworkBlocks());

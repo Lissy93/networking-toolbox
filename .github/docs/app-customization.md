@@ -157,6 +157,21 @@ environment:
   - **Example:** `NTB_ALLOWED_DNS_SERVERS='8.8.8.8,1.1.1.1,9.9.9.9'`
   - **Note:** Only used when `NTB_ALLOW_CUSTOM_DNS='false'`
 
+### Analytics Settings
+
+- **`NTB_ANALYTICS_DOMAIN`**
+  - **Description:** Domain for analytics tracking (for Plausible or similar)
+  - **Default:** `networking-toolbox.as93.net`
+  - **Example:** `NTB_ANALYTICS_DOMAIN='myapp.example.com'`
+  - **Disable:** Set to `false` to disable analytics: `NTB_ANALYTICS_DOMAIN='false'`
+
+- **`NTB_ANALYTICS_DSN`**
+  - **Description:** URL to the analytics script
+  - **Default:** `https://no-track.as93.net/js/script.js`
+  - **Example:** `NTB_ANALYTICS_DSN='https://plausible.io/js/script.js'`
+  - **Disable:** Set to `false` to disable analytics: `NTB_ANALYTICS_DSN='false'`
+  - **Note:** Analytics is disabled if either `NTB_ANALYTICS_DOMAIN` or `NTB_ANALYTICS_DSN` is set to `false`
+
 ---
 
 ## Example Configurations
@@ -174,6 +189,8 @@ NTB_HOMEPAGE_LAYOUT='categories'
 NTB_ALLOW_CUSTOM_DNS='false'
 NTB_BLOCK_PRIVATE_DNS_IPS='true'
 NTB_ALLOWED_DNS_SERVERS='8.8.8.8,1.1.1.1'
+NTB_ANALYTICS_DOMAIN='false'
+NTB_ANALYTICS_DSN='false'
 ```
 
 ### Full Customization
@@ -190,5 +207,15 @@ NTB_DEFAULT_LANGUAGE='en'
 NTB_SHOW_TIPS_ON_HOMEPAGE='true'
 NTB_ALLOW_CUSTOM_DNS='true'
 NTB_BLOCK_PRIVATE_DNS_IPS='true'
+NTB_ANALYTICS_DOMAIN='myapp.example.com'
+NTB_ANALYTICS_DSN='https://plausible.io/js/script.js'
+```
+
+### Self-Hosted (No Analytics)
+```bash
+NTB_SITE_TITLE='Internal Network Tools'
+NTB_DEFAULT_THEME='dark'
+NTB_ANALYTICS_DOMAIN='false'
+NTB_ANALYTICS_DSN='false'
 ```
 
