@@ -28,18 +28,18 @@ describe('Special-use IPv4 content', () => {
     const privateRanges = specialIPv4Content.ranges.filter(r => r.rfc === "RFC 1918");
     expect(privateRanges).toHaveLength(3);
     
-    const classA = privateRanges.find(r => r.network === "10.0.0.0/8");
-    expect(classA?.purpose).toBe("Private-Use Networks");
-    expect(classA?.routable).toBe(false);
-    expect(classA?.description).toContain("Class A");
-    
-    const classB = privateRanges.find(r => r.network === "172.16.0.0/12");
-    expect(classB?.purpose).toBe("Private-Use Networks");
-    expect(classB?.description).toContain("Class B");
-    
-    const classC = privateRanges.find(r => r.network === "192.168.0.0/16");
-    expect(classC?.purpose).toBe("Private-Use Networks");
-    expect(classC?.description).toContain("Class C");
+    const range10 = privateRanges.find(r => r.network === "10.0.0.0/8");
+    expect(range10?.purpose).toBe("Private-Use Networks");
+    expect(range10?.routable).toBe(false);
+    expect(range10?.description).toBe("Private addresses for internal networks");
+
+    const range172 = privateRanges.find(r => r.network === "172.16.0.0/12");
+    expect(range172?.purpose).toBe("Private-Use Networks");
+    expect(range172?.description).toBe("Private addresses for internal networks");
+
+    const range192 = privateRanges.find(r => r.network === "192.168.0.0/16");
+    expect(range192?.purpose).toBe("Private-Use Networks");
+    expect(range192?.description).toBe("Private addresses for internal networks");
   });
 
   it('includes CGNAT range (RFC 6598)', () => {

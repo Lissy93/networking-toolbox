@@ -110,7 +110,7 @@
             <th use:tooltip={'CIDR notation - number of network bits'}>CIDR</th>
             <th use:tooltip={'Decimal representation of the subnet mask'}>Subnet Mask</th>
             <th use:tooltip={'Number of usable host addresses per subnet'}>Hosts</th>
-            <th use:tooltip={'Number of possible subnets in a Class C'}>Subnets</th>
+            <th use:tooltip={'Number of possible subnets in a /24 network'}>Subnets</th>
           </tr>
         </thead>
         <tbody>

@@ -50,7 +50,7 @@
       description: '10 addresses',
     },
     {
-      label: 'Class C /24',
+      label: 'Medium /24 network',
       input: '192.168.0.0/24',
       description: '256 addresses',
     },

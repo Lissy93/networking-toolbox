@@ -139,18 +139,18 @@ describe('validateIPv4Detailed', () => {
     expect(result.details.isReserved).toBe(true);
   });
 
-  it('validates class A private addresses', () => {
+  it('validates 10.0.0.0/8 private addresses', () => {
     const result = validateIPv4Detailed('10.0.0.1');
     expect(result.isValid).toBe(true);
-    expect(result.details.addressType).toContain('Private');
-    expect(result.details.addressType).toContain('Class A');
+    expect(result.details.addressType).toBe('Private');
+    expect(result.details.isPrivate).toBe(true);
   });
 
-  it('validates class B private addresses', () => {
+  it('validates 172.16.0.0/12 private addresses', () => {
     const result = validateIPv4Detailed('172.16.0.1');
     expect(result.isValid).toBe(true);
-    expect(result.details.addressType).toContain('Private');
-    expect(result.details.addressType).toContain('Class B');
+    expect(result.details.addressType).toBe('Private');
+    expect(result.details.isPrivate).toBe(true);
   });
 
   it('handles negative numbers', () => {
