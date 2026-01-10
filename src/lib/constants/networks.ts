@@ -31,17 +31,17 @@ export const RESERVED_RANGES = {
   },
   PRIVATE_A: {
     range: '10.0.0.0/8',
-    description: 'Private network (Class A)',
+    description: 'Private network',
     rfc: 'RFC 1918',
   },
   PRIVATE_B: {
     range: '172.16.0.0/12',
-    description: 'Private network (Class B)',
+    description: 'Private network',
     rfc: 'RFC 1918',
   },
   PRIVATE_C: {
     range: '192.168.0.0/16',
-    description: 'Private network (Class C)',
+    description: 'Private network',
     rfc: 'RFC 1918',
   },
   LINK_LOCAL: {

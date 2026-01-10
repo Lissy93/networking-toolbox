@@ -16,23 +16,23 @@ describe('Private vs Public IP content', () => {
   it('defines RFC 1918 private ranges correctly', () => {
     expect(privateVsPublicContent.privateRanges).toHaveLength(3);
     
-    const classA = privateVsPublicContent.privateRanges[0];
-    expect(classA.range).toBe("10.0.0.0/8");
-    expect(classA.fullRange).toBe("10.0.0.0 to 10.255.255.255");
-    expect(classA.class).toBe("Class A private range");
-    expect(classA.examples).toContain("10.0.0.1");
-    
-    const classB = privateVsPublicContent.privateRanges[1];
-    expect(classB.range).toBe("172.16.0.0/12");
-    expect(classB.fullRange).toBe("172.16.0.0 to 172.31.255.255");
-    expect(classB.class).toBe("Class B private range");
-    expect(classB.examples).toContain("172.16.0.1");
-    
-    const classC = privateVsPublicContent.privateRanges[2];
-    expect(classC.range).toBe("192.168.0.0/16");
-    expect(classC.fullRange).toBe("192.168.0.0 to 192.168.255.255");
-    expect(classC.class).toBe("Class C private range");
-    expect(classC.examples).toContain("192.168.1.1");
+    const range10 = privateVsPublicContent.privateRanges[0];
+    expect(range10.range).toBe("10.0.0.0/8");
+    expect(range10.fullRange).toBe("10.0.0.0 to 10.255.255.255");
+    expect(range10.class).toBe("RFC 1918 private range");
+    expect(range10.examples).toContain("10.0.0.1");
+
+    const range172 = privateVsPublicContent.privateRanges[1];
+    expect(range172.range).toBe("172.16.0.0/12");
+    expect(range172.fullRange).toBe("172.16.0.0 to 172.31.255.255");
+    expect(range172.class).toBe("RFC 1918 private range");
+    expect(range172.examples).toContain("172.16.0.1");
+
+    const range192 = privateVsPublicContent.privateRanges[2];
+    expect(range192.range).toBe("192.168.0.0/16");
+    expect(range192.fullRange).toBe("192.168.0.0 to 192.168.255.255");
+    expect(range192.class).toBe("RFC 1918 private range");
+    expect(range192.examples).toContain("192.168.1.1");
   });
 
   it('has accurate address counts', () => {
