@@ -31,6 +31,15 @@
   import Footer from '$lib/components/furniture/Footer.svelte';
   import OfflineIndicator from '$lib/components/common/OfflineIndicator.svelte';
 
+  // SEO Schema imports
+  import { schemaToJsonLd } from '$lib/seo/json-ld';
+  import {
+    generateWebSiteSchema,
+    generateHomepageSoftwareSchema,
+    generateOrganizationSchema,
+    generateToolPageSchemas,
+  } from '$lib/seo/schema-generators';
+
   let { data, children } = $props(); // Gets data from the server load function
   let faviconTrigger = $state(0); // Trigger to force favicon updates
   let accessibilitySettings = $state(accessibility); // Accessibility settings store
@@ -226,22 +235,16 @@
     }
   });
 
-  /* Uses the server-generated breadcrumb data, to build a JSON-LD breadcrumb object */
-  function jsonLdTag(data: unknown, type = 'application/ld+json', nonce?: string) {
-    if (!data) return '';
-    try {
-      const json = JSON.stringify(data)
-        .replace(/</g, '\\u003c')
-        .replace(/>/g, '\\u003e')
-        .replace(/-->/g, '--\\u003e')
-        .replace(/\//g, '\\/');
-      const nonceAttr = nonce ? ` nonce="${nonce}"` : '';
-      return `<script type="${type}"${nonceAttr}>${json}</${'script'}>`;
-    } catch (error) {
-      console.error('Error generating JSON-LD tag:', error);
-      return '';
-    }
-  }
+  // Generate schema markup for tool pages
+  const toolSchemas = $derived.by(() => {
+    const currentPath = $page.url?.pathname ?? '/';
+    if (currentPath === '/') return [];
+
+    const pageDetails = getPageDetails(currentPath);
+    if (!pageDetails) return [];
+
+    return generateToolPageSchemas(pageDetails, currentPath);
+  });
 </script>
 
 <svelte:head>
@@ -302,103 +305,29 @@
   <meta name="theme-color" content="#2563eb" />
 
   <!-- Structured Data -->
+  <!-- Breadcrumb Schema -->
   <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-  {@html jsonLdTag(data.breadcrumbJsonLd)}
+  {@html schemaToJsonLd(data.breadcrumbJsonLd)}
 
-  <!-- WebSite Schema (Homepage only) -->
+  <!-- Homepage Schemas -->
   {#if $page.url.pathname === '/'}
+    <!-- WebSite Schema -->
     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-    {@html jsonLdTag({
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      name: site.name,
-      description: site.description,
-      url: site.url,
-      inLanguage: 'en-US',
-      copyrightYear: '2025',
-      copyrightHolder: {
-        '@type': 'Person',
-        name: author.name,
-        url: author.url,
-      },
-      creator: {
-        '@type': 'Person',
-        name: author.name,
-        url: author.url,
-      },
-      potentialAction: {
-        '@type': 'SearchAction',
-        target: {
-          '@type': 'EntryPoint',
-          urlTemplate: `${site.url}/?search={search_term_string}`,
-        },
-        'query-input': 'required name=search_term_string',
-      },
-    })}
+    {@html schemaToJsonLd(generateWebSiteSchema())}
 
-    <!-- SoftwareApplication Schema (Homepage only) -->
+    <!-- SoftwareApplication Schema -->
     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-    {@html jsonLdTag({
-      '@context': 'https://schema.org',
-      '@type': 'SoftwareApplication',
-      name: site.name,
-      description: site.longDescription,
-      url: site.url,
-      applicationCategory: 'DeveloperApplication',
-      operatingSystem: 'Any',
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD',
-      },
-      author: {
-        '@type': 'Person',
-        name: author.name,
-        url: author.url,
-      },
-      softwareVersion: '3.0',
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: '5',
-        ratingCount: '1',
-      },
-      featureList: [
-        'IPv4 and IPv6 subnet calculator',
-        'CIDR notation converter',
-        'IP address format conversion',
-        'Network diagnostics tools',
-        'DNS record generators',
-        'DHCP configuration builder',
-        'Offline-first PWA',
-      ],
-    })}
+    {@html schemaToJsonLd(generateHomepageSoftwareSchema())}
 
-    <!-- Organization Schema (Homepage only) -->
+    <!-- Organization Schema -->
     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-    {@html jsonLdTag({
-      '@context': 'https://schema.org',
-      '@type': 'Organization',
-      name: site.name,
-      url: site.url,
-      logo: {
-        '@type': 'ImageObject',
-        url: `${site.url}/icon.png`,
-        width: '1024',
-        height: '1024',
-      },
-      description: site.longDescription,
-      founder: {
-        '@type': 'Person',
-        name: author.name,
-        url: author.url,
-      },
-      sameAs: [site.repo, site.mirror, site.docker, author.githubUrl, author.portfolio],
-      contactPoint: {
-        '@type': 'ContactPoint',
-        contactType: 'Developer',
-        url: site.repo,
-      },
-    })}
+    {@html schemaToJsonLd(generateOrganizationSchema())}
+  {:else}
+    <!-- Tool Page Schemas (SoftwareApplication, WebPage, HowTo) -->
+    {#each toolSchemas as schema, i (i)}
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+      {@html schemaToJsonLd(schema)}
+    {/each}
   {/if}
 
   <!-- Analytics (Plausible or custom) -->
