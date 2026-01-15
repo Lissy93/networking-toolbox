@@ -279,8 +279,8 @@ function calculateIPv4ReverseZones(ip: string, prefix: number, cidr: string): Re
       zones.push(`${thirdOctet}.${secondOctet}.${firstOctet}.in-addr.arpa`);
     }
   } else {
-    // Very large networks - show class-based zones
-    zones.push(`${networkOctets[0]}.in-addr.arpa (Class A network)`);
+    // Very large networks - show /8 zone
+    zones.push(`${networkOctets[0]}.in-addr.arpa (/8 network)`);
   }
 
   return {

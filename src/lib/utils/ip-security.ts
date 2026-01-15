@@ -36,13 +36,13 @@ function isPrivateIPv4(ip: string): boolean {
   // Loopback: 127.0.0.0/8
   if (a === 127) return true;
 
-  // Private Class A: 10.0.0.0/8
+  // Private: 10.0.0.0/8
   if (a === 10) return true;
 
-  // Private Class B: 172.16.0.0/12
+  // Private: 172.16.0.0/12
   if (a === 172 && b >= 16 && b <= 31) return true;
 
-  // Private Class C: 192.168.0.0/16
+  // Private: 192.168.0.0/16
   if (a === 192 && b === 168) return true;
 
   // Link-local: 169.254.0.0/16 (AWS metadata, APIPA)
