@@ -163,20 +163,20 @@ export function validateIPv4Detailed(ip: string): DetailedValidationResponse {
     details.scope = 'Host';
     details.info.push('Loopback address (localhost)');
   } else if (a === 10) {
-    details.addressType = 'Private (Class A)';
+    details.addressType = 'Private';
     details.scope = 'Private Network';
     details.isPrivate = true;
-    details.info.push('RFC 1918 private address space');
+    details.info.push('RFC 1918 private address space (10.0.0.0/8)');
   } else if (a === 172 && b >= 16 && b <= 31) {
-    details.addressType = 'Private (Class B)';
+    details.addressType = 'Private';
     details.scope = 'Private Network';
     details.isPrivate = true;
-    details.info.push('RFC 1918 private address space');
+    details.info.push('RFC 1918 private address space (172.16.0.0/12)');
   } else if (a === 192 && b === 168) {
-    details.addressType = 'Private (Class C)';
+    details.addressType = 'Private';
     details.scope = 'Private Network';
     details.isPrivate = true;
-    details.info.push('RFC 1918 private address space');
+    details.info.push('RFC 1918 private address space (192.168.0.0/16)');
   } else if (a === 169 && b === 254) {
     details.addressType = 'Link-Local (APIPA)';
     details.scope = 'Link-Local';

@@ -25,17 +25,17 @@
     {
       label: 'IPv4 /24 Network',
       cidr: '192.168.1.0/24',
-      description: 'Single class C zone delegation',
+      description: 'Single /24 zone delegation',
     },
     {
       label: 'IPv4 /16 Network',
       cidr: '10.0.0.0/16',
-      description: 'Class B with multiple /24 zones',
+      description: '/16 network with multiple /24 zones',
     },
     {
       label: 'IPv4 /20 Block',
       cidr: '172.16.32.0/20',
-      description: '16 class C zones needed',
+      description: '16 /24 zones needed',
     },
     {
       label: 'IPv4 /28 Subnet',
@@ -82,7 +82,7 @@
       let delegationType = '';
       if (ipv4Zones > 0) {
         if (ipv4Zones === 1) {
-          delegationType = zones[0].delegation.includes('/24') ? 'Class C (/24)' : `Custom (${zones[0].delegation})`;
+          delegationType = zones[0].delegation.includes('/24') ? '/24 network' : `Custom (${zones[0].delegation})`;
         } else {
           delegationType = `Multiple zones (${ipv4Zones} x /24)`;
         }
@@ -268,11 +268,11 @@ chmod 644 /etc/bind/zones/${zone.zone}`;
                 <div class="zone-description">
                   {#if zone.type === 'IPv4'}
                     {#if zone.delegation === '/24'}
-                      Standard class C reverse zone for 256 addresses
+                      Standard /24 reverse zone for 256 addresses
                     {:else if zone.delegation === '/16'}
-                      Class B reverse zone covering 65,536 addresses
+                      /16 reverse zone covering 65,536 addresses
                     {:else if zone.delegation === '/8'}
-                      Class A reverse zone covering 16,777,216 addresses
+                      /8 reverse zone covering 16,777,216 addresses
                     {:else}
                       Custom IPv4 reverse zone for {zone.delegation} prefix
                     {/if}
