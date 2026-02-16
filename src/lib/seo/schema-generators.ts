@@ -16,7 +16,7 @@ export function generateWebSiteSchema() {
     description: site.description,
     url: site.url,
     inLanguage: 'en-US',
-    copyrightYear: '2025',
+    copyrightYear: '2026',
     copyrightHolder: {
       '@type': 'Person',
       name: author.name,

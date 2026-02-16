@@ -50,7 +50,7 @@
     <h3>Full License</h3>
   {/if}
   <pre class="license-content">
-Copyright (c) 2025 Alicia Sykes [aliciasykes.com]
+Copyright (c) 2026 Alicia Sykes [aliciasykes.com]
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in the
