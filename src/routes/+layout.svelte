@@ -157,7 +157,7 @@
     // Console message
     console.log(
       `\n%c🧰 Networking Toolbox` +
-        '%c\nLicensed under MIT, © Alicia Sykes 2025.\nhttps://github.com/lissy93/networking-toolbox\n',
+        '%c\nLicensed under MIT, © Alicia Sykes 2026.\nhttps://github.com/lissy93/networking-toolbox\n',
       'color:#e3ed70; background:#21262d; font-size:1.6rem; padding:0.15rem 0.25rem; ' +
         'margin: 1rem auto 0.5rem auto; font-family: Helvetica; border: 2px solid #e3ed70; ' +
         'border-radius: 4px;font-weight: bold; text-shadow: 1px 1px 4px #000;',

@@ -134,7 +134,7 @@ If you're new to GitHub or open source, take a look at [git-in.to](https://git-i
 
 <!-- License + Copyright -->
 <p  align="center">
-  <i>© <a href="https://aliciasykes.com">Alicia Sykes</a> 2025</i><br>
+  <i>© <a href="https://aliciasykes.com">Alicia Sykes</a> 2026</i><br>
   <i>Licensed under <a href="https://gist.github.com/Lissy93/143d2ee01ccc5c052a17">MIT</a></i><br>
   <a href="https://github.com/lissy93"><img src="https://cdn.as93.net/84m3gc?w=56" /></a><br>
   <sup>Thanks for visiting :)</sup>
