@@ -34,6 +34,8 @@
 
   let hostname = $state('google.com');
   let port = $state(443);
+  let servername = $state('');
+  let useCustomServername = $state(false);
   const diagnosticState = useDiagnosticState<TLSHandshakeResponse>();
   const clipboard = useClipboard();
   const examplesList = [
@@ -45,6 +47,17 @@
     { hostname: 'zoom.us', port: 443, description: 'Zoom' },
   ];
   const examples = useExamples(examplesList);
+  
+  // Reactive validation
+  const isInputValid = $derived(() => {
+    const trimmedHost = host.trim();
+    if (!trimmedHost) return false;
+    if (port === null || port < 1 || port > 65535) return false;
+    // Basic hostname/IP validation
+    const hostPattern =
+      /^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$|^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$|^\[?[a-fA-F0-9:]+\]?$/;
+    return hostPattern.test(trimmedHost);
+  });
 
   async function analyzeHandshake() {
     diagnosticState.startOperation();
@@ -53,7 +66,11 @@
       const response = await fetch('/api/internal/diagnostics/tls-handshake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hostname: hostname.trim(), port }),
+        body: JSON.stringify({
+          hostname: hostname.trim(), 
+          port,
+          servername: useCustomServername && servername ? servername.trim() : undefined
+        }),
       });
 
       if (!response.ok) {
@@ -124,8 +141,8 @@
       <h3>Handshake Analysis</h3>
     </div>
     <div class="card-content">
-      <div class="lookup-form">
-        <div class="input-row">
+      <div class="form-row">
+        <div class="form-group">
           <label for="hostname"> Hostname </label>
           <input
             id="hostname"
@@ -142,6 +159,37 @@
           <label for="port"> Port </label>
           <input id="port" type="number" bind:value={port} placeholder="443" min="1" max="65535" />
         </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="checkbox-group">
+            <input
+              type="checkbox"
+              bind:checked={useCustomServername}
+              onchange={() => {
+                examples.clear();
+                if (isInputValid()) analyzeHandshake();
+              }}
+            />
+            Use custom SNI servername
+          </label>
+          {#if useCustomServername}
+            <input
+              type="text"
+              bind:value={servername}
+              placeholder="example.com"
+              use:tooltip={'Custom servername for SNI (Server Name Indication)'}
+              onchange={() => {
+                examples.clear();
+                if (isInputValid()) analyzeHandshake();
+              }}
+            />
+          {/if}
+        </div>
+      </div>
+
+      <div class="action-section">
         <button class="lookup-btn" onclick={analyzeHandshake} disabled={diagnosticState.loading || !hostname.trim()}>
           {#if diagnosticState.loading}
             <Icon name="loader" size="sm" animate="spin" />
@@ -342,35 +390,6 @@
 </div>
 
 <style lang="scss">
-  .lookup-form {
-    display: flex;
-    gap: var(--spacing-md);
-    align-items: flex-end;
-
-    label {
-      display: block;
-      margin-bottom: var(--spacing-sm);
-      color: var(--text-primary);
-      font-weight: 500;
-    }
-
-    @media (max-width: 768px) {
-      flex-direction: column;
-      align-items: stretch;
-    }
-  }
-
-  .input-row {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-
-    input {
-      width: 100%;
-    }
-  }
-
   .port-row {
     display: flex;
     flex-direction: column;

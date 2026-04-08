@@ -7,6 +7,8 @@
 
   let hostname = $state('example.com');
   let port = $state('443');
+  let servername = $state('');
+  let useCustomServername = $state(false);
   const diagnosticState = useDiagnosticState<any>();
   const examplesList = [
     { host: 'github.com', port: '443', description: 'GitHub cipher support' },
@@ -14,6 +16,17 @@
     { host: 'google.com', port: '443', description: 'Google cipher support' },
   ];
   const examples = useExamples(examplesList);
+  
+  // Reactive validation
+  const isInputValid = $derived(() => {
+    const trimmedHost = host.trim();
+    if (!trimmedHost) return false;
+    if (port === null || port < 1 || port > 65535) return false;
+    // Basic hostname/IP validation
+    const hostPattern =
+      /^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$|^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$|^\[?[a-fA-F0-9:]+\]?$/;
+    return hostPattern.test(trimmedHost);
+  });
 
   async function testCiphers() {
     if (!hostname?.trim()) {
@@ -30,6 +43,7 @@
         body: JSON.stringify({
           action: 'cipher-presets',
           hostname: hostname.trim().toLowerCase(),
+          servername: useCustomServername && servername ? servername.trim() : undefined,
           port: parseInt(port) || 443,
         }),
       });
@@ -94,39 +108,72 @@
       <h3>Cipher Presets Configuration</h3>
     </div>
     <div class="card-content">
-      <div class="form-group">
-        <label for="hostname">Hostname and Port</label>
-        <div class="input-flex-container">
-          <input
-            id="hostname"
-            type="text"
-            bind:value={hostname}
-            placeholder="example.com"
-            disabled={diagnosticState.loading}
-            onchange={() => examples.clear()}
-            onkeydown={(e) => e.key === 'Enter' && testCiphers()}
-            class="flex-grow"
-          />
-          <input
-            id="port"
-            type="text"
-            bind:value={port}
-            placeholder="443"
-            disabled={diagnosticState.loading}
-            onchange={() => examples.clear()}
-            onkeydown={(e) => e.key === 'Enter' && testCiphers()}
-            class="port-input"
-          />
-          <button onclick={testCiphers} disabled={diagnosticState.loading} class="primary">
-            {#if diagnosticState.loading}
-              <Icon name="loader" size="sm" animate="spin" />
-              Testing...
-            {:else}
-              <Icon name="search" size="sm" />
-              Test
-            {/if}
-          </button>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="hostname">Hostname and Port</label>
+          <div class="input-flex-container">
+            <input
+              id="hostname"
+              type="text"
+              bind:value={hostname}
+              placeholder="example.com"
+              disabled={diagnosticState.loading}
+              onchange={() => examples.clear()}
+              onkeydown={(e) => e.key === 'Enter' && testCiphers()}
+              class="flex-grow"
+            />
+            <input
+              id="port"
+              type="text"
+              bind:value={port}
+              placeholder="443"
+              disabled={diagnosticState.loading}
+              onchange={() => examples.clear()}
+              onkeydown={(e) => e.key === 'Enter' && testCiphers()}
+              class="port-input"
+            />
+          </div>
         </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="checkbox-group">
+            <input
+              type="checkbox"
+              bind:checked={useCustomServername}
+              onchange={() => {
+                examples.clear();
+                if (isInputValid()) testCiphers();
+              }}
+            />
+            Use custom SNI servername
+          </label>
+          {#if useCustomServername}
+            <input
+              type="text"
+              bind:value={servername}
+              placeholder="example.com"
+              use:tooltip={'Custom servername for SNI (Server Name Indication)'}
+              onchange={() => {
+                examples.clear();
+                if (isInputValid()) testCiphers();
+              }}
+            />
+          {/if}
+        </div>
+      </div>
+
+      <div class="action-section">
+        <button onclick={testCiphers} disabled={diagnosticState.loading || !isInputValid} class="primary">
+          {#if diagnosticState.loading}
+            <Icon name="loader" size="sm" animate="spin" />
+            Testing...
+          {:else}
+            <Icon name="search" size="sm" />
+            Test
+          {/if}
+        </button>
       </div>
     </div>
   </div>

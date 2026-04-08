@@ -6,6 +6,7 @@ import { errorManager } from '$lib/utils/error-manager';
 
 interface TLSHandshakeRequest {
   hostname: string;
+  servername?: string;
   port?: number;
 }
 
@@ -18,6 +19,7 @@ interface HandshakePhase {
 
 interface TLSHandshakeResponse {
   hostname: string;
+  servername?: string;
   port: number;
   success: boolean;
   totalTime: number;
@@ -38,7 +40,7 @@ interface TLSHandshakeResponse {
 export const POST: RequestHandler = async ({ request }) => {
   try {
     const body: TLSHandshakeRequest = await request.json();
-    const { hostname, port = 443 } = body;
+    const { hostname, port = 443, servername } = body;
 
     if (!hostname || typeof hostname !== 'string' || !hostname.trim()) {
       throw error(400, 'Hostname is required');
@@ -46,7 +48,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     const trimmedHostname = hostname.trim();
 
-    const result = await performTLSHandshake(trimmedHostname, port);
+    const result = await performTLSHandshake(trimmedHostname, port, servername);
     return json(result);
   } catch (err) {
     errorManager.captureException(err, 'error', { component: 'TLS Handshake API' });
@@ -57,7 +59,7 @@ export const POST: RequestHandler = async ({ request }) => {
   }
 };
 
-function performTLSHandshake(hostname: string, port: number): Promise<TLSHandshakeResponse> {
+function performTLSHandshake(hostname: string, port: number, servername?: string): Promise<TLSHandshakeResponse> {
   return new Promise((resolve, reject) => {
     const phases: HandshakePhase[] = [];
     const startTime = Date.now();
@@ -101,7 +103,7 @@ function performTLSHandshake(hostname: string, port: number): Promise<TLSHandsha
     const tlsSocket = (tls as any).connect(
       {
         socket: tcpSocket,
-        servername: hostname,
+        servername: servername || hostname,
         // SECURITY: rejectUnauthorized must be false for this TLS diagnostic tool.
         // This tool analyzes TLS handshakes including servers with certificate issues.
         rejectUnauthorized: false,
@@ -128,6 +130,7 @@ function performTLSHandshake(hostname: string, port: number): Promise<TLSHandsha
 
           const response: TLSHandshakeResponse = {
             hostname,
+            servername: servername || hostname,
             port,
             success: true,
             totalTime,
